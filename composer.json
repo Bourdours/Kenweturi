@@ -11,7 +11,9 @@
     },
     "require": {
         "php": "^8.2",
-        "codeigniter4/framework": "^4.7"
+        "codeigniter4/framework": "^4.7",
+        "phpmailer/phpmailer": "^7.0",
+        "pusher/pusher-php-server": "^7.2"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9",
