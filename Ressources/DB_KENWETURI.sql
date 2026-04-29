@@ -1,117 +1,108 @@
-CREATE TABLE city (
+CREATE TABLE CITIES(
    id INT AUTO_INCREMENT,
-   name VARCHAR(100) NOT NULL,
-   zipcode VARCHAR(10) NOT NULL,
-   PRIMARY KEY (id)
+   city VARCHAR(100) NOT NULL,
+   zipcode INT NOT NULL,
+   PRIMARY KEY(id)
 );
 
-CREATE TABLE journey_status (
+CREATE TABLE JOURNEY_STATUSES(
    id INT AUTO_INCREMENT,
    label VARCHAR(50) NOT NULL,
-   PRIMARY KEY (id)
+   PRIMARY KEY(id)
 );
 
-CREATE TABLE user_status (
+CREATE TABLE USER_STATUSES(
    id INT AUTO_INCREMENT,
    label VARCHAR(50) NOT NULL,
-   PRIMARY KEY (id)
+   PRIMARY KEY(id)
 );
 
-CREATE TABLE users (
+CREATE TABLE WAYPOINTS(
    id INT AUTO_INCREMENT,
-   firstname VARCHAR(50) NOT NULL,
-   lastname VARCHAR(50) NOT NULL,
-   email VARCHAR(100) NOT NULL,
-   password_hash VARCHAR(255) NOT NULL,
-   registered_at DATETIME,
-   avatar VARCHAR(255),
-   birth_date DATE,
-   is_admin BOOLEAN DEFAULT FALSE,
-   user_status_id INT,
+   latitude DECIMAL(15,5) NOT NULL,
+   longitude DECIMAL(15,5) NOT NULL,
    city_id INT NOT NULL,
-   PRIMARY KEY (id),
-   UNIQUE (email),
-   FOREIGN KEY (user_status_id) REFERENCES user_status(id),
-   FOREIGN KEY (city_id) REFERENCES city(id)
+   PRIMARY KEY(id),
+   FOREIGN KEY(city_id) REFERENCES CITIES(id)
 );
 
-CREATE TABLE cars (
+CREATE TABLE USERS(
+   id INT AUTO_INCREMENT,
+   firstname VARCHAR(100) NOT NULL,
+   lastname VARCHAR(100) NOT NULL,
+   email VARCHAR(320) NOT NULL,
+   registered_at DATETIME NOT NULL,
+   gender VARCHAR(20) NOT NULL,
+   avatar VARCHAR(500),
+   birth_date DATETIME,
+   biography TEXT,
+   is_admin BOOLEAN NOT NULL,
+   password_hash VARCHAR(255) NOT NULL,
+   phone_notif BOOLEAN NOT NULL,
+   email_notif BOOLEAN NOT NULL,
+   user_status_id INT NOT NULL,
+   city_id INT NOT NULL,
+   PRIMARY KEY(id),
+   UNIQUE(email),
+   FOREIGN KEY(user_status_id) REFERENCES USER_STATUSES(id),
+   FOREIGN KEY(city_id) REFERENCES CITIES(id)
+);
+
+CREATE TABLE CARS(
    id INT AUTO_INCREMENT,
    brand VARCHAR(50) NOT NULL,
    model VARCHAR(50) NOT NULL,
-   color VARCHAR(50) NOT NULL,
+   color VARCHAR(30) NOT NULL,
    seats INT NOT NULL,
    user_id INT NOT NULL,
-   PRIMARY KEY (id),
-   FOREIGN KEY (user_id) REFERENCES users(id)
+   PRIMARY KEY(id),
+   FOREIGN KEY(user_id) REFERENCES USERS(id)
 );
 
-CREATE TABLE location (
-   id INT AUTO_INCREMENT,
-   name VARCHAR(100) NOT NULL,
-   address VARCHAR(255) NOT NULL,
-   longitude DECIMAL(9,6) NOT NULL,
-   latitude DECIMAL(9,6) NOT NULL,
-   city_id INT NOT NULL,
-   PRIMARY KEY (id),
-   FOREIGN KEY (city_id) REFERENCES city(id)
-);
-
-CREATE TABLE journey_request (
-   id INT AUTO_INCREMENT,
-   date DATETIME NOT NULL,
-   flexibility_minutes INT,
-   location_start_id INT NOT NULL,
-   location_end_id INT NOT NULL,
-   user_id INT NOT NULL,
-   PRIMARY KEY (id),
-   FOREIGN KEY (location_start_id) REFERENCES location(id),
-   FOREIGN KEY (location_end_id) REFERENCES location(id),
-   FOREIGN KEY (user_id) REFERENCES users(id)
-);
-
-CREATE TABLE journey (
+CREATE TABLE JOURNEYS(
    id INT AUTO_INCREMENT,
    seats INT NOT NULL,
-   departure_time DATETIME NOT NULL,
+   date_ DATETIME NOT NULL,
+   smoking BOOLEAN NOT NULL,
+   animal BOOLEAN NOT NULL,
+   is_search BOOLEAN NOT NULL,
+   user_id INT NOT NULL,
    status_id INT NOT NULL,
-   location_start_id INT NOT NULL,
-   location_end_id INT NOT NULL,
-   user_id INT NOT NULL,
-   PRIMARY KEY (id),
-   FOREIGN KEY (status_id) REFERENCES journey_status(id),
-   FOREIGN KEY (location_start_id) REFERENCES location(id),
-   FOREIGN KEY (location_end_id) REFERENCES location(id),
-   FOREIGN KEY (user_id) REFERENCES users(id)
+   driver_id INT NOT NULL,
+   PRIMARY KEY(id),
+   FOREIGN KEY(user_id) REFERENCES USERS(id),
+   FOREIGN KEY(status_id) REFERENCES JOURNEY_STATUSES(id),
+   FOREIGN KEY(driver_id) REFERENCES USERS(id)
 );
 
-CREATE TABLE message (
+CREATE TABLE MESSAGES(
    id INT AUTO_INCREMENT,
-   content TEXT NOT NULL,
-   sent_at DATETIME NOT NULL,
-   is_read BOOLEAN NOT NULL DEFAULT FALSE,
+   message TEXT NOT NULL,
+   send_at DATETIME NOT NULL,
+   is_read BOOLEAN NOT NULL,
    journey_id INT NOT NULL,
    user_id INT NOT NULL,
-   PRIMARY KEY (id),
-   FOREIGN KEY (journey_id) REFERENCES journey(id),
-   FOREIGN KEY (user_id) REFERENCES users(id)
+   PRIMARY KEY(id),
+   FOREIGN KEY(journey_id) REFERENCES JOURNEYS(id),
+   FOREIGN KEY(user_id) REFERENCES USERS(id)
 );
 
-CREATE TABLE booking (
+CREATE TABLE JOURNEY_WAYPOINTS(
+   id INT AUTO_INCREMENT,
+   order_ INT,
+   name VARCHAR(100),
+   journey_id INT NOT NULL,
+   waypoint_id INT NOT NULL,
+   PRIMARY KEY(id),
+   FOREIGN KEY(journey_id) REFERENCES JOURNEYS(id),
+   FOREIGN KEY(waypoint_id) REFERENCES WAYPOINTS(id)
+);
+
+CREATE TABLE BOOKS(
    user_id INT,
    journey_id INT,
    created_at DATETIME NOT NULL,
-   PRIMARY KEY (user_id, journey_id),
-   FOREIGN KEY (user_id) REFERENCES users(id),
-   FOREIGN KEY (journey_id) REFERENCES journey(id)
-);
-
-CREATE TABLE reporting (
-   id INT AUTO_INCREMENT,
-   description VARCHAR(1000) NOT NULL,
-   user_id INT NOT NULL,
-   journey_id INT NOT NULL,
-   PRIMARY KEY (id),
-   FOREIGN KEY (user_id) REFERENCES users(id),
-   FOREIGN KEY (journey_id) REFERENCES journey(id)
+   PRIMARY KEY(user_id, journey_id),
+   FOREIGN KEY(user_id) REFERENCES USERS(id),
+   FOREIGN KEY(journey_id) REFERENCES JOURNEYS(id)
 );
