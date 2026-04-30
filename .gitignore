@@ -124,3 +124,9 @@ _modules/*
 
 /results/
 /phpunit*.xml
+
+#-------------------------
+# Node / Tailwind CSS
+#-------------------------
+node_modules/
+/public/css/tailwind.css
