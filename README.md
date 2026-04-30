@@ -67,6 +67,46 @@ pusher.appId     = 000000
 pusher.cluster   = eu
 ```
 
+### Alpine.js
+
+Utilisé pour les interactions JavaScript légères directement dans les vues (toggle, dropdown, modal…).
+
+Aucune installation requise. Inclure le script dans chaque vue :
+
+```html
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+```
+
+### Tailwind CSS
+
+Utilisé pour le style des vues via des classes utilitaires.
+
+Fichier d'exemple : `app/Libraries/TailwindExample.php`
+
+Aucune variable `.env` requise. Le CSS généré est servi depuis `public/css/tailwind.css`.
+
+Commandes disponibles :
+
+```bash
+npm install        # installe les dépendances npm (première fois)
+npm run dev        # rebuild automatique pendant le développement
+npm run build      # build minifié pour la production
+```
+
+Inclure le CSS dans chaque vue :
+
+```html
+<link rel="stylesheet" href="/css/tailwind.css">
+```
+
+## Base de données
+
+Lance les migrations pour créer les tables :
+
+```bash
+php spark migrate
+```
+
 ## Lancer le projet
 
 ```bash
