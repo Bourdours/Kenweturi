@@ -8,4 +8,9 @@ class AuthController extends BaseController
     {
         return view('Auth/register');
     }
+
+    public function login()
+    {
+        return view('Auth/login');
+    }
 }

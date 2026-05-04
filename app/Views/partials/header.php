@@ -15,7 +15,7 @@
   </nav>
 
   <div>
-    <a href="#">Connexion</a>
+    <a href="<?= site_url('login') ?>">Connexion</a>
     <a href="<?= site_url('inscription') ?>" >Inscription</a>
   </div>
 </header>

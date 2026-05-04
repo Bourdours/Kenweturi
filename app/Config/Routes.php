@@ -9,4 +9,6 @@ use CodeIgniter\Router\RouteCollection;
 $routes->get('/', 'Home::index');
 /* Inscription */
 $routes->get('/inscription', 'AuthController::register');
+/* */
+$routes->get('/login', 'AuthController::login');
 $routes->get('/test/(:num)/test/(:num)', 'Home::test/$1/$2');
