@@ -1,9 +1,6 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <title>Créer un compte</title>
-</head>
-<body>
+<?= view('partials/head') ?>
+<?= view('partials/header') ?>
+
 
     <h2>Inscription</h2>
 
@@ -59,5 +56,4 @@
         <button type="submit">Créer mon compte</button>
     </form>
 
-</body>
-</html>
+<?= view('partials/footer') ?>
