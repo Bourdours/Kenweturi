@@ -17,6 +17,12 @@
             <input type="password" name="password" id="password" required>
         </div>
 
+        <?php if (session()->getFlashdata('success')): ?>
+            <div>
+                <?= session()->getFlashdata('success') ?>
+            </div>
+        <?php endif; ?>
+
         <div class="form-actions">
             <button type="submit">Se connecter</button>
         </div>
