@@ -4,14 +4,7 @@
 
     <h2>Inscription</h2>
 
-    <!-- Affichage des erreurs de validation -->
-    <?php if (isset($validation)): ?>
-        <div style="color: red;">
-            <?= $validation->listErrors() ?>
-        </div>
-    <?php endif; ?>
-
-    <form action="#" method="post">
+    <form action="<?= base_url('/handleRegister') ?>" method="post">
         <?= csrf_field() ?>
 
         <div>
@@ -43,6 +36,18 @@
             <input type="date" name="birth_date" value="<?= old('birth_date') ?>">
         </div>
 
+        <!-- Ville -->
+        <div>
+            <label>Ville :</label>
+            <input type="text" name="cityName" value="<?= old('cityName') ?>" required>
+        </div>
+
+        <!-- Code Postal -->
+        <div>
+            <label>Code postal :</label>
+            <input type="text" name="zipCode" value="<?= old('zipCode') ?>" required>
+        </div>
+
         <div>
             <label>Mot de passe :</label>
             <input type="password" name="password" required>
@@ -52,7 +57,17 @@
             <label>Confirmer le mot de passe :</label>
             <input type="password" name="pass_confirm" required>
         </div>
-
+        
+        <!-- Vérification des erreurs stockées en session -->
+        <?php if (session()->has('errors')): ?>
+            <div >
+                <ul>
+                    <?php foreach (session('errors') as $error): ?>
+                        <li><?= esc($error) ?></li>
+                    <?php endforeach ?>
+                </ul>
+            </div>
+        <?php endif; ?>
         <button type="submit">Créer mon compte</button>
     </form>
 
