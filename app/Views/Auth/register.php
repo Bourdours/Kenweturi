@@ -33,7 +33,7 @@
 
         <div>
             <label>Date de naissance :</label>
-            <input type="date" name="birth_date" value="<?= old('birth_date') ?>">
+            <input type="date" name="birth_date" max="<?= date('Y-m-d'); ?>" value="<?= old('birth_date') ?>">
         </div>
 
         <!-- Ville -->
