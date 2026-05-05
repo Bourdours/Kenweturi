@@ -24,6 +24,13 @@
             </div>
         <?php endif; ?>
 
+        
+        <?php if (session()->getFlashdata('success')): ?>
+            <div>
+                <?= session()->getFlashdata('success') ?>
+            </div>
+        <?php endif; ?>
+
         <div class="form-actions">
             <button type="submit">Se connecter</button>
         </div>
