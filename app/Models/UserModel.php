@@ -32,7 +32,6 @@ class UserModel extends Model
         'avatar', 
         'birth_date', 
         'biography', 
-        'is_admin', 
         'password_hash', 
         'phone_notif', 
         'email_notif', 
