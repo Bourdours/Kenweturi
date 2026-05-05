@@ -58,15 +58,12 @@
             <input type="password" name="pass_confirm" required>
         </div>
         
-        <!-- Vérification des erreurs stockées en session -->
+<!-- Vérification des erreurs stockées en session -->
         <?php if (session()->has('errors')): ?>
-            <div >
-                <ul>
-                    <?php foreach (session('errors') as $error): ?>
-                        <li><?= esc($error) ?></li>
-                    <?php endforeach ?>
-                </ul>
-            </div>
+            <?php $tw = new \App\Libraries\TailwindExample(); ?>
+            <?php foreach (session('errors') as $error): ?>
+                <?= $tw->alert('error', $error) ?>
+            <?php endforeach ?>
         <?php endif; ?>
         <button type="submit">Créer mon compte</button>
     </form>
