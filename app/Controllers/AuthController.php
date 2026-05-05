@@ -9,14 +9,18 @@ class AuthController extends BaseController
 {
     /**
      * Affiche le formulaire d'inscription
+     * 
+     * @return string
      */
     public function register()
     {
         return view('Auth/register');
     }
 
-    /**
+     /**
      * Affiche le formulaire de connexion
+     * 
+     * @return string
      */
     public function login()
     {
@@ -25,6 +29,11 @@ class AuthController extends BaseController
 
     /**
      * Traite les données envoyées par le formulaire d'inscription
+     * 
+     * Gère la création/récupération de la ville, l'enregistrement de l'utilisateur
+     * et la redirection avec message de succès.
+     * 
+     * @return \CodeIgniter\HTTP\RedirectResponse
      */
     public function handleRegister()
     {
@@ -76,5 +85,61 @@ class AuthController extends BaseController
 
     // Redirection vers la page de connexion avec un message flash
     return redirect()->to('/login')->with('success', 'Compte créé avec succès !');
+}
+
+/**
+ * Gère la tentative de connexion de l'utilisateur (authentification)
+ * 
+ * Vérifie l'email, le mot de passe haché et initialise la session.
+ * 
+ * @return \CodeIgniter\HTTP\RedirectResponse
+ */
+public function handleLogin()
+{
+    $session = session();
+    $userModel = new \App\Models\UserModel();
+
+    $email = $this->request->getPost('email');
+    $password = $this->request->getPost('password');
+
+    // On cherche l'utilisateur par son email
+    $user = $userModel->where('email', $email)->first();
+
+    if ($user) {
+        // Vérification du mot de passe 
+        if (password_verify($password, $user['password_hash'])) {
+            
+            $sessionData = [
+                'user_id'   => $user['id'],
+                'firstname' => $user['firstname'],
+                'lastname'  => $user['lastname'],
+                'email'     => $user['email'],
+                'is_admin'  => $user['is_admin'],
+                'isLoggedIn'=> true,
+            ];
+            
+            $session->set($sessionData);
+
+            // Redirection vers l'accueil avec un message de bienvenue
+            return redirect()->to('/')->with('success', 'Ravi de vous revoir, ' . $user['firstname'] . ' !');
+        } else {
+            // Mauvais mot de passe
+            return redirect()->back()->withInput()->with('error', 'Identifiants invalides.');
+        }
+    } else {
+        // Email non trouvé
+        return redirect()->back()->withInput()->with('error', 'Identifiants invalides.');
+    }
+}
+
+/**
+ * Déconnecte l'utilisateur et détruit la session
+ * 
+ * @return \CodeIgniter\HTTP\RedirectResponse
+ */
+public function logout()
+{
+    session()->destroy();
+    return redirect()->to('/login')->with('success', 'Vous avez été déconnecté.');
 }
 }

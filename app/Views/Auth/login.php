@@ -4,7 +4,7 @@
 <main class="container">
     <h2>Connexion</h2>
 
-    <form action="#" method="post">
+    <form action="<?= base_url('index.php/login/check') ?>" method="post">
         <?= csrf_field() ?>
 
         <div>
@@ -16,10 +16,11 @@
             <label for="password">Mot de passe :</label>
             <input type="password" name="password" id="password" required>
         </div>
-
-        <?php if (session()->getFlashdata('success')): ?>
+    
+        <!-- Affichage de l'erreur de connexion -->
+        <?php if (session()->getFlashdata('error')): ?>
             <div>
-                <?= session()->getFlashdata('success') ?>
+                <?= session()->getFlashdata('error') ?>
             </div>
         <?php endif; ?>
 
