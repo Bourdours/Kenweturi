@@ -42,19 +42,36 @@
 
     <!-- Menu mobile déroulant -->
     <div id="mobile-menu" class="hidden flex-col px-4 pb-4 border-t border-white/10 md:hidden">
+
+      <?php if (session()->get('isLoggedIn')): ?>
+        <!-- Bloc infos utilisateur -->
+        <div class="flex items-center gap-3 pt-4 pb-4 border-b border-white/10">
+          <div class="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-white font-bold text-sm shrink-0">
+            <?= strtoupper(substr(session()->get('firstname'), 0, 1) . substr(session()->get('lastname'), 0, 1)) ?>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-white font-semibold text-sm leading-tight">
+              <?= esc(session()->get('firstname')) ?> <?= esc(session()->get('lastname')) ?>
+            </span>
+            <span class="text-white/50 text-xs"><?= esc(session()->get('email')) ?></span>
+          </div>
+        </div>
+      <?php endif; ?>
+
       <nav class="flex flex-col gap-3 pt-4">
         <a href="#" class="text-white/70 hover:text-white font-medium transition-colors duration-200">Trouver un trajet</a>
         <a href="#" class="text-white/70 hover:text-white font-medium transition-colors duration-200">Proposer un trajet</a>
         <a href="#" class="text-white/70 hover:text-white font-medium transition-colors duration-200">Comment ça marche</a>
-      </nav>
-      <div class="flex flex-col gap-2 pt-4 border-t border-white/10 mt-4">
         <?php if (session()->get('isLoggedIn')): ?>
-          <a href="<?= site_url('dashboard') ?>" class="text-center text-white/70 hover:text-white font-medium py-2 transition-colors duration-200">Tableau de bord</a>
-          <a href="<?= site_url('logout') ?>" class="text-center bg-danger text-white px-5 py-2 rounded-full font-medium hover:bg-danger-dark transition-colors duration-200">Déconnexion</a>
-        <?php else: ?>
-          <a href="<?= site_url('login') ?>" class="text-center text-white/70 hover:text-white font-medium py-2 transition-colors duration-200">Connexion</a>
-          <a href="<?= site_url('inscription') ?>" class="text-center bg-accent text-white px-5 py-2 rounded-full font-medium hover:bg-accent-dark transition-colors duration-200">Inscription</a>
-        <?php endif; ?>
+          <a href="<?= site_url('dashboard') ?>" class="text-white/70 hover:text-white font-medium transition-colors duration-200">Tableau de bord</a>
+      </nav>
+
+      <div class="flex flex-col gap-2 pt-4 border-t border-white/10 mt-4">
+        <a href="<?= site_url('logout') ?>" class="text-center bg-danger text-white px-5 py-2 rounded-full font-medium hover:bg-danger-dark transition-colors duration-200">Déconnexion</a>
+      <?php else: ?>
+        <a href="<?= site_url('login') ?>" class="text-center text-white/70 hover:text-white font-medium py-2 transition-colors duration-200">Connexion</a>
+        <a href="<?= site_url('inscription') ?>" class="text-center bg-accent text-white px-5 py-2 rounded-full font-medium hover:bg-accent-dark transition-colors duration-200">Inscription</a>
+      <?php endif; ?>
       </div>
     </div>
 
