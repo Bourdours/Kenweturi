@@ -95,7 +95,7 @@ class AuthController extends BaseController
 
         // Gestion de la table 'cities' (Ville)
         // On vérifie si la ville existe déjà pour éviter les doublons
-        $cityBuilder = $db->table('cities');
+        $cityBuilder = $db->table('city');
         $existingCity = $cityBuilder->getWhere(['city' => $cityName])->getRow();
 
         // Si elle existe, on récupère son ID existant
