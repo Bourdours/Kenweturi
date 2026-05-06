@@ -11,6 +11,7 @@ module.exports = {
         primary: {
           DEFAULT: '#204A81',
           dark:    '#283C7D',
+          darker:  '#1D2B59',
           light:   '#345076',
           muted:   '#4A576A',
         },
@@ -18,6 +19,7 @@ module.exports = {
           DEFAULT: '#F2860E',
           dark:    '#E37413',
           muted:   '#C27C27',
+          light:   '#FFA800',
         },
         danger: {
           DEFAULT: '#D80B1C',
