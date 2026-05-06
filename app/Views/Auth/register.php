@@ -9,12 +9,12 @@
 
         <div>
             <label>Prénom :</label>
-            <input type="text" name="firstname" value="<?= old('firstname') ?>" required>
+            <input type="text" name="firstName" value="<?= old('firstName') ?>" required>
         </div>
 
         <div>
             <label>Nom :</label>
-            <input type="text" name="lastname" value="<?= old('lastname') ?>" required>
+            <input type="text" name="lastName" value="<?= old('lastName') ?>" required>
         </div>
 
         <div>
@@ -33,7 +33,7 @@
 
         <div>
             <label>Date de naissance :</label>
-            <input type="date" name="birth_date" max="<?= date('Y-m-d'); ?>" value="<?= old('birth_date') ?>">
+            <input type="date" name="birthDate" max="<?= date('Y-m-d'); ?>" value="<?= old('birthDate') ?>">
         </div>
 
         <!-- Ville -->
@@ -55,7 +55,7 @@
 
         <div>
             <label>Confirmer le mot de passe :</label>
-            <input type="password" name="pass_confirm" required>
+            <input type="password" name="passConfirm" required>
         </div>
         
 <!-- Vérification des erreurs stockées en session -->

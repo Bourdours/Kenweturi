@@ -46,12 +46,12 @@ class AuthController extends BaseController
         $rules = [
             'email'        => 'required|valid_email',
             'password'     => 'required|min_length[8]',
-            'pass_confirm' => 'required|matches[password]',
-            'birth_date'   => 'required|valid_date[Y-m-d]',
+            'passConfirm' => 'required|matches[password]',
+            'birthDate'   => 'required|valid_date[Y-m-d]',
         ];
 
         $messages = [
-            'pass_confirm' => [
+            'passConfirm' => [
                 'matches'  => 'La confirmation ne correspond pas au mot de passe saisi.',
                 'required' => 'Veuillez confirmer votre mot de passe.'
             ],
@@ -64,7 +64,7 @@ class AuthController extends BaseController
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
-        $birthDateStr = $this->request->getPost('birth_date');
+        $birthDateStr = $this->request->getPost('birthDate');
         $birthDateObj = new \DateTime($birthDateStr);
         $today        = new \DateTime();
 
@@ -74,14 +74,14 @@ class AuthController extends BaseController
         // Vérification de la majorité
         if ($age < 18) {
             return redirect()->back()->withInput()->with('errors', [
-                'birth_date' => 'Vous devez avoir au moins 18 ans pour vous inscrire.'
+                'birthDate' => 'Vous devez avoir au moins 18 ans pour vous inscrire.'
             ]);
         }
 
         // l'année de naissance ne peut pas être antérieure à 1920
         if ((int)$birthDateObj->format('Y') < 1920) {
             return redirect()->back()->withInput()->with('errors', [
-                'birth_date' => 'Veuillez saisir une date de naissance réaliste.'
+                'birthDate' => 'Veuillez saisir une date de naissance réaliste.'
             ]);
         }
 
@@ -114,15 +114,15 @@ class AuthController extends BaseController
 
         // Préparation des données de l'utilisateur
         $data = [
-            'firstname'     => $this->request->getPost('firstname'),
-            'lastname'      => $this->request->getPost('lastname'),
+            'firstname'     => $this->request->getPost('firstName'),
+            'lastname'      => $this->request->getPost('lastName'),
             'email'         => $this->request->getPost('email'),
             'gender'        => $this->request->getPost('gender'),
-            'birth_date'    => $this->request->getPost('birth_date'),
+            'birth_date'    => $this->request->getPost('birthDate'),
             'password_hash' => $this->request->getPost('password'),
 
-            'user_status_id' => 1,
-            'is_admin'       => 0,
+            // 'user_status_id' => 1,
+            // 'is_admin'       => 0,
             'city_id' => $cityId
         ];
 

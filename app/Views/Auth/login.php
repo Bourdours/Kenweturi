@@ -36,7 +36,7 @@
         </div>
 
         <p>
-            Pas encore de compte ? <a href="<?= site_url('inscription') ?>">Créer un compte</a>.
+            Pas encore de compte ? <a href="<?= site_url('register') ?>">Créer un compte</a>.
         </p>
     </form>
 </main>
