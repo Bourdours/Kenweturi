@@ -14,6 +14,9 @@ class AuthController extends BaseController
      */
     public function register()
     {
+        if (session()->get('isLoggedIn')) {
+            return redirect()->to('/');
+        }
         return view('Auth/register');
     }
 
@@ -24,6 +27,9 @@ class AuthController extends BaseController
      */
     public function login()
     {
+        if (session()->get('isLoggedIn')) {
+            return redirect()->to('/');
+        }
         return view('Auth/login');
     }
 
