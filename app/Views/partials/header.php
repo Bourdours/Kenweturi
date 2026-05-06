@@ -16,19 +16,19 @@
 
       <!-- Nav desktop -->
       <nav class="hidden md:flex items-center gap-8">
-        <a href="#" class="text-white/70 hover:text-white font-medium transition-colors duration-200">Trouver un trajet</a>
-        <a href="#" class="text-white/70 hover:text-white font-medium transition-colors duration-200">Proposer un trajet</a>
-        <a href="#" class="text-white/70 hover:text-white font-medium transition-colors duration-200">Comment ça marche</a>
+        <a href="#" class="text-base text-white/70 hover:text-white font-medium transition-colors duration-200">Trouver un trajet</a>
+        <a href="#" class="text-base text-white/70 hover:text-white font-medium transition-colors duration-200">Proposer un trajet</a>
+        <a href="#" class="text-base text-white/70 hover:text-white font-medium transition-colors duration-200">Comment ça marche</a>
       </nav>
 
       <!-- Auth desktop -->
       <div class="hidden md:flex items-center gap-3">
         <?php if (session()->get('isLoggedIn')): ?>
-          <a href="<?= site_url('dashboard') ?>" class="text-white/70 hover:text-white font-medium transition-colors duration-200">Tableau de bord</a>
+          <a href="<?= site_url('dashboard') ?>" class="text-base text-white/70 hover:text-white font-medium transition-colors duration-200">Tableau de bord</a>
           <a href="<?= site_url('logout') ?>" class="bg-danger text-white px-5 py-2 rounded-full font-medium hover:bg-danger-dark transition-colors duration-200">Déconnexion</a>
         <?php else: ?>
-          <a href="<?= site_url('login') ?>" class="text-white/70 hover:text-white font-medium transition-colors duration-200">Connexion</a>
-          <a href="<?= site_url('inscription') ?>" class="bg-accent text-white px-5 py-2 rounded-full font-medium hover:bg-accent-dark transition-colors duration-200">Inscription</a>
+          <a href="<?= site_url('login') ?>" class="text-base text-white/70 hover:text-white font-medium transition-colors duration-200">Connexion</a>
+          <a href="<?= site_url('inscription') ?>" class="bg-accent text-primary-darker hover:text-ink px-5 py-2 rounded-full font-bold text-medium hover:bg-accent-dark transition-colors duration-200">Inscription</a>
         <?php endif; ?>
       </div>
 
@@ -59,19 +59,19 @@
       <?php endif; ?>
 
       <nav class="flex flex-col gap-3 pt-4">
-        <a href="#" class="text-white/70 hover:text-white font-medium transition-colors duration-200">Trouver un trajet</a>
-        <a href="#" class="text-white/70 hover:text-white font-medium transition-colors duration-200">Proposer un trajet</a>
-        <a href="#" class="text-white/70 hover:text-white font-medium transition-colors duration-200">Comment ça marche</a>
-        <?php if (session()->get('isLoggedIn')): ?>
+        <a href="#" class="text-base text-white/70 hover:text-white font-medium transition-colors duration-200">Trouver un trajet</a>
+        <a href="#" class="text-base text-white/70 hover:text-white font-medium transition-colors duration-200">Proposer un trajet</a>
+        <a href="#" class="text-base text-white/70 hover:text-white font-medium transition-colors duration-200">Comment ça marche</a>
+                <?php if (session()->get('isLoggedIn')): ?>
           <a href="<?= site_url('dashboard') ?>" class="text-white/70 hover:text-white font-medium transition-colors duration-200">Tableau de bord</a>
       </nav>
 
       <div class="flex flex-col gap-2 pt-4 border-t border-white/10 mt-4">
-        <a href="<?= site_url('logout') ?>" class="text-center bg-danger text-white px-5 py-2 rounded-full font-medium hover:bg-danger-dark transition-colors duration-200">Déconnexion</a>
-      <?php else: ?>
-        <a href="<?= site_url('login') ?>" class="text-center text-white/70 hover:text-white font-medium py-2 transition-colors duration-200">Connexion</a>
-        <a href="<?= site_url('inscription') ?>" class="text-center bg-accent text-white px-5 py-2 rounded-full font-medium hover:bg-accent-dark transition-colors duration-200">Inscription</a>
-      <?php endif; ?>
+          <a href="<?= site_url('logout') ?>" class="text-center bg-danger text-white px-5 py-2 rounded-full font-medium hover:bg-danger-dark transition-colors duration-200">Déconnexion</a>
+        <?php else: ?>
+          <a href="<?= site_url('login') ?>" class="text-center text-white/70 hover:text-white font-medium py-2 transition-colors duration-200">Connexion</a>
+          <a href="<?= site_url('inscription') ?>" class="text-center bg-accent text-primary-darker px-5 py-2 rounded-full font-medium font-bold hover:bg-accent-dark transition-colors duration-200">Inscription</a>
+        <?php endif; ?>
       </div>
     </div>
 
