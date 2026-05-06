@@ -1,6 +1,6 @@
 // Champs du formulaire
 const inputVille = document.querySelector('input[name="cityName"]');
-const inputCp    = document.querySelector('input[name="zipCode"]');
+const inputCp    = document.querySelector('input[name="postalCode"]');
 
 if (inputVille && inputCp) {
 
