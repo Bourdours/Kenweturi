@@ -47,13 +47,13 @@
         <!-- Bloc infos utilisateur -->
         <div class="flex items-center gap-3 pt-4 pb-4 border-b border-white/10">
           <div class="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-white font-bold text-sm shrink-0">
-            <?= strtoupper(substr(session()->get('firstname'), 0, 1) . substr(session()->get('lastname'), 0, 1)) ?>
+            <?= strtoupper(substr((string) session()->get('firstname'), 0, 1) . substr((string) session()->get('lastname'), 0, 1)) ?>
           </div>
           <div class="flex flex-col">
             <span class="text-white font-semibold text-sm leading-tight">
-              <?= esc(session()->get('firstname')) ?> <?= esc(session()->get('lastname')) ?>
+              <?= esc((string) session()->get('firstname')) ?> <?= esc((string) session()->get('lastname')) ?>
             </span>
-            <span class="text-white/50 text-xs"><?= esc(session()->get('email')) ?></span>
+            <span class="text-white/50 text-xs"><?= esc((string) session()->get('email')) ?></span>
           </div>
         </div>
       <?php endif; ?>
