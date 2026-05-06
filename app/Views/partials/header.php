@@ -15,7 +15,15 @@
   </nav>
 
   <div>
+    <?php if (session()->get('isLoggedIn')): ?>
+      <!-- Affichage si connecté -->
+    <a href="<?= site_url('dashboard') ?>">Tableau de bord</a>
+    <a href="<?= site_url('logout') ?>" >Déconnexion</a>
+
+    <!-- Affichage si déconnecté -->
+    <?php else: ?>
     <a href="<?= site_url('login') ?>">Connexion</a>
     <a href="<?= site_url('inscription') ?>" >Inscription</a>
+    <?php endif; ?>
   </div>
 </header>
