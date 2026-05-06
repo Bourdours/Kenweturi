@@ -20,4 +20,6 @@ $routes->get('login', 'AuthController::login');
 // Route pour TRAITER le formulaire de connexion
 $routes->post('login/check', 'AuthController::handleLogin');
 
+// Route pour traiter la déconnexion
+$routes->get('logout', 'AuthController::logout');
 $routes->get('/test/(:num)/test/(:num)', 'Home::test/$1/$2');
