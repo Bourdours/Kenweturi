@@ -28,7 +28,7 @@
           <a href="<?= site_url('logout') ?>" class="text-white/90 px-5 py-2 rounded font-medium hover:bg-danger-dark transition-colors duration-200">Déconnexion</a>
         <?php else: ?>
           <a href="<?= site_url('login') ?>" class="text-white/90 hover:text-accent font-medium transition-colors duration-200">Connexion</a>
-          <a href="<?= site_url('inscription') ?>" class="bg-accent text-primary-darker px-5 py-2 rounded-full font-bold font-display hover:bg-accent-dark transition-colors duration-200">Inscription</a>
+          <a href="<?= site_url('register') ?>" class="bg-accent text-primary-darker px-5 py-2 rounded-full font-bold font-display hover:bg-accent-dark transition-colors duration-200">Inscription</a>
         <?php endif; ?>
       </div>
 
@@ -70,7 +70,7 @@
         <a href="<?= site_url('logout') ?>" class="text-white/90 px-5 py-2 rounded font-medium hover:bg-danger-dark transition-colors duration-200">Déconnexion</a>
       <?php else: ?>
         <a href="<?= site_url('login') ?>" class="text-white/90 hover:text-accent font-medium py-2 transition-colors duration-200">Connexion</a>
-        <a href="<?= site_url('inscription') ?>" class="text-center bg-accent text-primary-darker px-5 py-2 rounded-full font-bold font-display hover:bg-accent-dark transition-colors duration-200">Inscription</a>
+        <a href="<?= site_url('register') ?>" class="text-center bg-accent text-primary-darker px-5 py-2 rounded-full font-bold font-display hover:bg-accent-dark transition-colors duration-200">Inscription</a>
       <?php endif; ?>
       </div>
     </div>
