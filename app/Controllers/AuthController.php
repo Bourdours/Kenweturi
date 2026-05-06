@@ -91,7 +91,7 @@ class AuthController extends BaseController
 
         // Récupération des données liées à la ville depuis le formulaire
         $cityName = $this->request->getPost('cityName');
-        $zipCode  = $this->request->getPost('zipCode');
+        $zipCode  = $this->request->getPost('postalCode');
 
         // Gestion de la table 'cities' (Ville)
         // On vérifie si la ville existe déjà pour éviter les doublons
