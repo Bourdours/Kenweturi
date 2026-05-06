@@ -8,10 +8,10 @@ use CodeIgniter\Router\RouteCollection;
 /* Page d'accueil */
 $routes->get('/', 'Home::index');
 /* Inscription */
-$routes->get('/inscription', 'AuthController::register');
+$routes->get('/register', 'AuthController::register');
 /* */
 $routes->get('/login', 'AuthController::login');
-$routes->post('/inscription', 'AuthController::handleRegister');
+$routes->post('/register', 'AuthController::handleRegister');
 $routes->post('handleRegister', 'AuthController::handleRegister');
 
 // Route pour afficher la page (déjà existante normalement)
