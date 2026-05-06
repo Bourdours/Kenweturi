@@ -11,7 +11,7 @@ use CodeIgniter\Model;
 class UserModel extends Model
 {
    // Indique la table de la base de données utilisée par ce modèle
-    protected $table            = 'users';
+    protected $table            = 'user';
 
     // Définit la clé primaire de la table
     protected $primaryKey       = 'id';
@@ -27,15 +27,13 @@ class UserModel extends Model
         'firstname', 
         'lastname', 
         'email', 
-        'registered_at', 
-        'gender', 
-        'avatar', 
+        'gender',
         'birth_date', 
         'biography', 
-        'password_hash', 
-        'phone_notif', 
-        'email_notif', 
-        'user_status_id', 
+        'avatar', 
+        'is_student',
+        'registered_at', 
+        'password_hash',       
         'city_id'
     ];
 
@@ -43,7 +41,7 @@ class UserModel extends Model
     protected $validationRules = [
         'firstname'     => 'required|min_length[2]|max_length[100]',
         'lastname'      => 'required|min_length[2]|max_length[100]',
-        'email'         => 'required|valid_email|is_unique[users.email]',
+        'email'         => 'required|valid_email|is_unique[user.email]',
         'gender'        => 'required|in_list[Homme,Femme,Autre]',
         'birth_date'    => 'permit_empty|valid_date',
         // Le mot de passe doit faire 8 caractères et contenir au moins un symbole spécial
