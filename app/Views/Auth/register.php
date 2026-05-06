@@ -45,7 +45,7 @@
         <!-- Code Postal -->
         <div>
             <label>Code postal :</label>
-            <input type="text" name="zipCode" value="<?= old('zipCode') ?>" required>
+            <input type="text" name="postalCode" value="<?= old('postalCode') ?>" required>
         </div>
 
         <div>
