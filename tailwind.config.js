@@ -6,8 +6,35 @@ module.exports = {
     "./public/**/*.html",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        primary: {
+          DEFAULT: '#204A81',
+          dark:    '#283C7D',
+          light:   '#345076',
+          muted:   '#4A576A',
+        },
+        accent: {
+          DEFAULT: '#F2860E',
+          dark:    '#E37413',
+          muted:   '#C27C27',
+        },
+        danger: {
+          DEFAULT: '#D80B1C',
+          dark:    '#b5091a',
+        },
+        wine: {
+          DEFAULT: '#872249',
+          dark:    '#6E2957',
+        },
+        brown: {
+          DEFAULT: '#716354',
+          dark:    '#7C4210',
+          darker:  '#47290F',
+        },
+        ink: '#0E0D0D',
+      },
+    },
   },
   plugins: [],
 }
-
