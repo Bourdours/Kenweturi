@@ -67,16 +67,6 @@ pusher.appId     = 000000
 pusher.cluster   = eu
 ```
 
-### Alpine.js
-
-Utilisé pour les interactions JavaScript légères directement dans les vues (toggle, dropdown, modal…).
-
-Aucune installation requise. Inclure le script dans chaque vue :
-
-```html
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-```
-
 ### Tailwind CSS
 
 Utilisé pour le style des vues via des classes utilitaires.
