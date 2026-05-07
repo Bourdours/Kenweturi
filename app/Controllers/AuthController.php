@@ -51,13 +51,22 @@ class AuthController extends BaseController
         ];
 
         $messages = [
-            'passConfirm' => [
-                'matches'  => 'La confirmation ne correspond pas au mot de passe saisi.',
-                'required' => 'Veuillez confirmer votre mot de passe.'
+            'email' => [
+                'required'    => 'L\'adresse email est obligatoire.',
+                'valid_email' => 'Veuillez saisir une adresse email valide.',
             ],
             'password' => [
-                'min_length' => 'Le mot de passe doit faire au moins 8 caractères.'
-            ]
+                'required'   => 'Le mot de passe est obligatoire.',
+                'min_length' => 'Le mot de passe doit faire au moins 8 caractères.',
+            ],
+            'passConfirm' => [
+                'required' => 'Veuillez confirmer votre mot de passe.',
+                'matches'  => 'La confirmation ne correspond pas au mot de passe saisi.',
+            ],
+            'birthDate' => [
+                'required'   => 'La date de naissance est obligatoire.',
+                'valid_date' => 'Veuillez saisir une date de naissance valide.',
+            ],
         ];
 
         if (!$this->validate($rules, $messages)) {
