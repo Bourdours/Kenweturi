@@ -44,8 +44,7 @@ class UserModel extends Model
         'email'         => 'required|valid_email|is_unique[user.email]',
         'gender'        => 'required|in_list[Homme,Femme,Autre]',
         'birth_date'    => 'required|valid_date',
-        /* // Le mot de passe doit faire 8 caractères et contenir au moins un symbole spécial
-        'password_hash' => 'required|min_length[8]', */
+        
     ];
 
     // Messages d'erreurs
@@ -67,11 +66,6 @@ class UserModel extends Model
             'required' => 'Veuillez choisir un genre.',
             'in_list'  => 'Le genre sélectionné n\'est pas valide.'
         ],
-        /* 'password_hash' => [
-            'required'    => 'Le mot de passe est obligatoire.',
-            'min_length'  => 'Le mot de passe doit faire au moins 8 caractères.',
-            'regex_match' => 'Le mot de passe doit contenir au moins un caractère spécial (ex: @, #, !, $).'
-        ], */
     ];
 
     // Fonctions à exécuter automatiquement juste avant l'insertion en base de données
