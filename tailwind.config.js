@@ -12,6 +12,20 @@ module.exports = {
         display: ['Space Grotesk', 'sans-serif'],
       },
       colors: {
+        // Tokens design system (dark mode)
+        paper:   '#0E1A2E',
+        brand: {
+          DEFAULT: '#5B8FD9',
+          dark:    '#4A7EC8',
+        },
+        ink:     '#EFEAE0',
+        action: {
+          DEFAULT: '#C85028',
+          dark:    '#D76137',
+        },
+        success: '#9DB387',
+        notice:  '#E5C988',
+        // Tokens hérités (pages auth)
         primary: {
           DEFAULT: '#204A81',
           dark:    '#283C7D',
@@ -29,11 +43,11 @@ module.exports = {
           muted:   '#C27C27',
         },
         surface: {
-          DEFAULT: '#111a26',
-          page:    '#0f2744',
+          DEFAULT: '#1A2842',
+          page:    '#0E1A2E',
           nav:     '#1a3a5c',
-          card:    '#16222e',
-          input:   '#1a2d40',
+          card:    '#1A2842',
+          input:   '#1A2842',
         },
         muted:  '#888888',
         danger: {
@@ -49,7 +63,6 @@ module.exports = {
           dark:    '#7C4210',
           darker:  '#47290F',
         },
-        ink: '#0E0D0D',
       },
     },
   },
