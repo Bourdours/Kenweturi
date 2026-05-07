@@ -23,8 +23,8 @@
 
       <!-- Nav desktop -->
       <nav class="hidden md:flex items-center gap-8">
-        <a href="#" class="text-white/90 hover:text-accent font-medium transition-colors duration-200">Trouver un trajet</a>
-        <a href="#" class="text-white/90 hover:text-accent font-medium transition-colors duration-200">Proposer un trajet</a>
+        <a href="<?= site_url('journeys') ?>" class="text-white/90 hover:text-accent font-medium transition-colors duration-200">Trouver un trajet</a>
+        <a href="<?= site_url('journeys/new') ?>" class="text-white/90 hover:text-accent font-medium transition-colors duration-200">Proposer un trajet</a>
         <a href="#" class="text-white/90 hover:text-accent font-medium transition-colors duration-200">Comment ça marche</a>
       </nav>
 
