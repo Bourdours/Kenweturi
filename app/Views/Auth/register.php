@@ -8,23 +8,23 @@
         <?= csrf_field() ?>
 
         <div>
-            <label>Prénom :</label>
-            <input type="text" name="firstName" value="<?= old('firstName') ?>" required>
+            <label for="firstName">Prénom :</label>
+            <input type="text" name="firstName" id="firstName" value="<?= old('firstName') ?>" required>
         </div>
 
         <div>
-            <label>Nom :</label>
-            <input type="text" name="lastName" value="<?= old('lastName') ?>" required>
+            <label for="lastName">Nom :</label>
+            <input type="text" name="lastName" id="lastName" value="<?= old('lastName') ?>" required>
         </div>
 
         <div>
-            <label>Email :</label>
-            <input type="email" name="email" value="<?= old('email') ?>" required>
+            <label for="email">Email :</label>
+            <input type="email" name="email" id="email" value="<?= old('email') ?>" required>
         </div>
 
         <div>
-            <label>Genre :</label>
-            <select name="gender" required>
+            <label for="gender">Genre :</label>
+            <select name="gender" id="gender" required>
                 <option value="Homme" <?= old('gender') == 'Homme' ? 'selected' : '' ?>>Homme</option>
                 <option value="Femme" <?= old('gender') == 'Femme' ? 'selected' : '' ?>>Femme</option>
                 <option value="Autre" <?= old('gender') == 'Autre' ? 'selected' : '' ?>>Autre</option>
@@ -32,30 +32,30 @@
         </div>
 
         <div>
-            <label>Date de naissance :</label>
-            <input type="date" name="birthDate" max="<?= date('Y-m-d'); ?>" value="<?= old('birthDate') ?>">
+            <label for="birthDate">Date de naissance :</label>
+            <input type="date" name="birthDate" id="birthDate" max="<?= date('Y-m-d'); ?>" value="<?= old('birthDate') ?>">
         </div>
 
         <!-- Ville -->
         <div>
-            <label>Ville :</label>
-            <input type="text" name="cityName" value="<?= old('cityName') ?>" required>
+            <label for="cityName">Ville :</label>
+            <input type="text" name="cityName" id="cityName" value="<?= old('cityName') ?>" required>
         </div>
 
         <!-- Code Postal -->
         <div>
-            <label>Code postal :</label>
-            <input type="text" name="postalCode" value="<?= old('postalCode') ?>" required>
+            <label for="postalCode">Code postal :</label>
+            <input type="text" name="postalCode" id="postalCode" value="<?= old('postalCode') ?>" required>
         </div>
 
         <div>
-            <label>Mot de passe :</label>
-            <input type="password" name="password" required>
+            <label for="password">Mot de passe :</label>
+            <input type="password" name="password" id="password" required>
         </div>
 
         <div>
-            <label>Confirmer le mot de passe :</label>
-            <input type="password" name="passConfirm" required>
+            <label for="passConfirm">Confirmer le mot de passe :</label>
+            <input type="password" name="passConfirm" id="passConfirm" required>
         </div>
         
 <!-- Vérification des erreurs stockées en session -->
