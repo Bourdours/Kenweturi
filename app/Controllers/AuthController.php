@@ -2,6 +2,9 @@
 
 namespace App\Controllers;
 
+use \App\Models\UserModel;
+use DateTime;
+
 /**
  * Contrôleur gérant l'authentification (Inscription, Connexion)
  */
@@ -45,7 +48,7 @@ class AuthController extends BaseController
     {
         $rules = [
             'email'        => 'required|valid_email',
-            'password'     => 'required|min_length[8]',
+            'password'     => 'required|min_length[8]|regex_match[/.[!,@,#,$,%,^,&,*,?,_,~,-,(,)]/]',
             'passConfirm' => 'required|matches[password]',
             'birthDate'   => 'required|valid_date[Y-m-d]',
         ];
@@ -56,8 +59,9 @@ class AuthController extends BaseController
                 'valid_email' => 'Veuillez saisir une adresse email valide.',
             ],
             'password' => [
-                'required'   => 'Le mot de passe est obligatoire.',
-                'min_length' => 'Le mot de passe doit faire au moins 8 caractères.',
+                'required'    => 'Le mot de passe est obligatoire.',
+                'min_length'  => 'Le mot de passe doit faire au moins 8 caractères.',
+                'regex_match' => 'Le mot de passe doit contenir au moins un caractère spécial (ex: @, #, !, $).',
             ],
             'passConfirm' => [
                 'required' => 'Veuillez confirmer votre mot de passe.',
@@ -74,8 +78,8 @@ class AuthController extends BaseController
         }
 
         $birthDateStr = $this->request->getPost('birthDate');
-        $birthDateObj = new \DateTime($birthDateStr);
-        $today        = new \DateTime();
+        $birthDateObj = new DateTime($birthDateStr);
+        $today        = new DateTime();
 
         // Calcul de la différence (l'âge)
         $age = $today->diff($birthDateObj)->y;
@@ -96,7 +100,7 @@ class AuthController extends BaseController
 
         // Initialisation de la connexion à la base de données et du modèle utilisateur
         $db = \Config\Database::connect();
-        $userModel = new \App\Models\UserModel();
+        $userModel = new UserModel();
 
         // Récupération des données liées à la ville depuis le formulaire
         $cityName = $this->request->getPost('cityName');
@@ -105,7 +109,7 @@ class AuthController extends BaseController
         // Gestion de la table 'cities' (Ville)
         // On vérifie si la ville existe déjà pour éviter les doublons
         $cityBuilder = $db->table('city');
-        $existingCity = $cityBuilder->getWhere(['city' => $cityName])->getRow();
+        $existingCity = $cityBuilder->getWhere(['name' => $cityName])->getRow();
 
         // Si elle existe, on récupère son ID existant
         if ($existingCity) {
@@ -113,7 +117,7 @@ class AuthController extends BaseController
         } else {
             // Si elle n'existe pas, on l'ajoute dans la table 'cities'
             $cityBuilder->insert([
-                'city' => $cityName,
+                'name' => $cityName,
                 'zipcode' => $zipCode
             ]);
 
@@ -128,11 +132,9 @@ class AuthController extends BaseController
             'email'         => $this->request->getPost('email'),
             'gender'        => $this->request->getPost('gender'),
             'birth_date'    => $this->request->getPost('birthDate'),
+            'is_student'    => $this->request->getPost('isStudent') === 'on' ? 1 : 0,
             'password_hash' => $this->request->getPost('password'),
-
-            // 'user_status_id' => 1,
-            // 'is_admin'       => 0,
-            'city_id' => $cityId
+            'city_id'       => $cityId
         ];
 
         // Tentative de sauvegarde de l'utilisateur via le Model
@@ -154,7 +156,7 @@ class AuthController extends BaseController
     public function handleLogin()
     {
         $session = session();
-        $userModel = new \App\Models\UserModel();
+        $userModel = new UserModel();
 
         $email = $this->request->getPost('email');
         $password = $this->request->getPost('password');

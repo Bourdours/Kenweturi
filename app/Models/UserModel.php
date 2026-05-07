@@ -30,7 +30,7 @@ class UserModel extends Model
         'gender',
         'birth_date', 
         'biography', 
-        'avatar', 
+        'avatar',
         'is_student',
         'registered_at', 
         'password_hash',       
@@ -43,9 +43,8 @@ class UserModel extends Model
         'lastname'      => 'required|min_length[2]|max_length[100]',
         'email'         => 'required|valid_email|is_unique[user.email]',
         'gender'        => 'required|in_list[Homme,Femme,Autre]',
-        'birth_date'    => 'permit_empty|valid_date',
-        // Le mot de passe doit faire 8 caractères et contenir au moins un symbole spécial
-        'password_hash' => 'required|min_length[8]|regex_match[/.[!,@,#,$,%,^,&,*,?,_,~,-,(,)]/]',
+        'birth_date'    => 'required|valid_date',
+        
     ];
 
     // Messages d'erreurs
@@ -66,11 +65,6 @@ class UserModel extends Model
         'gender' => [
             'required' => 'Veuillez choisir un genre.',
             'in_list'  => 'Le genre sélectionné n\'est pas valide.'
-        ],
-        'password_hash' => [
-            'required'    => 'Le mot de passe est obligatoire.',
-            'min_length'  => 'Le mot de passe doit faire au moins 8 caractères.',
-            'regex_match' => 'Le mot de passe doit contenir au moins un caractère spécial (ex: @, #, !, $).'
         ],
     ];
 
