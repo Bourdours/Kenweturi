@@ -2,13 +2,11 @@
 
 namespace App\Models;
 
-use CodeIgniter\Model;
-
 /**
  * Modèle gérant la table 'users'
  * S'occupe de la validation, du hachage des mots de passe et de la gestion des données.
  */
-class UserModel extends Model
+class UserModel extends BaseModel
 {
    // Indique la table de la base de données utilisée par ce modèle
     protected $table            = 'user';
@@ -18,9 +16,6 @@ class UserModel extends Model
 
     // Active l'incrémentation automatique de l'ID à chaque nouvel enregistrement
     protected $useAutoIncrement = true;
-
-    // Définit que les données seront récupérées sous forme de tableaux PHP
-    protected $returnType       = 'array';
 
     // Liste des colonnes que l'on autorise à modifier ou insérer (sécurité)
     protected $allowedFields = [
