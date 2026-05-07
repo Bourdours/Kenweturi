@@ -76,7 +76,7 @@
       <div class="flex flex-col gap-2 pt-4 border-t border-white/10 mt-4">
         <a href="<?= site_url('logout') ?>" class="text-white/90 px-5 py-2 rounded font-medium hover:bg-accent-dark hover:text-primary-darker transition-colors duration-200">Déconnexion</a>
       <?php else: ?>
-        <a href="<?= site_url('login') ?>" class="<?= $loginClassMobile ?> transition-colors duration-200">Connexion</a>
+        <a href="<?= site_url('login') ?>" class="<?= $loginClassMobile ?> border-t border-white/10 transition-colors duration-200">Connexion</a>
         <a href="<?= site_url('register') ?>" class="<?= $registerClassMobile ?> transition-colors duration-200">Inscription</a>
       <?php endif; ?>
       </div>
