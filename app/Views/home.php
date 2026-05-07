@@ -8,8 +8,8 @@
         </div>
     <?php endif; ?>
 
-<main>
+<div>
     <h1>Accueil</h1>
-</main>
+</div>
 
 <?= view('partials/footer') ?>

@@ -6,7 +6,7 @@
   $registerClassMobile = $onLoginPage ? 'text-white/90 hover:text-accent font-medium py-2' : 'text-center bg-accent text-primary-darker px-5 py-2 rounded-full font-bold font-display hover:bg-accent-dark';
 ?>
 <body>
-  <header class="bg-primary-dark border-b border-white/10">
+  <header class="bg-primary-darker border-b border-white/10">
 
     <!-- Barre principale -->
     <div class="flex items-center justify-between px-4 py-3 md:px-8 md:py-4">
@@ -85,3 +85,5 @@
   </header>
 
   <script src="<?= base_url('js/header.js') ?>" defer></script>
+
+<main class="min-h-screen bg-surface-page">
