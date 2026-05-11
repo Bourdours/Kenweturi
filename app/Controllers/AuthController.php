@@ -68,7 +68,7 @@ class AuthController extends BaseController
     {
         $rules = [
             'email'        => 'required|valid_email',
-            'password'     => 'required|min_length[8]|regex_match[/.[!,@,#,$,%,^,&,*,?,_,~,-,(,)]/]',
+            'password'    => 'required|min_length[8]|regex_match[/^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*?_~\-()]).*$/]',
             'passConfirm' => 'required|matches[password]',
             'birthDate'   => 'required|valid_date[Y-m-d]',
         ];
@@ -81,7 +81,7 @@ class AuthController extends BaseController
             'password' => [
                 'required'    => 'Le mot de passe est obligatoire.',
                 'min_length'  => 'Le mot de passe doit faire au moins 8 caractères.',
-                'regex_match' => 'Le mot de passe doit contenir au moins un caractère spécial (ex: @, #, !, $).',
+                'regex_match' => 'Le mot de passe doit contenir au moins : une majuscule, un caractère spécial (ex: @, #, !, $).',
             ],
             'passConfirm' => [
                 'required' => 'Veuillez confirmer votre mot de passe.',
