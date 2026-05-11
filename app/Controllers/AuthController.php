@@ -81,7 +81,7 @@ class AuthController extends BaseController
             'password' => [
                 'required'    => 'Le mot de passe est obligatoire.',
                 'min_length'  => 'Le mot de passe doit faire au moins 8 caractères.',
-                'regex_match' => 'Le mot de passe doit contenir au moins : une majuscule, un caractère spécial (ex: @, #, !, $).',
+                'regex_match' => 'Le mot de passe doit contenir au moins : une majuscule, un chiffre et un caractère spécial (ex: @, #, !, $).',
             ],
             'passConfirm' => [
                 'required' => 'Veuillez confirmer votre mot de passe.',
