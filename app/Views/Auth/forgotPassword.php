@@ -12,7 +12,6 @@
         id="email"
         name="email"
         placeholder="exemple@email.com"
-        value="<?= old('email') ?>"
         required>
 
     <button type="submit">Envoyer</button>
