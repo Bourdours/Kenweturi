@@ -21,27 +21,27 @@
 
       <!-- Logo -->
       <a href="<?= site_url('/') ?>" class="flex items-center gap-2">
-        <div class="w-7 h-7 rounded-full bg-action flex items-center justify-center shrink-0">
+        <div class="w-7 h-7 rounded-xl bg-action flex items-center justify-center shrink-0">
           <i class="fa-solid fa-car-side text-ink text-xs"></i>
         </div>
-        <span class="text-base font-bold text-ink font-display">Kenweturi</span>
+        <span class="text-2xl font-bold text-ink font-display">Kenweturi</span>
       </a>
 
       <!-- Nav desktop -->
       <nav class="hidden md:flex items-center gap-8">
-        <a href="<?= site_url('journeys') ?>" class="text-ink/70 hover:text-action font-medium text-sm transition-colors duration-200">Chercher un trajet</a>
-        <a href="<?= site_url('journeys/new') ?>" class="text-ink/70 hover:text-action font-medium text-sm transition-colors duration-200">Publier un trajet</a>
-        <a href="#" class="text-ink/70 hover:text-action font-medium text-sm transition-colors duration-200">Comment ça marche</a>
+        <a href="<?= site_url('journeys') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Chercher un trajet</a>
+        <a href="<?= site_url('journeys/new') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Publier un trajet</a>
+        <a href="#" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Comment ça marche</a>
       </nav>
 
       <!-- Auth desktop -->
       <div class="hidden md:flex items-center gap-4">
         <?php if (session()->get('isLoggedIn')): ?>
-          <a href="<?= site_url('dashboard') ?>" class="text-ink/70 hover:text-action font-medium text-sm transition-colors duration-200">Tableau de bord</a>
-          <a href="<?= site_url('logout') ?>" class="text-ink/70 hover:text-action font-medium text-sm transition-colors duration-200">Déconnexion</a>
+          <a href="<?= site_url('dashboard') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Tableau de bord</a>
+          <a href="<?= site_url('logout') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Déconnexion</a>
         <?php else: ?>
-          <a href="<?= site_url('login') ?>" class="<?= $loginClass ?> text-sm transition-colors duration-200">Connexion</a>
-          <a href="<?= site_url('register') ?>" class="<?= $registerClass ?> text-sm transition-colors duration-200">S'inscrire</a>
+          <a href="<?= site_url('login') ?>" class="<?= $loginClass ?> text-base transition-colors duration-200">Connexion</a>
+          <a href="<?= site_url('register') ?>" class="<?= $registerClass ?> text-base transition-colors duration-200">S'inscrire</a>
         <?php endif; ?>
       </div>
 
@@ -72,18 +72,18 @@
       <?php endif; ?>
 
       <nav class="flex flex-col gap-3 pt-4">
-        <a href="<?= site_url('journeys') ?>" class="text-ink/70 hover:text-action font-medium text-sm transition-colors duration-200">Chercher un trajet</a>
-        <a href="<?= site_url('journeys/new') ?>" class="text-ink/70 hover:text-action font-medium text-sm transition-colors duration-200">Publier un trajet</a>
-        <a href="#" class="text-ink/70 hover:text-action font-medium text-sm transition-colors duration-200">Comment ça marche</a>
+        <a href="<?= site_url('journeys') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Chercher un trajet</a>
+        <a href="<?= site_url('journeys/new') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Publier un trajet</a>
+        <a href="#" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Comment ça marche</a>
         <?php if (session()->get('isLoggedIn')): ?>
-          <a href="<?= site_url('dashboard') ?>" class="text-ink/70 hover:text-action font-medium text-sm transition-colors duration-200">Tableau de bord</a>
+          <a href="<?= site_url('dashboard') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Tableau de bord</a>
       </nav>
 
       <div class="flex flex-col gap-2 pt-4 border-t border-action/10 mt-4">
-        <a href="<?= site_url('logout') ?>" class="text-ink/70 hover:text-action font-medium text-sm py-2 transition-colors duration-200">Déconnexion</a>
+        <a href="<?= site_url('logout') ?>" class="text-ink/70 hover:text-action font-medium text-base py-2 transition-colors duration-200">Déconnexion</a>
       <?php else: ?>
-        <a href="<?= site_url('login') ?>" class="<?= $loginClassMobile ?> text-sm border-t border-action/10 transition-colors duration-200">Connexion</a>
-        <a href="<?= site_url('register') ?>" class="<?= $registerClassMobile ?> text-sm transition-colors duration-200">S'inscrire</a>
+        <a href="<?= site_url('login') ?>" class="<?= $loginClassMobile ?> text-base border-t border-action/10 transition-colors duration-200">Connexion</a>
+        <a href="<?= site_url('register') ?>" class="<?= $registerClassMobile ?> text-base transition-colors duration-200">S'inscrire</a>
       <?php endif; ?>
       </div>
     </div>
