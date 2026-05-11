@@ -28,5 +28,10 @@ $routes->get('journeys', 'Journeys\JourneysController::show');
 $routes->get('journeys/new', 'Journeys\JourneysController::new');
 $routes->post('journeys', 'Journeys\JourneysController::store');
 
-
+// Mot de passe oublié
 $routes->get('forgotPassword', 'AuthController::forgotPassword');
+$routes->post('forgotPassword', 'AuthController::handleForgotPassword');
+
+// Réinitialisation du mot de passe
+$routes->get('resetPassword',   'AuthController::resetPassword');
+$routes->post('resetPassword', 'AuthController::handleResetPassword'); 

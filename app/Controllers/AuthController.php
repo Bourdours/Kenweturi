@@ -6,7 +6,7 @@ use \CodeIgniter\HTTP\RedirectResponse;
 
 use \App\Models\UserModel;
 use \App\Models\CityModel;
-
+use App\Libraries\MailerExample;
 use DateTime;
 
 /**
@@ -17,11 +17,11 @@ class AuthController extends BaseController
     private UserModel $userModel;
     private CityModel $cityModel;
 
-    public function __construct() {
+    public function __construct()
+    {
 
         $this->userModel = new UserModel();
         $this->cityModel = new CityModel();
-
     }
 
     /**
@@ -217,8 +217,106 @@ class AuthController extends BaseController
      */
     public function forgotPassword()
     {
-    return view('Auth/forgotPassword');
+        return view('Auth/forgotPassword');
+    }
+
+    /**
+     * Traite l'email soumis et envoie le lien de réinitialisation
+     * 
+     * @return RedirectResponse
+     */
+    public function handleForgotPassword()
+    {
+
+        $email = $this->request->getPost('email');
+
+        $user = $this->userModel->where('email', $email)->first();
+
+        if (!$user) {
+            return redirect()->back()->withInput()->with('success', 'Si un compte existe avec cet email, vous recevrez un lien de réinitialisation.');
+        }
+
+        // Génération du token unique
+        $token = bin2hex(random_bytes(32));
+        $expiry = date('Y-m-d H:i:s', strtotime('+1 hour'));
+
+        // Sauvegarde du token en base
+        $this->userModel->update($user['id'], [
+            'reset_token'        => $token,
+            'reset_token_expiry' => $expiry,
+        ]);
+
+        // Envoi de l'email
+        $resetLink = base_url('resetPassword?token=' . $token);
+
+        $mailer = new MailerExample();
+        $mailer->sendHtml(
+            $user['email'],
+            'Réinitialisation de votre mot de passe',
+            '<p>Cliquez sur ce lien pour réinitialiser votre mot de passe : <a href="' . $resetLink . '">Réinitialiser</a></p>'
+        );
+    
+        return redirect()->back()->with('success', 'Si un compte existe avec cet email, vous recevrez un lien de réinitialisation.');
+    }
+
+    /**
+     * Affiche le formulaire de réinitialisation du mot de passe
+     * 
+     * @return string
+     */
+    public function resetPassword()
+    {
+        $token = $this->request->getGet('token');
+
+        if (!$token) {
+            return redirect()->to('/forgotPassword')->with('error', 'Lien invalide.');
+        }
+
+        $user = $this->userModel
+            ->where('reset_token', $token)
+            ->where('reset_token_expiry >', date('Y-m-d H:i:s'))
+            ->first();
+
+        if (!$user) {
+            return redirect()->to('/forgotPassword')->with('error', 'Ce lien est invalide ou a expiré.');
+        }
+
+        return view('Auth/resetPassword', [
+            'token'      => $token,
+            'tokenValid' => true,
+        ]);
+    }
+
+    /**
+     * Traite le nouveau mot de passe soumis
+     * 
+     * @return RedirectResponse
+     */
+    public function handleResetPassword()
+    {
+        $token           = $this->request->getPost('token');
+        $password        = $this->request->getPost('password');
+        $confirmPassword = $this->request->getPost('confirmPassword');
+
+        if ($password !== $confirmPassword) {
+            return redirect()->back()->with('error', 'Les mots de passe ne correspondent pas.');
+        }
+
+        $user = $this->userModel
+            ->where('reset_token', $token)
+            ->where('reset_token_expiry >', date('Y-m-d H:i:s'))
+            ->first();
+
+        if (!$user) {
+            return redirect()->to('/forgotPassword')->with('error', 'Ce lien est invalide ou a expiré.');
+        }
+
+        $this->userModel->update($user['id'], [
+            'password_hash'      => password_hash($password, PASSWORD_DEFAULT),
+            'reset_token'        => null,
+            'reset_token_expiry' => null,
+        ]);
+
+        return redirect()->to('/login')->with('success', 'Mot de passe réinitialisé avec succès !');
     }
 }
-
-
