@@ -29,7 +29,9 @@ class UserModel extends BaseModel
         'is_student',
         'registered_at', 
         'password_hash',       
-        'city_id'
+        'city_id',
+        'reset_token',
+        'reset_token_expiry'
     ];
 
     // Règles de validation appliquées automatiquement avant chaque insertion
