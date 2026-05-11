@@ -2,7 +2,11 @@
 
 namespace App\Controllers;
 
+use \CodeIgniter\HTTP\RedirectResponse;
+
 use \App\Models\UserModel;
+use \App\Models\CityModel;
+
 use DateTime;
 
 /**
@@ -10,6 +14,16 @@ use DateTime;
  */
 class AuthController extends BaseController
 {
+    private UserModel $userModel;
+    private CityModel $cityModel;
+
+    public function __construct() {
+
+        $this->userModel = new UserModel();
+        $this->cityModel = new CityModel();
+
+    }
+
     /**
      * Affiche le formulaire d'inscription
      * 
@@ -42,7 +56,7 @@ class AuthController extends BaseController
      * Gère la création/récupération de la ville, l'enregistrement de l'utilisateur
      * et la redirection avec message de succès.
      * 
-     * @return \CodeIgniter\HTTP\RedirectResponse
+     * @return RedirectResponse
      */
     public function handleRegister()
     {
@@ -98,31 +112,26 @@ class AuthController extends BaseController
             ]);
         }
 
-        // Initialisation de la connexion à la base de données et du modèle utilisateur
-        $db = \Config\Database::connect();
-        $userModel = new UserModel();
-
         // Récupération des données liées à la ville depuis le formulaire
         $cityName = $this->request->getPost('cityName');
         $zipCode  = $this->request->getPost('postalCode');
 
         // Gestion de la table 'cities' (Ville)
         // On vérifie si la ville existe déjà pour éviter les doublons
-        $cityBuilder = $db->table('city');
-        $existingCity = $cityBuilder->getWhere(['name' => $cityName])->getRow();
+        $existingCity = $this->cityModel->where('name', $cityName)->first();
 
         // Si elle existe, on récupère son ID existant
         if ($existingCity) {
-            $cityId = $existingCity->id;
+            $cityId = $existingCity['id'];
         } else {
             // Si elle n'existe pas, on l'ajoute dans la table 'cities'
-            $cityBuilder->insert([
+            $this->cityModel->insert([
                 'name' => $cityName,
                 'zipcode' => $zipCode
             ]);
 
             // On récupère l'ID généré
-            $cityId = $db->insertID();
+            $cityId = $this->cityModel->insertID();
         }
 
         // Préparation des données de l'utilisateur
@@ -138,8 +147,8 @@ class AuthController extends BaseController
         ];
 
         // Tentative de sauvegarde de l'utilisateur via le Model
-        if (!$userModel->save($data)) {
-            return redirect()->back()->withInput()->with('errors', $userModel->errors());
+        if (!$this->userModel->save($data)) {
+            return redirect()->back()->withInput()->with('errors', $this->userModel->errors());
         }
 
         // Redirection vers la page de connexion avec un message flash
@@ -151,18 +160,17 @@ class AuthController extends BaseController
      * 
      * Vérifie l'email, le mot de passe haché et initialise la session.
      * 
-     * @return \CodeIgniter\HTTP\RedirectResponse
+     * @return RedirectResponse
      */
     public function handleLogin()
     {
         $session = session();
-        $userModel = new UserModel();
 
         $email = $this->request->getPost('email');
         $password = $this->request->getPost('password');
 
         // On cherche l'utilisateur par son email
-        $user = $userModel->where('email', $email)->first();
+        $user = $this->userModel->where('email', $email)->first();
 
         if ($user) {
             // Vérification du mot de passe 
@@ -194,7 +202,7 @@ class AuthController extends BaseController
     /**
      * Déconnecte l'utilisateur et détruit la session
      * 
-     * @return \CodeIgniter\HTTP\RedirectResponse
+     * @return RedirectResponse
      */
     public function logout()
     {
