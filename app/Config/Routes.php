@@ -27,3 +27,6 @@ $routes->get('/test/(:num)/test/(:num)', 'Home::test/$1/$2');
 $routes->get('journeys', 'Journeys\JourneysController::show');
 $routes->get('journeys/new', 'Journeys\JourneysController::new');
 $routes->post('journeys', 'Journeys\JourneysController::store');
+
+
+$routes->get('forgotPassword', 'AuthController::forgotPassword');

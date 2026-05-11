@@ -209,4 +209,16 @@ class AuthController extends BaseController
         session()->destroy();
         return redirect()->to('/login')->with('success', 'Vous avez été déconnecté.');
     }
+
+    /**
+     * Affiche la page de mot de passe oublié
+     * 
+     * @return string
+     */
+    public function forgotPassword()
+    {
+    return view('Auth/forgotPassword');
+    }
 }
+
+
