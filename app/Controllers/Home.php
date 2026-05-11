@@ -6,7 +6,9 @@ class Home extends BaseController
 {
     public function index(): string
     {
-        return view('home');
+        return view('home', [
+             'title' => "Page d'accueil"
+        ]);
     }
 
     public function test(int $id, int $id2): string
