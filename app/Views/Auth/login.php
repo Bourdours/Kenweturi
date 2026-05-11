@@ -69,8 +69,8 @@
       <div class="flex flex-col gap-3.5 mb-5">
 
         <div>
-          <label for="email" class="text-ink/50 text-xs mb-1.5 flex items-center gap-1">
-            <i class="fa-regular fa-envelope text-xs"></i>Adresse email
+          <label for="email" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
+            <i class="fa-regular fa-envelope text-sm"></i>Adresse email
           </label>
           <div class="relative">
             <input type="email" name="email" id="email"
@@ -83,7 +83,7 @@
         <div>
           <div class="flex justify-between items-center mb-1.5">
             <label for="password" class="text-ink/50 text-sm flex items-center gap-1">
-              <i class="fa-solid fa-lock text-xs"></i>Mot de passe
+              <i class="fa-solid fa-lock text-sm"></i>Mot de passe
             </label>
             <a href="<?= base_url('forgotPassword') ?>" class="text-xs text-action hover:text-action-dark transition-colors">Mot de passe oublié ?</a>
           </div>
