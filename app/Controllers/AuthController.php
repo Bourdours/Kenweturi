@@ -34,7 +34,11 @@ class AuthController extends BaseController
         if (session()->get('isLoggedIn')) {
             return redirect()->to('/');
         }
-        return view('Auth/register');
+        return view('Auth/register', [
+             'title' => 'Inscription'
+        ]
+        
+        );
     }
 
     /**
@@ -47,7 +51,9 @@ class AuthController extends BaseController
         if (session()->get('isLoggedIn')) {
             return redirect()->to('/');
         }
-        return view('Auth/login');
+        return view('Auth/login', [
+             'title' => 'Connexion'
+        ]);
     }
 
     /**
@@ -217,7 +223,9 @@ class AuthController extends BaseController
      */
     public function forgotPassword()
     {
-        return view('Auth/forgotPassword');
+        return view('Auth/forgotPassword', [
+            'title' => 'Mot de passe oublié'
+        ]);
     }
 
     /**
@@ -284,6 +292,7 @@ class AuthController extends BaseController
         return view('Auth/resetPassword', [
             'token'      => $token,
             'tokenValid' => true,
+            'title'      => 'Réinitialisation du mot de passe'
         ]);
     }
 
