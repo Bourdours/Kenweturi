@@ -70,6 +70,15 @@ class CreateUserTable extends Migration
                 'type' => 'INT',
                 'null' => false,
             ],
+            'reset_token' => [
+            'type'       => 'VARCHAR',
+            'constraint' => 255,
+            'null'       => true,
+            ],
+            'reset_token_expiry' => [
+                'type' => 'DATETIME',
+                'null' => true,
+            ],
         ]);
         $this->forge->addPrimaryKey('id');
         $this->forge->addUniqueKey('email');
