@@ -2,6 +2,10 @@
 
 namespace App\Models;
 
+/**
+ * Modèle gérant la table 'journey_request'.
+ * Gère la validation des données.
+ */
 class JourneyRequestModel extends BaseModel
 {
     protected $table = 'journey_request';
