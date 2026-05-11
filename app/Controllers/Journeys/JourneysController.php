@@ -8,12 +8,16 @@ class JourneysController extends BaseController
 {
     public function new(): string
     {
-        return view('Journeys/journeyNew');
+        return view('Journeys/journeyNew', [
+            'title' => "Publier un trajet"
+        ]);
     }
 
     public function show(): string
     {
-        return view('Journeys/journeyShow');
+        return view('Journeys/journeyShow',[
+            'title' => "Chercher un trajet"
+        ]);
     }
 
     public function store(): RedirectResponse
