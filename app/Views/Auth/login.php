@@ -85,7 +85,7 @@
             <label for="password" class="text-ink/50 text-[10px] flex items-center gap-1">
               <i class="fa-solid fa-lock text-[9px]"></i>Mot de passe
             </label>
-            <a href="#" class="text-[11px] text-action hover:text-action-dark transition-colors">Mot de passe oublié ?</a>
+            <a href="<?= base_url('forgotPassword') ?>" class="text-[11px] text-action hover:text-action-dark transition-colors">Mot de passe oublié ?</a>
           </div>
           <div class="relative">
             <input type="password" name="password" id="password" required
