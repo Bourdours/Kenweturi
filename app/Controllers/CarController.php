@@ -11,6 +11,18 @@ use \CodeIgniter\HTTP\RedirectResponse;
  */
 class CarController extends BaseController
 {
+
+    /** 
+     * 
+     * Créer la voiture d'un utilisateur.
+     * 
+     * @return string
+     */
+    public function showCreateForm()
+    {
+        return view('/car/create');
+    }
+
     /**
      * Traite les données envoyées par le formulaire 
      * 
@@ -34,9 +46,25 @@ class CarController extends BaseController
             return redirect()->back()->withInput()->with('errors', $carModel->errors());
         }
 
-        return redirect()->to('/cars')->with('success', 'Voiture ajoutée avec succès !');
+        $id = $carModel->getInsertID(); // récupère l'id de la voiture créée
+        return redirect()->to('/car/' . $id . '/get')->with('success', 'Voiture ajoutée avec succès !');
     }
 
+     /** 
+     * 
+     * Affiche une voitures d'un utilisateur.
+     * 
+     * @return string
+     */
+    public function show(int $id): string|RedirectResponse
+    {
+        $carModel = new CarModel();
+        $car = $carModel->where('user_id', session()->get('user_id'))->find($id);
+        if (!$car) {
+            return redirect()->to('/dashboard')->with('error', 'Voiture introuvable.');
+        }
+        return view('car/show', ['car' => $car]);
+    }
 
     /** 
      * 
@@ -52,19 +80,7 @@ class CarController extends BaseController
             'cars' => $carModel->where('user_id', session()->get('user_id'))->findAll()
         ];
 
-        return view('car/index', $data);
-    }
-
-
-    /** 
-     * 
-     * Créer la voiture d'un utilisateur.
-     * 
-     * @return string
-     */
-    public function showCreateForm()
-    {
-        return view('car/create');
+        return view('/cars/get', $data);
     }
 
 
@@ -81,14 +97,14 @@ class CarController extends BaseController
         $car = $carModel->where('user_id', session()->get('user_id'))->find($id);
 
         if (!$car) {
-            return redirect()->to('/cars')->with('error', 'Voiture introuvable.');
+            return redirect()->to('/dashboard')->with('error', 'Voiture introuvable.');
         }
 
         $data = [
             'car' => $car
         ];
 
-        return view('car/edit', $data);
+        return view('/car/update', $data);
     }
 
 
@@ -115,7 +131,7 @@ class CarController extends BaseController
             return redirect()->back()->withInput()->with('errors', $carModel->errors());
         }
 
-        return redirect()->to('/cars')->with('success', 'Voiture modifiée avec succès !');
+        return redirect()->to('/car/' . $id . '/get')->with('success', 'Voiture modifiée avec succès !');
     }
 
 
@@ -132,12 +148,12 @@ class CarController extends BaseController
         $car = $carModel->where('user_id', session()->get('user_id'))->find($id);
 
         if (!$car) {
-            return redirect()->to('/cars')->with('error', 'Voiture introuvable.');
+            return redirect()->to('/dashboard')->with('error', 'Voiture introuvable.');
         }
 
         $carModel->delete($id);
 
-        return redirect()->to('/cars')->with('success', 'Voiture supprimée avec succès !');
+        return redirect()->to('/dashboard')->with('success', 'Voiture supprimée avec succès !');
     }
 
 }
