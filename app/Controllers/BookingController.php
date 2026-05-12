@@ -44,7 +44,8 @@ class BookingController extends BaseController
             return redirect()->back()->withInput()->with('errors', $bookingModel->errors());
         }
 
-        return redirect()->to('/booking')->with('success', 'Réservation faite avec succès !'); 
+        $journeyId = $this->request->getPost('journey_id');
+        return redirect()->to('/journey/' . $journeyId . '/get')->with('success', 'Réservation faite avec succès !');
     }
 
     /** 
@@ -79,7 +80,7 @@ class BookingController extends BaseController
             ->find($id);
 
         if (!$booking) {
-            return redirect()->to('/booking')->with('error', 'Réservation introuvable.');
+            return redirect()->to('/dashboard')->with('error', 'Réservation introuvable.');
         }
 
         return view('booking/edit', ['booking' => $booking]);
@@ -100,7 +101,7 @@ class BookingController extends BaseController
             ->find($id);
 
         if (!$booking) {
-            return redirect()->to('/booking')->with('error', 'Réservation introuvable.');
+            return redirect()->to('/dashboard')->with('error', 'Réservation introuvable.');
         }
 
         $data = [
@@ -113,7 +114,8 @@ class BookingController extends BaseController
             return redirect()->back()->withInput()->with('errors', $bookingModel->errors());
         }
 
-        return redirect()->to('/booking')->with('success', 'Réservation modifiée avec succès !');
+        $journeyId = $this->request->getPost('journey_id');
+        return redirect()->to('/journey/' . $journeyId . '/get')->with('success', 'Réservation modifiée avec succès !');
     }
 
 
@@ -128,10 +130,10 @@ class BookingController extends BaseController
         $bookingModel = new BookingModel();
         $booking = $bookingModel->where('user_id', session()->get('user_id'))->find($id);
         if (!$booking) {
-            return redirect()->to('/booking')->with('error', 'Réservation introuvable.');
+            return redirect()->to('/dashboard')->with('error', 'Réservation introuvable.');
         }
-        $bookingModel->delete($id);
-        return redirect()->to('/booking')->with('success', 'Réservation annulée avec succès !');
+        $journeyId = $booking['journey_id'];
+        return redirect()->to('/journey/' . $journeyId . '/get')->with('success', 'Réservation annulée avec succès !');
     }
 
 }

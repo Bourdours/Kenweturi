@@ -18,7 +18,7 @@ $routes->post('handleRegister', 'AuthController::handleRegister');
 $routes->get('login', 'AuthController::login');
 
 // Route pour TRAITER le formulaire de connexion
-$routes->post('login/check', 'AuthController::handleLogin');
+$routes->post('login', 'AuthController::handleLogin');
 
 // Route pour traiter la déconnexion
 $routes->get('logout', 'AuthController::logout');
