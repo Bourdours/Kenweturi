@@ -29,7 +29,7 @@ class AuthController extends BaseController
      * 
      * @return string
      */
-    public function register()
+    public function showRegister()
     {
         if (session()->get('isLoggedIn')) {
             return redirect()->to('/');
@@ -46,7 +46,7 @@ class AuthController extends BaseController
      * 
      * @return string
      */
-    public function login()
+    public function showLogin()
     {
         if (session()->get('isLoggedIn')) {
             return redirect()->to('/');
@@ -221,7 +221,7 @@ class AuthController extends BaseController
      * 
      * @return string
      */
-    public function forgotPassword()
+    public function showForgotPassword()
     {
         return view('Auth/forgotPassword', [
             'title' => 'Mot de passe oublié'
@@ -272,7 +272,7 @@ class AuthController extends BaseController
      * 
      * @return string
      */
-    public function resetPassword()
+    public function showResetPassword()
     {
         $token = $this->request->getGet('token');
 
