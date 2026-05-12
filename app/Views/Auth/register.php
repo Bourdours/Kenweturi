@@ -24,7 +24,7 @@
     </div>
   <?php endif ?>
 
-  <form action="<?= base_url('/handleRegister') ?>" method="post">
+  <form action="<?= base_url('/register') ?>" method="post">
     <?= csrf_field() ?>
 
     <div class="relative lg:static pl-5 lg:pl-0">
