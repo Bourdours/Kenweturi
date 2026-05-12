@@ -18,7 +18,7 @@ class CarController extends BaseController
      * 
      * @return RedirectResponse
      */
-    public function store ()
+    public function create()
     {
         $carModel = new CarModel();
 
@@ -52,7 +52,7 @@ class CarController extends BaseController
             'cars' => $carModel->where('user_id', session()->get('user_id'))->findAll()
         ];
 
-        return view('Car/index', $data);
+        return view('car/index', $data);
     }
 
 
@@ -62,9 +62,9 @@ class CarController extends BaseController
      * 
      * @return string
      */
-    public function create()
+    public function showCreateForm()
     {
-        return view('Car/create');
+        return view('car/create');
     }
 
 
@@ -74,7 +74,7 @@ class CarController extends BaseController
      * 
      * @return string|RedirectResponse
      */
-    public function edit($id)
+    public function showEditForm($id)
     {
         $carModel = new CarModel();
         
@@ -88,7 +88,7 @@ class CarController extends BaseController
             'car' => $car
         ];
 
-        return view('Car/edit', $data);
+        return view('car/edit', $data);
     }
 
 
