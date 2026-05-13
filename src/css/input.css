@@ -35,6 +35,56 @@
 }
 /* etc. pour les autres graisses */
 
+/* ─── Thème clair (défaut) ───────────────────────────────── */
+:root {
+  --color-paper:         244 242 236; /* #F4F2EC  Crème */
+  --color-ink:           14 26 46;    /* #0E1A2E  Nuit */
+  --color-surface:       226 221 208; /* #E2DDD0  Sable */
+  --color-surface-page:  244 242 236;
+  --color-surface-nav:   34 70 122;
+  --color-surface-card:  226 221 208;
+  --color-surface-input: 234 230 220;
+  --color-brand:         34 70 122;   /* #22467A  Bleu GRETA */
+  --color-brand-dark:    27 56 98;    /* #1B3862  hover */
+  --color-action:        217 102 63;  /* #D9663F  Terre cuite */
+  --color-action-dark:   194 85 48;   /* #C25530  hover */
+  --color-success:       122 146 104; /* #7A9268  Sauge */
+  --color-notice:        217 183 104; /* #D9B768  Blé */
+  --color-muted:         107 114 128;
+  --color-danger:        216 11 28;
+  --color-danger-dark:   181 9 26;
+  --color-wine:          135 34 73;
+  --color-wine-dark:     110 41 87;
+  --color-brown:         113 99 84;
+  --color-brown-dark:    124 66 16;
+  --color-brown-darker:  71 41 15;
+}
+
+/* ─── Thème sombre ───────────────────────────────────────── */
+.dark {
+  --color-paper:         14 26 46;    /* #0E1A2E  Nuit */
+  --color-ink:           239 234 224; /* #EFEAE0  Crème */
+  --color-surface:       26 40 66;    /* #1A2842  Bleu encre */
+  --color-surface-page:  14 26 46;
+  --color-surface-nav:   26 58 92;
+  --color-surface-card:  26 40 66;
+  --color-surface-input: 26 40 66;
+  --color-brand:         91 143 217;  /* #5B8FD9  Bleu clair */
+  --color-brand-dark:    74 126 200;  /* #4A7EC8  hover */
+  --color-action:        200 80 40;
+  --color-action-dark:   215 97 55;
+  --color-success:       157 179 135; /* #9DB387  Sauge éclaircie */
+  --color-notice:        229 201 136; /* #E5C988  Blé éclairci */
+  --color-muted:         136 136 136;
+  --color-danger:        216 11 28;
+  --color-danger-dark:   181 9 26;
+  --color-wine:          135 34 73;
+  --color-wine-dark:     110 41 87;
+  --color-brown:         113 99 84;
+  --color-brown-dark:    124 66 16;
+  --color-brown-darker:  71 41 15;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

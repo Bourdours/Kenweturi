@@ -160,7 +160,7 @@
 
           <div>
             <label for="passConfirm" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
-              <i class="fa-solid fa-lock text-sm"></i>Confirmer le mot de passe
+              <i class="fa-solid fa-check text-sm"></i>Confirmer le mot de passe
             </label>
             <div class="relative">
               <input type="password" name="passConfirm" id="passConfirm" required
