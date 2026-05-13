@@ -38,8 +38,46 @@ $registerClassMobile = $onLoginPage
       <!-- Auth desktop -->
       <div class="hidden md:flex items-center gap-4">
         <?php if (session()->get('isLoggedIn')): ?>
-          <a href="<?= site_url('dashboard') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Tableau de bord</a>
-          <a href="<?= site_url('logout') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Déconnexion</a>
+          <!-- Menu utilisateur avec dropdown -->
+          <div class="relative" id="user-menu-wrapper">
+            <button id="user-menu-toggle" class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
+              <?php $initials = strtoupper(substr((string) session()->get('firstname'), 0, 1) . substr((string) session()->get('lastname'), 0, 1)); ?>
+              <?php if (session()->get('avatar')): ?>
+                <div style="width:2.25rem;height:2.25rem;border-radius:9999px;overflow:hidden;flex-shrink:0;" class="desktop-avatar-img">
+                  <img src="<?= esc(base_url(session()->get('avatar'))) ?>" alt="" style="width:100%;height:100%;object-fit:cover;"
+                    onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
+                </div>
+                <div style="display:none;width:2.25rem;height:2.25rem;border-radius:9999px;background:#C85028;color:#EFEAE0;font-weight:700;font-size:0.75rem;flex-shrink:0;align-items:center;justify-content:center;">
+                  <?= $initials ?>
+                </div>
+              <?php else: ?>
+                <div style="display:flex;width:2.25rem;height:2.25rem;border-radius:9999px;background:#C85028;color:#EFEAE0;font-weight:700;font-size:0.75rem;flex-shrink:0;align-items:center;justify-content:center;">
+                  <?= $initials ?>
+                </div>
+              <?php endif; ?>
+              <span class="text-ink font-medium text-sm"><?= esc((string) session()->get('firstname')) ?></span>
+              <i class="fa-solid fa-chevron-down text-ink/40 text-xs"></i>
+            </button>
+
+            <!-- Dropdown -->
+            <div id="user-dropdown" class="hidden absolute right-0 top-full mt-4 w-56 bg-paper border border-action/10 rounded-xl shadow-lg py-2 z-50">
+              <div class="px-4 py-3 border-b border-action/10">
+                <p class="text-ink font-semibold text-sm"><?= esc((string) session()->get('firstname')) ?> <?= esc((string) session()->get('lastname')) ?></p>
+                <p class="text-ink/40 text-xs"><?= esc((string) session()->get('email')) ?></p>
+              </div>
+              <a href="<?= site_url('profile') ?>" class="flex items-center gap-2 px-4 py-2 text-ink/70 hover:text-action text-sm transition-colors duration-200">
+                <i class="fa-solid fa-user text-xs w-4"></i> Mon profil
+              </a>
+              <a href="<?= site_url('dashboard') ?>" class="flex items-center gap-2 px-4 py-2 text-ink/70 hover:text-action text-sm transition-colors duration-200">
+                <i class="fa-solid fa-gauge text-xs w-4"></i> Tableau de bord
+              </a>
+              <div class="border-t border-action/10 mt-1 pt-1">
+                <a href="<?= site_url('logout') ?>" class="flex items-center gap-2 px-4 py-2 text-ink/70 hover:text-action text-sm transition-colors duration-200">
+                  <i class="fa-solid fa-right-from-bracket text-xs w-4"></i> Déconnexion
+                </a>
+              </div>
+            </div>
+          </div>
         <?php else: ?>
           <a href="<?= site_url('login') ?>" class="<?= $loginClass ?> text-base transition-colors duration-200">Connexion</a>
           <a href="<?= site_url('register') ?>" class="<?= $registerClass ?> text-base transition-colors duration-200">S'inscrire</a>
@@ -60,9 +98,19 @@ $registerClassMobile = $onLoginPage
       <?php if (session()->get('isLoggedIn')): ?>
         <!-- Bloc infos utilisateur -->
         <div class="flex items-center gap-3 pt-4 pb-4 border-b border-action/10">
-          <div class="w-10 h-10 rounded-full bg-action/20 flex items-center justify-center text-action font-bold text-sm shrink-0">
-            <?= strtoupper(substr((string) session()->get('firstname'), 0, 1) . substr((string) session()->get('lastname'), 0, 1)) ?>
-          </div>
+          <?php if (session()->get('avatar')): ?>
+            <div style="width:2.5rem;height:2.5rem;border-radius:9999px;overflow:hidden;flex-shrink:0;" class="mobile-avatar-img">
+              <img src="<?= esc(base_url(session()->get('avatar'))) ?>" alt="" style="width:100%;height:100%;object-fit:cover;"
+                onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
+            </div>
+            <div style="display:none;width:2.5rem;height:2.5rem;border-radius:9999px;background:#C85028;color:#EFEAE0;font-weight:700;font-size:0.75rem;flex-shrink:0;align-items:center;justify-content:center;">
+              <?= $initials ?>
+            </div>
+          <?php else: ?>
+            <div style="display:flex;width:2.5rem;height:2.5rem;border-radius:9999px;background:#C85028;color:#EFEAE0;font-weight:700;font-size:0.75rem;flex-shrink:0;align-items:center;justify-content:center;">
+              <?= $initials ?>
+            </div>
+          <?php endif; ?>
           <div class="flex flex-col">
             <span class="text-ink font-semibold text-sm leading-tight">
               <?= esc((string) session()->get('firstname')) ?> <?= esc((string) session()->get('lastname')) ?>
