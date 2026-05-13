@@ -58,7 +58,7 @@ class ProfileController extends BaseController
      *
      * @return \CodeIgniter\HTTP\RedirectResponse
      */
-    public function handleProfileEdit()
+    public function updateProfileEdit()
     {
         $userId = session()->get('user_id');
         $user   = $this->userModel->find($userId);
