@@ -15,13 +15,13 @@ document.querySelectorAll('input, select').forEach(function (el) {
 const pwInput = document.getElementById('password');
 
 if (pwInput) {
-  const bars = ['sb1', 'sb2', 'sb3', 'sb4'].map(id => document.getElementById(id));
+  const bars = ['sb1', 'sb2', 'sb3', 'sb4'].map(id => document.getElementById(id)).filter(Boolean);
   const crits = [
     { id: 'crit-length',  test: v => v.length >= 8 },
     { id: 'crit-upper',   test: v => /[A-Z]/.test(v) },
     { id: 'crit-number',  test: v => /[0-9]/.test(v) },
     { id: 'crit-special', test: v => /[^a-zA-Z0-9]/.test(v) },
-  ].map(c => ({ ...c, el: document.getElementById(c.id) }));
+  ].map(c => ({ ...c, el: document.getElementById(c.id) })).filter(c => c.el !== null);
 
   const barColors  = ['#D80B1C', '#C85028', '#E5C988', '#9DB387'];
   const emptyColor = 'rgba(239,234,224,0.08)';
