@@ -23,9 +23,11 @@ if (pwInput) {
     { id: 'crit-special', test: v => /[^a-zA-Z0-9]/.test(v) },
   ].map(c => ({ ...c, el: document.getElementById(c.id) })).filter(c => c.el !== null);
 
-  const barColors  = ['#D80B1C', '#C85028', '#E5C988', '#9DB387'];
-  const emptyColor = 'rgba(239,234,224,0.08)';
-  const metColor   = '#9DB387';
+  const barColors    = ['#D80B1C', '#C85028', '#E5C988', '#9DB387'];
+  const metColor     = '#9DB387';
+  const isDark       = () => document.documentElement.classList.contains('dark');
+  const emptyColor   = () => isDark() ? 'rgba(239,234,224,0.08)' : 'rgba(14,26,46,0.12)';
+  const metTextColor = () => isDark() ? '#EFEAE0' : 'rgb(14,26,46)';
 
   pwInput.addEventListener('input', function () {
     const val = this.value;
@@ -37,7 +39,7 @@ if (pwInput) {
       const icon = el.querySelector('i');
       if (met) {
         el.style.opacity = '1';
-        el.style.color   = '#EFEAE0';
+        el.style.color   = metTextColor();
         icon.className   = 'fa-solid fa-circle-check w-3 text-center';
         icon.style.color = metColor;
       } else {
@@ -48,9 +50,9 @@ if (pwInput) {
       }
     });
 
-    const fillColor = score > 0 ? barColors[score - 1] : emptyColor;
+    const fillColor = score > 0 ? barColors[score - 1] : emptyColor();
     bars.forEach((bar, i) => {
-      bar.style.background = i < score ? fillColor : emptyColor;
+      bar.style.background = i < score ? fillColor : emptyColor();
     });
   });
 }
