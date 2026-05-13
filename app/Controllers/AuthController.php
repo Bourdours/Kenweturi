@@ -6,7 +6,6 @@ use \CodeIgniter\HTTP\RedirectResponse;
 
 use \App\Models\UserModel;
 use \App\Models\CityModel;
-use App\Libraries\MailerExample;
 use DateTime;
 
 /**
@@ -258,13 +257,21 @@ class AuthController extends BaseController
         // Envoi de l'email
         $resetLink = base_url('resetPassword?token=' . $token);
 
-        $mailer = new MailerExample();
-        $mailer->sendHtml(
-            $user['email'],
-            'Réinitialisation de votre mot de passe',
-            '<p>Cliquez sur ce lien pour réinitialiser votre mot de passe : <a href="' . $resetLink . '">Réinitialiser</a></p>'
-        );
-    
+        $emailBody = view('Emails/resetPassword', [
+            'firstname' => $user['firstname'],
+            'resetLink' => $resetLink,
+        ]);
+
+        try {
+            $mail = \Config\Services::mailer();
+            $mail->addAddress($user['email']);
+            $mail->Subject = 'Réinitialisation de votre mot de passe — Kenweturi';
+            $mail->Body    = $emailBody;
+            $mail->send();
+        } catch (\PHPMailer\PHPMailer\Exception $e) {
+            log_message('error', 'Mailer error: ' . $e->getMessage());
+        }
+
         return redirect()->back()->with('success', 'Si un compte existe avec cet email, vous recevrez un lien de réinitialisation.');
     }
 

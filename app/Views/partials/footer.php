@@ -48,6 +48,16 @@
 
     </div>
   </div>
+
+  <!-- Bas de footer : copyright + toggle thème -->
+  <div class="max-w-6xl mx-auto mt-8 pt-6 border-t border-action/10 flex items-center justify-between">
+    <span class="text-ink/30 text-xs">&copy; <?= date('Y') ?> Kenweturi</span>
+    <button id="theme-toggle" class="flex items-center gap-1.5 text-ink/40 hover:text-action transition-colors text-xs" aria-label="Changer de thème">
+      <i id="theme-icon" class="fa-solid"></i>
+      <span id="theme-label"></span>
+    </button>
+  </div>
 </footer>
 </body>
+
 </html>
