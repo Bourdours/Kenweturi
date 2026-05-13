@@ -62,6 +62,11 @@
 
     <!-- Changement de mot de passe -->
     <div>
+      <label for="currentPasswordProfile">Mot de passe actuel</label>
+      <input type="password" id="currentPasswordProfile" name="currentPasswordProfile" placeholder="Requis pour changer le mot de passe">
+    </div>
+
+    <div>
       <label for="newPasswordProfile">Nouveau mot de passe</label>
       <input type="password" id="newPasswordProfile" name="newPasswordProfile" placeholder="Laisser vide pour ne pas changer">
     </div>
