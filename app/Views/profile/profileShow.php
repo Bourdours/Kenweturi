@@ -17,15 +17,15 @@
       <div>
         <?php $initials = strtoupper(substr($user['firstname'], 0, 1) . substr($user['lastname'], 0, 1)); ?>
         <?php if (!empty($user['avatar'])): ?>
-          <div style="width:6rem;height:6rem;border-radius:9999px;overflow:hidden;flex-shrink:0;">
+          <div class="jsAvatarOpen" style="width:6rem;height:6rem;border-radius:9999px;overflow:hidden;flex-shrink:0;cursor:pointer;">
             <img src="<?= esc($user['avatar']) ?>" alt="Avatar de <?= esc($user['firstname']) ?>" style="width:100%;height:100%;object-fit:cover;"
               onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
           </div>
-          <div style="display:none;width:6rem;height:6rem;border-radius:9999px;background:#C85028;color:#EFEAE0;font-weight:700;font-size:1.5rem;flex-shrink:0;align-items:center;justify-content:center;">
+          <div class="jsAvatarOpen" style="display:none;width:6rem;height:6rem;border-radius:9999px;background:#C85028;color:#EFEAE0;font-weight:700;font-size:1.5rem;flex-shrink:0;align-items:center;justify-content:center;cursor:pointer;">
             <?= $initials ?>
           </div>
         <?php else: ?>
-          <div style="display:flex;width:6rem;height:6rem;border-radius:9999px;background:#C85028;color:#EFEAE0;font-weight:700;font-size:1.5rem;flex-shrink:0;align-items:center;justify-content:center;">
+          <div class="jsAvatarOpen" style="display:flex;width:6rem;height:6rem;border-radius:9999px;background:#C85028;color:#EFEAE0;font-weight:700;font-size:1.5rem;flex-shrink:0;align-items:center;justify-content:center;cursor:pointer;">
             <?= $initials ?>
           </div>
         <?php endif; ?>
@@ -66,8 +66,6 @@
         </p>
       <?php endif; ?>
     </div>
-
- 
 
     <!-- Infos personnelles -->
     <div>
@@ -127,5 +125,22 @@
 
   </div>
 </div>
+
+<!-- Modal avatar -->
+<div id="avatarModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;align-items:center;justify-content:center;cursor:zoom-out;">
+  <?php if (!empty($user['avatar'])): ?>
+    <img src="<?= esc($user['avatar']) ?>" alt="Avatar de <?= esc($user['firstname']) ?>" style="max-width:90vw;max-height:90vh;border-radius:0.5rem;object-fit:contain;box-shadow:0 0 40px rgba(0,0,0,0.5);"
+      onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+    <div style="display:none;width:16rem;height:16rem;border-radius:9999px;background:#C85028;color:#EFEAE0;font-weight:700;font-size:5rem;align-items:center;justify-content:center;box-shadow:0 0 40px rgba(0,0,0,0.5);">
+      <?= $initials ?>
+    </div>
+  <?php else: ?>
+    <div style="width:16rem;height:16rem;border-radius:9999px;background:#C85028;color:#EFEAE0;font-weight:700;font-size:5rem;display:flex;align-items:center;justify-content:center;box-shadow:0 0 40px rgba(0,0,0,0.5);">
+      <?= $initials ?>
+    </div>
+  <?php endif; ?>
+</div>
+
+<script src="<?= base_url('js/profile.js') ?>"></script>
 
 <?= view('partials/footer') ?>
