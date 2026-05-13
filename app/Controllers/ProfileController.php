@@ -15,13 +15,15 @@ class ProfileController extends BaseController
         $this->userModel = new UserModel();
         $this->cityModel = new CityModel();
     }
+
     /**
-     * Affiche le profil d'utilisateur 
-     * 
+     * Affiche le profil de l'utilisateur connecté
+     *
      * @return string
      */
     public function showProfile()
     {
+        // Récupération de l'utilisateur et de sa ville depuis la session
         $userId = session()->get('user_id');
         $user   = $this->userModel->find($userId);
         $city   = $this->cityModel->find($user['city_id']);
@@ -35,12 +37,13 @@ class ProfileController extends BaseController
     }
 
     /**
-     * Affiche la page de modification du profil
+     * Affiche le formulaire de modification du profil
      *
      * @return string
      */
     public function showProfileEdit()
     {
+        // Récupération de l'utilisateur et de sa ville depuis la session
         $userId = session()->get('user_id');
         $user   = $this->userModel->find($userId);
         $city   = $this->cityModel->find($user['city_id']);
@@ -54,15 +57,17 @@ class ProfileController extends BaseController
     }
 
     /**
-     * Traite la modification du profil
+     * Traite la soumission du formulaire de modification du profil
      *
      * @return \CodeIgniter\HTTP\RedirectResponse
      */
     public function updateProfileEdit()
     {
+        // Récupération de l'utilisateur connecté
         $userId = session()->get('user_id');
         $user   = $this->userModel->find($userId);
 
+        // Données de base du profil à mettre à jour
         $data = [
             'firstname'  => $this->request->getPost('firstNameProfile'),
             'lastname'   => $this->request->getPost('lastNameProfile'),
@@ -72,7 +77,7 @@ class ProfileController extends BaseController
             'biography'  => $this->request->getPost('biographyProfile'),
         ];
 
-        // Validation
+        // Règles de validation des champs obligatoires
         $rules = [
             'firstNameProfile' => 'required|min_length[2]|max_length[100]',
             'lastNameProfile'  => 'required|min_length[2]|max_length[100]',
@@ -84,11 +89,22 @@ class ProfileController extends BaseController
         $newPassword     = $this->request->getPost('newPasswordProfile');
         $confirmPassword = $this->request->getPost('confirmPasswordProfile');
 
+        // Si l'utilisateur souhaite changer son mot de passe
         if (!empty($newPassword)) {
+            $currentPassword = $this->request->getPost('currentPasswordProfile');
+
+            // Vérification que le mot de passe actuel est correct avant d'autoriser le changement
+            if (!password_verify($currentPassword, $user['password_hash'])) {
+                return redirect()->back()->withInput()
+                    ->with('errors', ['currentPasswordProfile' => 'Le mot de passe actuel est incorrect.']);
+            }
+
+            // Ajout des règles de validation pour le nouveau mot de passe
             $rules['newPasswordProfile']     = 'required|min_length[8]|regex_match[/^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*?_~\-()]).*$/]';
             $rules['confirmPasswordProfile'] = 'required|matches[newPasswordProfile]';
         }
 
+        // Messages d'erreur personnalisés pour le changement de mot de passe
         $messages = [
             'newPasswordProfile' => [
                 'required'    => 'Le mot de passe est obligatoire.',
@@ -101,15 +117,17 @@ class ProfileController extends BaseController
             ],
         ];
 
+        // Retour au formulaire avec les erreurs si la validation échoue
         if (!$this->validate($rules, $messages)) {
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
+        // Hachage du nouveau mot de passe si renseigné
         if (!empty($newPassword)) {
             $data['password_hash'] = password_hash($newPassword, PASSWORD_DEFAULT);
         }
 
-        // Gestion de l'avatar
+        // Gestion de l'upload de l'avatar
         $avatar = $this->request->getFile('avatarProfile');
         if ($avatar && $avatar->isValid() && !$avatar->hasMoved()) {
             $newName = $avatar->getRandomName();
@@ -117,9 +135,10 @@ class ProfileController extends BaseController
             $data['avatar'] = 'data/images/' . $newName;
         }
 
+        // Mise à jour en base de données
         $this->userModel->skipValidation(true)->update($userId, $data);
 
-        // Mise à jour de la session
+        // Synchronisation des données de session avec les nouvelles valeurs
         session()->set([
             'firstname' => $data['firstname'],
             'lastname'  => $data['lastname'],
