@@ -222,7 +222,10 @@ class AuthController extends BaseController
      * @return string
      */
     public function showForgotPassword()
-    {
+    {    if (session()->get('isLoggedIn')) {
+            return redirect()->to('/');
+        }
+        
         return view('Auth/forgotPassword', [
             'title' => 'Mot de passe oublié'
         ]);
