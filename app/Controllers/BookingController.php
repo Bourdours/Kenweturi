@@ -54,7 +54,7 @@ class BookingController extends BaseController
      * 
      * @return string
      */
-    public function index()
+    public function showAll()
     {
         $bookingModel = new BookingModel();
 
