@@ -1,18 +1,19 @@
 <?php
-  $onLoginPage        = uri_string() === 'login';
-  $loginClass         = $onLoginPage
-    ? 'bg-action text-ink px-5 py-2 rounded-full font-semibold font-display hover:bg-action-dark'
-    : 'text-ink/70 hover:text-action font-medium';
-  $registerClass      = $onLoginPage
-    ? 'text-ink/70 hover:text-action font-medium'
-    : 'bg-action text-ink px-5 py-2 rounded-full font-semibold font-display hover:bg-action-dark';
-  $loginClassMobile   = $onLoginPage
-    ? 'text-center bg-action text-ink px-5 py-2 rounded-full font-semibold font-display hover:bg-action-dark'
-    : 'text-ink/70 hover:text-action font-medium py-2';
-  $registerClassMobile = $onLoginPage
-    ? 'text-ink/70 hover:text-action font-medium py-2'
-    : 'text-center bg-action text-ink px-5 py-2 rounded-full font-semibold font-display hover:bg-action-dark';
+$onLoginPage        = uri_string() === 'login';
+$loginClass         = $onLoginPage
+  ? 'bg-action text-ink px-5 py-2 rounded-full font-semibold font-display hover:bg-action-dark'
+  : 'text-ink/70 hover:text-action font-medium';
+$registerClass      = $onLoginPage
+  ? 'text-ink/70 hover:text-action font-medium'
+  : 'bg-action text-ink px-5 py-2 rounded-full font-semibold font-display hover:bg-action-dark';
+$loginClassMobile   = $onLoginPage
+  ? 'text-center bg-action text-ink px-5 py-2 rounded-full font-semibold font-display hover:bg-action-dark'
+  : 'text-ink/70 hover:text-action font-medium py-2';
+$registerClassMobile = $onLoginPage
+  ? 'text-ink/70 hover:text-action font-medium py-2'
+  : 'text-center bg-action text-ink px-5 py-2 rounded-full font-semibold font-display hover:bg-action-dark';
 ?>
+
 <body class="flex flex-col min-h-screen">
   <header class="bg-paper border-b border-action/10">
 
@@ -92,4 +93,4 @@
 
   <script src="<?= base_url('js/header.js') ?>" defer></script>
 
-<main class="flex-1 bg-paper">
+  <main class="flex-1 bg-paper">

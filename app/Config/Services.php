@@ -3,30 +3,29 @@
 namespace Config;
 
 use CodeIgniter\Config\BaseService;
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
 
-/**
- * Services Configuration file.
- *
- * Services are simply other classes/libraries that the system uses
- * to do its job. This is used by CodeIgniter to allow the core of the
- * framework to be swapped out easily without affecting the usage within
- * the rest of your application.
- *
- * This file holds any application-specific services, or service overrides
- * that you might need. An example has been included with the general
- * method format you should use for your service methods. For more examples,
- * see the core Services file at system/Config/Services.php.
- */
 class Services extends BaseService
 {
-    /*
-     * public static function example($getShared = true)
-     * {
-     *     if ($getShared) {
-     *         return static::getSharedInstance('example');
-     *     }
-     *
-     *     return new \CodeIgniter\Example();
-     * }
-     */
+    public static function mailer(bool $getShared = true): PHPMailer
+    {
+        if ($getShared) {
+            return static::getSharedInstance('mailer');
+        }
+
+        $mail = new PHPMailer(true);
+        $mail->isSMTP();
+        $mail->Host       = env('mailer.host');
+        $mail->SMTPAuth   = true;
+        $mail->Username   = env('mailer.username');
+        $mail->Password   = env('mailer.password');
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port       = (int) env('mailer.port', 587);
+        $mail->CharSet    = 'UTF-8';
+        $mail->setFrom(env('mailer.from'), env('mailer.fromName'));
+        $mail->isHTML(true);
+
+        return $mail;
+    }
 }

@@ -11,9 +11,9 @@
       </div>
       <span class="text-ink text-xl font-bold font-display">Kenweturi</span>
     </div>
-    <h2 class="text-ink text-xl font-semibold font-display mb-2 leading-snug">
+    <h1 class="text-ink text-xl font-semibold font-display mb-2 leading-snug">
       Retrouvez l'accès<br>à votre compte.
-    </h2>
+    </h1>
     <p class="text-ink/50 text-sm mb-6 leading-relaxed">
       Pas de panique, ça arrive. Entrez votre email et nous vous enverrons un lien pour réinitialiser votre mot de passe.
     </p>
@@ -50,17 +50,17 @@
     </div>
 
     <?php if (session()->getFlashdata('error')): ?>
-    <div class="bg-action/10 border border-action/30 rounded-xl p-3 mb-4 flex gap-2.5 items-center">
-      <i class="fa-solid fa-triangle-exclamation text-action text-sm shrink-0"></i>
-      <span class="text-action text-xs"><?= session()->getFlashdata('error') ?></span>
-    </div>
+      <div class="bg-action/10 border border-action/30 rounded-xl p-3 mb-4 flex gap-2.5 items-center">
+        <i class="fa-solid fa-triangle-exclamation text-action text-sm shrink-0"></i>
+        <span class="text-action text-xs"><?= session()->getFlashdata('error') ?></span>
+      </div>
     <?php endif ?>
 
     <?php if (session()->getFlashdata('success')): ?>
-    <div class="bg-success/10 border border-success/30 rounded-xl p-3 mb-4 flex gap-2.5 items-center">
-      <i class="fa-solid fa-circle-check text-success text-sm shrink-0"></i>
-      <span class="text-success text-xs"><?= session()->getFlashdata('success') ?></span>
-    </div>
+      <div class="bg-success/10 border border-success/30 rounded-xl p-3 mb-4 flex gap-2.5 items-center">
+        <i class="fa-solid fa-circle-check text-success text-sm shrink-0"></i>
+        <span class="text-success text-xs"><?= session()->getFlashdata('success') ?></span>
+      </div>
     <?php endif ?>
 
     <form id="forgotForm" action="<?= base_url('forgotPassword') ?>" method="POST">
