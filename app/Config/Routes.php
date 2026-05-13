@@ -35,4 +35,4 @@ $routes->post('resetPassword', 'AuthController::handleResetPassword');
 // Profile
 $routes->get('profile', 'ProfileController::showProfile');
 $routes->get('profile/profileEdit', 'ProfileController::showProfileEdit');
-$routes->post('profile/profileEdit', 'ProfileController::handleProfileEdit');
+$routes->post('profile/profileEdit', 'ProfileController::updateProfileEdit');
