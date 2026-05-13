@@ -63,7 +63,7 @@
     </div>
     <?php endif ?>
 
-    <form action="<?= base_url('index.php/login/check') ?>" method="post">
+    <form action="<?= base_url('index.php/login') ?>" method="post">
       <?= csrf_field() ?>
 
       <div class="flex flex-col gap-3.5 mb-5">
