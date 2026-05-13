@@ -4,8 +4,9 @@ namespace App\Controllers;
 
 use App\Models\UserModel;
 use App\Models\CityModel;
+use CodeIgniter\I18n\Time;
 
-class ProfileController extends BaseController
+class UserController extends BaseController
 {
     private UserModel $userModel;
     private CityModel $cityModel;
@@ -21,18 +22,21 @@ class ProfileController extends BaseController
      *
      * @return string
      */
-    public function showProfile()
+    public function show()
     {
         // Récupération de l'utilisateur et de sa ville depuis la session
         $userId = session()->get('user_id');
         $user   = $this->userModel->find($userId);
         $city   = $this->cityModel->find($user['city_id']);
 
-        return view('profile/profileShow', [
+        $memberSince = ucfirst(Time::parse($user['registered_at'], 'Europe/Paris', 'fr_FR')->toLocalizedString('MMMM yyyy'));
+
+        return view('profile/show', [
             'title'        => 'Mon profil',
             'user'         => $user,
             'city'         => $city['name'] ?? null,
             'isOwnProfile' => true,
+            'memberSince'  => $memberSince,
         ]);
     }
 
@@ -41,14 +45,14 @@ class ProfileController extends BaseController
      *
      * @return string
      */
-    public function showProfileEdit()
+    public function showEditForm()
     {
         // Récupération de l'utilisateur et de sa ville depuis la session
         $userId = session()->get('user_id');
         $user   = $this->userModel->find($userId);
         $city   = $this->cityModel->find($user['city_id']);
 
-        return view('profile/profileEdit', [
+        return view('profile/edit', [
             'title'        => 'Modifier mon profil',
             'user'         => $user,
             'city'         => $city['name'] ?? null,
@@ -61,7 +65,7 @@ class ProfileController extends BaseController
      *
      * @return \CodeIgniter\HTTP\RedirectResponse
      */
-    public function updateProfileEdit()
+    public function update()
     {
         // Récupération de l'utilisateur connecté
         $userId = session()->get('user_id');
