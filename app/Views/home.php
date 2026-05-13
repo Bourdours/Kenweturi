@@ -8,7 +8,9 @@
 <?php endif; ?>
 
 <div>
-    <h1>Accueil</h1>
+  <h1 class="text-ink text-2xl font-semibold font-display mb-6">
+    Accueil
+  </h1>
 </div>
 
 <?= view('partials/footer') ?>
