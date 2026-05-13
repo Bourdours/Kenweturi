@@ -37,3 +37,48 @@ if (userMenuToggle && userDropdown) {
     sync();
   });
 })();
+
+(function () {
+  var MODELS = ['default', 'coupe', 'suv'];
+  var LABELS = { default: 'Berline', coupe: 'Décapotable', suv: 'SUV' };
+  var btn   = document.getElementById('car-model-toggle');
+  var label = document.getElementById('car-model-label');
+
+  function sync() {
+    var model = localStorage.getItem('carModel') || 'default';
+    if (label) label.textContent = LABELS[model];
+  }
+
+  sync();
+
+  if (btn) btn.addEventListener('click', function () {
+    var current = localStorage.getItem('carModel') || 'default';
+    var next = MODELS[(MODELS.indexOf(current) + 1) % MODELS.length];
+    localStorage.setItem('carModel', next);
+    document.dispatchEvent(new Event('carModelChange'));
+    sync();
+  });
+})();
+
+(function () {
+  var html  = document.documentElement;
+  var btn   = document.getElementById('car-toggle');
+  var label = document.getElementById('car-toggle-label');
+
+  var modelBtn = document.getElementById('car-model-toggle');
+
+  function sync() {
+    var off = html.classList.contains('car-off');
+    if (label)    label.textContent  = off ? 'Curseur voiture' : 'Curseur normal';
+    if (modelBtn) modelBtn.style.display = off ? 'none' : 'flex';
+  }
+
+  sync();
+
+  if (btn) btn.addEventListener('click', function () {
+    var off = html.classList.contains('car-off');
+    html.classList.toggle('car-off', !off);
+    localStorage.setItem('carCursor', !off ? 'off' : 'on');
+    sync();
+  });
+})();

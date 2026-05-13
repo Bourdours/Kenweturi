@@ -52,10 +52,20 @@
   <!-- Bas de footer : copyright + toggle thème -->
   <div class="max-w-6xl mx-auto mt-8 pt-6 border-t border-action/10 flex items-center justify-between">
     <span class="text-ink/30 text-xs">&copy; <?= date('Y') ?> Kenweturi</span>
-    <button id="theme-toggle" class="flex items-center gap-1.5 text-ink/40 hover:text-action transition-colors text-xs" aria-label="Changer de thème">
-      <i id="theme-icon" class="fa-solid"></i>
-      <span id="theme-label"></span>
-    </button>
+    <div class="flex items-center gap-4">
+      <button id="car-toggle" class="flex items-center gap-1.5 text-ink/40 hover:text-action transition-colors text-xs" aria-label="Activer/désactiver le curseur voiture">
+        <i class="fa-solid fa-car-side"></i>
+        <span id="car-toggle-label"></span>
+      </button>
+      <button id="car-model-toggle" style="display:none" class="flex items-center gap-1.5 text-ink/40 hover:text-action transition-colors text-xs" aria-label="Changer de modèle">
+        <i class="fa-solid fa-car"></i>
+        <span id="car-model-label"></span>
+      </button>
+      <button id="theme-toggle" class="flex items-center gap-1.5 text-ink/40 hover:text-action transition-colors text-xs" aria-label="Changer de thème">
+        <i id="theme-icon" class="fa-solid"></i>
+        <span id="theme-label"></span>
+      </button>
+    </div>
   </div>
 </footer>
 </body>

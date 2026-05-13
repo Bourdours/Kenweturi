@@ -183,18 +183,18 @@
             </div>
             <div class="flex gap-4">
               <ul class="flex flex-col gap-1.5 flex-1">
-                <li id="crit-length" class="flex items-center gap-2 text-xs text-ink/40 transition-all duration-200">
+                <li id="crit-length" class="flex items-center gap-2 text-xs text-ink/60 dark:text-ink/40 transition-all duration-200">
                   <i class="fa-regular fa-circle w-3 text-center"></i>8 caractères minimum
                 </li>
-                <li id="crit-upper" class="flex items-center gap-2 text-xs text-ink/40 transition-all duration-200">
+                <li id="crit-upper" class="flex items-center gap-2 text-xs text-ink/60 dark:text-ink/40 transition-all duration-200">
                   <i class="fa-regular fa-circle w-3 text-center"></i>Une lettre majuscule
                 </li>
               </ul>
               <ul class="flex flex-col gap-1.5 flex-1">
-                <li id="crit-number" class="flex items-center gap-2 text-xs text-ink/40 transition-all duration-200">
+                <li id="crit-number" class="flex items-center gap-2 text-xs text-ink/60 dark:text-ink/40 transition-all duration-200">
                   <i class="fa-regular fa-circle w-3 text-center"></i>Un chiffre
                 </li>
-                <li id="crit-special" class="flex items-center gap-2 text-xs text-ink/40 transition-all duration-200">
+                <li id="crit-special" class="flex items-center gap-2 text-xs text-ink/60 dark:text-ink/40 transition-all duration-200">
                   <i class="fa-regular fa-circle w-3 text-center"></i>Un caractère spécial
                 </li>
               </ul>
