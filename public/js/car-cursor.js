@@ -164,7 +164,9 @@
 
   function applyConfig() {
     const dark = document.documentElement.classList.contains('dark');
-    carOff = document.documentElement.classList.contains('car-off');
+    carOff     = document.documentElement.classList.contains('car-off');
+
+    cursorStyle.disabled  = carOff;
     car.style.visibility  = carOff ? 'hidden' : 'visible';
     car.innerHTML         = getCarSVG(dark);
     dot.style.background  = dark ? '#FFF0A0' : '#D9663F';
@@ -236,7 +238,7 @@
     // Le point suit le vrai curseur sans délai ; s'efface quand la voiture l'a rattrapé
     const dist = Math.hypot(tx - cx, ty - cy);
     dot.style.transform = `translate(${tx - 3.5}px, ${ty - 3.5}px)`;
-    dot.style.opacity   = tx > -100 ? (carOff ? 1 : Math.min(1, dist / 40)) : 0;
+    dot.style.opacity   = (tx > -100 && !carOff) ? Math.min(1, dist / 40) : 0;
 
     requestAnimationFrame(animate);
   })();
