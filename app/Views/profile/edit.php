@@ -3,7 +3,7 @@
 
 <!-- Message d'erreur -->
 <div>
-<?php if (session()->has('errors')): ?>
+  <?php if (session()->has('errors')): ?>
     <div class="bg-action/10 border border-action/30 rounded-xl p-4 mb-6 flex gap-3 items-start">
       <i class="fa-solid fa-triangle-exclamation text-action text-base shrink-0 mt-0.5"></i>
       <div>
@@ -15,10 +15,10 @@
         </ul>
       </div>
     </div>
-<?php endif; ?>
+  <?php endif; ?>
 
 
-  <form action="<?= site_url('profile/profileEdit') ?>" method="post" enctype="multipart/form-data">
+  <form action="<?= site_url('profile/update') ?>" method="post" enctype="multipart/form-data">
     <?= csrf_field() ?>
 
     <!-- Identité -->
@@ -42,9 +42,9 @@
     <div>
       <label for="genderProfile">Genre</label>
       <select id="genderProfile" name="genderProfile" required>
-        <option value="Homme"  <?= $user['gender'] === 'Homme'  ? 'selected' : '' ?>>Homme</option>
-        <option value="Femme"  <?= $user['gender'] === 'Femme'  ? 'selected' : '' ?>>Femme</option>
-        <option value="Autre"  <?= $user['gender'] === 'Autre'  ? 'selected' : '' ?>>Autre</option>
+        <option value="Homme" <?= $user['gender'] === 'Homme'  ? 'selected' : '' ?>>Homme</option>
+        <option value="Femme" <?= $user['gender'] === 'Femme'  ? 'selected' : '' ?>>Femme</option>
+        <option value="Autre" <?= $user['gender'] === 'Autre'  ? 'selected' : '' ?>>Autre</option>
       </select>
     </div>
 

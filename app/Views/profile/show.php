@@ -5,10 +5,10 @@
 
 
   <?php if (session()->getFlashdata('success')): ?>
-  <div class="bg-success/10 border-b border-success/20 px-6 py-3 text-success text-sm text-center">
-    <?= session()->getFlashdata('success') ?>
-  </div>
-<?php endif; ?>
+    <div class="bg-success/10 border-b border-success/20 px-6 py-3 text-success text-sm text-center">
+      <?= session()->getFlashdata('success') ?>
+    </div>
+  <?php endif; ?>
   <div>
 
     <div>
@@ -47,7 +47,7 @@
             ·
           <?php endif; ?>
           <i class="fa-regular fa-calendar"></i>
-          Membre depuis <?= date('F Y', strtotime($user['registered_at'])) ?>
+          Membre depuis <?= esc($memberSince) ?>
         </p>
       </div>
 
@@ -94,9 +94,9 @@
             <dt>Âge</dt>
             <dd>
               <?php
-                $birth = new DateTime($user['birth_date']);
-                $age   = (new DateTime())->diff($birth)->y;
-                echo $age . ' ans';
+              $birth = new DateTime($user['birth_date']);
+              $age   = (new DateTime())->diff($birth)->y;
+              echo $age . ' ans';
               ?>
             </dd>
           </div>
@@ -117,7 +117,7 @@
 
     <!-- Bouton modifier -->
     <?php if ($isOwnProfile): ?>
-      <a href="<?= site_url('profile/profileEdit') ?>">
+      <a href="<?= site_url('profile/update') ?>">
         <i class="fa-solid fa-pen"></i>
         Modifier
       </a>

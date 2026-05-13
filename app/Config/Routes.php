@@ -33,6 +33,6 @@ $routes->get('resetPassword',   'AuthController::showResetPassword');
 $routes->post('resetPassword', 'AuthController::handleResetPassword'); 
 
 // Profile
-$routes->get('profile', 'ProfileController::showProfile');
-$routes->get('profile/profileEdit', 'ProfileController::showProfileEdit');
-$routes->post('profile/profileEdit', 'ProfileController::updateProfileEdit');
+$routes->get('profile', 'UserController::show');
+$routes->get('profile/update', 'UserController::showEditForm');
+$routes->post('profile/update', 'UserController::update');
