@@ -72,7 +72,7 @@ class CarController extends BaseController
      * 
      * @return string
      */
-    public function index()
+    public function showAll()
     {
         $carModel = new CarModel();
 
