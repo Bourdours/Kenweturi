@@ -9,12 +9,12 @@ use CodeIgniter\Router\RouteCollection;
 $routes->get('/', 'Home::index');
 
 /* Inscription */
-$routes->get('/register', 'AuthController::showRegister');
-$routes->post('/register', 'AuthController::handleRegister');
+$routes->get('/register', 'AuthController::showRegisterForm');
+$routes->post('/register', 'AuthController::register');
 
 // Route pour afficher de la page login et traitement du formulaire
-$routes->get('login', 'AuthController::showLogin');
-$routes->post('login', 'AuthController::handleLogin');
+$routes->get('login', 'AuthController::showLoginForm');
+$routes->post('login', 'AuthController::login');
 
 // Route pour traiter la déconnexion
 $routes->get('logout', 'AuthController::logout');
@@ -28,14 +28,14 @@ $routes->post('journeys/(:num)/cancel',  'JourneysController::cancel/$1');
 $routes->post('journeys/(:num)/delete',  'JourneysController::delete/$1');
 
 // Mot de passe oublié
-$routes->get('forgotPassword', 'AuthController::showForgotPassword');
-$routes->post('forgotPassword', 'AuthController::handleForgotPassword');
+$routes->get('forgotPassword', 'AuthController::showForgotPasswordForm');
+$routes->post('forgotPassword', 'AuthController::forgotPassword');
 
 // Réinitialisation du mot de passe
-$routes->get('resetPassword',   'AuthController::showResetPassword');
-$routes->post('resetPassword', 'AuthController::handleResetPassword'); 
+$routes->get('resetPassword',   'AuthController::showResetPasswordForm');
+$routes->post('resetPassword', 'AuthController::resetPassword'); 
 
 // Profile
-$routes->get('profile', 'ProfileController::showProfile');
-$routes->get('profile/profileEdit', 'ProfileController::showProfileEdit');
-$routes->post('profile/profileEdit', 'ProfileController::updateProfileEdit');
+$routes->get('profile', 'UserController::show');
+$routes->get('profile/update', 'UserController::showEditForm');
+$routes->post('profile/update', 'UserController::update');

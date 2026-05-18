@@ -28,7 +28,7 @@ class AuthController extends BaseController
      * 
      * @return string
      */
-    public function showRegister()
+    public function showRegisterForm()
     {
         if (session()->get('isLoggedIn')) {
             return redirect()->to('/');
@@ -45,7 +45,7 @@ class AuthController extends BaseController
      * 
      * @return string
      */
-    public function showLogin()
+    public function showLoginForm()
     {
         if (session()->get('isLoggedIn')) {
             return redirect()->to('/');
@@ -63,7 +63,7 @@ class AuthController extends BaseController
      * 
      * @return RedirectResponse
      */
-    public function handleRegister()
+    public function register()
     {
         $rules = [
             'email'        => 'required|valid_email',
@@ -167,7 +167,7 @@ class AuthController extends BaseController
      * 
      * @return RedirectResponse
      */
-    public function handleLogin()
+    public function login()
     {
         $session = session();
 
@@ -221,7 +221,7 @@ class AuthController extends BaseController
      * 
      * @return string
      */
-    public function showForgotPassword()
+    public function showForgotPasswordForm()
     {    if (session()->get('isLoggedIn')) {
             return redirect()->to('/');
         }
@@ -236,7 +236,7 @@ class AuthController extends BaseController
      * 
      * @return RedirectResponse
      */
-    public function handleForgotPassword()
+    public function forgotPassword()
     {
 
         $email = $this->request->getPost('email');
@@ -283,7 +283,7 @@ class AuthController extends BaseController
      * 
      * @return string
      */
-    public function showResetPassword()
+    public function showResetPasswordForm()
     {
         $token = $this->request->getGet('token');
 
@@ -312,7 +312,7 @@ class AuthController extends BaseController
      * 
      * @return RedirectResponse
      */
-    public function handleResetPassword()
+    public function resetPassword()
     {
         $token           = $this->request->getPost('token');
         $password        = $this->request->getPost('password');
