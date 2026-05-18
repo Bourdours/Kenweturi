@@ -39,3 +39,5 @@ $routes->post('resetPassword', 'AuthController::resetPassword');
 $routes->get('profile', 'UserController::show');
 $routes->get('profile/update', 'UserController::showEditForm');
 $routes->post('profile/update', 'UserController::update');
+
+$routes->post('profile/delete', 'UserController::delete');
