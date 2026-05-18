@@ -20,12 +20,12 @@ $routes->post('login', 'AuthController::login');
 $routes->get('logout', 'AuthController::logout');
 
 // Routes journeys
-$routes->get('journeys',                 'JourneysController::showAll');
-$routes->get('journeys/new',             'JourneysController::showCreateForm');
-$routes->post('journeys/new',            'JourneysController::create');
-$routes->get('journeys/(:num)',          'JourneysController::show/$1');
-$routes->post('journeys/(:num)/cancel',  'JourneysController::cancel/$1');
-$routes->post('journeys/(:num)/delete',  'JourneysController::delete/$1');
+$routes->get('journeys',                 'JourneyController::showAll');
+$routes->get('journeys/new',             'JourneyController::showCreateForm');
+$routes->post('journeys/new',            'JourneyController::create');
+$routes->get('journeys/(:num)',          'JourneyController::show/$1');
+$routes->post('journeys/(:num)/cancel',  'JourneyController::cancel/$1');
+$routes->post('journeys/(:num)/delete',  'JourneyController::delete/$1');
 
 // Mot de passe oublié
 $routes->get('forgotPassword', 'AuthController::showForgotPasswordForm');
