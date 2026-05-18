@@ -29,6 +29,12 @@ class UserController extends BaseController
         $user   = $this->userModel->find($userId);
         $city   = $this->cityModel->find($user['city_id']);
 
+        if (!$user) {
+            session()->destroy();
+            return redirect()->to(site_url('login'))
+                ->with('error', 'Ce compte n\'existe plus.');
+        }
+
         $memberSince = ucfirst(Time::parse($user['registered_at'], 'Europe/Paris', 'fr_FR')->toLocalizedString('MMMM yyyy'));
 
         return view('profile/show', [
@@ -52,12 +58,34 @@ class UserController extends BaseController
         $user   = $this->userModel->find($userId);
         $city   = $this->cityModel->find($user['city_id']);
 
+        if (!$user) {
+            session()->destroy();
+            return redirect()->to(site_url('login'))
+                ->with('error', 'Ce compte n\'existe plus.');
+        }
+
         return view('profile/edit', [
             'title'        => 'Modifier mon profil',
             'user'         => $user,
             'city'         => $city['name'] ?? null,
             'isOwnProfile' => true,
         ]);
+    }
+
+    /**
+     * Supprime le compte de l'utilisateur connecté (soft delete)
+     *
+     * @return \CodeIgniter\HTTP\RedirectResponse
+     */
+    public function delete()
+    {
+        $userId = session()->get('user_id');
+
+        $this->userModel->delete($userId);
+        session()->destroy();
+
+        return redirect()->to(site_url('login'))
+            ->with('success', 'Votre compte a été supprimé.');
     }
 
     /**
