@@ -6,7 +6,6 @@ use \CodeIgniter\HTTP\RedirectResponse;
 
 use \App\Models\UserModel;
 use \App\Models\CityModel;
-use App\Libraries\MailerExample;
 use DateTime;
 
 /**
@@ -29,7 +28,7 @@ class AuthController extends BaseController
      * 
      * @return string
      */
-    public function register()
+    public function showRegisterForm()
     {
         if (session()->get('isLoggedIn')) {
             return redirect()->to('/');
@@ -46,7 +45,7 @@ class AuthController extends BaseController
      * 
      * @return string
      */
-    public function login()
+    public function showLoginForm()
     {
         if (session()->get('isLoggedIn')) {
             return redirect()->to('/');
@@ -64,11 +63,11 @@ class AuthController extends BaseController
      * 
      * @return RedirectResponse
      */
-    public function handleRegister()
+    public function register()
     {
         $rules = [
             'email'        => 'required|valid_email',
-            'password'     => 'required|min_length[8]|regex_match[/.[!,@,#,$,%,^,&,*,?,_,~,-,(,)]/]',
+            'password'    => 'required|min_length[8]|regex_match[/^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*?_~\-()]).*$/]',
             'passConfirm' => 'required|matches[password]',
             'birthDate'   => 'required|valid_date[Y-m-d]',
         ];
@@ -81,7 +80,7 @@ class AuthController extends BaseController
             'password' => [
                 'required'    => 'Le mot de passe est obligatoire.',
                 'min_length'  => 'Le mot de passe doit faire au moins 8 caractères.',
-                'regex_match' => 'Le mot de passe doit contenir au moins un caractère spécial (ex: @, #, !, $).',
+                'regex_match' => 'Le mot de passe doit contenir au moins : une majuscule, un chiffre et un caractère spécial (ex: @, #, !, $).',
             ],
             'passConfirm' => [
                 'required' => 'Veuillez confirmer votre mot de passe.',
@@ -168,7 +167,7 @@ class AuthController extends BaseController
      * 
      * @return RedirectResponse
      */
-    public function handleLogin()
+    public function login()
     {
         $session = session();
 
@@ -188,6 +187,7 @@ class AuthController extends BaseController
                     'lastname'  => $user['lastname'],
                     'email'     => $user['email'],
                     'is_admin'  => $user['is_admin'],
+                    'avatar'     => $user['avatar'] ?? null,
                     'isLoggedIn' => true,
                 ];
 
@@ -221,8 +221,11 @@ class AuthController extends BaseController
      * 
      * @return string
      */
-    public function forgotPassword()
-    {
+    public function showForgotPasswordForm()
+    {    if (session()->get('isLoggedIn')) {
+            return redirect()->to('/');
+        }
+        
         return view('Auth/forgotPassword', [
             'title' => 'Mot de passe oublié'
         ]);
@@ -233,7 +236,7 @@ class AuthController extends BaseController
      * 
      * @return RedirectResponse
      */
-    public function handleForgotPassword()
+    public function forgotPassword()
     {
 
         $email = $this->request->getPost('email');
@@ -257,13 +260,21 @@ class AuthController extends BaseController
         // Envoi de l'email
         $resetLink = base_url('resetPassword?token=' . $token);
 
-        $mailer = new MailerExample();
-        $mailer->sendHtml(
-            $user['email'],
-            'Réinitialisation de votre mot de passe',
-            '<p>Cliquez sur ce lien pour réinitialiser votre mot de passe : <a href="' . $resetLink . '">Réinitialiser</a></p>'
-        );
-    
+        $emailBody = view('Emails/resetPassword', [
+            'firstname' => $user['firstname'],
+            'resetLink' => $resetLink,
+        ]);
+
+        try {
+            $mail = \Config\Services::mailer();
+            $mail->addAddress($user['email']);
+            $mail->Subject = 'Réinitialisation de votre mot de passe — Kenweturi';
+            $mail->Body    = $emailBody;
+            $mail->send();
+        } catch (\PHPMailer\PHPMailer\Exception $e) {
+            log_message('error', 'Mailer error: ' . $e->getMessage());
+        }
+
         return redirect()->back()->with('success', 'Si un compte existe avec cet email, vous recevrez un lien de réinitialisation.');
     }
 
@@ -272,7 +283,7 @@ class AuthController extends BaseController
      * 
      * @return string
      */
-    public function resetPassword()
+    public function showResetPasswordForm()
     {
         $token = $this->request->getGet('token');
 
@@ -301,7 +312,7 @@ class AuthController extends BaseController
      * 
      * @return RedirectResponse
      */
-    public function handleResetPassword()
+    public function resetPassword()
     {
         $token           = $this->request->getPost('token');
         $password        = $this->request->getPost('password');
