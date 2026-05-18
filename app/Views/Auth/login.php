@@ -1,7 +1,7 @@
 <?= view('partials/head') ?>
 <?= view('partials/header') ?>
 
-<div class="max-w-4xl mx-auto py-12 px-6 md:px-8 flex flex-col md:flex-row items-center gap-12">
+<div class="max-w-5xl mx-auto py-12 px-6 md:px-8 flex flex-col md:flex-row items-center md:items-start gap-12">
 
   <!-- Panneau branding (desktop uniquement) -->
   <div class="hidden md:flex flex-col flex-1">
@@ -11,9 +11,9 @@
       </div>
       <span class="text-ink text-xl font-bold font-display">Kenweturi</span>
     </div>
-    <h2 class="text-ink text-xl font-semibold font-display mb-2 leading-snug">
+    <h1 class="text-ink text-xl font-semibold font-display mb-2 leading-snug">
       Voyagez ensemble,<br>dépensez moins.
-    </h2>
+    </h1>
     <p class="text-ink/50 text-sm mb-6 leading-relaxed">
       Rejoignez des milliers de voyageurs qui partagent leurs trajets et réduisent leur empreinte carbone.
     </p>
@@ -43,49 +43,49 @@
   <div class="bg-surface rounded-2xl p-7 border border-action/10 w-full md:w-auto md:shrink-0" style="min-width:320px; max-width:360px;">
 
     <div class="mb-5">
-      <h3 class="text-ink text-lg font-semibold font-display mb-1">Bon retour parmi nous !</h3>
-      <p class="text-ink/40 text-xs">
+      <h3 class="text-ink text-xl font-semibold font-display mb-1">Bon retour parmi nous !</h3>
+      <p class="text-ink/40 text-sm">
         <i class="fa-regular fa-user mr-1.5"></i>Connectez-vous à votre compte
       </p>
     </div>
 
     <?php if (session()->getFlashdata('error')): ?>
-    <div class="bg-action/10 border border-action/30 rounded-xl p-3 mb-4 flex gap-2.5 items-center">
-      <i class="fa-solid fa-triangle-exclamation text-action text-sm shrink-0"></i>
-      <span class="text-action text-xs"><?= session()->getFlashdata('error') ?></span>
-    </div>
+      <div class="bg-action/10 border border-action/30 rounded-xl p-3 mb-4 flex gap-2.5 items-center">
+        <i class="fa-solid fa-triangle-exclamation text-action text-sm shrink-0"></i>
+        <span class="text-action text-xs"><?= session()->getFlashdata('error') ?></span>
+      </div>
     <?php endif ?>
 
     <?php if (session()->getFlashdata('success')): ?>
-    <div class="bg-success/10 border border-success/30 rounded-xl p-3 mb-4 flex gap-2.5 items-center">
-      <i class="fa-solid fa-circle-check text-success text-sm shrink-0"></i>
-      <span class="text-success text-xs"><?= session()->getFlashdata('success') ?></span>
-    </div>
+      <div class="bg-success/10 border border-success/30 rounded-xl p-3 mb-4 flex gap-2.5 items-center">
+        <i class="fa-solid fa-circle-check text-success text-sm shrink-0"></i>
+        <span class="text-success text-xs"><?= session()->getFlashdata('success') ?></span>
+      </div>
     <?php endif ?>
 
-    <form action="<?= base_url('index.php/login/check') ?>" method="post">
+    <form action="<?= base_url('index.php/login') ?>" method="post">
       <?= csrf_field() ?>
 
       <div class="flex flex-col gap-3.5 mb-5">
 
         <div>
-          <label for="email" class="text-ink/50 text-[10px] mb-1.5 flex items-center gap-1">
-            <i class="fa-regular fa-envelope text-[9px]"></i>Adresse email
+          <label for="email" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
+            <i class="fa-regular fa-envelope text-sm"></i>Adresse email
           </label>
           <div class="relative">
             <input type="email" name="email" id="email"
               value="<?= old('email') ?>" required placeholder="votre@email.com"
               class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 pr-9 outline-none focus:border-action/50 placeholder:text-ink/30" />
-            <i class="fa-regular fa-envelope absolute right-3 top-1/2 -translate-y-1/2 text-ink/30 text-[11px] pointer-events-none"></i>
+            <i class="fa-regular fa-envelope absolute right-3 top-1/2 -translate-y-1/2 text-ink/30 text-xs pointer-events-none"></i>
           </div>
         </div>
 
         <div>
           <div class="flex justify-between items-center mb-1.5">
-            <label for="password" class="text-ink/50 text-[10px] flex items-center gap-1">
-              <i class="fa-solid fa-lock text-[9px]"></i>Mot de passe
+            <label for="password" class="text-ink/50 text-sm flex items-center gap-1">
+              <i class="fa-solid fa-lock text-sm"></i>Mot de passe
             </label>
-            <a href="<?= base_url('forgotPassword') ?>" class="text-[11px] text-action hover:text-action-dark transition-colors">Mot de passe oublié ?</a>
+            <a href="<?= base_url('forgotPassword') ?>" class="text-xs text-action hover:text-action-dark transition-colors">Mot de passe oublié ?</a>
           </div>
           <div class="relative">
             <input type="password" name="password" id="password" required
@@ -101,7 +101,7 @@
       </div>
 
       <button type="submit"
-        class="w-full bg-action hover:bg-action-dark text-ink font-semibold font-display rounded-lg py-3 text-sm mb-4 transition-colors cursor-pointer">
+        class="w-full bg-action hover:bg-action-dark text-ink font-semibold font-display rounded-lg py-3 text-base mb-4 transition-colors cursor-pointer">
         <i class="fa-solid fa-arrow-right-to-bracket mr-2"></i>Se connecter
       </button>
 

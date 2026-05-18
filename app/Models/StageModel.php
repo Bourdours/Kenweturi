@@ -20,7 +20,6 @@ class StageModel extends BaseModel
         'position' => 'required|integer|greater_than[0]',
         'location_id' => 'required|integer',
         'journey_id' => 'required|integer'
-
     ];
 
     protected $validationMessages = [
@@ -28,6 +27,5 @@ class StageModel extends BaseModel
             'required'   => 'Veuillez renseigner une date de départ.',
             'valid_time' => 'Veuillez renseigner une date valide.',
         ]
-        
     ];
 }
