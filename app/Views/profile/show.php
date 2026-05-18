@@ -121,6 +121,15 @@
         <i class="fa-solid fa-pen"></i>
         Modifier
       </a>
+
+        <!-- Suppression du compte -->
+      <form action="<?= site_url('profile/delete') ?>" method="post" class="deleteAccount">
+        <?= csrf_field() ?>
+        <button type="submit">
+          <i class="fa-solid fa-trash"></i>
+          Supprimer mon compte
+        </button>
+      </form>
     <?php endif; ?>
 
   </div>
@@ -141,6 +150,6 @@
   <?php endif; ?>
 </div>
 
-<script src="<?= base_url('js/profile.js') ?>"></script>
+<script src="<?= base_url('js/user.js') ?>"></script>
 
 <?= view('partials/footer') ?>
