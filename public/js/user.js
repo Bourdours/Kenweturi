@@ -21,3 +21,14 @@ document.querySelectorAll('.jsAvatarOpen').forEach(function (el) {
 if (modal) {
   modal.addEventListener('click', closeAvatarModal);
 }
+
+// Confirmation suppression de compte
+const deleteForm = document.querySelector('.deleteAccount');
+
+function confirmDelete(e) {
+  if (!confirm('Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.')) {
+    e.preventDefault();
+  }
+}
+
+deleteForm.addEventListener('submit', confirmDelete);
