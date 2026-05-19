@@ -6,17 +6,7 @@ if (inputVille && inputCp) {
 
   // Création du dropdown
   const dropdown = document.createElement('div');
-  dropdown.style.cssText = `
-    display: none;
-    position: absolute;
-    background: white;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    max-height: 200px;
-    overflow-y: auto;
-    z-index: 1000;
-    width: 100%;
-  `;
+  dropdown.classList.add('autocomplete-dropdown');
   inputVille.parentElement.style.position = 'relative';
   inputVille.parentElement.appendChild(dropdown);
 
@@ -51,11 +41,7 @@ if (inputVille && inputCp) {
       const cp   = c.codesPostaux?.[0] ?? '';
       const item = document.createElement('div');
       item.textContent = `${c.nom} (${cp})`;
-      item.style.cssText = 'padding: 8px 12px; cursor: pointer; font-size: 14px;';
-
-      // Survol
-      item.addEventListener('mouseenter', () => item.style.background = '#f0f0f0');
-      item.addEventListener('mouseleave', () => item.style.background = 'white');
+      item.classList.add('autocomplete-item');
 
       // Sélection d'une ville
       item.addEventListener('mousedown', (e) => {
@@ -68,7 +54,7 @@ if (inputVille && inputCp) {
       dropdown.appendChild(item);
     });
 
-    dropdown.style.display = 'block';
+    dropdown.style.display = 'block'; // 'none' est le défaut CSS, on force block à l'ouverture
   }
 
   // Vide et cache le dropdown

@@ -57,7 +57,7 @@
         <i class="fa-solid fa-car-side"></i>
         <span id="car-toggle-label"></span>
       </button>
-      <button id="car-model-toggle" style="display:none" class="flex items-center gap-1.5 text-ink/40 hover:text-action transition-colors text-xs" aria-label="Changer de modèle">
+      <button id="car-model-toggle" class="hidden items-center gap-1.5 text-ink/40 hover:text-action transition-colors text-xs" aria-label="Changer de modèle">
         <i class="fa-solid fa-car"></i>
         <span id="car-model-label"></span>
       </button>

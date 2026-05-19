@@ -28,7 +28,7 @@
     <?= csrf_field() ?>
 
     <div class="relative lg:static pl-5 lg:pl-0">
-      <!-- Grande route verticale mobile -->
+      <!-- Grande route verticale mobile -->Z
       <div class="lg:hidden absolute left-0 top-0 bottom-0 border-l-2 border-dashed border-action/40"></div>
 
       <div class="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-5 lg:gap-0">
@@ -103,7 +103,7 @@
           <p class="text-sm font-medium text-ink/50 mb-3 flex items-center gap-1.5">
             <i class="fa-solid fa-location-dot"></i>Localisation
           </p>
-          <div class="grid gap-3 mb-4" style="grid-template-columns:1fr 120px;">
+          <div class="grid gap-3 mb-4 [grid-template-columns:1fr_120px]">
             <div>
               <label for="cityName" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
                 <i class="fa-solid fa-city text-sm"></i>Ville
