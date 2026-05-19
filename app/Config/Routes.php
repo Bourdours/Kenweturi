@@ -42,3 +42,8 @@ $routes->post('profile/update', 'UserController::update');
 $routes->post('profile/delete', 'UserController::delete');
 $routes->get('profile/edit', 'UserController::showEditForm');
 $routes->post('car/create', 'CarController::create'); // Ajouter un véhicule
+
+// Pages légales
+$routes->get('cgu',              'LegalController::cgu');
+$routes->get('confidentialite',  'LegalController::confidentialite');
+$routes->get('mentions-legales', 'LegalController::mentions');
