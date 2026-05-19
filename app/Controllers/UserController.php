@@ -199,19 +199,11 @@ class UserController extends BaseController
      */
     private function passwordChangedEmail(string $firstname, string $lastname): string
     {
-        $date    = ucfirst(Time::now('Europe/Paris', 'fr_FR')->toLocalizedString('d MMMM yyyy à HH:mm'));
-        $appName = env('mailer.fromName');
-        $support = env('mailer.from');
-
-        return <<<HTML
-        <p>Bonjour {$firstname} {$lastname},</p>
-
-        <p>Nous vous confirmons que votre mot de passe a bien été modifié le <strong>{$date}</strong>.</p>
-
-        <p>Si vous n'êtes pas à l'origine de cette modification, contactez-nous immédiatement à
-        <a href="mailto:{$support}">{$support}</a>.</p>
-
-        <p>— L'équipe {$appName}</p>
-        HTML;
+        return view('Emails/passwordChanged', [
+            'firstname' => $firstname,
+            'lastname'  => $lastname,
+            'date'      => ucfirst(Time::now('Europe/Paris', 'fr_FR')->toLocalizedString('d MMMM yyyy à HH:mm')),
+            'support'   => env('mailer.from'),
+        ]);
     }
 }
