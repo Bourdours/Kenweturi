@@ -1,4 +1,5 @@
 <?php
+
 /** @var array $user */
 ?>
 <?= view('partials/head') ?>
@@ -31,6 +32,39 @@
 
   <form action="<?= site_url('profile/update') ?>" method="post" enctype="multipart/form-data" class="flex flex-col gap-6">
     <?= csrf_field() ?>
+
+    <!-- Photo de profil -->
+    <div class="bg-surface rounded-2xl p-6 border border-action/10">
+      <h2 class="text-ink text-base font-semibold font-display mb-5 flex items-center gap-2">
+        <i class="fa-solid fa-image text-action text-sm"></i>Photo de profil
+      </h2>
+
+      <?php $initials = strtoupper(substr((string) $user['firstname'], 0, 1) . substr((string) $user['lastname'], 0, 1)); ?>
+
+      <div class="flex items-center gap-4 mb-4">
+        <?php if (!empty($user['avatar'])): ?>
+          <div style="width:3.5rem;height:3.5rem;border-radius:9999px;overflow:hidden;flex-shrink:0;">
+            <img src="<?= esc(base_url($user['avatar'])) ?>" alt="Avatar actuel" style="width:100%;height:100%;object-fit:cover;"
+              onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
+          </div>
+          <div style="display:none;width:3.5rem;height:3.5rem;border-radius:9999px;background:#C85028;color:#EFEAE0;font-weight:700;font-size:1rem;flex-shrink:0;align-items:center;justify-content:center;">
+            <?= $initials ?>
+          </div>
+        <?php else: ?>
+          <div style="display:flex;width:3.5rem;height:3.5rem;border-radius:9999px;background:#C85028;color:#EFEAE0;font-weight:700;font-size:1rem;flex-shrink:0;align-items:center;justify-content:center;">
+            <?= $initials ?>
+          </div>
+        <?php endif; ?>
+
+        <p class="text-ink/50 text-xs">
+          <?= !empty($user['avatar']) ? 'Photo actuelle — choisissez un nouveau fichier pour la remplacer.' : 'Aucune photo — choisissez un fichier pour en ajouter une.' ?>
+        </p>
+      </div>
+
+      <label for="avatarProfile" class="text-ink/50 text-xs font-medium mb-1.5 block">Nouvelle photo</label>
+      <input type="file" id="avatarProfile" name="avatarProfile" accept="image/*"
+        class="w-full text-ink/70 text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-action/10 file:text-action hover:file:bg-action/20 file:cursor-pointer file:transition-colors">
+    </div>
 
     <!-- Informations personnelles -->
     <div class="bg-surface rounded-2xl p-6 border border-action/10">
@@ -75,6 +109,23 @@
           </div>
         </div>
 
+        <!-- Ville -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="relative">
+            <label for="cityProfile" class="text-ink/50 text-xs font-medium mb-1.5 block ">Ville</label>
+            <input type="text" id="cityProfile" name="cityName" value="<?= esc($city ?? '') ?>"
+              placeholder="Votre ville..."
+              autocomplete="off"
+              class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors">
+          </div>
+          <div>
+            <label for="zipcodeProfile" class="text-ink/50 text-xs font-medium mb-1.5 block">Code postal</label>
+            <input type="text" id="zipcodeProfile" name="postalCode" value="<?= esc($zipcode ?? '') ?>"
+              placeholder="Ex: 75001"
+              class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors">
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -89,22 +140,89 @@
         class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 resize-none transition-colors"><?= esc($user['biography'] ?? '') ?></textarea>
     </div>
 
-    <!-- Photo de profil -->
+    <!-- Véhicules -->
     <div class="bg-surface rounded-2xl p-6 border border-action/10">
       <h2 class="text-ink text-base font-semibold font-display mb-5 flex items-center gap-2">
-        <i class="fa-solid fa-image text-action text-sm"></i>Photo de profil
+        <i class="fa-solid fa-car text-action text-sm"></i>Mes véhicules
       </h2>
-      <?php if (!empty($user['avatar'])): ?>
-        <div class="flex items-center gap-4 mb-4">
-          <div class="w-14 h-14 rounded-full overflow-hidden shrink-0">
-            <img src="<?= esc($user['avatar']) ?>" alt="Avatar actuel" class="w-full h-full object-cover">
-          </div>
-          <p class="text-ink/50 text-xs">Photo actuelle — choisissez un nouveau fichier pour la remplacer.</p>
+
+      <?php if (!empty($cars)): ?>
+        <div class="flex flex-col gap-3 mb-5">
+          <?php foreach ($cars as $car): ?>
+            <div class="flex items-center justify-between bg-paper border border-action/10 rounded-xl px-4 py-3">
+              <div class="flex items-center gap-3">
+                <i class="fa-solid fa-car-side text-action/50 text-sm"></i>
+                <div>
+                  <p class="text-ink text-sm font-medium"><?= esc($car['brand']) ?> <?= esc($car['model']) ?></p>
+                  <p class="text-ink/40 text-xs"><?= esc($car['color']) ?> · <?= esc($car['seats']) ?> places</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-3">
+                <a href="<?= site_url('car/' . $car['id'] . '/edit') ?>"
+                  class="text-ink/30 hover:text-action text-xs transition-colors">
+                  <i class="fa-solid fa-pen"></i>
+                </a>
+                <a href="<?= site_url('car/' . $car['id'] . '/delete') ?>"
+                  class="text-ink/30 hover:text-action text-xs transition-colors">
+                  <i class="fa-solid fa-trash"></i>
+                </a>
+              </div>
+            </div>
+          <?php endforeach ?>
         </div>
+      <?php else: ?>
+        <p class="text-ink/30 text-xs mb-5">Aucun véhicule enregistré.</p>
       <?php endif; ?>
-      <label for="avatarProfile" class="text-ink/50 text-xs font-medium mb-1.5 block">Nouvelle photo</label>
-      <input type="file" id="avatarProfile" name="avatarProfile" accept="image/*"
-        class="w-full text-ink/70 text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-action/10 file:text-action hover:file:bg-action/20 file:cursor-pointer file:transition-colors">
+
+      <p class="text-ink/50 text-xs font-medium mb-3">Ajouter un véhicule</p>
+      <div id="carFieldsContainer" class="flex flex-col gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label for="vehicleBrand" class="text-ink/50 text-xs font-medium mb-1.5 block">Marque</label>
+            <div class="relative w-full">
+              <input type="text" id="vehicleBrand" data-name="brand"
+                placeholder="Ex: Renault"
+                autocomplete="off"
+                class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors js-car-input">
+
+              <ul id="brandSuggestions" class="absolute left-0 top-full z-50 w-full bg-paper border border-action/15 rounded-b-lg shadow-lg max-h-48 overflow-y-auto hidden flex flex-col pointer-events-auto"></ul>
+            </div>
+          </div>
+          <div>
+            <label for="vehicleModel" class="text-ink/50 text-xs font-medium mb-1.5 block">Modèle</label>
+            <input type="text" id="vehicleModel" data-name="model"
+              placeholder="Ex: Clio"
+              class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors js-car-input">
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label for="vehicleColor" class="text-ink/50 text-xs font-medium mb-1.5 block">Couleur</label>
+            <input type="text" id="vehicleColor" data-name="color"
+              placeholder="Ex: Bleu"
+              class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors js-car-input">
+          </div>
+          <div>
+            <label for="vehicleSeats" class="text-ink/50 text-xs font-medium mb-1.5 block">Nombre de places</label>
+            <input type="number" id="vehicleSeats" data-name="seats" min="1" max="9"
+              placeholder="Ex: 5"
+              class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors js-car-input">
+          </div>
+        </div>
+
+        <p id="carError" class="text-action text-xs hidden mt-1">Veuillez remplir tous les champs. Le nombre de places doit être entre 1 et 9.</p>
+
+        <div class="flex justify-end">
+          <button type="button" id="addCarBtn"
+            data-action="<?= site_url('car/create') ?>"
+            data-csrf-name="<?= csrf_token() ?>"
+            data-csrf-value="<?= csrf_hash() ?>"
+            class="flex items-center gap-2 bg-action/10 hover:bg-action/20 text-action font-semibold text-sm rounded-lg px-4 py-2 transition-colors cursor-pointer">
+            <i class="fa-solid fa-plus text-xs"></i>Ajouter
+          </button>
+        </div>
+      </div>
+
     </div>
 
     <!-- Mot de passe -->
@@ -174,5 +292,6 @@
 </div>
 
 <script src="<?= base_url('js/auth.js') ?>" defer></script>
-
+<script src="<?= base_url('js/app.js') ?>" defer></script>
+<script src="<?= base_url('js/user.js') ?>"></script>
 <?= view('partials/footer') ?>
