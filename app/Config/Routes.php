@@ -20,12 +20,12 @@ $routes->post('login', 'AuthController::login');
 $routes->get('logout', 'AuthController::logout');
 
 // Routes journeys
-$routes->get('journeys',                 'JourneysController::showAll');
-$routes->get('journeys/new',             'JourneysController::showCreateForm');
-$routes->post('journeys/new',            'JourneysController::create');
-$routes->get('journeys/(:num)',          'JourneysController::show/$1');
-$routes->post('journeys/(:num)/cancel',  'JourneysController::cancel/$1');
-$routes->post('journeys/(:num)/delete',  'JourneysController::delete/$1');
+$routes->get('journeys',                 'JourneyController::showAll');
+$routes->get('journeys/new',             'JourneyController::showCreateForm');
+$routes->post('journeys/new',            'JourneyController::create');
+$routes->get('journeys/(:num)',          'JourneyController::show/$1');
+$routes->post('journeys/(:num)/cancel',  'JourneyController::cancel/$1');
+$routes->post('journeys/(:num)/delete',  'JourneyController::delete/$1');
 
 // Mot de passe oublié
 $routes->get('forgotPassword', 'AuthController::showForgotPasswordForm');
@@ -33,11 +33,24 @@ $routes->post('forgotPassword', 'AuthController::forgotPassword');
 
 // Réinitialisation du mot de passe
 $routes->get('resetPassword',   'AuthController::showResetPasswordForm');
-$routes->post('resetPassword', 'AuthController::resetPassword'); 
+$routes->post('resetPassword', 'AuthController::resetPassword');
 
 // Profile
 $routes->get('profile', 'UserController::show');
 $routes->get('profile/update', 'UserController::showEditForm');
 $routes->post('profile/update', 'UserController::update');
-
 $routes->post('profile/delete', 'UserController::delete');
+$routes->get('profile/edit', 'UserController::showEditForm');
+$routes->post('car/create', 'CarController::create'); // Ajouter un véhicule
+
+// Pages légales
+$routes->get('cgu',              'LegalController::cgu');
+$routes->get('confidentialite',  'LegalController::confidentialite');
+$routes->get('mentions-legales', 'LegalController::mentions');
+
+// Pages entreprise
+$routes->get('a-propos',          'PageController::about');
+$routes->get('comment-ca-marche', 'PageController::howItWorks');
+$routes->get('blog',              'PageController::blog');
+$routes->get('contact',           'PageController::contact');
+$routes->post('contact',          'PageController::sendContact');

@@ -70,7 +70,7 @@ if (userMenuToggle && userDropdown) {
   function sync() {
     var off = html.classList.contains('car-off');
     if (label)    label.textContent  = off ? 'Curseur voiture' : 'Curseur normal';
-    if (modelBtn) modelBtn.style.display = off ? 'none' : 'flex';
+    if (modelBtn) { modelBtn.classList.toggle('hidden', off); modelBtn.classList.toggle('flex', !off); }
   }
 
   sync();

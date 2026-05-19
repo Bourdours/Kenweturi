@@ -4,7 +4,9 @@ namespace App\Controllers;
 
 use App\Models\UserModel;
 use App\Models\CityModel;
+use App\Libraries\MailerExample;
 use CodeIgniter\I18n\Time;
+use App\Models\CarModel;
 
 class UserController extends BaseController
 {
@@ -15,6 +17,7 @@ class UserController extends BaseController
     {
         $this->userModel = new UserModel();
         $this->cityModel = new CityModel();
+        $this->carModel  = new CarModel();
     }
 
     /**
@@ -27,7 +30,7 @@ class UserController extends BaseController
         // Récupération de l'utilisateur et de sa ville depuis la session
         $userId = session()->get('user_id');
         $user   = $this->userModel->find($userId);
-        $city   = $this->cityModel->find($user['city_id']);
+
 
         if (!$user) {
             session()->destroy();
@@ -35,12 +38,15 @@ class UserController extends BaseController
                 ->with('error', 'Ce compte n\'existe plus.');
         }
 
+
+        $city        = $this->cityModel->find($user['city_id']);
         $memberSince = ucfirst(Time::parse($user['registered_at'], 'Europe/Paris', 'fr_FR')->toLocalizedString('MMMM yyyy'));
 
         return view('profile/show', [
             'title'        => 'Mon profil',
             'user'         => $user,
             'city'         => $city['name'] ?? null,
+            'cars'         => $this->carModel->where('user_id', $userId)->findAll(),
             'isOwnProfile' => true,
             'memberSince'  => $memberSince,
         ]);
@@ -68,7 +74,9 @@ class UserController extends BaseController
             'title'        => 'Modifier mon profil',
             'user'         => $user,
             'city'         => $city['name'] ?? null,
+            'zipcode'      => $city['zipcode'] ?? null,
             'isOwnProfile' => true,
+            'cars'         => $this->carModel->where('user_id', $userId)->findAll(),
         ]);
     }
 
@@ -154,9 +162,30 @@ class UserController extends BaseController
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
+        $cityName = trim($this->request->getPost('cityProfile')    ?? '');
+        $zipcode  = trim($this->request->getPost('zipcodeProfile') ?? '');
+
+        if (!empty($cityName)) {
+            $cityRow = $this->cityModel->where('name', $cityName)->first();
+            if ($cityRow) {
+                $data['city_id'] = $cityRow['id'];
+            } else {
+                $this->cityModel->insert(['name' => $cityName, 'zipcode' => $zipcode]);
+                $data['city_id'] = $this->cityModel->getInsertID();
+            }
+        }
+
         // Hachage du nouveau mot de passe si renseigné
         if (!empty($newPassword)) {
             $data['password_hash'] = password_hash($newPassword, PASSWORD_DEFAULT);
+
+            // Envoi de la notification par email
+            $mailer = new MailerExample();
+            $mailer->sendHtml(
+                $user['email'],
+                'Votre mot de passe a été modifié',
+                $this->passwordChangedEmail($user['firstname'], $user['lastname'])
+            );
         }
 
         // Gestion de l'upload de l'avatar
@@ -179,5 +208,22 @@ class UserController extends BaseController
         ]);
 
         return redirect()->to(site_url('profile'))->with('success', 'Profil mis à jour avec succès.');
+    }
+
+    /**
+     * Construit le corps HTML de l'email de notification de changement de mot de passe
+     *
+     * @param  string $firstname Prénom de l'utilisateur 
+     * @param  string $lastname  Nom de l'utilisateur
+     * @return string Corps HTML de l'email
+     */
+    private function passwordChangedEmail(string $firstname, string $lastname): string
+    {
+        return view('Emails/passwordChanged', [
+            'firstname' => $firstname,
+            'lastname'  => $lastname,
+            'date'      => ucfirst(Time::now('Europe/Paris', 'fr_FR')->toLocalizedString('d MMMM yyyy à HH:mm')),
+            'support'   => env('mailer.from'),
+        ]);
     }
 }

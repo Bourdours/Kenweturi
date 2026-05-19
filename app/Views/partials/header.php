@@ -25,14 +25,32 @@ $registerClassMobile = $onLoginPage
         <div class="w-7 h-7 rounded-xl bg-action flex items-center justify-center shrink-0">
           <i class="fa-solid fa-car-side text-ink text-xs"></i>
         </div>
-        <span class="text-2xl font-bold text-ink font-display">Kenweturi</span>
+        <!-- <span class="text-2xl font-bold text-ink font-display">Kenweturi</span> -->
+        <svg width="240" height="36" viewBox="0 0 240 36" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <clipPath id="cw">
+              <polygon points="0,0 76,0 56,36 0,36" />
+            </clipPath>
+            <clipPath id="co">
+              <polygon points="76,0 240,0 240,36 56,36" />
+            </clipPath>
+          </defs>
+          <text clip-path="url(#cw)"
+            x="0" y="28"
+            class="font-display text-2xl font-bold"
+            fill="#EFEAE0" letter-spacing="3">KENWETURI</text>
+          <text clip-path="url(#co)"
+            x="0" y="28"
+            class="font-display text-2xl font-bold"
+            fill="#D9663F" letter-spacing="3">KENWETURI</text>
+        </svg>
       </a>
 
       <!-- Nav desktop -->
       <nav class="hidden md:flex items-center gap-8">
         <a href="<?= site_url('journeys') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Chercher un trajet</a>
         <a href="<?= site_url('journeys/new') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Publier un trajet</a>
-        <a href="#" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Comment ça marche</a>
+        <a href="<?= site_url('comment-ca-marche') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Comment ça marche</a>
       </nav>
 
       <!-- Auth desktop -->
@@ -43,15 +61,15 @@ $registerClassMobile = $onLoginPage
             <button id="user-menu-toggle" class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
               <?php $initials = strtoupper(substr((string) session()->get('firstname'), 0, 1) . substr((string) session()->get('lastname'), 0, 1)); ?>
               <?php if (session()->get('avatar')): ?>
-                <div style="width:2.25rem;height:2.25rem;border-radius:9999px;overflow:hidden;flex-shrink:0;" class="desktop-avatar-img">
-                  <img src="<?= esc(base_url(session()->get('avatar'))) ?>" alt="" style="width:100%;height:100%;object-fit:cover;"
+                <div class="w-9 h-9 rounded-full overflow-hidden shrink-0 desktop-avatar-img">
+                  <img src="<?= esc(base_url(session()->get('avatar'))) ?>" alt="" class="w-full h-full object-cover"
                     onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
                 </div>
-                <div style="display:none;width:2.25rem;height:2.25rem;border-radius:9999px;background:#C85028;color:#EFEAE0;font-weight:700;font-size:0.75rem;flex-shrink:0;align-items:center;justify-content:center;">
+                <div class="hidden w-9 h-9 rounded-full bg-action text-paper font-bold text-xs shrink-0 items-center justify-center">
                   <?= $initials ?>
                 </div>
               <?php else: ?>
-                <div style="display:flex;width:2.25rem;height:2.25rem;border-radius:9999px;background:#C85028;color:#EFEAE0;font-weight:700;font-size:0.75rem;flex-shrink:0;align-items:center;justify-content:center;">
+                <div class="flex w-9 h-9 rounded-full bg-action text-paper font-bold text-xs shrink-0 items-center justify-center">
                   <?= $initials ?>
                 </div>
               <?php endif; ?>
@@ -99,15 +117,15 @@ $registerClassMobile = $onLoginPage
         <!-- Bloc infos utilisateur -->
         <div class="flex items-center gap-3 pt-4 pb-4 border-b border-action/10">
           <?php if (session()->get('avatar')): ?>
-            <div style="width:2.5rem;height:2.5rem;border-radius:9999px;overflow:hidden;flex-shrink:0;" class="mobile-avatar-img">
-              <img src="<?= esc(base_url(session()->get('avatar'))) ?>" alt="" style="width:100%;height:100%;object-fit:cover;"
+            <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 mobile-avatar-img">
+              <img src="<?= esc(base_url(session()->get('avatar'))) ?>" alt="" class="w-full h-full object-cover"
                 onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
             </div>
-            <div style="display:none;width:2.5rem;height:2.5rem;border-radius:9999px;background:#C85028;color:#EFEAE0;font-weight:700;font-size:0.75rem;flex-shrink:0;align-items:center;justify-content:center;">
+            <div class="hidden w-10 h-10 rounded-full bg-action text-paper font-bold text-xs shrink-0 items-center justify-center">
               <?= $initials ?>
             </div>
           <?php else: ?>
-            <div style="display:flex;width:2.5rem;height:2.5rem;border-radius:9999px;background:#C85028;color:#EFEAE0;font-weight:700;font-size:0.75rem;flex-shrink:0;align-items:center;justify-content:center;">
+            <div class="flex w-10 h-10 rounded-full bg-action text-paper font-bold text-xs shrink-0 items-center justify-center">
               <?= $initials ?>
             </div>
           <?php endif; ?>
@@ -123,9 +141,12 @@ $registerClassMobile = $onLoginPage
       <nav class="flex flex-col gap-3 pt-4">
         <a href="<?= site_url('journeys') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Chercher un trajet</a>
         <a href="<?= site_url('journeys/new') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Publier un trajet</a>
-        <a href="#" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Comment ça marche</a>
+        <a href="<?= site_url('comment-ca-marche') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Comment ça marche</a>
         <?php if (session()->get('isLoggedIn')): ?>
-          <a href="<?= site_url('dashboard') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Tableau de bord</a>
+          <div class="flex flex-col gap-2 pt-4 border-t border-action/10 mt-4">
+            <a href="<?= site_url('profile') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Mon profil</a>
+            <a href="<?= site_url('dashboard') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Tableau de bord</a>
+          </div>
       </nav>
 
       <div class="flex flex-col gap-2 pt-4 border-t border-action/10 mt-4">

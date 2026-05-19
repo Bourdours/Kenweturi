@@ -131,6 +131,10 @@
     willChange: 'transform',
     transform: 'translate(-200px, -200px)',
   });
+
+  const carInner = document.createElement('div');
+  carInner.classList.add('animate-bounce');
+  car.appendChild(carInner);
   document.body.appendChild(car);
 
   // Point lumineux positionné exactement sur le curseur (sans délai)
@@ -168,7 +172,7 @@
 
     cursorStyle.disabled  = carOff;
     car.style.visibility  = carOff ? 'hidden' : 'visible';
-    car.innerHTML         = getCarSVG(dark);
+    carInner.innerHTML    = getCarSVG(dark);
     dot.style.background  = dark ? '#FFF0A0' : '#D9663F';
     dot.style.boxShadow   = dark
       ? '0 0 6px 3px rgba(255,240,160,0.7)'
