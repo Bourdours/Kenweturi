@@ -127,12 +127,61 @@ class JourneyController extends BaseController{
 
     public function show($id): string
     {
+        $db      = \Config\Database::connect();
+        $journey = $db->table('journey')
+            ->select('journey.*, 
+                loc_start.address as address_start,
+                loc_end.address as address_end,
+                city_start.name as city_start_name, 
+                city_end.name as city_end_name, 
+                u.firstname as driver_firstname, 
+                u.lastname as driver_lastname, 
+                u.id as driver_id,
+                u.avatar as driver_avatar,
+                u.biography as driver_biography,
+                u.is_student as driver_is_student,
+                car.brand as car_brand,
+                car.model as car_model,
+                car.color as car_color,
+                car.seats as car_seats')
+            ->join('location loc_start', 'loc_start.id = journey.location_start_id')
+            ->join('location loc_end',   'loc_end.id = journey.location_end_id')
+            ->join('city city_start',    'city_start.id = loc_start.city_id')
+            ->join('city city_end',      'city_end.id = loc_end.city_id')
+            ->join('user u',             'u.id = journey.user_id')
+            ->join('car',                'car.id = journey.car_id', 'left')
+            ->where('journey.id', $id)
+            ->get()->getRowArray();
+
+        if(!$journey)
+            return redirect()->to('/journeys');
+
+        // Récupération des stages ordonnés
+        $stages = $db->table('stage')
+            ->select('stage.*, location.address, location.latitude, location.longitude, city.name as city_name')
+            ->join('location', 'location.id = stage.location_id')
+            ->join('city',     'city.id = location.city_id')
+            ->where('stage.journey_id', $id)
+            ->orderBy('stage.position', 'ASC')
+            ->get()->getResultArray();
+
+        // --- Calcul des places restantes
+        $bookedSeats = $db->table('booking')
+            ->selectSum('seat_numbers')
+            ->where('journey_id', $id)
+            ->get()->getRowArray();
+
+        $remainingSeats = $journey['seats'] - ($bookedSeats['seat_numbers'] ?? 0);
+
         return view('Journeys/journeyShow',[
-            'title' => "Chercher un trajet"
-        ]);
+            'title'          => 'Détail du trajet',
+            'journey'        => $journey,
+            'stages'         => $stages,
+            'remainingSeats' => $remainingSeats,
+            ]);
     }
 
-    public function showAll(): string|RedirectResponse
+    public function showAll(): string|RedirectResponse 
     {
         // --- Récupération des filtres
         $startAddress   = $this->request->getGet('startAddress');
