@@ -24,7 +24,7 @@
         <ul class="flex flex-col gap-2">
           <li><a href="<?= site_url('journeys') ?>" class="text-ink/60 text-sm hover:text-action transition-colors">Chercher un trajet</a></li>
           <li><a href="<?= site_url('journeys/new') ?>" class="text-ink/60 text-sm hover:text-action transition-colors">Publier un trajet</a></li>
-          <li><a href="#" class="text-ink/60 text-sm hover:text-action transition-colors">Comment ça marche</a></li>
+          <li><a href="<?= site_url('comment-ca-marche') ?>" class="text-ink/60 text-sm hover:text-action transition-colors">Comment ça marche</a></li>
         </ul>
       </div>
 

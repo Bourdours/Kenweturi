@@ -8,7 +8,7 @@
 <?= view('partials/head') ?>
 <?= view('partials/header') ?>
 
-<div class="max-w-3xl mx-auto py-10 px-6 md:px-8 flex flex-col gap-6">
+<div class="max-w-4xl mx-auto py-10 px-6 md:px-8 flex flex-col gap-6">
 
   <?php if (session()->getFlashdata('success')): ?>
     <div class="bg-success/10 border border-success/20 rounded-xl px-5 py-3 text-success text-sm flex items-center gap-2">
