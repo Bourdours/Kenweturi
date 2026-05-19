@@ -130,3 +130,8 @@ _modules/*
 #-------------------------
 node_modules/
 /public/css/tailwind.css
+
+#-------------------------
+# Database
+#-------------------------
+Ressources/Kenku.sql

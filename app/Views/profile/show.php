@@ -32,7 +32,7 @@
           <?= $initials ?>
         </div>
       <?php else: ?>
-        <div class="jsAvatarOpen ring-2 ring-action/20 flex w-20 h-20 rounded-full bg-action-dark text-paper font-bold text-2xl shrink-0 items-center justify-center">
+        <div class="jsAvatarOpen ring-2 ring-action/20 flex w-20 h-20 rounded-full bg-action text-paper font-bold text-2xl shrink-0 items-center justify-center">
           <?= $initials ?>
         </div>
       <?php endif; ?>

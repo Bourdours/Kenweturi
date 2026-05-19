@@ -76,7 +76,7 @@
             <input type="email" name="email" id="email"
               value="<?= old('email') ?>" required placeholder="votre@email.com"
               class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 pr-9 outline-none focus:border-action/50 placeholder:text-ink/30" />
-            <i class="fa-regular fa-envelope absolute right-3 top-1/2 -translate-y-1/2 text-ink/30 text-xs pointer-events-none"></i>
+            <i class="fa-regular fa-envelope absolute right-3 top-1/2 -translate-y-1/2 text-ink/30 text-sm pointer-events-none"></i>
           </div>
         </div>
 
