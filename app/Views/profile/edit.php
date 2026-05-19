@@ -292,6 +292,5 @@
 </div>
 
 <script src="<?= base_url('js/auth.js') ?>" defer></script>
-<script src="<?= base_url('js/app.js') ?>" defer></script>
 <script src="<?= base_url('js/user.js') ?>"></script>
 <?= view('partials/footer') ?>
