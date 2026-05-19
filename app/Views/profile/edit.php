@@ -96,8 +96,8 @@
       </h2>
       <?php if (!empty($user['avatar'])): ?>
         <div class="flex items-center gap-4 mb-4">
-          <div style="width:3.5rem;height:3.5rem;border-radius:9999px;overflow:hidden;flex-shrink:0;">
-            <img src="<?= esc($user['avatar']) ?>" alt="Avatar actuel" style="width:100%;height:100%;object-fit:cover;">
+          <div class="w-14 h-14 rounded-full overflow-hidden shrink-0">
+            <img src="<?= esc($user['avatar']) ?>" alt="Avatar actuel" class="w-full h-full object-cover">
           </div>
           <p class="text-ink/50 text-xs">Photo actuelle — choisissez un nouveau fichier pour la remplacer.</p>
         </div>
