@@ -32,7 +32,7 @@
 
   <form action="<?= site_url('profile/update') ?>" method="post" enctype="multipart/form-data" class="flex flex-col gap-6">
     <?= csrf_field() ?>
-    
+
     <!-- Photo de profil -->
     <div class="bg-surface rounded-2xl p-6 border border-action/10">
       <h2 class="text-ink text-base font-semibold font-display mb-5 flex items-center gap-2">
@@ -163,7 +163,6 @@
                   <i class="fa-solid fa-pen"></i>
                 </a>
                 <a href="<?= site_url('car/' . $car['id'] . '/delete') ?>"
-                  onclick="return confirm('Supprimer ce véhicule ?')"
                   class="text-ink/30 hover:text-action text-xs transition-colors">
                   <i class="fa-solid fa-trash"></i>
                 </a>
