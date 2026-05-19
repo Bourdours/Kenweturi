@@ -24,25 +24,25 @@
         <ul class="flex flex-col gap-2">
           <li><a href="<?= site_url('journeys') ?>" class="text-ink/60 text-sm hover:text-action transition-colors">Chercher un trajet</a></li>
           <li><a href="<?= site_url('journeys/new') ?>" class="text-ink/60 text-sm hover:text-action transition-colors">Publier un trajet</a></li>
-          <li><a href="#" class="text-ink/60 text-sm hover:text-action transition-colors">Comment ça marche</a></li>
+          <li><a href="<?= site_url('comment-ca-marche') ?>" class="text-ink/60 text-sm hover:text-action transition-colors">Comment ça marche</a></li>
         </ul>
       </div>
 
       <div>
         <p class="text-ink/30 text-xs uppercase tracking-widest font-medium mb-3">Entreprise</p>
         <ul class="flex flex-col gap-2">
-          <li><a href="#" class="text-ink/60 text-sm hover:text-action transition-colors">À propos</a></li>
-          <li><a href="#" class="text-ink/60 text-sm hover:text-action transition-colors">Blog</a></li>
-          <li><a href="#" class="text-ink/60 text-sm hover:text-action transition-colors">Contact</a></li>
+          <li><a href="<?= site_url('a-propos') ?>" class="text-ink/60 text-sm hover:text-action transition-colors">À propos</a></li>
+          <li><a href="<?= site_url('blog') ?>" class="text-ink/60 text-sm hover:text-action transition-colors">Blog</a></li>
+          <li><a href="<?= site_url('contact') ?>" class="text-ink/60 text-sm hover:text-action transition-colors">Contact</a></li>
         </ul>
       </div>
 
       <div>
         <p class="text-ink/30 text-xs uppercase tracking-widest font-medium mb-3">Légal</p>
         <ul class="flex flex-col gap-2">
-          <li><a href="#" class="text-ink/60 text-sm hover:text-action transition-colors">CGU</a></li>
-          <li><a href="#" class="text-ink/60 text-sm hover:text-action transition-colors">Confidentialité</a></li>
-          <li><a href="#" class="text-ink/60 text-sm hover:text-action transition-colors">Mentions légales</a></li>
+          <li><a href="<?= site_url('cgu') ?>" class="text-ink/60 text-sm hover:text-action transition-colors">CGU</a></li>
+          <li><a href="<?= site_url('confidentialite') ?>" class="text-ink/60 text-sm hover:text-action transition-colors">Confidentialité</a></li>
+          <li><a href="<?= site_url('mentions-legales') ?>" class="text-ink/60 text-sm hover:text-action transition-colors">Mentions légales</a></li>
         </ul>
       </div>
 
@@ -57,7 +57,7 @@
         <i class="fa-solid fa-car-side"></i>
         <span id="car-toggle-label"></span>
       </button>
-      <button id="car-model-toggle" style="display:none" class="flex items-center gap-1.5 text-ink/40 hover:text-action transition-colors text-xs" aria-label="Changer de modèle">
+      <button id="car-model-toggle" class="hidden items-center gap-1.5 text-ink/40 hover:text-action transition-colors text-xs" aria-label="Changer de modèle">
         <i class="fa-solid fa-car"></i>
         <span id="car-model-label"></span>
       </button>
