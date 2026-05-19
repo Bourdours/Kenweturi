@@ -40,9 +40,9 @@
       <div>
         <p class="text-ink/30 text-xs uppercase tracking-widest font-medium mb-3">Légal</p>
         <ul class="flex flex-col gap-2">
-          <li><a href="#" class="text-ink/60 text-sm hover:text-action transition-colors">CGU</a></li>
-          <li><a href="#" class="text-ink/60 text-sm hover:text-action transition-colors">Confidentialité</a></li>
-          <li><a href="#" class="text-ink/60 text-sm hover:text-action transition-colors">Mentions légales</a></li>
+          <li><a href="<?= site_url('cgu') ?>" class="text-ink/60 text-sm hover:text-action transition-colors">CGU</a></li>
+          <li><a href="<?= site_url('confidentialite') ?>" class="text-ink/60 text-sm hover:text-action transition-colors">Confidentialité</a></li>
+          <li><a href="<?= site_url('mentions-legales') ?>" class="text-ink/60 text-sm hover:text-action transition-colors">Mentions légales</a></li>
         </ul>
       </div>
 
