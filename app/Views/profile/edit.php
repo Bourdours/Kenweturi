@@ -32,6 +32,39 @@
 
   <form action="<?= site_url('profile/update') ?>" method="post" enctype="multipart/form-data" class="flex flex-col gap-6">
     <?= csrf_field() ?>
+    
+    <!-- Photo de profil -->
+    <div class="bg-surface rounded-2xl p-6 border border-action/10">
+      <h2 class="text-ink text-base font-semibold font-display mb-5 flex items-center gap-2">
+        <i class="fa-solid fa-image text-action text-sm"></i>Photo de profil
+      </h2>
+
+      <?php $initials = strtoupper(substr((string) $user['firstname'], 0, 1) . substr((string) $user['lastname'], 0, 1)); ?>
+
+      <div class="flex items-center gap-4 mb-4">
+        <?php if (!empty($user['avatar'])): ?>
+          <div style="width:3.5rem;height:3.5rem;border-radius:9999px;overflow:hidden;flex-shrink:0;">
+            <img src="<?= esc(base_url($user['avatar'])) ?>" alt="Avatar actuel" style="width:100%;height:100%;object-fit:cover;"
+              onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
+          </div>
+          <div style="display:none;width:3.5rem;height:3.5rem;border-radius:9999px;background:#C85028;color:#EFEAE0;font-weight:700;font-size:1rem;flex-shrink:0;align-items:center;justify-content:center;">
+            <?= $initials ?>
+          </div>
+        <?php else: ?>
+          <div style="display:flex;width:3.5rem;height:3.5rem;border-radius:9999px;background:#C85028;color:#EFEAE0;font-weight:700;font-size:1rem;flex-shrink:0;align-items:center;justify-content:center;">
+            <?= $initials ?>
+          </div>
+        <?php endif; ?>
+
+        <p class="text-ink/50 text-xs">
+          <?= !empty($user['avatar']) ? 'Photo actuelle — choisissez un nouveau fichier pour la remplacer.' : 'Aucune photo — choisissez un fichier pour en ajouter une.' ?>
+        </p>
+      </div>
+
+      <label for="avatarProfile" class="text-ink/50 text-xs font-medium mb-1.5 block">Nouvelle photo</label>
+      <input type="file" id="avatarProfile" name="avatarProfile" accept="image/*"
+        class="w-full text-ink/70 text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-action/10 file:text-action hover:file:bg-action/20 file:cursor-pointer file:transition-colors">
+    </div>
 
     <!-- Informations personnelles -->
     <div class="bg-surface rounded-2xl p-6 border border-action/10">
@@ -145,17 +178,17 @@
       <p class="text-ink/50 text-xs font-medium mb-3">Ajouter un véhicule</p>
       <div id="carFieldsContainer" class="flex flex-col gap-3">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-<div>
-  <label for="vehicleBrand" class="text-ink/50 text-xs font-medium mb-1.5 block">Marque</label>
-  <div class="relative w-full">
-    <input type="text" id="vehicleBrand" data-name="brand"
-      placeholder="Ex: Renault"
-      autocomplete="off" 
-      class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors js-car-input">
-      
-    <ul id="brandSuggestions" class="absolute left-0 top-full z-50 w-full bg-paper border border-action/15 rounded-b-lg shadow-lg max-h-48 overflow-y-auto hidden flex flex-col pointer-events-auto"></ul>
-  </div>
-</div>
+          <div>
+            <label for="vehicleBrand" class="text-ink/50 text-xs font-medium mb-1.5 block">Marque</label>
+            <div class="relative w-full">
+              <input type="text" id="vehicleBrand" data-name="brand"
+                placeholder="Ex: Renault"
+                autocomplete="off"
+                class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors js-car-input">
+
+              <ul id="brandSuggestions" class="absolute left-0 top-full z-50 w-full bg-paper border border-action/15 rounded-b-lg shadow-lg max-h-48 overflow-y-auto hidden flex flex-col pointer-events-auto"></ul>
+            </div>
+          </div>
           <div>
             <label for="vehicleModel" class="text-ink/50 text-xs font-medium mb-1.5 block">Modèle</label>
             <input type="text" id="vehicleModel" data-name="model"
@@ -191,39 +224,6 @@
         </div>
       </div>
 
-    </div>
-
-    <!-- Photo de profil -->
-    <div class="bg-surface rounded-2xl p-6 border border-action/10">
-      <h2 class="text-ink text-base font-semibold font-display mb-5 flex items-center gap-2">
-        <i class="fa-solid fa-image text-action text-sm"></i>Photo de profil
-      </h2>
-
-      <?php $initials = strtoupper(substr((string) $user['firstname'], 0, 1) . substr((string) $user['lastname'], 0, 1)); ?>
-
-      <div class="flex items-center gap-4 mb-4">
-        <?php if (!empty($user['avatar'])): ?>
-          <div style="width:3.5rem;height:3.5rem;border-radius:9999px;overflow:hidden;flex-shrink:0;">
-            <img src="<?= esc(base_url($user['avatar'])) ?>" alt="Avatar actuel" style="width:100%;height:100%;object-fit:cover;"
-              onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
-          </div>
-          <div style="display:none;width:3.5rem;height:3.5rem;border-radius:9999px;background:#C85028;color:#EFEAE0;font-weight:700;font-size:1rem;flex-shrink:0;align-items:center;justify-content:center;">
-            <?= $initials ?>
-          </div>
-        <?php else: ?>
-          <div style="display:flex;width:3.5rem;height:3.5rem;border-radius:9999px;background:#C85028;color:#EFEAE0;font-weight:700;font-size:1rem;flex-shrink:0;align-items:center;justify-content:center;">
-            <?= $initials ?>
-          </div>
-        <?php endif; ?>
-
-        <p class="text-ink/50 text-xs">
-          <?= !empty($user['avatar']) ? 'Photo actuelle — choisissez un nouveau fichier pour la remplacer.' : 'Aucune photo — choisissez un fichier pour en ajouter une.' ?>
-        </p>
-      </div>
-
-      <label for="avatarProfile" class="text-ink/50 text-xs font-medium mb-1.5 block">Nouvelle photo</label>
-      <input type="file" id="avatarProfile" name="avatarProfile" accept="image/*"
-        class="w-full text-ink/70 text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-action/10 file:text-action hover:file:bg-action/20 file:cursor-pointer file:transition-colors">
     </div>
 
     <!-- Mot de passe -->
@@ -294,5 +294,5 @@
 
 <script src="<?= base_url('js/auth.js') ?>" defer></script>
 <script src="<?= base_url('js/app.js') ?>" defer></script>
-<script src="<?= base_url('js/user.js') ?>" ></script>
+<script src="<?= base_url('js/user.js') ?>"></script>
 <?= view('partials/footer') ?>
