@@ -31,9 +31,9 @@
       <div>
         <p class="text-ink/30 text-xs uppercase tracking-widest font-medium mb-3">Entreprise</p>
         <ul class="flex flex-col gap-2">
-          <li><a href="#" class="text-ink/60 text-sm hover:text-action transition-colors">À propos</a></li>
-          <li><a href="#" class="text-ink/60 text-sm hover:text-action transition-colors">Blog</a></li>
-          <li><a href="#" class="text-ink/60 text-sm hover:text-action transition-colors">Contact</a></li>
+          <li><a href="<?= site_url('a-propos') ?>" class="text-ink/60 text-sm hover:text-action transition-colors">À propos</a></li>
+          <li><a href="<?= site_url('blog') ?>" class="text-ink/60 text-sm hover:text-action transition-colors">Blog</a></li>
+          <li><a href="<?= site_url('contact') ?>" class="text-ink/60 text-sm hover:text-action transition-colors">Contact</a></li>
         </ul>
       </div>
 
