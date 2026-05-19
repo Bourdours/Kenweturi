@@ -9,6 +9,11 @@ class PageController extends BaseController
         return view('Pages/about', ['title' => 'À propos']);
     }
 
+    public function howItWorks(): string
+    {
+        return view('Pages/how-it-works', ['title' => 'Comment ça marche']);
+    }
+
     public function blog(): string
     {
         return view('Pages/blog', ['title' => 'Blog']);

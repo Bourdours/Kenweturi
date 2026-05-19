@@ -32,7 +32,7 @@ $registerClassMobile = $onLoginPage
       <nav class="hidden md:flex items-center gap-8">
         <a href="<?= site_url('journeys') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Chercher un trajet</a>
         <a href="<?= site_url('journeys/new') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Publier un trajet</a>
-        <a href="#" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Comment ça marche</a>
+        <a href="<?= site_url('comment-ca-marche') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Comment ça marche</a>
       </nav>
 
       <!-- Auth desktop -->
@@ -123,7 +123,7 @@ $registerClassMobile = $onLoginPage
       <nav class="flex flex-col gap-3 pt-4">
         <a href="<?= site_url('journeys') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Chercher un trajet</a>
         <a href="<?= site_url('journeys/new') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Publier un trajet</a>
-        <a href="#" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Comment ça marche</a>
+        <a href="<?= site_url('comment-ca-marche') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Comment ça marche</a>
         <?php if (session()->get('isLoggedIn')): ?>
           <div class="flex flex-col gap-2 pt-4 border-t border-action/10 mt-4">
             <a href="<?= site_url('profile') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Mon profil</a>
