@@ -6,6 +6,9 @@ module.exports = {
     "./app/Libraries/**/*.php",
     "./public/**/*.html",
   ],
+  safelist: [
+    'animate-bounce',
+  ],
   theme: {
     extend: {
       fontFamily: {
