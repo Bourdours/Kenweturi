@@ -88,3 +88,33 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ─── Autocomplete dropdown ──────────────────────────────── */
+.autocomplete-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  margin-top: 4px;
+  background: rgb(var(--color-paper));
+  border: 1px solid rgb(var(--color-action) / 0.15);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgb(var(--color-ink) / 0.08);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.autocomplete-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  color: rgb(var(--color-ink));
+  border-radius: 6px;
+  transition: background 150ms ease;
+}
+
+.autocomplete-item:hover {
+  background: rgb(var(--color-action) / 0.08);
+}
