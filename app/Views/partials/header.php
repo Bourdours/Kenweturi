@@ -25,7 +25,25 @@ $registerClassMobile = $onLoginPage
         <div class="w-7 h-7 rounded-xl bg-action flex items-center justify-center shrink-0">
           <i class="fa-solid fa-car-side text-ink text-xs"></i>
         </div>
-        <span class="text-2xl font-bold text-ink font-display">Kenweturi</span>
+        <!-- <span class="text-2xl font-bold text-ink font-display">Kenweturi</span> -->
+        <svg width="240" height="36" viewBox="0 0 240 36" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <clipPath id="cw">
+              <polygon points="0,0 76,0 56,36 0,36" />
+            </clipPath>
+            <clipPath id="co">
+              <polygon points="76,0 240,0 240,36 56,36" />
+            </clipPath>
+          </defs>
+          <text clip-path="url(#cw)"
+            x="0" y="28"
+            class="font-display text-2xl font-bold"
+            fill="#EFEAE0" letter-spacing="3">KENWETURI</text>
+          <text clip-path="url(#co)"
+            x="0" y="28"
+            class="font-display text-2xl font-bold"
+            fill="#D9663F" letter-spacing="3">KENWETURI</text>
+        </svg>
       </a>
 
       <!-- Nav desktop -->

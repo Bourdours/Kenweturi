@@ -28,7 +28,7 @@
     <?= csrf_field() ?>
 
     <div class="relative lg:static pl-5 lg:pl-0">
-      <!-- Grande route verticale mobile -->Z
+      <!-- Grande route verticale mobile -->
       <div class="lg:hidden absolute left-0 top-0 bottom-0 border-l-2 border-dashed border-action/40"></div>
 
       <div class="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-5 lg:gap-0">
