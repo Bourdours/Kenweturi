@@ -103,7 +103,7 @@
           <p class="text-sm font-medium text-ink/50 mb-3 flex items-center gap-1.5">
             <i class="fa-solid fa-location-dot"></i>Localisation
           </p>
-          <div class="grid gap-3 mb-4" style="grid-template-columns:1fr 120px;">
+          <div class="grid gap-3 mb-4 [grid-template-columns:1fr_120px]">
             <div>
               <label for="cityName" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
                 <i class="fa-solid fa-city text-sm"></i>Ville

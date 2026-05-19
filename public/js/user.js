@@ -1,12 +1,12 @@
 let modal = document.querySelector('#avatarModal');
 
 function openAvatarModal() {
-  modal.style.display = 'flex';
+  modal.classList.remove('hidden'); modal.classList.add('flex');
   document.addEventListener('keydown', closeOnEsc);
 }
 
 function closeAvatarModal() {
-  modal.style.display = 'none';
+  modal.classList.add('hidden'); modal.classList.remove('flex');
   document.removeEventListener('keydown', closeOnEsc);
 }
 
