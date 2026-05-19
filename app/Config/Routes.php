@@ -33,14 +33,15 @@ $routes->post('forgotPassword', 'AuthController::forgotPassword');
 
 // Réinitialisation du mot de passe
 $routes->get('resetPassword',   'AuthController::showResetPasswordForm');
-$routes->post('resetPassword', 'AuthController::resetPassword'); 
+$routes->post('resetPassword', 'AuthController::resetPassword');
 
 // Profile
 $routes->get('profile', 'UserController::show');
 $routes->get('profile/update', 'UserController::showEditForm');
 $routes->post('profile/update', 'UserController::update');
-
 $routes->post('profile/delete', 'UserController::delete');
+$routes->get('profile/edit', 'UserController::showEditForm');
+$routes->post('car/create', 'CarController::create'); // Ajouter un véhicule
 
 // Pages légales
 $routes->get('cgu',              'LegalController::cgu');

@@ -1,4 +1,5 @@
 <?php
+
 /** @var array $user */
 /** @var string $city */
 /** @var string $memberSince */
@@ -137,6 +138,28 @@
 
     </dl>
   </div>
+
+  <!-- Véhicules -->
+  <?php if (!empty($cars)): ?>
+    <div class="bg-surface rounded-2xl p-6 border border-action/10">
+      <h2 class="text-ink text-base font-semibold font-display mb-4 flex items-center gap-2">
+        <i class="fa-solid fa-car text-action text-sm"></i>Véhicules
+      </h2>
+      <div class="flex flex-col divide-y divide-action/10">
+        <?php foreach ($cars as $car): ?>
+          <div class="flex items-center gap-4 py-3 first:pt-0 last:pb-0">
+            <div class="w-8 h-8 rounded-lg bg-action/10 flex items-center justify-center shrink-0">
+              <i class="fa-solid fa-car-side text-action text-xs"></i>
+            </div>
+            <div>
+              <p class="text-ink text-sm font-medium"><?= esc($car['brand']) ?> <?= esc($car['model']) ?></p>
+              <p class="text-ink/40 text-xs"><?= esc($car['color']) ?> · <?= esc($car['seats']) ?> places</p>
+            </div>
+          </div>
+        <?php endforeach ?>
+      </div>
+    </div>
+  <?php endif; ?>
 
   <!-- Zone danger -->
   <?php if ($isOwnProfile): ?>
