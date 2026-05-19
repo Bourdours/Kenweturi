@@ -46,3 +46,9 @@ $routes->post('profile/delete', 'UserController::delete');
 $routes->get('cgu',              'LegalController::cgu');
 $routes->get('confidentialite',  'LegalController::confidentialite');
 $routes->get('mentions-legales', 'LegalController::mentions');
+
+// Pages entreprise
+$routes->get('a-propos', 'PageController::about');
+$routes->get('blog',     'PageController::blog');
+$routes->get('contact',  'PageController::contact');
+$routes->post('contact', 'PageController::sendContact');
