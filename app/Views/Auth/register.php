@@ -215,8 +215,8 @@
           <label class="flex items-start gap-2 cursor-pointer mb-4">
             <input type="checkbox" required class="mt-0.5 shrink-0 accent-action" />
             <span class="text-xs text-ink/40 leading-relaxed">
-              J'accepte les <a href="#" class="text-action font-medium hover:text-action-dark transition-colors">conditions d'utilisation</a>
-              et la <a href="#" class="text-action font-medium hover:text-action-dark transition-colors">politique de confidentialité</a> de Kenweturi.
+              J'accepte les <a href="<?= site_url('cgu') ?>" target="_blank" class="text-action font-medium hover:text-action-dark transition-colors">conditions d'utilisation</a>
+              et la <a href="<?= site_url('confidentialite') ?>" target="_blank" class="text-action font-medium hover:text-action-dark transition-colors">politique de confidentialité</a> de Kenweturi.
             </span>
           </label>
           <button type="submit"
