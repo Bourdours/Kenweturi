@@ -43,15 +43,15 @@ $registerClassMobile = $onLoginPage
             <button id="user-menu-toggle" class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
               <?php $initials = strtoupper(substr((string) session()->get('firstname'), 0, 1) . substr((string) session()->get('lastname'), 0, 1)); ?>
               <?php if (session()->get('avatar')): ?>
-                <div style="width:2.25rem;height:2.25rem;border-radius:9999px;overflow:hidden;flex-shrink:0;" class="desktop-avatar-img">
-                  <img src="<?= esc(base_url(session()->get('avatar'))) ?>" alt="" style="width:100%;height:100%;object-fit:cover;"
+                <div class="w-9 h-9 rounded-full overflow-hidden shrink-0 desktop-avatar-img">
+                  <img src="<?= esc(base_url(session()->get('avatar'))) ?>" alt="" class="w-full h-full object-cover"
                     onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
                 </div>
-                <div style="display:none;width:2.25rem;height:2.25rem;border-radius:9999px;background:#C85028;color:#EFEAE0;font-weight:700;font-size:0.75rem;flex-shrink:0;align-items:center;justify-content:center;">
+                <div class="hidden w-9 h-9 rounded-full bg-action text-paper font-bold text-xs shrink-0 items-center justify-center">
                   <?= $initials ?>
                 </div>
               <?php else: ?>
-                <div style="display:flex;width:2.25rem;height:2.25rem;border-radius:9999px;background:#C85028;color:#EFEAE0;font-weight:700;font-size:0.75rem;flex-shrink:0;align-items:center;justify-content:center;">
+                <div class="flex w-9 h-9 rounded-full bg-action text-paper font-bold text-xs shrink-0 items-center justify-center">
                   <?= $initials ?>
                 </div>
               <?php endif; ?>
@@ -99,15 +99,15 @@ $registerClassMobile = $onLoginPage
         <!-- Bloc infos utilisateur -->
         <div class="flex items-center gap-3 pt-4 pb-4 border-b border-action/10">
           <?php if (session()->get('avatar')): ?>
-            <div style="width:2.5rem;height:2.5rem;border-radius:9999px;overflow:hidden;flex-shrink:0;" class="mobile-avatar-img">
-              <img src="<?= esc(base_url(session()->get('avatar'))) ?>" alt="" style="width:100%;height:100%;object-fit:cover;"
+            <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 mobile-avatar-img">
+              <img src="<?= esc(base_url(session()->get('avatar'))) ?>" alt="" class="w-full h-full object-cover"
                 onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
             </div>
-            <div style="display:none;width:2.5rem;height:2.5rem;border-radius:9999px;background:#C85028;color:#EFEAE0;font-weight:700;font-size:0.75rem;flex-shrink:0;align-items:center;justify-content:center;">
+            <div class="hidden w-10 h-10 rounded-full bg-action text-paper font-bold text-xs shrink-0 items-center justify-center">
               <?= $initials ?>
             </div>
           <?php else: ?>
-            <div style="display:flex;width:2.5rem;height:2.5rem;border-radius:9999px;background:#C85028;color:#EFEAE0;font-weight:700;font-size:0.75rem;flex-shrink:0;align-items:center;justify-content:center;">
+            <div class="flex w-10 h-10 rounded-full bg-action text-paper font-bold text-xs shrink-0 items-center justify-center">
               <?= $initials ?>
             </div>
           <?php endif; ?>
