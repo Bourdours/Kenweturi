@@ -41,3 +41,8 @@ $routes->get('profile/update', 'UserController::showEditForm');
 $routes->post('profile/update', 'UserController::update');
 
 $routes->post('profile/delete', 'UserController::delete');
+
+// Pages légales
+$routes->get('cgu',              'LegalController::cgu');
+$routes->get('confidentialite',  'LegalController::confidentialite');
+$routes->get('mentions-legales', 'LegalController::mentions');
