@@ -11,7 +11,7 @@ use App\Models\LocationModel;
 use App\Models\BookingModel;
 use DateTimeImmutable;
 
-class JourneysController extends BaseController{
+class JourneyController extends BaseController{
 
     protected TrackModel $trackModel;
     protected JourneyModel $journeyModel;

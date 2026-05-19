@@ -44,7 +44,7 @@
   </div>
 
   <!-- Carte formulaire -->
-  <div class="bg-surface rounded-2xl p-7 border border-action/10 w-full md:w-auto md:shrink-0" style="min-width:320px; max-width:360px;">
+  <div class="bg-surface rounded-2xl p-7 border border-action/10 w-full md:w-auto md:shrink-0 min-w-80 max-w-[360px]">
 
     <?php if (isset($tokenValid) && $tokenValid): ?>
 

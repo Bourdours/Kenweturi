@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Models\UserModel;
 use App\Models\CityModel;
+use App\Libraries\MailerExample;
 use CodeIgniter\I18n\Time;
 
 class UserController extends BaseController
@@ -157,6 +158,14 @@ class UserController extends BaseController
         // Hachage du nouveau mot de passe si renseigné
         if (!empty($newPassword)) {
             $data['password_hash'] = password_hash($newPassword, PASSWORD_DEFAULT);
+
+            // Envoi de la notification par email
+            $mailer = new MailerExample();
+            $mailer->sendHtml(
+            $user['email'],
+            'Votre mot de passe a été modifié',
+            $this->passwordChangedEmail($user['firstname'], $user['lastname'])
+            );
         }
 
         // Gestion de l'upload de l'avatar
@@ -179,5 +188,22 @@ class UserController extends BaseController
         ]);
 
         return redirect()->to(site_url('profile'))->with('success', 'Profil mis à jour avec succès.');
+    }
+
+    /**
+     * Construit le corps HTML de l'email de notification de changement de mot de passe
+     *
+     * @param  string $firstname Prénom de l'utilisateur 
+     * @param  string $lastname  Nom de l'utilisateur
+     * @return string Corps HTML de l'email
+     */
+    private function passwordChangedEmail(string $firstname, string $lastname): string
+    {
+        return view('Emails/passwordChanged', [
+            'firstname' => $firstname,
+            'lastname'  => $lastname,
+            'date'      => ucfirst(Time::now('Europe/Paris', 'fr_FR')->toLocalizedString('d MMMM yyyy à HH:mm')),
+            'support'   => env('mailer.from'),
+        ]);
     }
 }
