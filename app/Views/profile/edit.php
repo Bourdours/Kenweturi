@@ -43,15 +43,15 @@
 
       <div class="flex items-center gap-4 mb-4">
         <?php if (!empty($user['avatar'])): ?>
-          <div style="width:3.5rem;height:3.5rem;border-radius:9999px;overflow:hidden;flex-shrink:0;">
-            <img src="<?= esc(base_url($user['avatar'])) ?>" alt="Avatar actuel" style="width:100%;height:100%;object-fit:cover;"
+          <div class="jsAvatarOpen cursor-pointer w-14 h-14 rounded-full overflow-hidden shrink-0">
+            <img src="<?= esc(base_url($user['avatar'])) ?>" alt="Avatar actuel" class="w-full h-full object-cover"
               onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
           </div>
-          <div style="display:none;width:3.5rem;height:3.5rem;border-radius:9999px;background:#C85028;color:#EFEAE0;font-weight:700;font-size:1rem;flex-shrink:0;align-items:center;justify-content:center;">
+          <div class="jsAvatarOpen cursor-pointer hidden w-14 h-14 rounded-full bg-action-dark text-paper font-bold text-base shrink-0 items-center justify-center">
             <?= $initials ?>
           </div>
         <?php else: ?>
-          <div style="display:flex;width:3.5rem;height:3.5rem;border-radius:9999px;background:#C85028;color:#EFEAE0;font-weight:700;font-size:1rem;flex-shrink:0;align-items:center;justify-content:center;">
+          <div class="jsAvatarOpen cursor-pointer flex w-14 h-14 rounded-full bg-action-dark text-paper font-bold text-base shrink-0 items-center justify-center">
             <?= $initials ?>
           </div>
         <?php endif; ?>
@@ -291,7 +291,21 @@
   </form>
 </div>
 
+<!-- Modal avatar -->
+<div id="avatarModal" class="hidden fixed inset-0 bg-black/80 z-[9999] items-center justify-center cursor-zoom-out">
+  <?php if (!empty($user['avatar'])): ?>
+    <img src="<?= esc(base_url($user['avatar'])) ?>" alt="Avatar de <?= esc($user['firstname']) ?>" class="max-w-[90vw] max-h-[90vh] rounded-lg object-contain shadow-[0_0_40px_rgba(0,0,0,0.5)]"
+      onerror="this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden'); this.nextElementSibling.classList.add('flex');">
+    <div class="hidden w-64 h-64 rounded-full bg-action-dark text-paper font-bold text-[5rem] items-center justify-center shadow-[0_0_40px_rgba(0,0,0,0.5)]">
+      <?= $initials ?>
+    </div>
+  <?php else: ?>
+    <div class="flex w-64 h-64 rounded-full bg-action-dark text-paper font-bold text-[5rem] items-center justify-center shadow-[0_0_40px_rgba(0,0,0,0.5)]">
+      <?= $initials ?>
+    </div>
+  <?php endif; ?>
+</div>
+
 <script src="<?= base_url('js/auth.js') ?>" defer></script>
-<script src="<?= base_url('js/app.js') ?>" defer></script>
 <script src="<?= base_url('js/user.js') ?>"></script>
 <?= view('partials/footer') ?>
