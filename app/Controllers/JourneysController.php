@@ -132,7 +132,7 @@ class JourneysController extends BaseController{
         ]);
     }
 
-    public function showAll(): string
+    public function showAll(): string|RedirectResponse
     {
         // --- Récupération des filtres
         $startAddress   = $this->request->getGet('startAddress');
