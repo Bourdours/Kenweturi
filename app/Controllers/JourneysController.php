@@ -132,8 +132,87 @@ class JourneysController extends BaseController{
         ]);
     }
 
-    public function showAll(): RedirectResponse
+    public function showAll(): string
     {
-        return redirect()->to('/journeys');
-    }
+        // --- Récupération des filtres
+        $startAddress   = $this->request->getGet('startAddress');
+        $endAddress     = $this->request->getGet('endAddress');
+        $latStart       = $this->request->getGet('startLat');
+        $lngStart       = $this->request->getGet('startLng');
+        $latEnd         = $this->request->getGet('endLat');
+        $lngEnd         = $this->request->getGet('endLng');
+        $filterDate     = $this->request->getGet('date');
+        $filterTime     = $this->request->getGet('time');
+        $availableSeats = $this->request->getGet('availableSeats') ?? 1;
+        $smoking        = $this->request->getGet('smoking');
+        $page           = $this->request->getGet('page') ?? 1;
+
+        // --- Construction de la requête
+        $db      = \Config\Database::connect();
+        $builder = $db->table('journey')
+            ->select('journey.*, city_start.name as city_start_name, city_end.name as city_end_name, u.firstname as driver_firstname, u.lastname as driver_lastname')
+            ->join('location loc_start', 'loc_start.id = journey.location_start_id')
+            ->join('location loc_end',   'loc_end.id = journey.location_end_id')
+            ->join('city city_start',    'city_start.id = loc_start.city_id')
+            ->join('city city_end',      'city_end.id = loc_end.city_id')
+            ->join('user u',             'u.id = journey.user_id')
+            ->join('stage', 'stage.journey_id = journey.id', 'left')
+            ->join('location loc_stage', 'loc_stage.id = stage.location_id', 'left')
+            ->where('journey.canceled_at', null)
+            ->orderBy('journey.start_datetime', 'ASC');
+
+        if ($latStart && $lngStart)
+            $builder->groupStart()
+                        ->where("(6371 * acos(cos(radians($latStart)) * cos(radians(loc_start.latitude)) * cos(radians(loc_start.longitude) - radians($lngStart)) + sin(radians($latStart)) * sin(radians(loc_start.latitude)))) <=", 10)
+                        ->orWhere("(6371 * acos(cos(radians($latStart)) * cos(radians(loc_stage.latitude)) * cos(radians(loc_stage.longitude) - radians($lngStart)) + sin(radians($latStart)) * sin(radians(loc_stage.latitude)))) <=", 10)
+                    ->groupEnd();
+
+        if ($latEnd && $lngEnd)
+            $builder->groupStart()
+                        ->where("(6371 * acos(cos(radians($latEnd)) * cos(radians(loc_end.latitude)) * cos(radians(loc_end.longitude) - radians($lngEnd)) + sin(radians($latEnd)) * sin(radians(loc_end.latitude)))) <=", 10)
+                        ->orWhere("(6371 * acos(cos(radians($latEnd)) * cos(radians(loc_stage.latitude)) * cos(radians(loc_stage.longitude) - radians($lngEnd)) + sin(radians($latEnd)) * sin(radians(loc_stage.latitude)))) <=", 10)
+                    ->groupEnd();
+
+        if ($filterDate && $filterTime) {
+            $dateTimeFrom = date('Y-m-d H:i:s', strtotime($filterDate . ' ' . $filterTime . ':00') - 1800);
+            $dateTimeTo   = $filterDate . ' ' . $filterTime . ':00';
+            $builder->where('journey.start_datetime >=', $dateTimeFrom)
+                    ->where('journey.start_datetime <=', $dateTimeTo);
+        }
+        elseif ($filterDate)
+            $builder->where('DATE(journey.start_datetime)', $filterDate);
+        else
+            $builder->where('journey.start_datetime >=', date('Y-m-d H:i:s'));
+
+        if ($availableSeats)
+            $builder->where("(journey.seats - COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id), 0)) >=", $availableSeats);
+
+        if ($smoking !== null && $smoking !== '')
+            $builder->where('journey.smoking', $smoking);
+
+        // --- Pagination
+        $perPage  = 10;
+        $total    = $builder->countAllResults(false);
+        $journeys = $builder->limit($perPage, ($page - 1) * $perPage)->get()->getResultArray();
+        $pager    = \Config\Services::pager();
+
+        return view('Journeys/journeyShowAll', [
+            'title'          => 'Rechercher un trajet',
+            'journeys'       => $journeys,
+            'pager'          => $pager,
+            'total'          => $total,
+            'page'           => $page,
+            'perPage'        => $perPage,
+            'startAddress'   => $startAddress,
+            'endAddress'     => $endAddress,
+            'latStart'       => $latStart,
+            'lngStart'       => $lngStart,
+            'latEnd'         => $latEnd,
+            'lngEnd'         => $lngEnd,
+            'filterDate'     => $filterDate,
+            'filterTime'     => $filterTime,
+            'availableSeats' => $availableSeats,
+            'smoking'        => $smoking,
+        ]);
+    }   
 }
