@@ -125,7 +125,10 @@ $registerClassMobile = $onLoginPage
         <a href="<?= site_url('journeys/new') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Publier un trajet</a>
         <a href="#" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Comment ça marche</a>
         <?php if (session()->get('isLoggedIn')): ?>
-          <a href="<?= site_url('dashboard') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Tableau de bord</a>
+          <div class="flex flex-col gap-2 pt-4 border-t border-action/10 mt-4">
+            <a href="<?= site_url('profile') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Mon profil</a>
+            <a href="<?= site_url('dashboard') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Tableau de bord</a>
+          </div>
       </nav>
 
       <div class="flex flex-col gap-2 pt-4 border-t border-action/10 mt-4">
