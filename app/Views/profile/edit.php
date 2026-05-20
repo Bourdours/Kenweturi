@@ -1,13 +1,8 @@
-<?php
-
-/** @var array $user */
-?>
 <?= view('partials/head') ?>
 <?= view('partials/header') ?>
 
 <div class="max-w-4xl mx-auto py-10 px-6 md:px-8 flex flex-col gap-6">
 
-  <!-- En-tête -->
   <div class="flex items-center justify-between">
     <h1 class="text-ink text-2xl font-bold font-display">Modifier le profil</h1>
     <a href="<?= site_url('profile') ?>" class="text-ink/50 hover:text-action text-sm flex items-center gap-1.5 transition-colors">
@@ -30,6 +25,7 @@
     </div>
   <?php endif; ?>
 
+  <!-- Formulaire -->
   <form action="<?= site_url('profile/update') ?>" method="post" enctype="multipart/form-data" class="flex flex-col gap-6">
     <?= csrf_field() ?>
 
@@ -162,10 +158,13 @@
                   class="text-ink/30 hover:text-action text-xs transition-colors">
                   <i class="fa-solid fa-pen"></i>
                 </a>
-                <a href="<?= site_url('car/' . $car['id'] . '/delete') ?>"
-                  class="text-ink/30 hover:text-action text-xs transition-colors">
+
+                <button type="button"
+                  class="deleteCar text-ink/30 hover:text-action text-xs transition-colors"
+                  data-car-id="<?= $car['id'] ?>"
+                  data-car-label="<?= esc($car['brand'] . ' ' . $car['model']) ?>">
                   <i class="fa-solid fa-trash"></i>
-                </a>
+                </button>
               </div>
             </div>
           <?php endforeach ?>
@@ -306,6 +305,37 @@
   <?php endif; ?>
 </div>
 
+<!-- Modale suppression voiture -->
+<div id="deleteCarModal" class="hidden fixed inset-0 bg-black/60 z-[9999] items-center justify-center">
+  <div class="bg-surface rounded-2xl p-6 w-full max-w-sm mx-4 shadow-xl">
+    <div class="flex items-center gap-3 mb-3">
+      <div class="w-9 h-9 rounded-full bg-action/10 flex items-center justify-center shrink-0">
+        <i class="fa-solid fa-trash text-action text-sm"></i>
+      </div>
+      <h3 class="text-ink font-semibold font-display text-base">Supprimer le véhicule</h3>
+    </div>
+    <p class="text-ink/50 text-sm mb-5">
+      Voulez-vous vraiment supprimer <span id="deleteCarLabel" class="text-ink font-medium"></span> ? Cette action est irréversible.
+    </p>
+    <form id="deleteCarForm" method="post" action="">
+      <?= csrf_field() ?>
+      <div class="flex gap-3 justify-end">
+        <button type="button" id="cancelDeleteCar"
+          class="border border-action/20 hover:border-action/50 text-ink/60 hover:text-ink font-medium rounded-lg px-4 py-2 text-sm transition-colors">
+          Annuler
+        </button>
+        <button type="submit"
+          class="bg-action hover:bg-action-dark text-ink font-semibold font-display rounded-lg px-4 py-2 text-sm transition-colors cursor-pointer flex items-center gap-2">
+          <i class="fa-solid fa-trash text-xs"></i>Supprimer
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script src="<?= base_url('js/auth.js') ?>" defer></script>
 <script src="<?= base_url('js/user.js') ?>"></script>
+<script>
+  window.baseUrl = "<?= base_url() ?>";
+</script>
 <?= view('partials/footer') ?>
