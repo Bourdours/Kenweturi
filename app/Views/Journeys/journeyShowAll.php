@@ -47,9 +47,9 @@
                 <p><?= esc($journey['city_start_name']) ?> -> <?= esc($journey['city_end_name']) ?></p>
                 <p><?= esc($journey['start_datetime']) ?></p>
                 <p>Conducteur : <?= esc($journey['driver_firstname']) ?> <?= esc($journey['driver_lastname']) ?></p>
-                <p>Places restantes : <?= esc($journey['seats']) ?></p>
+                <p>Places restantes : <?= esc($journey['remaining_seats']) ?></p>
                 <p>Fumeur : <?= esc($journey['smoking']) ? 'Oui' : 'Non' ?></p>
-                <a href="/journeys/<?= esc($journey['id']) ?>">Voir le trajet</a>
+                <a href="/journeys/<?= esc($journey['id']) ?>?seats=<?= esc($availableSeats) ?>">Voir le trajet</a>
             </div>
         <?php endforeach ?>
 
