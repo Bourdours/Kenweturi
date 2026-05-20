@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 /**
@@ -10,6 +11,10 @@ class ReportModel extends BaseModel
     protected $table            = 'report';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
+
+    protected $useTimestamps = true;
+    protected $createdField  = 'created_at';
+    protected $updatedField  = '';
 
     protected $allowedFields = [
         'title',
@@ -47,4 +52,20 @@ class ReportModel extends BaseModel
             'is_not_unique'      => 'Cet utilisateur n\'existe pas.',
         ],
     ];
+
+    /**
+     * Vérifie si un utilisateur a déjà signalé ce trajet.
+     * Un même utilisateur ne peut pas soumettre deux signalements
+     * pour le même trajet, évitant ainsi les doublons en base.
+     *
+     * @param int $userId L'id de l'utilisateur connecté 
+     * @param int $journeyId L'id du trajet signalé
+     * @return bool True si un signalement existe déjà, false sinon
+     */
+    public function alreadyReported(int $userId, int $journeyId): bool
+    {
+        return $this->where('user_id', $userId)
+            ->where('journey_id', $journeyId)
+            ->countAllResults() > 0;
+    }
 }
