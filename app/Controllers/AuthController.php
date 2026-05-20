@@ -70,6 +70,8 @@ class AuthController extends BaseController
             'password'    => 'required|min_length[8]|regex_match[/^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*?_~\-()]).*$/]',
             'passConfirm' => 'required|matches[password]',
             'birthDate'   => 'required|valid_date[Y-m-d]',
+            'cityName'    => 'required|min_length[2]',
+            'postalCode'  => 'required|exact_length[5]|numeric',
         ];
 
         $messages = [
@@ -89,6 +91,16 @@ class AuthController extends BaseController
             'birthDate' => [
                 'required'   => 'La date de naissance est obligatoire.',
                 'valid_date' => 'Veuillez saisir une date de naissance valide.',
+            ],
+            // Messages pour la ville
+            'cityName' => [
+                'required'   => 'La ville est obligatoire.',
+                'min_length' => 'Le nom de la ville est trop court.',
+            ],
+            'postalCode' => [
+                'required'     => 'Le code postal est obligatoire.',
+                'exact_length' => 'Le code postal doit comporter exactement 5 chiffres.',
+                'numeric'      => 'Le code postal doit être numérique.',
             ],
         ];
 
@@ -123,7 +135,12 @@ class AuthController extends BaseController
 
         // Gestion de la table 'cities' (Ville)
         // On vérifie si la ville existe déjà pour éviter les doublons
-        $existingCity = $this->cityModel->where('name', $cityName)->first();
+        // $existingCity = $this->cityModel->where('name', $cityName)->first();
+
+        $cityName = trim($this->request->getPost('cityName'));
+        $zipCode  = trim($this->request->getPost('postalCode'));
+
+        $existingCity = $this->cityModel->where(['name' => $cityName, 'zipcode' => $zipCode])->first();
 
         // Si elle existe, on récupère son ID existant
         if ($existingCity) {
@@ -136,7 +153,7 @@ class AuthController extends BaseController
             ]);
 
             // On récupère l'ID généré
-            $cityId = $this->cityModel->insertID();
+            $cityId = $this->cityModel->getInsertID();
         }
 
         // Préparation des données de l'utilisateur
