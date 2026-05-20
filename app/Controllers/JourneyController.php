@@ -325,7 +325,6 @@ class JourneyController extends BaseController{
         $bookSeats = $this->bookingModel->selectSum('seat_numbers')
                                         ->where('journey_id', $id)
                                         ->get()->getRowArray();
-
         $remainingSeats = $journey['seats'] - ($bookSeats['seat_numbers'] ?? 0);
 
         $seatsRequested = $this->request->getPost('seat_numbers') ?? 1;
@@ -336,7 +335,7 @@ class JourneyController extends BaseController{
 
         // --- Insertion de la réservation
         $this->bookingModel->insert([
-            'booking_date' => date('Y-m-d H:i'),
+            'booking_date' => date('Y-m-d H:i:s'),
             'seat_numbers' => $seatsRequested,
             'journey_id'   => $id,
             'user_id'      => $userId
