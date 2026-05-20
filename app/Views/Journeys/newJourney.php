@@ -1,4 +1,4 @@
-<?= view('partials/head') ?>
+<?= view('partials/head', ['extraJs' => [base_url('js/autocompletion.js')]]) ?>
 <?= view('partials/header') ?>
 
 <main>
@@ -20,6 +20,5 @@
   </form>
 
 </main>
-<script src="<?= base_url('js/autocompletion.js') ?>" defer></script>
 
 <?= view('partials/footer') ?>
