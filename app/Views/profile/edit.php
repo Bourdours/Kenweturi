@@ -2,7 +2,7 @@
 
 /** @var array $user */
 ?>
-<?= view('partials/head') ?>
+<?= view('partials/head', ['extraJs' => [base_url('js/auth.js'), base_url('js/user.js')]]) ?>
 <?= view('partials/header') ?>
 
 <div class="max-w-4xl mx-auto py-10 px-6 md:px-8 flex flex-col gap-6">
@@ -306,6 +306,4 @@
   <?php endif; ?>
 </div>
 
-<script src="<?= base_url('js/auth.js') ?>" defer></script>
-<script src="<?= base_url('js/user.js') ?>"></script>
 <?= view('partials/footer') ?>

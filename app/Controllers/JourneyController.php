@@ -193,10 +193,10 @@ class JourneyController extends BaseController{
         // --- Récupération des filtres
         $startAddress   = $this->request->getGet('startAddress');
         $endAddress     = $this->request->getGet('endAddress');
-        $latStart       = $this->request->getGet('startLat');
-        $lngStart       = $this->request->getGet('startLng');
-        $latEnd         = $this->request->getGet('endLat');
-        $lngEnd         = $this->request->getGet('endLng');
+        $latStart       = $this->request->getGet('startLat') !== null ? (float) $this->request->getGet('startLat') : null;
+        $lngStart       = $this->request->getGet('startLng') !== null ? (float) $this->request->getGet('startLng') : null;
+        $latEnd         = $this->request->getGet('endLat')   !== null ? (float) $this->request->getGet('endLat')   : null;
+        $lngEnd         = $this->request->getGet('endLng')   !== null ? (float) $this->request->getGet('endLng')   : null;
         $filterDate     = $this->request->getGet('date');
         $filterTime     = $this->request->getGet('time');
         $availableSeats = $this->request->getGet('availableSeats') ?? 1;
@@ -251,10 +251,7 @@ class JourneyController extends BaseController{
         }
 
         if ($filterDate && $filterTime) {
-            $dateTimeFrom = date('Y-m-d H:i:s', strtotime($filterDate . ' ' . $filterTime . ':00') - 1800);
-            $dateTimeTo   = $filterDate . ' ' . $filterTime . ':00';
-            $builder->where('journey.start_datetime >=', $dateTimeFrom)
-                    ->where('journey.start_datetime <=', $dateTimeTo);
+            $builder->where('journey.start_datetime >=', $filterDate . ' ' . $filterTime . ':00');
         }
         elseif ($filterDate)
             $builder->where('DATE(journey.start_datetime)', $filterDate);
@@ -270,7 +267,7 @@ class JourneyController extends BaseController{
         $builder->groupBy('journey.id');
 
         // --- Pagination
-        $perPage  = 10;
+        $perPage  = 5;
         $total    = $builder->countAllResults(false);
         $journeys = $builder->limit($perPage, ($page - 1) * $perPage)->get()->getResultArray();
         $pager    = \Config\Services::pager();
