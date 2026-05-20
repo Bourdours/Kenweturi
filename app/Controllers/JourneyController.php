@@ -173,11 +173,14 @@ class JourneyController extends BaseController{
 
         $remainingSeats = $journey['seats'] - ($bookedSeats['seat_numbers'] ?? 0);
 
+        $availableSeats = $this->request->getGet('seats') ?? 1;
+
         return view('Journeys/journeyShow',[
             'title'          => 'Détail du trajet',
             'journey'        => $journey,
             'stages'         => $stages,
             'remainingSeats' => $remainingSeats,
+            'availableSeats' => $availableSeats,
             ]);
     }
 
@@ -199,7 +202,7 @@ class JourneyController extends BaseController{
         // --- Construction de la requête
         $db      = \Config\Database::connect();
         $builder = $db->table('journey')
-            ->select('journey.*, city_start.name as city_start_name, city_end.name as city_end_name, u.firstname as driver_firstname, u.lastname as driver_lastname')
+            ->select('journey.*, city_start.name as city_start_name, city_end.name as city_end_name, u.firstname as driver_firstname, u.lastname as driver_lastname, (journey.seats - COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id), 0)) as remaining_seats')
             ->join('location loc_start', 'loc_start.id = journey.location_start_id')
             ->join('location loc_end',   'loc_end.id = journey.location_end_id')
             ->join('city city_start',    'city_start.id = loc_start.city_id')
@@ -263,5 +266,56 @@ class JourneyController extends BaseController{
             'availableSeats' => $availableSeats,
             'smoking'        => $smoking,
         ]);
-    }   
+    } 
+    
+    public function book($id): RedirectResponse
+    {
+        $userId = session('user_id');
+
+        // --- Vérification que le trajet existe et n'est pas annulé
+        $journey = $this->journeyModel->where('id', $id)
+                        ->where('canceled_at', null)
+                        ->first();
+
+        if (!$journey)
+            return redirect()->to('/journeys');
+
+        // --- Vérification que c'est pas le driver
+        if ($journey['user_id'] === $userId)
+            return redirect->to('/journeys/' . $id)
+                ->with('errors', ['booking' => 'Vous ne pouvez par réserver votre propre trajet.']);
+
+        // --- Vérification pas déjà réservé
+        $existing = $this->bookingModel->where('journey_id', $id)
+                                       -> where('user_id', $userId)
+                                       ->first();
+
+        if ($existing)
+            return redirect()->to('/journeys/' . $id)
+                ->with('errors', ['booking' => 'Vous avez déjà réservé ce trajet.']);
+
+        // --- Vérification places restantes
+        $bookSeats = $this->bookingModel->selectSum('seat_numbers')
+                                        ->where('journey_id', $id)
+                                        ->get()->getRowArrey();
+        
+        $remainingSeats = $journey['seats'] - ($bookingSeats['seat_numbers'] ?? 0);
+
+        $seatsRequested = $this->request->getPost('seat_numbers') ?? 1;
+
+        if ($seatsRequested -> $remainigSeats)
+            return redirect()->to('/journeys/' . $id)
+        ->with('errors', ['booking' => 'Plus assez de palces disponibles']);
+
+        // --- Insertion de la réservation
+        $this->bookingModel->insert([
+            'booking_date' => date('Y-m-d H:i'),
+            'sear_numbers' => $seatsRequested,
+            'journey_id'   => $id,
+            'user_id'      => $userId
+        ]);
+
+        return redirect()->to('/journeys/' . $id)
+            ->with('success', 'Réservation effectuée avec succès.');
+    }
 }
