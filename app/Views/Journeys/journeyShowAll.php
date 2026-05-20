@@ -1,5 +1,11 @@
-<?= view('partials/head') ?>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<?= view('partials/head', [
+    'extraCss' => ['https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css'],
+    'extraJs'  => [
+        'https://cdn.jsdelivr.net/npm/flatpickr',
+        base_url('js/autocompletion.js'),
+        base_url('js/timepicker.js'),
+    ],
+]) ?>
 <?= view('partials/header') ?>
 
 <div class="max-w-4xl mx-auto py-10 px-6 md:px-8 space-y-6">
@@ -109,16 +115,4 @@
 
 </div>
 
-<script src="<?= base_url('js/autocompletion.js') ?>" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script>
-  const timeInput = document.getElementById('time');
-  flatpickr(timeInput, {
-    enableTime: true,
-    noCalendar: true,
-    dateFormat: "H:i",
-    time_24hr: true,
-    defaultDate: timeInput.value || new Date(),
-  });
-</script>
 <?= view('partials/footer') ?>
