@@ -26,7 +26,7 @@ $registerClassMobile = $onLoginPage
           <i class="fa-solid fa-car-side text-ink text-xs"></i>
         </div>
         <!-- <span class="text-2xl font-bold text-ink font-display">Kenweturi</span> -->
-        <svg width="240" height="36" viewBox="0 0 240 36" xmlns="http://www.w3.org/2000/svg">
+        <svg width="240" height="36" viewBox="0 0 240 36" xmlns="http://www.w3.org/2000/svg" class="text-ink">
           <defs>
             <clipPath id="cw">
               <polygon points="0,0 76,0 56,36 0,36" />
@@ -38,7 +38,7 @@ $registerClassMobile = $onLoginPage
           <text clip-path="url(#cw)"
             x="0" y="28"
             class="font-display text-2xl font-bold"
-            fill="#EFEAE0" letter-spacing="3">KENWETURI</text>
+            fill="currentColor" letter-spacing="3">KENWETURI</text>
           <text clip-path="url(#co)"
             x="0" y="28"
             class="font-display text-2xl font-bold"
