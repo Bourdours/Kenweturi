@@ -88,6 +88,15 @@ class UserController extends BaseController
     public function delete()
     {
         $userId = session()->get('user_id');
+        $user   = $this->userModel->find($userId);
+
+        // Envoi de l'email de confirmation de suppression
+        $mailer = new MailerExample();
+        $mailer->sendHtml(
+            $user['email'],
+            'Votre compte a été supprimé',
+            $this->accountDeletedEmail($user['firstname'], $user['lastname'])
+        );
 
         $this->userModel->delete($userId);
         session()->destroy();
@@ -220,6 +229,23 @@ class UserController extends BaseController
     private function passwordChangedEmail(string $firstname, string $lastname): string
     {
         return view('Emails/passwordChanged', [
+            'firstname' => $firstname,
+            'lastname'  => $lastname,
+            'date'      => ucfirst(Time::now('Europe/Paris', 'fr_FR')->toLocalizedString('d MMMM yyyy à HH:mm')),
+            'support'   => env('mailer.from'),
+        ]);
+    }
+
+    /**
+     * Construit le corps HTML de l'email de notification de suppression de compte
+     *
+     * @param  string $firstname Prénom de l'utilisateur
+     * @param  string $lastname  Nom de l'utilisateur
+     * @return string Corps HTML de l'email
+     */
+    private function accountDeletedEmail(string $firstname, string $lastname): string
+    {
+        return view('Emails/accountDeleted', [
             'firstname' => $firstname,
             'lastname'  => $lastname,
             'date'      => ucfirst(Time::now('Europe/Paris', 'fr_FR')->toLocalizedString('d MMMM yyyy à HH:mm')),
