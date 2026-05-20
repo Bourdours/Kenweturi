@@ -3,7 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\CarModel;
-use \CodeIgniter\HTTP\RedirectResponse; 
+use \CodeIgniter\HTTP\RedirectResponse;
 
 
 /**
@@ -50,7 +50,7 @@ class CarController extends BaseController
         return redirect()->to(site_url('profile/edit'))->with('success', 'Voiture ajoutée avec succès !');
     }
 
-     /** 
+    /** 
      * 
      * Affiche une voitures d'un utilisateur.
      * 
@@ -93,7 +93,7 @@ class CarController extends BaseController
     public function showEditForm($id)
     {
         $carModel = new CarModel();
-        
+
         $car = $carModel->where('user_id', session()->get('user_id'))->find($id);
 
         if (!$car) {
@@ -104,7 +104,7 @@ class CarController extends BaseController
             'car' => $car
         ];
 
-        return view('/car/update', $data);
+        return view('profile/carUpdate', $data);
     }
 
 
@@ -155,5 +155,4 @@ class CarController extends BaseController
 
         return redirect()->to(site_url('profile/edit'))->with('success', 'Voiture supprimée avec succès !');
     }
-
 }

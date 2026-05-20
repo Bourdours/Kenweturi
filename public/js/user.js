@@ -55,7 +55,7 @@ const suggestionsContainer = document.querySelector('#brandSuggestions');
 const addCarBtn = document.querySelector('#addCarBtn');
 
 if (brandInput && suggestionsContainer) {
-  
+
   brandInput.addEventListener('input', function () {
     const value = this.value.trim().toLowerCase();
     suggestionsContainer.innerHTML = '';
@@ -75,13 +75,13 @@ if (brandInput && suggestionsContainer) {
         li.textContent = brand;
         // Styles Tailwind pour l'affichage de la liste
         li.className = 'px-3 py-2 text-sm text-ink hover:bg-action/10 cursor-pointer transition-colors';
-        
+
         // Événement au clic sur une suggestion de la liste
         li.addEventListener('click', function () {
-          brandInput.value = brand; 
+          brandInput.value = brand;
           suggestionsContainer.classList.add('hidden');
         });
-        
+
         suggestionsContainer.appendChild(li);
       });
       suggestionsContainer.classList.remove('hidden'); // Rend la liste visible
@@ -101,19 +101,19 @@ if (brandInput && suggestionsContainer) {
 // Gestion de l'ajout du véhicule au clic sur le bouton "Ajouter"
 if (addCarBtn) {
   document.querySelectorAll('.js-car-input').forEach(input => {
-    input.addEventListener('keydown', function(e) {
+    input.addEventListener('keydown', function (e) {
       if (e.key === 'Enter') {
-        e.preventDefault(); 
-        addCarBtn.click(); 
+        e.preventDefault();
+        addCarBtn.click();
       }
     });
   });
 
   addCarBtn.addEventListener('click', function () {
-    const brand    = document.querySelector('#vehicleBrand').value.trim();
-    const model    = document.querySelector('#vehicleModel').value.trim();
-    const color    = document.querySelector('#vehicleColor').value.trim();
-    const seats    = document.querySelector('#vehicleSeats').value.trim();
+    const brand = document.querySelector('#vehicleBrand').value.trim();
+    const model = document.querySelector('#vehicleModel').value.trim();
+    const color = document.querySelector('#vehicleColor').value.trim();
+    const seats = document.querySelector('#vehicleSeats').value.trim();
     const carError = document.querySelector('#carError');
 
     if (!brand || !model || !color || !seats || isNaN(seats) || seats < 1 || seats > 9) {
@@ -128,15 +128,15 @@ if (addCarBtn) {
     form.action = addCarBtn.dataset.action;
 
     const csrf = document.createElement('input');
-    csrf.type  = 'hidden';
-    csrf.name  = addCarBtn.dataset.csrfName;
+    csrf.type = 'hidden';
+    csrf.name = addCarBtn.dataset.csrfName;
     csrf.value = addCarBtn.dataset.csrfValue;
     form.appendChild(csrf);
 
     [['brand', brand], ['model', model], ['color', color], ['seats', seats]].forEach(function ([name, val]) {
       const input = document.createElement('input');
-      input.type  = 'hidden';
-      input.name  = name;
+      input.type = 'hidden';
+      input.name = name;
       input.value = val;
       form.appendChild(input);
     });
@@ -145,3 +145,32 @@ if (addCarBtn) {
     form.submit();
   });
 }
+
+// Gestion de la modale de confirmation de suppression de véhicule
+const deleteCarModal  = document.querySelector('#deleteCarModal');
+const deleteCarForm   = document.querySelector('#deleteCarForm');
+const deleteCarLabel  = document.querySelector('#deleteCarLabel');
+const cancelDeleteCar = document.querySelector('#cancelDeleteCar');
+
+document.querySelectorAll('.deleteCar').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const id    = btn.dataset.carId;
+    const label = btn.dataset.carLabel;
+    deleteCarLabel.textContent = label;
+    deleteCarForm.action = `${window.baseUrl}car/${id}/delete`;
+    deleteCarModal.classList.remove('hidden');
+    deleteCarModal.classList.add('flex');
+  });
+});
+
+cancelDeleteCar?.addEventListener('click', () => {
+  deleteCarModal.classList.add('hidden');
+  deleteCarModal.classList.remove('flex');
+});
+
+deleteCarModal?.addEventListener('click', (e) => {
+  if (e.target === deleteCarModal) {
+    deleteCarModal.classList.add('hidden');
+    deleteCarModal.classList.remove('flex');
+  }
+});

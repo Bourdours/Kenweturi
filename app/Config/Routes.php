@@ -43,6 +43,10 @@ $routes->post('profile/update', 'UserController::update');
 $routes->post('profile/delete', 'UserController::delete');
 $routes->get('profile/edit', 'UserController::showEditForm');
 $routes->post('car/create', 'CarController::create'); // Ajouter un véhicule
+// Modifier / supprimer une voiture
+$routes->get('car/(:num)/edit',    'CarController::showEditForm/$1');
+$routes->post('car/(:num)/update', 'CarController::update/$1');
+$routes->post('car/(:num)/delete', 'CarController::delete/$1');
 
 // Pages légales
 $routes->get('cgu',              'LegalController::cgu');
