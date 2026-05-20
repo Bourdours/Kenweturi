@@ -1,8 +1,13 @@
 <?= view('partials/head') ?>
 <?= view('partials/header') ?>
 
-<h1 style="color: white;">Détails du trajet</h1>
-
+<!-- En-tête -->
+<div class="flex items-center justify-between">
+    <h1 class="text-ink text-2xl font-bold font-display">Détails du trajet</h1>
+    <a href="<?= site_url('journeys') ?>" class="text-ink/50 hover:text-action text-sm flex items-center gap-1.5 transition-colors">
+        <i class="fa-solid fa-arrow-left text-xs"></i>Retour
+    </a>
+</div>
 <article style="color: white;">
     <div>
         <p><?= esc(date('H:i', strtotime($journey['start_datetime']))) ?></p>
@@ -54,7 +59,17 @@
         <h3><?= esc($journey['city_end_name']) ?>Carte</h3>
         <p><?= esc($journey['address_end']) ?></p>
     </div>
-    <p><?= esc($journey['seats']) ?> siège restant</p>
-    <button>Réserver</button>
+    
+    <?php if ($remainingSeats > 0) : ?>
+        <form action="/journeys/<?= esc($journey['id']) ?>/book" method="POST"
+              onsubmit="return confirm('Confirmer la réservation ?')">
+            <?= csrf_field() ?>
+            <p><?= esc($remainingSeats) ?> siège restant</p>
+            <p><?= esc($availableSeats) ?> passager<?= $availableSeats > 1 ? 's' : '' ?></p>
+            <button type="submit">Réserver</button>
+        </form>
+    <?php else : ?>
+        <p>Complet</p>
+    <?php endif ?>
 </article>
 <?= view('partials/footer') ?>

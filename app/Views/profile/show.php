@@ -163,19 +163,29 @@
 
   <!-- Zone danger -->
   <?php if ($isOwnProfile): ?>
-    <div class="bg-surface rounded-2xl p-6 border border-danger/20">
-      <h2 class="text-danger text-base font-semibold font-display mb-1 flex items-center gap-2">
-        <i class="fa-solid fa-triangle-exclamation text-sm"></i>Zone de danger
-      </h2>
-      <p class="text-ink/50 text-sm mb-4">La suppression de votre compte est irréversible.</p>
-      <form action="<?= site_url('profile/delete') ?>" method="post" class="deleteAccount">
+    <form action="<?= site_url('profile/delete') ?>" method="post" class="deleteAccount" id="formDeleteAccount">
         <?= csrf_field() ?>
-        <button type="submit"
-          class="flex items-center gap-2 bg-danger/10 hover:bg-danger text-danger hover:text-white border border-danger/30 hover:border-danger font-semibold rounded-lg px-4 py-2 text-sm transition-colors cursor-pointer">
-          <i class="fa-solid fa-trash text-xs"></i>Supprimer mon compte
+        <button type="button" onclick="document.getElementById('modalSupprimer').style.display='flex'"
+            class="flex items-center gap-2 bg-danger/10 hover:bg-danger text-danger hover:text-white border border-danger/30 hover:border-danger font-semibold rounded-lg px-4 py-2 text-sm transition-colors cursor-pointer">
+            <i class="fa-solid fa-trash text-xs"></i>Supprimer mon compte
         </button>
-      </form>
-    </div>
+    </form>
+  <div id="modalSupprimer" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:9999;">
+      <div class="bg-surface rounded-2xl p-6" style="max-width:400px; width:90%;">
+          <h2 class="text-danger font-semibold font-display mb-2">Supprimer mon compte</h2>
+          <p class="text-ink text-sm mb-6">La suppression de votre compte est irréversible. Êtes-vous sûr ?</p>
+          <div class="flex gap-3">
+              <button onclick="document.getElementById('modalSupprimer').style.display='none'"
+                  class="flex-1 border border-ink/20 text-ink rounded-lg px-4 py-2 text-sm font-semibold">
+                  Annuler
+              </button>
+              <button onclick="document.getElementById('formDeleteAccount').submit()"
+                  class="flex-1 bg-danger text-white rounded-lg px-4 py-2 text-sm font-semibold">
+                  Confirmer la suppression
+              </button>
+          </div>
+      </div>
+  </div>
   <?php endif; ?>
 
 </div>
