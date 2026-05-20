@@ -282,7 +282,7 @@ class JourneyController extends BaseController{
 
         // --- Vérification que c'est pas le driver
         if ($journey['user_id'] === $userId)
-            return redirect->to('/journeys/' . $id)
+            return redirect()->to('/journeys/' . $id)
                 ->with('errors', ['booking' => 'Vous ne pouvez par réserver votre propre trajet.']);
 
         // --- Vérification pas déjà réservé
@@ -297,20 +297,20 @@ class JourneyController extends BaseController{
         // --- Vérification places restantes
         $bookSeats = $this->bookingModel->selectSum('seat_numbers')
                                         ->where('journey_id', $id)
-                                        ->get()->getRowArrey();
+                                        ->get()->getRowArray();
         
-        $remainingSeats = $journey['seats'] - ($bookingSeats['seat_numbers'] ?? 0);
+        $remainingSeats = $journey['seats'] - ($bookSeats['seat_numbers'] ?? 0);
 
         $seatsRequested = $this->request->getPost('seat_numbers') ?? 1;
 
-        if ($seatsRequested -> $remainigSeats)
+        if ($seatsRequested > $remainingSeats)
             return redirect()->to('/journeys/' . $id)
         ->with('errors', ['booking' => 'Plus assez de palces disponibles']);
 
         // --- Insertion de la réservation
         $this->bookingModel->insert([
-            'booking_date' => date('Y-m-d H:i'),
-            'sear_numbers' => $seatsRequested,
+            'booking_date' => date('Y-m-d H:i:s'),
+            'seat_numbers' => $seatsRequested,
             'journey_id'   => $id,
             'user_id'      => $userId
         ]);
