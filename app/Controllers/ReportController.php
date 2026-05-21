@@ -3,90 +3,99 @@
 namespace App\Controllers;
 
 use App\Models\ReportModel;
-use CodeIgniter\HTTP\RedirectResponse;
+use App\Models\JourneyModel;
+use CodeIgniter\Exceptions\PageNotFoundException;
+use Config\Services;
 
+/**
+ * Contrôleur gérant les signalements de trajets.
+ * Permet à un utilisateur connecté de signaler un trajet problématique.
+ */
 class ReportController extends BaseController
 {
-    /**
-     * Affiche le formulaire de création d'un signalement.
-     *
-     * @return string
-     */
-    public function showCreateForm(): string
-    {
-        return view('report/add');
-    }
 
     /**
-     * Traite les données envoyées par le formulaire.
-     * Gère la création d'un signalement et la redirection avec message de succès.
+     * Traite la soumission d'un signalement pour un trajet donné.
      *
-     * @return RedirectResponse
+     * @param int $journeyId L'id du trajet à signaler
      */
-    public function create(): RedirectResponse
+    public function create(int $journeyId)
     {
-        $reportModel = new ReportModel();
+        // Vérification de la session
+        if (!session()->get('isLoggedIn')) {
+            return redirect()->to('/login');
+        }
+
+
+        $reporterId = (int) session()->get('user_id');
+
+        $reportModel  = new ReportModel();
+        $journeyModel = new JourneyModel();
+
+        // Vérification que le trajet existe
+        $journey = $journeyModel->find($journeyId);
+        if (!$journey) {
+            throw new PageNotFoundException("Trajet introuvable.");
+        }
+
+        $journeyOwnerId = (int) $journey['user_id'];
+
+        // Un utilisateur ne peut pas signaler son propre trajet
+        if ($reporterId === $journeyOwnerId) {
+            return redirect()->back()
+                ->with('error', 'Vous ne pouvez pas signaler votre propre trajet.');
+        }
+
+        // Anti-doublon 
+        if ($reportModel->alreadyReported($reporterId, $journeyId)) {
+            return redirect()->back()
+                ->with('error', 'Vous avez déjà signalé ce trajet.');
+        }
+
+        // Validation et insertion via le model
         $data = [
-            'title'       => $this->request->getPost('title'),
-            'description' => $this->request->getPost('description'),
-            'journey_id'  => $this->request->getPost('journey_id'),
-            'user_id'     => session()->get('user_id'),
+            'title'       => $this->request->getPost('titleReport'),
+            'description' => $this->request->getPost('reasonReport'),
+            'journey_id'  => $journeyId,
+            'user_id'     => $reporterId,
         ];
 
-        if (!$reportModel->save($data)) {
-            return redirect()->back()->withInput()->with('errors', $reportModel->errors());
+        if (!$reportModel->insert($data)) {
+            return redirect()->back()
+                ->withInput()
+                ->with('validationErrors', $reportModel->errors());
         }
 
-        return redirect()->to('/dashboard')->with('success', 'Signalement envoyé avec succès !');
+        // Notification admin par email
+        $this->notifyAdmin($journey, $data['description'], $reporterId);
+
+        return redirect()->back()
+            ->with('success', 'Signalement envoyé. Notre équipe le traitera sous 48h.');
     }
 
     /**
-     * Affiche un signalement.
+     * Envoie un email de notification à l'administrateur
+     * lors d'un nouveau signalement.
      *
-     * @return string|RedirectResponse
+     * @param array  $journey     Les données du trajet signalé
+     * @param string $description La description du signalement
+     * @param int    $reporterId  L'id de l'utilisateur qui signale
      */
-    public function show(int $id): string|RedirectResponse
+    private function notifyAdmin(array $journey, string $description, int $reporterId): void
     {
-        $reportModel = new ReportModel();
-        $report = $reportModel->where('user_id', session()->get('user_id'))->find($id);
+        $email = Services::email();
 
-        if (!$report) {
-            return redirect()->to('/dashboard')->with('error', 'Signalement introuvable.');
-        }
+        $email->setTo(getenv('ADMIN_EMAIL') ?: 'admin@exemple.com');
+        $email->setSubject('[Signalement] Nouveau signalement à traiter');
+        $email->setMessage("
+            Un nouveau signalement a été soumis.<br><br>
+            <strong>Signalé par (user_id) :</strong> {$reporterId}<br>
+            <strong>Trajet signalé (journey_id) :</strong> {$journey['id']}<br>
+            <strong>Propriétaire du trajet (user_id) :</strong> {$journey['user_id']}<br>
+            <strong>Description :</strong> " . nl2br(esc($description)) . "<br><br>
+            À traiter sous 48h dans l'interface d'administration.
+        ");
 
-        return view('report/show', ['report' => $report]);
-    }
-
-    /**
-     * Affiche la liste des signalements de l'utilisateur connecté.
-     *
-     * @return string
-     */
-    public function showAll(): string
-    {
-        $reportModel = new ReportModel();
-        $data = [
-            'reports' => $reportModel->where('user_id', session()->get('user_id'))->findAll()
-        ];
-
-        return view('report/index', $data);
-    }
-
-    /**
-     * Gère la suppression d'un signalement et la redirection avec message de succès.
-     *
-     * @return RedirectResponse
-     */
-    public function delete(int $id): RedirectResponse
-    {
-        $reportModel = new ReportModel();
-        $report = $reportModel->where('user_id', session()->get('user_id'))->find($id);
-
-        if (!$report) {
-            return redirect()->to('/dashboard')->with('error', 'Signalement introuvable.');
-        }
-
-        $reportModel->delete($id);
-        return redirect()->to('/dashboard')->with('success', 'Signalement supprimé avec succès !');
+        $email->send();
     }
 }

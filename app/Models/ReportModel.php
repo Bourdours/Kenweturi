@@ -53,19 +53,5 @@ class ReportModel extends BaseModel
         ],
     ];
 
-    /**
-     * Vérifie si un utilisateur a déjà signalé ce trajet.
-     * Un même utilisateur ne peut pas soumettre deux signalements
-     * pour le même trajet, évitant ainsi les doublons en base.
-     *
-     * @param int $userId L'id de l'utilisateur connecté 
-     * @param int $journeyId L'id du trajet signalé
-     * @return bool True si un signalement existe déjà, false sinon
-     */
-    public function alreadyReported(int $userId, int $journeyId): bool
-    {
-        return $this->where('user_id', $userId)
-            ->where('journey_id', $journeyId)
-            ->countAllResults() > 0;
-    }
+    
 }
