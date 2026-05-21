@@ -83,7 +83,7 @@
     <?php else : ?>
         <div class="space-y-3">
             <?php foreach ($journeys as $journey) : ?>
-                <a href="/journeys/<?= esc($journey['id']) ?>?seats=<?= esc($availableSeats) ?>&boardingCity=<?= urlencode($journey['city_boarding_name']) ?>" class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors">
+                <a href="/journeys/<?= esc($journey['id']) ?>?seats=<?= esc($availableSeats) ?>&boardingCity=<?= urlencode($journey['city_boarding_name']) ?>&startAddress=<?= urlencode($startAddress ?? '') ?>&startLat=<?= esc($latStart ?? '') ?>&startLng=<?= esc($lngStart ?? '') ?>&endAddress=<?= urlencode($endAddress ?? '') ?>&endLat=<?= esc($latEnd ?? '') ?>&endLng=<?= esc($lngEnd ?? '') ?>" class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors">
                     <div class="flex items-center gap-4">
                         <div class="flex flex-col items-center shrink-0">
                             <div class="w-2.5 h-2.5 rounded-full bg-brand"></div>
