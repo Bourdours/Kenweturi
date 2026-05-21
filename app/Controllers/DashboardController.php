@@ -59,17 +59,31 @@ class DashboardController extends BaseController
             ->limit(1)
             ->get()->getResultArray();
 
-        // 3 dernières réservations reçues sur ses trajets
-        $lastBookings = $db->table('booking')
-            ->select('booking.*, journey.start_datetime, city_start.name as city_start_name, city_end.name as city_end_name, u.firstname, u.lastname')
-            ->join('journey',            'journey.id = booking.journey_id')
-            ->join('location loc_start', 'loc_start.id = journey.location_start_id')
-            ->join('location loc_end',   'loc_end.id = journey.location_end_id')
-            ->join('city city_start',    'city_start.id = loc_start.city_id')
-            ->join('city city_end',      'city_end.id = loc_end.city_id')
-            ->join('user u',             'u.id = booking.user_id')
-            ->where('journey.user_id', $userId)
-            ->orderBy('booking.sent_at', 'DESC')
+        $nextBookings = $db->table('booking')
+            ->select('booking.*, journey.start_datetime, journey.seats,
+                city_start.name as city_start_name,
+                city_end.name as city_end_name,
+                loc_pickup.address as pickup_address,
+                city_pickup.name as pickup_city_name,
+                loc_dropoff.address as dropoff_address,
+                city_dropoff.name as dropoff_city_name,
+                u.firstname as passenger_firstname,
+                u.lastname as passenger_lastname,
+                u.avatar as passenger_avatar,
+                u.is_student as passenger_is_student,
+                COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id), 0) as booked_seats')
+            ->join('journey',              'journey.id = booking.journey_id')
+            ->join('location loc_start',   'loc_start.id = journey.location_start_id')
+            ->join('location loc_end',     'loc_end.id = journey.location_end_id')
+            ->join('city city_start',      'city_start.id = loc_start.city_id')
+            ->join('city city_end',        'city_end.id = loc_end.city_id')
+            ->join('location loc_pickup',  'loc_pickup.id = booking.location_pickup_id', 'left')
+            ->join('city city_pickup',     'city_pickup.id = loc_pickup.city_id', 'left')
+            ->join('location loc_dropoff', 'loc_dropoff.id = booking.location_dropoff_id', 'left')
+            ->join('city city_dropoff',    'city_dropoff.id = loc_dropoff.city_id', 'left')
+            ->join('user u',               'u.id = booking.user_id')
+            ->where('journey.user_id',     $userId)
+            ->orderBy('booking.sent_at',   'DESC')
             ->limit(1)
             ->get()->getResultArray();
 
@@ -90,7 +104,7 @@ class DashboardController extends BaseController
             'title'        => 'Mon dashboard',
             'nextJourneys' => $nextJourneys,
             'lastJourneys' => $lastJourneys,
-            'lastBookings' => $lastBookings,
+            'nextBookings' => $nextBookings,
             'lastReport'   => $lastReport,
         ]);
     }
@@ -114,6 +128,7 @@ class DashboardController extends BaseController
             ->join('city city_end',      'city_end.id = loc_end.city_id')
             ->where('journey.user_id', $userId)
             ->orderBy('journey.start_datetime', 'DESC');
+            
 
         $total    = $builder->countAllResults(false);
         $journeys = $builder->limit($perPage, ($page - 1) * $perPage)->get()->getResultArray();
@@ -150,7 +165,7 @@ class DashboardController extends BaseController
             ->join('city city_start',    'city_start.id = loc_start.city_id')
             ->join('city city_end',      'city_end.id = loc_end.city_id')
             ->where('booking.user_id', $userId)
-            ->orderBy('journey.start_datetime', 'DESC');
+            ->orderBy('journey.start_datetime', 'ASC');
 
         $total    = $builder->countAllResults(false);
         $bookings = $builder->limit($perPage, ($page - 1) * $perPage)->get()->getResultArray();
