@@ -171,9 +171,9 @@
 
   <!-- Zone danger -->
   <?php if ($isOwnProfile): ?>
-    <form action="<?= site_url('profile/delete') ?>" method="post" class="deleteAccount" id="formDeleteAccount">
+    <form action="<?= site_url('profile/delete') ?>" method="post" class="deleteAccount" id="formDeleteAccount" novalidate>
       <?= csrf_field() ?>
-      <button type="button" onclick="document.getElementById('modalSupprimer').style.display='flex'"
+      <button type="button" id="btnOpenDeleteModal"
         class="flex items-center gap-2 bg-danger/10 hover:bg-danger text-danger hover:text-white border border-danger/30 hover:border-danger font-semibold rounded-lg px-4 py-2 text-sm transition-colors cursor-pointer">
         <i class="fa-solid fa-trash text-xs"></i>Supprimer mon compte
       </button>
@@ -195,15 +195,16 @@
                 class="absolute right-3 top-1/2 -translate-y-1/2 text-ink/30 hover:text-action/60 transition-colors">
                 <i class="fa-regular fa-eye text-xs"></i>
               </button>
+
             </div>
             <p id="deletePasswordError" class="text-danger text-xs mt-1.5 hidden">Veuillez saisir votre mot de passe.</p>
           </div>
           <div class="flex gap-3">
-            <button type="button" onclick="document.getElementById('modalSupprimer').style.display='none'"
+            <button type="button" id="btnCancelDelete"
               class="flex-1 border border-ink/20 text-ink rounded-lg px-4 py-2 text-sm font-semibold">
               Annuler
             </button>
-            <button type="button" onclick="document.getElementById('formDeleteAccount').submit()"
+            <button type="submit"
               class="flex-1 bg-danger text-white rounded-lg px-4 py-2 text-sm font-semibold">
               Confirmer la suppression
             </button>
