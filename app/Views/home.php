@@ -1,21 +1,23 @@
 <?php
+
 /** @var array|null $nextDriverJourney */
 /** @var array|null $nextPassengerJourney */
 ?>
 <?= view('partials/head', [
-    'extraJs' => [base_url('js/autocompletion.js')],
+  'extraJs' => [base_url('js/autocompletion.js')],
 ]) ?>
 <?= view('partials/header') ?>
 
-<?php if (session()->getFlashdata('success')): ?>
-  <div class="bg-success/10 border-b border-success/20 px-6 py-3 text-success text-sm text-center">
-    <?= session()->getFlashdata('success') ?>
-  </div>
-<?php endif; ?>
 
 <!-- Hero -->
 <section class="bg-gradient-to-b from-paper via-surface to-paper">
   <div class="max-w-4xl mx-auto px-6 md:px-8 py-16 md:py-24 flex flex-col items-center gap-8 text-center">
+    <?php if (session()->getFlashdata('success')): ?>
+      <div class="bg-success/10 border-b border-r- border-success/20 px-6 py-3 text-success max-w-sm text-sm text-center mx-auto rounded-xl">
+
+        <?= session()->getFlashdata('success') ?>
+      </div>
+    <?php endif; ?>
 
     <div class="flex flex-col gap-3">
       <p class="text-action text-xs font-semibold uppercase tracking-widest">Covoiturage régional</p>
@@ -88,53 +90,53 @@
 </section>
 
 <?php if (!empty($nextDriverJourney) || !empty($nextPassengerJourney)): ?>
-<div class="max-w-4xl mx-auto px-6 md:px-8 pt-8">
-  <div class="grid grid-cols-1 <?= (!empty($nextDriverJourney) && !empty($nextPassengerJourney)) ? 'sm:grid-cols-2' : '' ?> gap-3">
+  <div class="max-w-4xl mx-auto px-6 md:px-8 pt-8">
+    <div class="grid grid-cols-1 <?= (!empty($nextDriverJourney) && !empty($nextPassengerJourney)) ? 'sm:grid-cols-2' : '' ?> gap-3">
 
-    <?php if (!empty($nextDriverJourney)): ?>
-    <a href="<?= site_url('journeys/' . $nextDriverJourney['id']) ?>"
-      class="flex items-center gap-4 bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors">
-      <div class="w-10 h-10 rounded-xl bg-action/10 flex items-center justify-center shrink-0">
-        <i class="fa-solid fa-car-side text-action text-sm"></i>
-      </div>
-      <div class="flex-1 min-w-0">
-        <p class="text-ink/40 text-xs mb-0.5">Prochain trajet conducteur</p>
-        <p class="text-ink font-semibold text-sm truncate">
-          <?= esc($nextDriverJourney['city_start_name']) ?>
-          <span class="text-ink/30 mx-1">→</span>
-          <?= esc($nextDriverJourney['city_end_name']) ?>
-        </p>
-      </div>
-      <div class="flex flex-col items-end gap-0.5 shrink-0">
-        <p class="text-ink font-bold text-sm font-display"><?= date('H:i', strtotime($nextDriverJourney['start_datetime'])) ?></p>
-        <p class="text-ink/40 text-xs"><?= date('d/m/Y', strtotime($nextDriverJourney['start_datetime'])) ?></p>
-      </div>
-    </a>
-    <?php endif; ?>
+      <?php if (!empty($nextDriverJourney)): ?>
+        <a href="<?= site_url('journeys/' . $nextDriverJourney['id']) ?>"
+          class="flex items-center gap-4 bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors">
+          <div class="w-10 h-10 rounded-xl bg-action/10 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-car-side text-action text-sm"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-ink/40 text-xs mb-0.5">Prochain trajet conducteur</p>
+            <p class="text-ink font-semibold text-sm truncate">
+              <?= esc($nextDriverJourney['city_start_name']) ?>
+              <span class="text-ink/30 mx-1">→</span>
+              <?= esc($nextDriverJourney['city_end_name']) ?>
+            </p>
+          </div>
+          <div class="flex flex-col items-end gap-0.5 shrink-0">
+            <p class="text-ink font-bold text-sm font-display"><?= date('H:i', strtotime($nextDriverJourney['start_datetime'])) ?></p>
+            <p class="text-ink/40 text-xs"><?= date('d/m/Y', strtotime($nextDriverJourney['start_datetime'])) ?></p>
+          </div>
+        </a>
+      <?php endif; ?>
 
-    <?php if (!empty($nextPassengerJourney)): ?>
-    <a href="<?= site_url('journeys/' . $nextPassengerJourney['id']) ?>"
-      class="flex items-center gap-4 bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors">
-      <div class="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center shrink-0">
-        <i class="fa-solid fa-person-walking text-brand text-sm"></i>
-      </div>
-      <div class="flex-1 min-w-0">
-        <p class="text-ink/40 text-xs mb-0.5">Prochain trajet passager</p>
-        <p class="text-ink font-semibold text-sm truncate">
-          <?= esc($nextPassengerJourney['city_start_name']) ?>
-          <span class="text-ink/30 mx-1">→</span>
-          <?= esc($nextPassengerJourney['city_end_name']) ?>
-        </p>
-      </div>
-      <div class="flex flex-col items-end gap-0.5 shrink-0">
-        <p class="text-ink font-bold text-sm font-display"><?= date('H:i', strtotime($nextPassengerJourney['start_datetime'])) ?></p>
-        <p class="text-ink/40 text-xs"><?= date('d/m/Y', strtotime($nextPassengerJourney['start_datetime'])) ?></p>
-      </div>
-    </a>
-    <?php endif; ?>
+      <?php if (!empty($nextPassengerJourney)): ?>
+        <a href="<?= site_url('journeys/' . $nextPassengerJourney['id']) ?>"
+          class="flex items-center gap-4 bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors">
+          <div class="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-person-walking text-brand text-sm"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-ink/40 text-xs mb-0.5">Prochain trajet passager</p>
+            <p class="text-ink font-semibold text-sm truncate">
+              <?= esc($nextPassengerJourney['city_start_name']) ?>
+              <span class="text-ink/30 mx-1">→</span>
+              <?= esc($nextPassengerJourney['city_end_name']) ?>
+            </p>
+          </div>
+          <div class="flex flex-col items-end gap-0.5 shrink-0">
+            <p class="text-ink font-bold text-sm font-display"><?= date('H:i', strtotime($nextPassengerJourney['start_datetime'])) ?></p>
+            <p class="text-ink/40 text-xs"><?= date('d/m/Y', strtotime($nextPassengerJourney['start_datetime'])) ?></p>
+          </div>
+        </a>
+      <?php endif; ?>
 
+    </div>
   </div>
-</div>
 <?php endif; ?>
 
 <!-- Corps -->
@@ -214,22 +216,22 @@
 
   <!-- CTA — uniquement pour les non-connectés -->
   <?php if (!session()->get('isLoggedIn')): ?>
-  <div class="bg-surface rounded-2xl p-6 border border-action/10 flex flex-col sm:flex-row items-center gap-4">
-    <div class="flex-1 flex flex-col gap-1">
-      <p class="text-ink text-sm font-semibold">Prêt à démarrer ?</p>
-      <p class="text-ink/50 text-xs">Rejoignez la communauté Kenweturi et simplifiez vos trajets du quotidien.</p>
+    <div class="bg-surface rounded-2xl p-6 border border-action/10 flex flex-col sm:flex-row items-center gap-4">
+      <div class="flex-1 flex flex-col gap-1">
+        <p class="text-ink text-sm font-semibold">Prêt à démarrer ?</p>
+        <p class="text-ink/50 text-xs">Rejoignez la communauté Kenweturi et simplifiez vos trajets du quotidien.</p>
+      </div>
+      <div class="flex flex-col sm:flex-row gap-3 shrink-0">
+        <a href="<?= site_url('register') ?>"
+          class="bg-action hover:bg-action/90 transition-colors text-ink font-semibold text-sm rounded-xl px-5 py-2.5 text-center">
+          Créer un compte
+        </a>
+        <a href="<?= site_url('journeys') ?>"
+          class="bg-paper hover:bg-action/10 border border-action/20 transition-colors text-ink/70 font-semibold text-sm rounded-xl px-5 py-2.5 text-center">
+          Voir les trajets
+        </a>
+      </div>
     </div>
-    <div class="flex flex-col sm:flex-row gap-3 shrink-0">
-      <a href="<?= site_url('register') ?>"
-        class="bg-action hover:bg-action/90 transition-colors text-ink font-semibold text-sm rounded-xl px-5 py-2.5 text-center">
-        Créer un compte
-      </a>
-      <a href="<?= site_url('journeys') ?>"
-        class="bg-paper hover:bg-action/10 border border-action/20 transition-colors text-ink/70 font-semibold text-sm rounded-xl px-5 py-2.5 text-center">
-        Voir les trajets
-      </a>
-    </div>
-  </div>
   <?php endif; ?>
 
 </div>
