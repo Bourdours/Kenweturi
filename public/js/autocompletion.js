@@ -9,6 +9,8 @@
  *  results['x'] (longitude)
  *  results['y'] (latitude)
  *  results['fulltext'] (adresse complète)
+ *  results['city'] (nom de la ville)
+ *  results['zipcode'] (code postal)
  * 
  * Lorsque que l'utilisateur choisie l'une des suggestions (click), ses données sont affectées à la valeur de l'input concernée (fulltext)
  * ainsi qu'à des inputs chachés (pour x et y).
@@ -116,6 +118,8 @@ if (addressInputs.length) {
         item.classList.add('autocomplete-item');
         item.dataset.lng = suggestion.x;
         item.dataset.lat = suggestion.y;
+        item.dataset.city = suggestion.city;
+        item.dataset.zipcode = suggestion.zipcode;
         item.textContent = suggestion.fulltext;
         return item;
     }
@@ -134,6 +138,8 @@ if (addressInputs.length) {
         input.value = item.textContent;
         input.parentElement.querySelector('.lng').value = item.dataset.lng;
         input.parentElement.querySelector('.lat').value = item.dataset.lat;
+        input.parentElement.querySelector('.city').value = item.dataset.city;
+        input.parentElement.querySelector('.zipcode').value = item.dataset.zipcode;
         closeList(list);
     }
 

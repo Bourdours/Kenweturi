@@ -16,7 +16,7 @@ class StageModel extends BaseModel
     ];
 
     protected $validationRules = [
-        'departure_time' => 'required|valid_time',
+        'departure_time' => 'required|valid_date[H:i:s]',
         'position' => 'required|integer|greater_than[0]',
         'location_id' => 'required|integer',
         'journey_id' => 'required|integer'
