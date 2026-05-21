@@ -33,10 +33,12 @@ class AuthController extends BaseController
         if (session()->get('isLoggedIn')) {
             return redirect()->to('/');
         }
-        return view('Auth/register', [
-             'title' => 'Inscription'
-        ]
-        
+        return view(
+            'Auth/register',
+            [
+                'title' => 'Inscription'
+            ]
+
         );
     }
 
@@ -51,7 +53,7 @@ class AuthController extends BaseController
             return redirect()->to('/');
         }
         return view('Auth/login', [
-             'title' => 'Connexion'
+            'title' => 'Connexion'
         ]);
     }
 
@@ -129,16 +131,41 @@ class AuthController extends BaseController
             ]);
         }
 
-        // Récupération des données liées à la ville depuis le formulaire
+        // Récupération des données liées à la ville depuis le formulaireu
         $cityName = $this->request->getPost('cityName');
         $zipCode  = $this->request->getPost('postalCode');
 
         // Gestion de la table 'cities' (Ville)
         // On vérifie si la ville existe déjà pour éviter les doublons
-        // $existingCity = $this->cityModel->where('name', $cityName)->first();
 
-        $cityName = trim($this->request->getPost('cityName'));
-        $zipCode  = trim($this->request->getPost('postalCode'));
+        // Interrogation de l'API Géo pour récupérer les communes correspondant au code postal saisi
+        $apiUrl        = "https://geo.api.gouv.fr/communes?codePostal={$zipCode}&fields=nom";
+        $apiResponse   = @file_get_contents($apiUrl);
+
+        
+        if ($apiResponse === false) {
+            return redirect()->back()->withInput()->with('errors', [
+                'cityName' => 'Impossible de vérifier la ville. Veuillez réessayer.'
+            ]);
+        }
+
+        $municipalities  = json_decode($apiResponse, true);
+        // Supprime accents, casse et caractères spéciaux
+        $normalize       = fn($s) => strtolower(preg_replace(
+            '/[^a-z0-9]/i',
+            '',
+            iconv('UTF-8', 'ASCII//TRANSLIT', $s)
+        ));
+
+        $normalizedCity  = $normalize($cityName);
+        $isCityValid     = !empty(array_filter($municipalities, fn($m) => $normalize($m['nom']) === $normalizedCity));
+
+        // Si aucune correspondance trouvée, on rejette le formulaire
+        if (!$isCityValid) {
+            return redirect()->back()->withInput()->with('errors', [
+                'cityName' => 'La ville et le code postal ne correspondent pas à une commune valide.'
+            ]);
+        }
 
         $existingCity = $this->cityModel->where(['name' => $cityName, 'zipcode' => $zipCode])->first();
 
@@ -239,10 +266,11 @@ class AuthController extends BaseController
      * @return string
      */
     public function showForgotPasswordForm()
-    {    if (session()->get('isLoggedIn')) {
+    {
+        if (session()->get('isLoggedIn')) {
             return redirect()->to('/');
         }
-        
+
         return view('Auth/forgotPassword', [
             'title' => 'Mot de passe oublié'
         ]);

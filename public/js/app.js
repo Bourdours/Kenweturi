@@ -10,7 +10,7 @@ if (cityInput && zipInput) {
   let isValid = false;
 
   if (cityInput.value.trim() && zipInput.value.trim().length === 5) {
-    isValid = true;
+    validateCityZip();
   }
 
   /**
@@ -130,9 +130,9 @@ if (cityInput && zipInput) {
     const typedCity = cityInput.value.trim();
     const typedZip = zipInput.value.trim();
 
-    if (isValid && typedCity && typedZip.length === 5) {
-      return;
-    }
+    // if (isValid && typedCity && typedZip.length === 5) {
+    //   return;
+    // }
 
     if (!typedCity || typedZip.length !== 5) {
       isValid = false;
