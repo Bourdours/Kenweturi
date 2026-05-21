@@ -98,6 +98,19 @@ class UserController extends BaseController
                 ->with('error', 'Ce compte n\'existe plus.');
         }
 
+        $inputPassword = $this->request->getPost('deleteAccountPassword');
+
+
+        if (empty($inputPassword)) {
+            return redirect()->back()
+                ->with('error', 'Veuillez saisir votre mot de passe pour confirmer la suppression.');
+        }
+
+        if (!password_verify($inputPassword, $user['password_hash'])) {
+            return redirect()->back()
+                ->with('error', 'Le mot de passe saisi est incorrect.');
+        }
+
         // Envoi de l'email de confirmation de suppression
         $mailer = new MailerExample();
         $mailer->sendHtml(
@@ -146,7 +159,7 @@ class UserController extends BaseController
         ];
 
         $newPassword     = $this->request->getPost('newPasswordProfile');
-        
+
         // Si l'utilisateur souhaite changer son mot de passe
         if (!empty($newPassword)) {
             $currentPassword = $this->request->getPost('currentPasswordProfile');
