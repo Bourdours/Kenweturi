@@ -62,13 +62,15 @@ class UserController extends BaseController
         // Récupération de l'utilisateur et de sa ville depuis la session
         $userId = session()->get('user_id');
         $user   = $this->userModel->find($userId);
-        $city   = $this->cityModel->find($user['city_id']);
+
 
         if (!$user) {
             session()->destroy();
             return redirect()->to(site_url('login'))
                 ->with('error', 'Ce compte n\'existe plus.');
         }
+
+        $city   = $this->cityModel->find($user['city_id']);
 
         return view('profile/edit', [
             'title'        => 'Modifier mon profil',
@@ -89,6 +91,12 @@ class UserController extends BaseController
     {
         $userId = session()->get('user_id');
         $user   = $this->userModel->find($userId);
+
+        if (!$user) {
+            session()->destroy();
+            return redirect()->to(site_url('login'))
+                ->with('error', 'Ce compte n\'existe plus.');
+        }
 
         // Envoi de l'email de confirmation de suppression
         $mailer = new MailerExample();
@@ -134,11 +142,11 @@ class UserController extends BaseController
             'genderProfile'    => 'required|in_list[Homme,Femme,Autre]',
             'birthDateProfile' => 'required|valid_date',
             'biographyProfile' => 'max_length[200]',
+            'avatarProfile' => 'is_image[avatarProfile]|mime_in[avatarProfile,image/jpeg,image/png,image/webp]|max_size[avatarProfile,2048]',
         ];
 
         $newPassword     = $this->request->getPost('newPasswordProfile');
-        $confirmPassword = $this->request->getPost('confirmPasswordProfile');
-
+        
         // Si l'utilisateur souhaite changer son mot de passe
         if (!empty($newPassword)) {
             $currentPassword = $this->request->getPost('currentPasswordProfile');
@@ -167,6 +175,11 @@ class UserController extends BaseController
             ],
             'biographyProfile' => [
                 'max_length' => 'La biographie ne peut pas dépasser 200 caractères.',
+            ],
+            'avatarProfile' => [
+                'is_image'  => 'Le fichier doit être une image.',
+                'mime_in'   => 'Les formats acceptés sont : JPG, PNG, WebP.',
+                'max_size'  => 'L\'image ne doit pas dépasser 2 Mo.',
             ],
         ];
 
