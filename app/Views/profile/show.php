@@ -5,7 +5,7 @@
 /** @var string $memberSince */
 /** @var bool $isOwnProfile */
 ?>
-<?= view('partials/head', ['extraJs' => [base_url('js/user.js')]]) ?>
+<?= view('partials/head', ['extraJs' => [base_url('js/auth.js'), base_url('js/user.js')]]) ?>
 <?= view('partials/header') ?>
 
 <div class="max-w-4xl mx-auto py-10 px-6 md:px-8 flex flex-col gap-6">
@@ -14,6 +14,14 @@
     <div class="bg-success/10 border border-success/20 rounded-xl px-5 py-3 text-success text-sm flex items-center gap-2">
       <i class="fa-solid fa-circle-check shrink-0"></i>
       <?= session()->getFlashdata('success') ?>
+    </div>
+  <?php endif; ?>
+
+  <!-- Message d'erreur -->
+  <?php if (session()->getFlashdata('error')): ?>
+    <div class="bg-danger/10 border border-danger/20 rounded-xl px-5 py-3 text-danger text-sm flex items-center gap-2">
+      <i class="fa-solid fa-circle-exclamation shrink-0"></i>
+      <?= session()->getFlashdata('error') ?>
     </div>
   <?php endif; ?>
 
@@ -164,28 +172,46 @@
   <!-- Zone danger -->
   <?php if ($isOwnProfile): ?>
     <form action="<?= site_url('profile/delete') ?>" method="post" class="deleteAccount" id="formDeleteAccount">
-        <?= csrf_field() ?>
-        <button type="button" onclick="document.getElementById('modalSupprimer').style.display='flex'"
-            class="flex items-center gap-2 bg-danger/10 hover:bg-danger text-danger hover:text-white border border-danger/30 hover:border-danger font-semibold rounded-lg px-4 py-2 text-sm transition-colors cursor-pointer">
-            <i class="fa-solid fa-trash text-xs"></i>Supprimer mon compte
-        </button>
-    </form>
-  <div id="modalSupprimer" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:9999;">
-      <div class="bg-surface rounded-2xl p-6" style="max-width:400px; width:90%;">
+      <?= csrf_field() ?>
+      <button type="button" onclick="document.getElementById('modalSupprimer').style.display='flex'"
+        class="flex items-center gap-2 bg-danger/10 hover:bg-danger text-danger hover:text-white border border-danger/30 hover:border-danger font-semibold rounded-lg px-4 py-2 text-sm transition-colors cursor-pointer">
+        <i class="fa-solid fa-trash text-xs"></i>Supprimer mon compte
+      </button>
+
+      <!-- Modal -->
+      <div id="modalSupprimer" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:9999;">
+        <div class="bg-surface rounded-2xl p-6" style="max-width:400px; width:90%;">
           <h2 class="text-danger font-semibold font-display mb-2">Supprimer mon compte</h2>
           <p class="text-ink text-sm mb-6">La suppression de votre compte est irréversible. Êtes-vous sûr ?</p>
-          <div class="flex gap-3">
-              <button onclick="document.getElementById('modalSupprimer').style.display='none'"
-                  class="flex-1 border border-ink/20 text-ink rounded-lg px-4 py-2 text-sm font-semibold">
-                  Annuler
+          <div class="mb-5">
+            <label for="deleteAccountPassword" class="text-ink/50 text-xs font-medium mb-1.5 block">
+              Confirmez votre mot de passe
+            </label>
+            <div class="relative">
+              <input type="password" name="deleteAccountPassword" id="deleteAccountPassword" required
+                placeholder="••••••••"
+                class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 pr-9 outline-none focus:border-action/50 placeholder:text-ink/30" />
+              <button type="button" onclick="togglePassword('deleteAccountPassword', this)"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-ink/30 hover:text-action/60 transition-colors">
+                <i class="fa-regular fa-eye text-xs"></i>
               </button>
-              <button onclick="document.getElementById('formDeleteAccount').submit()"
-                  class="flex-1 bg-danger text-white rounded-lg px-4 py-2 text-sm font-semibold">
-                  Confirmer la suppression
-              </button>
+            </div>
+            <p id="deletePasswordError" class="text-danger text-xs mt-1.5 hidden">Veuillez saisir votre mot de passe.</p>
           </div>
+          <div class="flex gap-3">
+            <button type="button" onclick="document.getElementById('modalSupprimer').style.display='none'"
+              class="flex-1 border border-ink/20 text-ink rounded-lg px-4 py-2 text-sm font-semibold">
+              Annuler
+            </button>
+            <button type="button" onclick="document.getElementById('formDeleteAccount').submit()"
+              class="flex-1 bg-danger text-white rounded-lg px-4 py-2 text-sm font-semibold">
+              Confirmer la suppression
+            </button>
+          </div>
+        </div>
       </div>
-  </div>
+    </form>
+
   <?php endif; ?>
 
 </div>
