@@ -19,6 +19,18 @@ $routes->post('login', 'AuthController::login');
 // Route pour traiter la déconnexion
 $routes->get('logout', 'AuthController::logout');
 
+// Routes dashboard
+$routes->get('dashboard/journeys',  'DashboardController::showJourneys');
+$routes->get('dashboard/bookings',  'DashboardController::showBookings');
+$routes->get('dashboard/reports',   'DashboardController::showReports');
+$routes->get('dashboard/reports/(:num)', 'DashboardController::showReport/$1');
+$routes->get('dashboard',           'DashboardController::show');
+
+// Routes bookings
+$routes->post('dashboard/bookings/(:num)/delete', 'BookingController::delete/$1');
+$routes->post('dashboard/bookings/(:num)/accept', 'BookingController::accept/$1');
+$routes->post('dashboard/bookings/(:num)/reject', 'BookingController::reject/$1');
+
 // Routes journeys
 $routes->get('journeys',                 'JourneyController::showAll');
 $routes->get('journeys/new',             'JourneyController::showCreateForm');
