@@ -22,18 +22,49 @@ if (modal) {
   modal.addEventListener('click', closeAvatarModal);
 }
 
-// // Confirmation suppression de compte
-function confirmDelete(e) {
-  if (!confirm('Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.')) {
-    e.preventDefault();
-  }
-}
+// Confirmation suppression de compte
+const deleteForm = document.querySelector('#formDeleteAccount');
+const modalSupprimer = document.querySelector('#modalSupprimer');
+const btnOpenDeleteModal = document.querySelector('#btnOpenDeleteModal');
+const btnCancelDelete = document.querySelector('#btnCancelDelete');
+const deleteAccountPassword = document.querySelector('#deleteAccountPassword');
+const deletePasswordError = document.querySelector('#deletePasswordError');
 
-const deleteForm = document.querySelector('.deleteAccount');
-if (deleteForm) {
-  deleteForm.addEventListener('submit', confirmDelete);
-}
+if (deleteForm && modalSupprimer) {
+  
+  // Ouvrir le modal au clic sur "Supprimer mon compte"
+  btnOpenDeleteModal?.addEventListener('click', () => {
+    modalSupprimer.style.display = 'flex';
+    deleteAccountPassword.focus();
+  });
 
+  // Fermer le modal au clic sur "Annuler"
+  btnCancelDelete?.addEventListener('click', () => {
+    modalSupprimer.style.display = 'none';
+    deletePasswordError.classList.add('hidden');
+  });
+
+  // Fermer le modal si on clique à l'extérieur
+  modalSupprimer.addEventListener('click', (e) => {
+    if (e.target === modalSupprimer) {
+      modalSupprimer.style.display = 'none';
+      deletePasswordError.classList.add('hidden');
+    }
+  });
+
+  // Intercepter la soumission pour valider que ce n'est pas vide
+  deleteForm.addEventListener('submit', function (e) {
+    const passwordValue = deleteAccountPassword.value.trim();
+
+    if (!passwordValue) {
+      e.preventDefault();
+      deletePasswordError.classList.remove('hidden');
+      deleteAccountPassword.focus();
+    } else {
+      deletePasswordError.classList.add('hidden');
+    }
+  });
+}
 // Ajouter une voiture
 const CAR_BRANDS = [
   'Alfa Romeo', 'Aston Martin', 'Audi', 'Bentley', 'BMW', 'Bugatti',
