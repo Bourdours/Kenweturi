@@ -43,9 +43,9 @@ class JourneyModel extends BaseModel
     ];
 
     protected $validationRules = [
-        'start_datetime'    => 'required|valid_date|after_now',
+        'start_datetime'    => 'required|valid_date[Y-m-d H:i:s]|after_now',
         'seats'             => 'required|integer|greater_than_equal_to[1]|less_than_equal_to[8]',
-        'note'              => 'less_than_equal_to[1000]',
+        'note'              => 'permit_empty|string|max_length[1000]',
         'smoking'           => 'required|in_list[0,1]',
         'canceled_at'       => 'permit_empty|valid_date',
         'track_id'          => 'required|integer|is_not_unique[track.id]',
