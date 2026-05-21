@@ -127,6 +127,9 @@
           </div>
         </div>
 
+          <!-- Message d'erreur -->
+          <p class="errorMessage text-red-600 mb-4 w-full hidden"></p>
+
       </div>
     </div>
 

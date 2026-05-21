@@ -122,9 +122,7 @@
             </div>
           </div>
           <!-- Message d'erreur -->
-          <div>
-              <p class="errorMessage text-red-600 mb-4"></p>
-          </div>
+          <p class="errorMessage text-red-600 mb-4 hidden"></p>
           
           <div class="flex items-start gap-2.5 bg-action/5 border border-action/15 rounded-lg px-3 py-2.5">
             <i class="fa-solid fa-circle-info text-action/60 text-sm mt-0.5 shrink-0"></i>
