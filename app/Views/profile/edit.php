@@ -298,20 +298,7 @@
   </form>
 </div>
 
-<!-- Modal avatar -->
-<div id="avatarModal" class="hidden fixed inset-0 bg-black/80 z-[9999] items-center justify-center cursor-zoom-out">
-  <?php if (!empty($user['avatar'])): ?>
-    <img src="<?= esc(base_url($user['avatar'])) ?>" alt="Avatar de <?= esc($user['firstname']) ?>" class="max-w-[90vw] max-h-[90vh] rounded-lg object-contain shadow-[0_0_40px_rgba(0,0,0,0.5)]"
-      onerror="this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden'); this.nextElementSibling.classList.add('flex');">
-    <div class="hidden w-64 h-64 rounded-full bg-action-dark text-paper font-bold text-[5rem] items-center justify-center shadow-[0_0_40px_rgba(0,0,0,0.5)]">
-      <?= $initials ?>
-    </div>
-  <?php else: ?>
-    <div class="flex w-64 h-64 rounded-full bg-action-dark text-paper font-bold text-[5rem] items-center justify-center shadow-[0_0_40px_rgba(0,0,0,0.5)]">
-      <?= $initials ?>
-    </div>
-  <?php endif; ?>
-</div>
+<?= view('partials/avatar_modal', ['avatarSrc' => base_url($user['avatar'] ?? ''), 'firstname' => $user['firstname'], 'initials' => $initials]) ?>
 
 <!-- Modale suppression voiture -->
 <div id="deleteCarModal" class="hidden fixed inset-0 bg-black/60 z-[9999] items-center justify-center">
