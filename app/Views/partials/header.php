@@ -160,6 +160,5 @@ $registerClassMobile = $onLoginPage
 
   </header>
 
-  <script src="<?= base_url('js/header.js') ?>" defer></script>
 
   <main class="flex-1 bg-paper">

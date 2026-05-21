@@ -1,4 +1,9 @@
-<?= view('partials/head') ?>
+<?php
+
+/** @var array $user */
+?>
+<?= view('partials/head', ['extraJs' => [base_url('js/auth.js'), base_url('js/user.js')]]) ?>
+<script> window.baseUrl = "<?= base_url() ?>"; </script>
 <?= view('partials/header') ?>
 
 <div class="max-w-4xl mx-auto py-10 px-6 md:px-8 flex flex-col gap-6">
@@ -333,9 +338,4 @@
   </div>
 </div>
 
-<script src="<?= base_url('js/auth.js') ?>" defer></script>
-<script src="<?= base_url('js/user.js') ?>"></script>
-<script>
-  window.baseUrl = "<?= base_url() ?>";
-</script>
 <?= view('partials/footer') ?>

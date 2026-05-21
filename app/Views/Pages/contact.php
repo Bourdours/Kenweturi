@@ -1,5 +1,5 @@
 <?php /** @var \Config\Site $site */ ?>
-<?= view('partials/head') ?>
+<?= view('partials/head', ['extraJs' => [base_url('js/contact.js')]]) ?>
 <?= view('partials/header') ?>
 
 <div class="max-w-4xl mx-auto py-10 px-6 md:px-8 flex flex-col gap-6">
@@ -120,6 +120,5 @@
 
 </div>
 
-<script src="<?= base_url('js/contact.js') ?>" defer></script>
 
 <?= view('partials/footer') ?>
