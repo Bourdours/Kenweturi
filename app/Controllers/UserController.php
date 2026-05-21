@@ -102,12 +102,12 @@ class UserController extends BaseController
 
 
         if (empty($inputPassword)) {
-            return redirect()->back()
+            return redirect()->to(site_url('profile'))
                 ->with('error', 'Veuillez saisir votre mot de passe pour confirmer la suppression.');
         }
 
         if (!password_verify($inputPassword, $user['password_hash'])) {
-            return redirect()->back()
+            return redirect()->to(site_url('profile'))
                 ->with('error', 'Le mot de passe saisi est incorrect.');
         }
 
