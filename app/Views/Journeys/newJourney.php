@@ -1,4 +1,4 @@
-<?= view('partials/head') ?>
+<?= view('partials/head', ['extraJs' => [base_url('js/autocompletion.js')]]) ?>
 <?= view('partials/header') ?>
 
   <form id="addJourneyForm" action="/journeys/new" method="post">
@@ -58,6 +58,6 @@
 
   </form>
 
-<script src="<?= base_url('js/autocompletion.js') ?>" defer></script>
+</main>
 
 <?= view('partials/footer') ?>

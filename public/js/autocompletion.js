@@ -33,8 +33,7 @@ if (addressInputs.length) {
 
         // Création de la liste ul pour accueillir les suggestions li
         const list = document.createElement('ul');
-        list.classList.add('suggestions');
-        list.style.display = 'none';
+        list.classList.add('autocomplete-dropdown');
         input.parentElement.appendChild(list); // Parent qui englobe input et label
 
         // A chaque frappe dans un input, on lance un timer avant d'executer la requête
@@ -116,6 +115,7 @@ if (addressInputs.length) {
      */
     function createSuggestionItem(suggestion) {
         const item = document.createElement('li');
+        item.classList.add('autocomplete-item');
         item.dataset.lng = suggestion.x;
         item.dataset.lat = suggestion.y;
         item.dataset.city = suggestion.city;
