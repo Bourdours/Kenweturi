@@ -138,8 +138,8 @@ if (addressInputs.length) {
         input.value = item.textContent;
         input.parentElement.querySelector('.lng').value = item.dataset.lng;
         input.parentElement.querySelector('.lat').value = item.dataset.lat;
-        input.parentElement.querySelector('.city').value = item.dataset.city;
-        input.parentElement.querySelector('.zipcode').value = item.dataset.zipcode;
+        input.parentElement.querySelector('.city')?.setAttribute('value', item.dataset.city);
+        input.parentElement.querySelector('.zipcode')?.setAttribute('value', item.dataset.zipcode);
         closeList(list);
     }
 

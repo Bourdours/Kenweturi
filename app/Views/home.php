@@ -39,7 +39,7 @@
     </div>
 
     <!-- Formulaire de recherche -->
-    <form action="<?= site_url('journeys') ?>" method="GET" class="w-full max-w-2xl">
+    <form id="addJourneyForm" action="<?= site_url('journeys') ?>" method="GET" class="w-full max-w-2xl">
       <div class="bg-paper rounded-2xl p-5 border border-action/10 shadow-sm space-y-4 text-left">
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
