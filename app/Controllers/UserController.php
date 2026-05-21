@@ -133,6 +133,7 @@ class UserController extends BaseController
             'emailProfile'     => "required|valid_email|is_unique[user.email,id,{$userId}]",
             'genderProfile'    => 'required|in_list[Homme,Femme,Autre]',
             'birthDateProfile' => 'required|valid_date',
+            'biographyProfile' => 'max_length[200]',
         ];
 
         $newPassword     = $this->request->getPost('newPasswordProfile');
@@ -163,6 +164,9 @@ class UserController extends BaseController
             'confirmPasswordProfile' => [
                 'required' => 'Veuillez confirmer votre mot de passe.',
                 'matches'  => 'La confirmation ne correspond pas au mot de passe saisi.',
+            ],
+            'biographyProfile' => [
+                'max_length' => 'La biographie ne peut pas dépasser 200 caractères.',
             ],
         ];
 
