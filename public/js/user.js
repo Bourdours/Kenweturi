@@ -44,7 +44,7 @@ if (deleteForm && modalSupprimer) {
     deletePasswordError.classList.add('hidden');
   });
 
-  // Fermer le modal si on clique à l'extérieur (sur le fond sombre)
+  // Fermer le modal si on clique à l'extérieur
   modalSupprimer.addEventListener('click', (e) => {
     if (e.target === modalSupprimer) {
       modalSupprimer.style.display = 'none';
@@ -57,8 +57,8 @@ if (deleteForm && modalSupprimer) {
     const passwordValue = deleteAccountPassword.value.trim();
 
     if (!passwordValue) {
-      e.preventDefault(); // Bloque l'envoi vers le contrôleur PHP
-      deletePasswordError.classList.remove('hidden'); // Affiche le message d'erreur rouge
+      e.preventDefault();
+      deletePasswordError.classList.remove('hidden');
       deleteAccountPassword.focus();
     } else {
       deletePasswordError.classList.add('hidden');
