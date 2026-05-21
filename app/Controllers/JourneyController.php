@@ -151,6 +151,7 @@ class JourneyController extends BaseController{
             ->join('user u',             'u.id = journey.user_id')
             ->join('car',                'car.id = journey.car_id', 'left')
             ->where('journey.id', $id)
+            ->where('u.deleted_at', null)
             ->get()->getRowArray();
 
         if(!$journey)
@@ -199,19 +200,19 @@ class JourneyController extends BaseController{
         $lngEnd         = $this->request->getGet('endLng')   !== null ? (float) $this->request->getGet('endLng')   : null;
         $filterDate     = $this->request->getGet('date');
         $filterTime     = $this->request->getGet('time');
-        $availableSeats = $this->request->getGet('availableSeats') ?? 1;
+        $availableSeats = (int) ($this->request->getGet('availableSeats') ?? 1);
         $smoking        = $this->request->getGet('smoking');
-        $page           = $this->request->getGet('page') ?? 1;
-
+        $page           = (int) ($this->request->getGet('page') ?? 1);
+ 
         // --- Construction de la requête
         $db = \Config\Database::connect();
-
+ 
         if ($latStart && $lngStart) {
             $selectBoarding = "CASE WHEN (6371 * acos(cos(radians($latStart)) * cos(radians(loc_start.latitude)) * cos(radians(loc_start.longitude) - radians($lngStart)) + sin(radians($latStart)) * sin(radians(loc_start.latitude)))) <= 10 THEN city_start.name ELSE COALESCE((SELECT c.name FROM stage s JOIN location l ON l.id = s.location_id JOIN city c ON c.id = l.city_id WHERE s.journey_id = journey.id AND s.location_id != journey.location_end_id AND (6371 * acos(cos(radians($latStart)) * cos(radians(l.latitude)) * cos(radians(l.longitude) - radians($lngStart)) + sin(radians($latStart)) * sin(radians(l.latitude)))) <= 10 ORDER BY s.position ASC LIMIT 1), city_start.name) END";
         } else {
             $selectBoarding = 'city_start.name';
         }
-
+ 
         $builder = $db->table('journey')
             ->select("journey.*, city_start.name as city_start_name, city_end.name as city_end_name, u.firstname as driver_firstname, u.lastname as driver_lastname, (journey.seats - COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id), 0)) as remaining_seats, $selectBoarding as city_boarding_name")
             ->join('location loc_start', 'loc_start.id = journey.location_start_id')
@@ -219,59 +220,53 @@ class JourneyController extends BaseController{
             ->join('city city_start',    'city_start.id = loc_start.city_id')
             ->join('city city_end',      'city_end.id = loc_end.city_id')
             ->join('user u',             'u.id = journey.user_id')
-            ->join('stage', 'stage.journey_id = journey.id', 'left')
-            ->join('location loc_stage', 'loc_stage.id = stage.location_id', 'left')
             ->where('journey.canceled_at', null)
+            ->where('u.deleted_at', null)
             ->orderBy('journey.start_datetime', 'ASC');
-
+ 
         if ($latStart && $lngStart) {
-            $distStart = "(6371 * acos(cos(radians($latStart)) * cos(radians(loc_start.latitude)) * cos(radians(loc_start.longitude) - radians($lngStart)) + sin(radians($latStart)) * sin(radians(loc_start.latitude)))) <= 10";
-            $distStageStart = "(6371 * acos(cos(radians($latStart)) * cos(radians(loc_stage.latitude)) * cos(radians(loc_stage.longitude) - radians($lngStart)) + sin(radians($latStart)) * sin(radians(loc_stage.latitude)))) <= 10";
+            $distStart     = "(6371 * acos(cos(radians($latStart)) * cos(radians(loc_start.latitude)) * cos(radians(loc_start.longitude) - radians($lngStart)) + sin(radians($latStart)) * sin(radians(loc_start.latitude)))) <= 10";
+            $subStageStart = "journey.id IN (SELECT s.journey_id FROM stage s JOIN location l ON l.id = s.location_id WHERE l.id != journey.location_end_id AND (6371 * acos(cos(radians($latStart)) * cos(radians(l.latitude)) * cos(radians(l.longitude) - radians($lngStart)) + sin(radians($latStart)) * sin(radians(l.latitude)))) <= 10)";
             $builder->groupStart()
                         ->where($distStart, null, false)
-                        ->orGroupStart()
-                            ->where('loc_stage.id IS NOT NULL', null, false)
-                            ->where('loc_stage.id != journey.location_end_id', null, false)
-                            ->where($distStageStart, null, false)
-                        ->groupEnd()
+                        ->orWhere($subStageStart, null, false)
                     ->groupEnd();
         }
-
+ 
         if ($latEnd && $lngEnd) {
-            $distEnd = "(6371 * acos(cos(radians($latEnd)) * cos(radians(loc_end.latitude)) * cos(radians(loc_end.longitude) - radians($lngEnd)) + sin(radians($latEnd)) * sin(radians(loc_end.latitude)))) <= 10";
-            $distStageEnd = "(6371 * acos(cos(radians($latEnd)) * cos(radians(loc_stage.latitude)) * cos(radians(loc_stage.longitude) - radians($lngEnd)) + sin(radians($latEnd)) * sin(radians(loc_stage.latitude)))) <= 10";
+            $distEnd     = "(6371 * acos(cos(radians($latEnd)) * cos(radians(loc_end.latitude)) * cos(radians(loc_end.longitude) - radians($lngEnd)) + sin(radians($latEnd)) * sin(radians(loc_end.latitude)))) <= 10";
+            $subStageEnd = "journey.id IN (SELECT s.journey_id FROM stage s JOIN location l ON l.id = s.location_id WHERE l.id != journey.location_start_id AND (6371 * acos(cos(radians($latEnd)) * cos(radians(l.latitude)) * cos(radians(l.longitude) - radians($lngEnd)) + sin(radians($latEnd)) * sin(radians(l.latitude)))) <= 10)";
             $builder->groupStart()
                         ->where($distEnd, null, false)
-                        ->orGroupStart()
-                            ->where('loc_stage.id IS NOT NULL', null, false)
-                            ->where('loc_stage.id != journey.location_start_id', null, false)
-                            ->where($distStageEnd, null, false)
-                        ->groupEnd()
+                        ->orWhere($subStageEnd, null, false)
                     ->groupEnd();
         }
-
+ 
         if ($filterDate && $filterTime) {
-            $builder->where('journey.start_datetime >=', $filterDate . ' ' . $filterTime . ':00');
+            $dateTimeCenter = strtotime($filterDate . ' ' . $filterTime . ':00');
+            $dateTimeFrom   = date('Y-m-d H:i:s', $dateTimeCenter - 1800);
+            $dateTimeTo     = date('Y-m-d H:i:s', $dateTimeCenter + 1800);
+            $builder->where('journey.start_datetime >=', $dateTimeFrom)
+                    ->where('journey.start_datetime <=', $dateTimeTo);
         }
+ 
         elseif ($filterDate)
             $builder->where('DATE(journey.start_datetime)', $filterDate);
         else
             $builder->where('journey.start_datetime >=', date('Y-m-d H:i:s'));
-
+ 
         if ($availableSeats)
             $builder->where("(journey.seats - COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id), 0)) >=", $availableSeats);
-
+ 
         if ($smoking !== null && $smoking !== '')
             $builder->where('journey.smoking', $smoking);
-
-        $builder->groupBy('journey.id');
-
+ 
         // --- Pagination
         $perPage  = 5;
         $total    = $builder->countAllResults(false);
         $journeys = $builder->limit($perPage, ($page - 1) * $perPage)->get()->getResultArray();
         $pager    = \Config\Services::pager();
-
+ 
         return view('Journeys/journeyShowAll', [
             'title'          => 'Rechercher un trajet',
             'journeys'       => $journeys,

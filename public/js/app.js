@@ -9,6 +9,10 @@ if (cityInput && zipInput) {
 
   let isValid = false;
 
+  if (cityInput.value.trim() && zipInput.value.trim().length === 5) {
+    isValid = true;
+  }
+
   /**
    * @var {HTMLDivElement} dropdown - Création dynamique de l'élément conteneur 
    * qui affichera la liste des suggestions sous le champ de saisie de la Ville.
@@ -34,7 +38,10 @@ if (cityInput && zipInput) {
 
     cityInput.style.borderColor = "";
     zipInput.style.borderColor = "";
-    if (errorText) errorText.textContent = "";
+    if (errorText) {
+      errorText.textContent = "";
+      errorText.classList.add('hidden');
+    }
 
     if (val.length < 2) { closeDropdown(); return; }
     debounceTimer = setTimeout(() => fetchCities(val), 250);
@@ -50,7 +57,10 @@ if (cityInput && zipInput) {
 
     cityInput.style.borderColor = "";
     zipInput.style.borderColor = "";
-    if (errorText) errorText.textContent = "";
+    if (errorText) {
+      errorText.textContent = "";
+      errorText.classList.add('hidden');
+    }
 
     if (zipVal.length === 5 && /^\d+$/.test(zipVal)) {
       try {
@@ -63,12 +73,16 @@ if (cityInput && zipInput) {
           isValid = true;
           cityInput.style.borderColor = "";
           zipInput.style.borderColor = "";
-          if (errorText) errorText.textContent = "";
+          if (errorText) {
+            errorText.textContent = "";
+            errorText.classList.add('hidden');
+          }
         } else {
           zipInput.style.borderColor = "red";
           isValid = false;
           if (errorText) {
             errorText.textContent = "Le code postal et la ville ne correspondent pas à une commune valide.";
+            errorText.classList.remove('hidden');
           }
         }
       } catch (error) {
@@ -139,13 +153,17 @@ if (cityInput && zipInput) {
         isValid = true;
         cityInput.style.borderColor = ""; // Remet le champ à son aspect normal
         zipInput.style.borderColor = "";
-        if (errorText) errorText.textContent = "";
+        if (errorText) {
+          errorText.textContent = "";
+          errorText.classList.add('hidden');
+        }
       } else {
         cityInput.style.borderColor = "red";
         zipInput.style.borderColor = "red";
         isValid = false;
         if (errorText) {
           errorText.textContent = "Le code postal et la ville ne correspondent pas à une commune valide.";
+          errorText.classList.remove('hidden');
         }
       }
     } catch (error) {
@@ -202,6 +220,7 @@ if (cityInput && zipInput) {
       if (!isValid) {
         e.preventDefault(); // Bloque l'envoi vers PHP si la ville est incorrecte
         errorText.textContent = "Le code postal et la ville ne correspondent pas à une commune valide.";
+        errorText.classList.remove('hidden');
       }
     });
   }
