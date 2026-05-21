@@ -8,6 +8,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="<?= base_url('js/app.js') ?>" defer></script>
     <script src="<?= base_url('js/car-cursor.js') ?>" defer></script>
+    <script src="<?= base_url('js/header.js') ?>" defer></script>
     <title><?= isset($title) ? $title . ', Kenweturi' : 'Kenweturi' ?></title>
     <link rel="stylesheet" href="<?= base_url('css/tailwind.css') ?>">
+    <?php foreach ($extraCss ?? [] as $href) : ?>
+        <link rel="stylesheet" href="<?= $href ?>">
+    <?php endforeach ?>
+    <?php foreach ($extraJs ?? [] as $src) : ?>
+        <script src="<?= $src ?>" defer></script>
+    <?php endforeach ?>
 </head>

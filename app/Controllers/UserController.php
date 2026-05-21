@@ -4,7 +4,9 @@ namespace App\Controllers;
 
 use App\Models\UserModel;
 use App\Models\CityModel;
+use App\Libraries\MailerExample;
 use CodeIgniter\I18n\Time;
+use App\Models\CarModel;
 
 class UserController extends BaseController
 {
@@ -15,6 +17,7 @@ class UserController extends BaseController
     {
         $this->userModel = new UserModel();
         $this->cityModel = new CityModel();
+        $this->carModel  = new CarModel();
     }
 
     /**
@@ -27,7 +30,7 @@ class UserController extends BaseController
         // Récupération de l'utilisateur et de sa ville depuis la session
         $userId = session()->get('user_id');
         $user   = $this->userModel->find($userId);
-        $city   = $this->cityModel->find($user['city_id']);
+
 
         if (!$user) {
             session()->destroy();
@@ -35,12 +38,15 @@ class UserController extends BaseController
                 ->with('error', 'Ce compte n\'existe plus.');
         }
 
+
+        $city        = $this->cityModel->find($user['city_id']);
         $memberSince = ucfirst(Time::parse($user['registered_at'], 'Europe/Paris', 'fr_FR')->toLocalizedString('MMMM yyyy'));
 
         return view('profile/show', [
             'title'        => 'Mon profil',
             'user'         => $user,
             'city'         => $city['name'] ?? null,
+            'cars'         => $this->carModel->where('user_id', $userId)->findAll(),
             'isOwnProfile' => true,
             'memberSince'  => $memberSince,
         ]);
@@ -56,7 +62,7 @@ class UserController extends BaseController
         // Récupération de l'utilisateur et de sa ville depuis la session
         $userId = session()->get('user_id');
         $user   = $this->userModel->find($userId);
-        $city   = $this->cityModel->find($user['city_id']);
+
 
         if (!$user) {
             session()->destroy();
@@ -64,11 +70,15 @@ class UserController extends BaseController
                 ->with('error', 'Ce compte n\'existe plus.');
         }
 
+        $city   = $this->cityModel->find($user['city_id']);
+
         return view('profile/edit', [
             'title'        => 'Modifier mon profil',
             'user'         => $user,
             'city'         => $city['name'] ?? null,
+            'zipcode'      => $city['zipcode'] ?? null,
             'isOwnProfile' => true,
+            'cars'         => $this->carModel->where('user_id', $userId)->findAll(),
         ]);
     }
 
@@ -80,6 +90,21 @@ class UserController extends BaseController
     public function delete()
     {
         $userId = session()->get('user_id');
+        $user   = $this->userModel->find($userId);
+
+        if (!$user) {
+            session()->destroy();
+            return redirect()->to(site_url('login'))
+                ->with('error', 'Ce compte n\'existe plus.');
+        }
+
+        // Envoi de l'email de confirmation de suppression
+        $mailer = new MailerExample();
+        $mailer->sendHtml(
+            $user['email'],
+            'Votre compte a été supprimé',
+            $this->accountDeletedEmail($user['firstname'], $user['lastname'])
+        );
 
         $this->userModel->delete($userId);
         session()->destroy();
@@ -116,11 +141,12 @@ class UserController extends BaseController
             'emailProfile'     => "required|valid_email|is_unique[user.email,id,{$userId}]",
             'genderProfile'    => 'required|in_list[Homme,Femme,Autre]',
             'birthDateProfile' => 'required|valid_date',
+            'biographyProfile' => 'max_length[200]',
+            'avatarProfile' => 'is_image[avatarProfile]|mime_in[avatarProfile,image/jpeg,image/png,image/webp]|max_size[avatarProfile,2048]',
         ];
 
         $newPassword     = $this->request->getPost('newPasswordProfile');
-        $confirmPassword = $this->request->getPost('confirmPasswordProfile');
-
+        
         // Si l'utilisateur souhaite changer son mot de passe
         if (!empty($newPassword)) {
             $currentPassword = $this->request->getPost('currentPasswordProfile');
@@ -147,6 +173,14 @@ class UserController extends BaseController
                 'required' => 'Veuillez confirmer votre mot de passe.',
                 'matches'  => 'La confirmation ne correspond pas au mot de passe saisi.',
             ],
+            'biographyProfile' => [
+                'max_length' => 'La biographie ne peut pas dépasser 200 caractères.',
+            ],
+            'avatarProfile' => [
+                'is_image'  => 'Le fichier doit être une image.',
+                'mime_in'   => 'Les formats acceptés sont : JPG, PNG, WebP.',
+                'max_size'  => 'L\'image ne doit pas dépasser 2 Mo.',
+            ],
         ];
 
         // Retour au formulaire avec les erreurs si la validation échoue
@@ -154,9 +188,30 @@ class UserController extends BaseController
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
+        $cityName = trim($this->request->getPost('cityProfile')    ?? '');
+        $zipcode  = trim($this->request->getPost('zipcodeProfile') ?? '');
+
+        if (!empty($cityName)) {
+            $cityRow = $this->cityModel->where('name', $cityName)->first();
+            if ($cityRow) {
+                $data['city_id'] = $cityRow['id'];
+            } else {
+                $this->cityModel->insert(['name' => $cityName, 'zipcode' => $zipcode]);
+                $data['city_id'] = $this->cityModel->getInsertID();
+            }
+        }
+
         // Hachage du nouveau mot de passe si renseigné
         if (!empty($newPassword)) {
             $data['password_hash'] = password_hash($newPassword, PASSWORD_DEFAULT);
+
+            // Envoi de la notification par email
+            $mailer = new MailerExample();
+            $mailer->sendHtml(
+                $user['email'],
+                'Votre mot de passe a été modifié',
+                $this->passwordChangedEmail($user['firstname'], $user['lastname'])
+            );
         }
 
         // Gestion de l'upload de l'avatar
@@ -179,5 +234,39 @@ class UserController extends BaseController
         ]);
 
         return redirect()->to(site_url('profile'))->with('success', 'Profil mis à jour avec succès.');
+    }
+
+    /**
+     * Construit le corps HTML de l'email de notification de changement de mot de passe
+     *
+     * @param  string $firstname Prénom de l'utilisateur 
+     * @param  string $lastname  Nom de l'utilisateur
+     * @return string Corps HTML de l'email
+     */
+    private function passwordChangedEmail(string $firstname, string $lastname): string
+    {
+        return view('Emails/passwordChanged', [
+            'firstname' => $firstname,
+            'lastname'  => $lastname,
+            'date'      => ucfirst(Time::now('Europe/Paris', 'fr_FR')->toLocalizedString('d MMMM yyyy à HH:mm')),
+            'support'   => env('mailer.from'),
+        ]);
+    }
+
+    /**
+     * Construit le corps HTML de l'email de notification de suppression de compte
+     *
+     * @param  string $firstname Prénom de l'utilisateur
+     * @param  string $lastname  Nom de l'utilisateur
+     * @return string Corps HTML de l'email
+     */
+    private function accountDeletedEmail(string $firstname, string $lastname): string
+    {
+        return view('Emails/accountDeleted', [
+            'firstname' => $firstname,
+            'lastname'  => $lastname,
+            'date'      => ucfirst(Time::now('Europe/Paris', 'fr_FR')->toLocalizedString('d MMMM yyyy à HH:mm')),
+            'support'   => env('mailer.from'),
+        ]);
     }
 }

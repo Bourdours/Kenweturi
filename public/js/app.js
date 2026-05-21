@@ -1,86 +1,237 @@
 // Champs du formulaire
-const inputVille = document.querySelector('input[name="cityName"]');
-const inputCp    = document.querySelector('input[name="postalCode"]');
+const cityInput = document.querySelector('input[name="cityName"]');
+const zipInput = document.querySelector('input[name="postalCode"]');
+const form = cityInput ? cityInput.closest('form') : null;
+const errorText = document.querySelector('.errorMessage');
 
-if (inputVille && inputCp) {
+// Le script ne s'exécute que si les deux champs cibles (Ville et Code Postal) existent sur la page
+if (cityInput && zipInput) {
 
-  // Création du dropdown
+  let isValid = false;
+
+  if (cityInput.value.trim() && zipInput.value.trim().length === 5) {
+    isValid = true;
+  }
+
+  /**
+   * @var {HTMLDivElement} dropdown - Création dynamique de l'élément conteneur 
+   * qui affichera la liste des suggestions sous le champ de saisie de la Ville.
+   */
   const dropdown = document.createElement('div');
-  dropdown.style.cssText = `
-    display: none;
-    position: absolute;
-    background: white;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    max-height: 200px;
-    overflow-y: auto;
-    z-index: 1000;
-    width: 100%;
-  `;
-  inputVille.parentElement.style.position = 'relative';
-  inputVille.parentElement.appendChild(dropdown);
+  dropdown.classList.add('autocomplete-dropdown');
+  cityInput.parentElement.style.position = 'relative';
+  cityInput.parentElement.appendChild(dropdown);
 
+  /**
+   * @var {number|null} debounceTimer - ID du chronomètre pour la fonction "debounce".
+   */
   let debounceTimer = null;
 
-  // Attendre 250ms après la dernière frappe avant d'appeler l'API
-  inputVille.addEventListener('input', () => {
+  /**
+   * Événement 'input' sur le champ VILLE.
+   * Se déclenche à chaque modification du texte. Gère le délai d'attente
+   * et efface les alertes visuelles d'erreur dès que l'utilisateur corrige sa saisie.
+   */
+  cityInput.addEventListener('input', () => {
     clearTimeout(debounceTimer);
-    const val = inputVille.value.trim();
-    if (val.length < 2) { fermerDropdown(); return; }
-    debounceTimer = setTimeout(() => fetchCommunes(val), 250);
+    const val = cityInput.value.trim();
+
+    cityInput.style.borderColor = "";
+    zipInput.style.borderColor = "";
+    if (errorText) {
+      errorText.textContent = "";
+      errorText.classList.add('hidden');
+    }
+
+    if (val.length < 2) { closeDropdown(); return; }
+    debounceTimer = setTimeout(() => fetchCities(val), 250);
   });
 
-  // Appel API
-  async function fetchCommunes(nom) {
+  /**
+  * Événement 'input' sur le champ CODE POSTAL.
+  * Déclenché à chaque chiffre tapé. Dès que la saisie atteint exactement 5 chiffres, 
+  * une requête API recherche la commune associée pour remplir automatiquement la Ville.
+  */
+  zipInput.addEventListener('input', async () => {
+    const zipVal = zipInput.value.trim();
+
+    cityInput.style.borderColor = "";
+    zipInput.style.borderColor = "";
+    if (errorText) {
+      errorText.textContent = "";
+      errorText.classList.add('hidden');
+    }
+
+    if (zipVal.length === 5 && /^\d+$/.test(zipVal)) {
+      try {
+        const url = `https://geo.api.gouv.fr/communes?codePostal=${zipVal}&fields=nom`;
+        const res = await fetch(url);
+        const cities = await res.json();
+
+        if (cities.length > 0) {
+          cityInput.value = cities[0].nom;
+          isValid = true;
+          cityInput.style.borderColor = "";
+          zipInput.style.borderColor = "";
+          if (errorText) {
+            errorText.textContent = "";
+            errorText.classList.add('hidden');
+          }
+        } else {
+          zipInput.style.borderColor = "red";
+          isValid = false;
+          if (errorText) {
+            errorText.textContent = "Le code postal et la ville ne correspondent pas à une commune valide.";
+            errorText.classList.remove('hidden');
+          }
+        }
+      } catch (error) {
+        console.error("Erreur lors de la recherche du code postal :", error);
+        isValid = false;
+      }
+    } else {
+      isValid = false;
+    }
+  });
+
+  /**
+   * Interroge l'API Géo pour obtenir la liste des villes contenant le nom saisi.
+   * * @async
+   * @function fetchCities
+   * @param {string} name - Le nom (ou début de nom) de la commune recherchée
+   * @returns {Promise<void>} - Transmet les données au dropdown.
+   */
+  async function fetchCities(name) {
     try {
-      const url = `https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(nom)}&fields=nom,codesPostaux,codeDepartement&boost=population&limit=8`;
-      const res      = await fetch(url);
-      const communes = await res.json();
-      afficherDropdown(communes);
+      const url = `https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(name)}&fields=nom,codesPostaux,codeDepartement&boost=population&limit=8`;
+      const res = await fetch(url);
+      const cities = await res.json();
+      displayDropdown(cities);
     } catch (e) {
-      fermerDropdown();
+      closeDropdown();
     }
   }
 
-  // Affiche les suggestions
-  function afficherDropdown(communes) {
+  /**
+  * Lorsque l'utilisateur clique en dehors d'un des deux champs, on relance une 
+  * vérification s'assurer que la ville écrite correspond au CP écrit.
+  */
+  cityInput.addEventListener('blur', validateCityZip);
+  zipInput.addEventListener('blur', validateCityZip);
+
+  /**
+  * Effectue la vérification finale de cohérence entre la ville saisie et le code postal saisi.
+  * Télécharge toutes les communes valides pour le code postal donné et cherche une correspondance.
+  * * @async
+  * @function validateCityZip
+  * @returns {Promise<void>} - Modifie la variable globale 'isValid' et ajuste les styles CSS.
+  */
+  async function validateCityZip() {
+    const typedCity = cityInput.value.trim();
+    const typedZip = zipInput.value.trim();
+
+    if (isValid && typedCity && typedZip.length === 5) {
+      return;
+    }
+
+    if (!typedCity || typedZip.length !== 5) {
+      isValid = false;
+      return;
+    }
+
+    try {
+      const url = `https://geo.api.gouv.fr/communes?codePostal=${typedZip}&fields=nom`;
+      const res = await fetch(url);
+      const cities = await res.json();
+
+      const normalize = (str) => str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+      const typedCityNorm = normalize(typedCity);
+
+      const isMatchFound = cities.some(c => normalize(c.nom) === typedCityNorm);
+
+      if (isMatchFound) {
+        isValid = true;
+        cityInput.style.borderColor = ""; // Remet le champ à son aspect normal
+        zipInput.style.borderColor = "";
+        if (errorText) {
+          errorText.textContent = "";
+          errorText.classList.add('hidden');
+        }
+      } else {
+        cityInput.style.borderColor = "red";
+        zipInput.style.borderColor = "red";
+        isValid = false;
+        if (errorText) {
+          errorText.textContent = "Le code postal et la ville ne correspondent pas à une commune valide.";
+          errorText.classList.remove('hidden');
+        }
+      }
+    } catch (error) {
+      console.error("Impossible de vérifier la correspondance :", error);
+      isValid = false;
+    }
+  }
+
+  /**
+  * Génère les éléments HTML à l'intérieur du dropdown pour afficher les suggestions trouvées.
+  * * @function displayDropdown
+  * @param {Array<Object>} cities - Tableau d'objets communes renvoyé par l'API fetchCities.
+  */
+  function displayDropdown(cities) {
     dropdown.innerHTML = '';
-    if (!communes.length) { fermerDropdown(); return; }
+    if (!cities.length) { closeDropdown(); return; }
 
-    communes.forEach(c => {
-      const cp   = c.codesPostaux?.[0] ?? '';
+    cities.forEach(c => {
+      const zip = c.codesPostaux?.[0] ?? '';
       const item = document.createElement('div');
-      item.textContent = `${c.nom} (${cp})`;
-      item.style.cssText = 'padding: 8px 12px; cursor: pointer; font-size: 14px;';
-
-      // Survol
-      item.addEventListener('mouseenter', () => item.style.background = '#f0f0f0');
-      item.addEventListener('mouseleave', () => item.style.background = 'white');
+      item.textContent = `${c.nom} (${zip})`;
+      item.classList.add('autocomplete-item');
 
       // Sélection d'une ville
       item.addEventListener('mousedown', (e) => {
         e.preventDefault();
-        inputVille.value = c.nom;
-        inputCp.value    = cp; // Remplit le code postal automatiquement
-        fermerDropdown();
+        cityInput.value = c.nom;
+        zipInput.value = zip; // Remplit le code postal automatiquement
+        validateCityZip();
+        closeDropdown();
       });
 
       dropdown.appendChild(item);
     });
 
-    dropdown.style.display = 'block';
+    dropdown.style.display = 'block'; // 'none' est le défaut CSS, on force block à l'ouverture
   }
 
-  // Vide et cache le dropdown
-  function fermerDropdown() {
+  /**
+  * Nettoie le contenu HTML de la boîte de suggestions et la masque visuellement.
+  * * @function closeDropdown
+  */
+  function closeDropdown() {
     dropdown.style.display = 'none';
     dropdown.innerHTML = '';
   }
 
-  // Ferme le dropdown si clic en dehors
+  /**
+    * Événement 'submit' sur le formulaire.
+    * Si 'isValid' est faux, empêche l'envoi des données vers le traitement PHP/Backend.
+    */
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      if (!isValid) {
+        e.preventDefault(); // Bloque l'envoi vers PHP si la ville est incorrecte
+        errorText.textContent = "Le code postal et la ville ne correspondent pas à une commune valide.";
+        errorText.classList.remove('hidden');
+      }
+    });
+  }
+
+  /**
+   * Permet de fermer le menu d'autocomplétion si l'utilisateur clique 
+   * n'importe où ailleurs sur la page
+   */
   document.addEventListener('click', (e) => {
-    if (!inputVille.contains(e.target) && !dropdown.contains(e.target)) {
-      fermerDropdown();
+    if (!cityInput.contains(e.target) && !dropdown.contains(e.target)) {
+      closeDropdown();
     }
   });
 

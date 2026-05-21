@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 /**
@@ -10,6 +11,10 @@ class ReportModel extends BaseModel
     protected $table            = 'report';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
+
+    protected $useTimestamps = true;
+    protected $createdField  = 'created_at';
+    protected $updatedField  = '';
 
     protected $allowedFields = [
         'title',
@@ -47,4 +52,6 @@ class ReportModel extends BaseModel
             'is_not_unique'      => 'Cet utilisateur n\'existe pas.',
         ],
     ];
+
+    
 }

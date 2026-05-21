@@ -1,7 +1,7 @@
-<?= view('partials/head') ?>
+<?= view('partials/head', ['extraJs' => [base_url('js/auth.js')]]) ?>
 <?= view('partials/header') ?>
 
-<div class="max-w-5xl mx-auto py-10 px-6 md:px-8">
+<div class="max-w-4xl mx-auto py-10 px-6 md:px-8">
 
   <p class="text-ink/40 text-base mb-1">
     <i class="fa-solid fa-user-plus mr-2"></i>Créer un compte
@@ -103,7 +103,7 @@
           <p class="text-sm font-medium text-ink/50 mb-3 flex items-center gap-1.5">
             <i class="fa-solid fa-location-dot"></i>Localisation
           </p>
-          <div class="grid gap-3 mb-4" style="grid-template-columns:1fr 120px;">
+          <div class="grid gap-3 mb-4 [grid-template-columns:1fr_120px]">
             <div>
               <label for="cityName" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
                 <i class="fa-solid fa-city text-sm"></i>Ville
@@ -121,8 +121,12 @@
                 class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30" />
             </div>
           </div>
+          <!-- Message d'erreur -->
+          <p class="errorMessage text-red-600 mb-4 hidden"></p>
+          
           <div class="flex items-start gap-2.5 bg-action/5 border border-action/15 rounded-lg px-3 py-2.5">
             <i class="fa-solid fa-circle-info text-action/60 text-sm mt-0.5 shrink-0"></i>
+            
             <p class="text-xs text-ink/50 leading-relaxed">
               Votre ville nous permet de vous suggérer des trajets près de chez vous et de connecter les conducteurs et passagers d'une même région.
             </p>
@@ -215,8 +219,8 @@
           <label class="flex items-start gap-2 cursor-pointer mb-4">
             <input type="checkbox" required class="mt-0.5 shrink-0 accent-action" />
             <span class="text-xs text-ink/40 leading-relaxed">
-              J'accepte les <a href="#" class="text-action font-medium hover:text-action-dark transition-colors">conditions d'utilisation</a>
-              et la <a href="#" class="text-action font-medium hover:text-action-dark transition-colors">politique de confidentialité</a> de Kenweturi.
+              J'accepte les <a href="<?= site_url('cgu') ?>" target="_blank" class="text-action font-medium hover:text-action-dark transition-colors">conditions d'utilisation</a>
+              et la <a href="<?= site_url('confidentialite') ?>" target="_blank" class="text-action font-medium hover:text-action-dark transition-colors">politique de confidentialité</a> de Kenweturi.
             </span>
           </label>
           <button type="submit"
@@ -239,6 +243,5 @@
   </form>
 </div>
 
-<script src="<?= base_url('js/auth.js') ?>" defer></script>
 
 <?= view('partials/footer') ?>

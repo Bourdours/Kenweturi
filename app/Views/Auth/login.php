@@ -1,7 +1,7 @@
-<?= view('partials/head') ?>
+<?= view('partials/head', ['extraJs' => [base_url('js/auth.js')]]) ?>
 <?= view('partials/header') ?>
 
-<div class="max-w-5xl mx-auto py-12 px-6 md:px-8 flex flex-col md:flex-row items-center md:items-start gap-12">
+<div class="max-w-4xl mx-auto py-12 px-6 md:px-8 flex flex-col md:flex-row items-center md:items-start gap-12">
 
   <!-- Panneau branding (desktop uniquement) -->
   <div class="hidden md:flex flex-col flex-1">
@@ -40,7 +40,7 @@
   </div>
 
   <!-- Carte formulaire -->
-  <div class="bg-surface rounded-2xl p-7 border border-action/10 w-full md:w-auto md:shrink-0" style="min-width:320px; max-width:360px;">
+  <div class="bg-surface rounded-2xl p-7 border border-action/10 w-full md:w-auto md:shrink-0 min-w-80 max-w-[360px]">
 
     <div class="mb-5">
       <h3 class="text-ink text-xl font-semibold font-display mb-1">Bon retour parmi nous !</h3>
@@ -76,7 +76,7 @@
             <input type="email" name="email" id="email"
               value="<?= old('email') ?>" required placeholder="votre@email.com"
               class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 pr-9 outline-none focus:border-action/50 placeholder:text-ink/30" />
-            <i class="fa-regular fa-envelope absolute right-3 top-1/2 -translate-y-1/2 text-ink/30 text-xs pointer-events-none"></i>
+            <i class="fa-regular fa-envelope absolute right-3 top-1/2 -translate-y-1/2 text-ink/30 text-sm pointer-events-none"></i>
           </div>
         </div>
 
@@ -122,6 +122,5 @@
 
 </div>
 
-<script src="<?= base_url('js/auth.js') ?>" defer></script>
 
 <?= view('partials/footer') ?>
