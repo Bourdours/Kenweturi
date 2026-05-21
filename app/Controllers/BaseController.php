@@ -42,4 +42,19 @@ abstract class BaseController extends Controller
         // Preload any models, libraries, etc, here.
         // $this->session = service('session');
     }
+
+
+    /**
+     * Calcule la distance en kilomètres entre deux points GPS (formule Haversine).
+     *
+     * @param float $lat1 Latitude du point A
+     * @param float $lng1 Longitude du point A
+     * @param float $lat2 Latitude du point B
+     * @param float $lng2 Longitude du point B
+     * @return float Distance en kilomètres
+     */
+    protected function haversineDistance(float $lat1, float $lng1, float $lat2, float $lng2): float
+    {
+        return 6371 * acos(cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * cos(deg2rad($lng2) - deg2rad($lng1)) + sin(deg2rad($lat1)) * sin(deg2rad($lat2)));
+    }
 }
