@@ -1,8 +1,13 @@
 <?= view('partials/head', [
-    'extraCss' => ['https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css'],
+    'extraCss' => [
+        'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css',
+        base_url('css/flatpickr-theme.css'),
+    ],
     'extraJs'  => [
         'https://cdn.jsdelivr.net/npm/flatpickr',
+        'https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js',
         base_url('js/autocompletion.js'),
+        base_url('js/datepicker.js'),
         base_url('js/timepicker.js'),
     ],
 ]) ?>
@@ -42,7 +47,7 @@
                     <label for="date" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
                         <i class="fa-regular fa-calendar text-sm"></i>Date
                     </label>
-                    <input type="date" id="date" name="date" value="<?= esc($filterDate ?? '') ?>" class="w-full bg-paper border border-action/15 rounded-lg text-ink/60 text-sm px-3 py-2.5 outline-none focus:border-action/50">
+                    <input type="text" id="date" name="date" value="<?= esc($filterDate ?? '') ?>" readonly placeholder="jj/mm/aaaa" class="w-full bg-paper border border-action/15 rounded-lg text-ink/60 text-sm px-3 py-2.5 outline-none focus:border-action/50 cursor-pointer">
                 </div>
                 <div>
                     <label for="time" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">

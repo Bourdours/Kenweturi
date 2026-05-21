@@ -4,7 +4,16 @@
 /** @var array|null $nextPassengerJourney */
 ?>
 <?= view('partials/head', [
-  'extraJs' => [base_url('js/autocompletion.js')],
+  'extraCss' => [
+    'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css',
+    base_url('css/flatpickr-theme.css'),
+  ],
+  'extraJs' => [
+    'https://cdn.jsdelivr.net/npm/flatpickr',
+    'https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js',
+    base_url('js/autocompletion.js'),
+    base_url('js/datepicker.js'),
+  ],
 ]) ?>
 <?= view('partials/header') ?>
 
@@ -61,8 +70,9 @@
             <label for="date" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
               <i class="fa-regular fa-calendar text-sm"></i>Date
             </label>
-            <input type="date" id="date" name="date"
-              class="w-full bg-surface border border-action/15 rounded-lg text-ink/60 text-sm px-3 py-2.5 outline-none focus:border-action/50">
+            <input type="text" id="date" name="date" readonly
+              placeholder="jj/mm/aaaa"
+              class="w-full bg-surface border border-action/15 rounded-lg text-ink/60 text-sm px-3 py-2.5 outline-none focus:border-action/50 cursor-pointer">
           </div>
           <div>
             <label for="availableSeats" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
