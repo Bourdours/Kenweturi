@@ -9,7 +9,14 @@ use App\Models\JourneyModel;
 use App\Models\CarModel;
 use App\Models\LocationModel;
 use App\Models\BookingModel;
+use App\Models\CityModel;
+use App\Models\StageModel;
+
+use App\Exceptions\ExternalApiException;
+use App\Exceptions\ModelValidationException;
+
 use DateTimeImmutable;
+use DateTime;
 
 class JourneyController extends BaseController{
 
@@ -18,6 +25,8 @@ class JourneyController extends BaseController{
     protected CarModel $carModel;
     protected BookingModel $bookingModel;
     protected LocationModel $locationModel;
+    protected CityModel $cityModel;
+    protected StageModel $stageModel;
 
     public function __construct(){
         $this->trackModel = new TrackModel();
@@ -25,6 +34,8 @@ class JourneyController extends BaseController{
         $this->carModel = new CarModel();
         $this->bookingModel = new BookingModel();
         $this->locationModel = new LocationModel();
+        $this->cityModel = new CityModel();
+        $this->stageModel = new StageModel();
     }
 
     public function showCreateForm(): string
@@ -34,93 +45,58 @@ class JourneyController extends BaseController{
         ]);
     }
 
-    /**create
+    /**
+     * create
      * 
-     * Vérifie que l'utilisateur est connecté, récupère les donneés du formulaires et les donne
-     * au model pour les insérer.
+     * Vérifie que l'utilisateur est connecté, valide les données du formulaire,
+     * récupère le tracé via les APIs externes, puis insère le trajet en base.
      * 
-     * Les vérifications des données sont effectuées dans les models : journeyModel & trackModel
-     * 
+     * Les erreurs sont gérées selon trois familles :
+     *  - validation du formulaire HTTP
+     *  - API externe indisponible (géocodage / routage)
+     *  - validation des models / erreur de transaction
      */
-    public function create(){
-
+    public function create()
+    {
+        // ====== Authentification
         $userId = session('user_id');
         if (empty($userId)) return redirect()->to('/login');
- 
-        // --- Récupération des données
-        $trackData         = $this->request->getPost('geoJson');
-        $locationStartData = [
-            'longitude' => $this->request->getPost('long_start'),
-            'latitude'  => $this->request->getPost('lat_start'),
-        ];
-        $locationEndData = [
-            'longitude' => $this->request->getPost('long_end'),
-            'latitude'  => $this->request->getPost('lat_end'),
-        ];
-        $journeyData = [
-            'start_datetime' => $this->request->getPost('startDateTime'),
-            'seats'          => $this->request->getPost('seats'),
-            'note'           => $this->request->getPost('note'),
-            'smoking'        => $this->request->getPost('smoking'),
-            'user_id'        => $userId,
-        ];
- 
-        // --- Vérification : pas de trajet existant sur la même demi-journée
-        $journeyStartDate = new DateTimeImmutable($this->request->getPost('startDate'));
-        $journeyStartTime = new DateTimeImmutable($this->request->getPost('startTime'));
-        $startHour        = $journeyStartTime->format('H') < 12 ? 0 : 12;
-        $dayStartDateTime = $journeyStartDate->setTime(0, $startHour, 0);
-        $dayEndDateTime   = $dayStartDateTime->modify('+12 hours');
- 
-        $existingJourney = $this->journeyModel
-            ->where('user_id', $userId)
-            ->where('start_datetime >=', $dayStartDateTime->format('Y-m-d H:i:s'))
-            ->where('start_datetime <',  $dayEndDateTime->format('Y-m-d H:i:s'))
-            ->first();
- 
-        if ($existingJourney) {
+
+        // ====== Validation des données du formulaire
+        if (!$this->validate($this->getCreateValidationRules())) {
             return redirect()->back()->withInput()
-                ->with('errors', ['journey' => 'Vous avez déjà un trajet sur cette demi-journée.']);
+                ->with('errors', $this->validator->getErrors());
         }
- 
-        // --- Validation via les models
-        $errors = [];
- 
-        if (!$this->trackModel->validate(['geojson' => $trackData]))
-            $errors = array_merge($errors, $this->trackModel->errors());
- 
-        if (!$this->locationModel->validate($locationStartData))
-            $errors = array_merge($errors, array_map(fn($e) => "Départ : $e", $this->locationModel->errors()));
- 
-        if (!$this->locationModel->validate($locationEndData))
-            $errors = array_merge($errors, array_map(fn($e) => "Arrivée : $e", $this->locationModel->errors()));
- 
-        if (!$this->journeyModel->validate($journeyData))
-            $errors = array_merge($errors, $this->journeyModel->errors());
- 
-        if (!empty($errors))
-            return redirect()->back()->withInput()->with('errors', $errors);
- 
-        // --- Insertion dans la base
-        $db = \Config\Database::connect();
-        $db->transStart();
- 
-        $trackId         = $this->trackModel->insert(['geojson' => $trackData]);
-        $locationStartId = $this->locationModel->insert($locationStartData);
-        $locationEndId   = $this->locationModel->insert($locationEndData);
- 
-        $journeyData['track_id']          = $trackId;
-        $journeyData['location_start_id'] = $locationStartId;
-        $journeyData['location_end_id']   = $locationEndId;
- 
-        $journeyId = $this->journeyModel->insert($journeyData);
- 
-        $db->transComplete();
- 
-        if (!$db->transStatus())
+
+        // ====== Récupération des données du formulaire
+        $createFormData = $this->getCreateFormData();
+
+        // ====== Traitement métier
+        try {
+
+            $locationsData = $this->fetchAllLocationsData($createFormData['location']);
+            $geoJsonTrack  = $this->fetchTrackOrFail($locationsData);
+            $journeyId     = $this->persistJourney($userId, $createFormData, $locationsData, $geoJsonTrack);
+
+        } catch (ExternalApiException $e) {
+
+            log_message('error', 'API externe KO: ' . $e->getMessage());
+            return redirect()->back()->withInput()
+                ->with('errors', ['api' => 'Service de cartographie indisponible, réessayez plus tard.']);
+
+        } catch (ModelValidationException $e) {
+
+            return redirect()->back()->withInput()
+                ->with('errors', $e->getErrors());
+
+        } catch (\Throwable $e) {
+
+            log_message('error', 'Erreur création trajet: ' . $e->getMessage());
             return redirect()->back()->withInput()
                 ->with('errors', ['db' => 'Une erreur est survenue lors de l\'enregistrement.']);
- 
+
+        }
+
         return redirect()->to('/journeys/' . $journeyId);
     }
 
@@ -136,4 +112,421 @@ class JourneyController extends BaseController{
     {
         return redirect()->to('/journeys');
     }
+
+    /**
+     * Retourne les règles de validation pour le formulaire de création de trajet.
+     */
+    public function getCreateValidationRules(): array {
+
+        return [
+            'startDate'     => 'required|valid_date',
+            'startTime'     => 'required|regex_match[/^([01]\d|2[0-3]):[0-5]\d$/]',
+            'seats'         => 'required|integer|greater_than[0]|less_than[10]',
+            'note'          => 'permit_empty|max_length[500]',
+            'smoking'       => 'in_list[0,1]',
+            'startAddress'  => 'required|string|max_length[255]',
+            'endAddress'    => 'required|string|max_length[255]',
+        ];
+
+    }
+
+    public function getLocationsCreateFormData(): array{
+
+        $locations['start'] = $this->sanitizeAddress($this->request->getPost('startAddress'));
+
+        $stagesAddresses = $this->request->getPost('stagesAddresses');
+
+        if (is_array($stagesAddresses)) {
+            foreach ($stagesAddresses as $key => $stageAddress) {
+                $locations['stage' . (int) $key] = $this->sanitizeAddress($stageAddress);
+            }
+        }
+
+        $locations['end'] = $this->sanitizeAddress($this->request->getPost('endAddress'));
+
+        return $locations;
+
+    }
+
+    public function getJourneyCreateFormData(){
+
+        return [
+            'startDate'    => $this->request->getPost('startDate'),
+            'startTime'    => $this->request->getPost('startTime'),
+            'seats'         => $this->request->getPost('seats'),
+            'note'          => $this->request->getPost('note'),
+            'smoking'       => $this->request->getPost('smoking'),
+        ];
+
+    }
+
+    public function getCreateFormData():array{
+
+        return [
+            "location"=>$this->getLocationsCreateFormData(),
+            "journey"=>$this->getJourneyCreateFormData(),
+        ];
+
+    }
+
+    private function sanitizeAddress($value): string{
+        
+        if (!is_string($value)) {
+            return '';
+        }
+        return trim(strip_tags($value));
+
+    }
+
+
+    /**
+     * Récupère les données de localisation d'une adresse via l'API de la Géoplateforme (IGN/BAN).
+     *
+     * @param string $adresse Adresse en texte libre (ex : "8 bd du Port 95000 Cergy")
+     * @param int    $limit   Nombre max de résultats (défaut : 1)
+     * @return array|null     Propriétés de l'adresse, ou null si rien trouvé / erreur
+     */
+    function getLocationData(string $adresse, int $limit = 1): ?array{
+
+        $url = 'https://data.geopf.fr/geocodage/search?' . http_build_query([
+            'q'     => $adresse,
+            'index' => 'address',
+            'limit' => $limit,
+        ]);
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT        => 10,
+            CURLOPT_HTTPHEADER     => ['Accept: application/json'],
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        if ($response === false || $httpCode !== 200) {
+            return null;
+        }
+
+        $data = json_decode($response, true);
+        if (empty($data['features'])) {
+            return null;
+        }
+
+        $feature = $data['features'][0];
+        $result  = $feature['properties'] ?? [];
+
+        if (isset($feature['geometry']['coordinates'])) {
+            [$longitude, $latitude] = $feature['geometry']['coordinates'];
+            $result['longitude'] = $longitude;
+            $result['latitude']  = $latitude;
+        }
+
+        return $result;
+    }
+
+
+    function getLocationsData(array $addresses):array | null{
+
+        $addressesData=[];
+
+        foreach($addresses as $key => $address){
+
+            $addressesData[$key]=$this->getLocationData($address);
+
+        }
+
+        return $addressesData;
+
+    }
+
+    /**
+     * Renvoi une route au format geoJson
+     * 
+     * input array : coordinates : tableau de coordonnées au format [[lat,long],[lat,long]....]
+     */
+    function getTrack(array $coordinates): ?string{
+
+        $url = 'https://api.openrouteservice.org/v2/directions/driving-car/geojson';
+        $apiKey = $_ENV['ORS_API_KEY'];
+
+        $coordFields=[];
+
+        foreach($coordinates as $coordinate){
+
+            $lat = $coordinate[0];
+            $long = $coordinate[1];
+
+            $coordFields[] = '['.$long.','.$lat.']';
+
+        }
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT        => 10,
+            CURLOPT_HTTPHEADER     => [
+                'Content-Type: application/json',
+                'Accept: application/json, application/geo+json',
+                'Authorization: '.$apiKey
+            ],
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => '{"coordinates":['.implode(",",$coordFields).']}',
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+
+        if ($response === false || $httpCode !== 200) {
+            return null;
+        }
+
+        return $response;
+    }
+
+    /**
+     * Retourne le trajet existant de l'utilisateur sur la même demi-journée
+     * (matin : 00h–12h, après-midi : 12h–24h) que la date/heure fournies,
+     * ou null si aucun.
+     */
+    private function findExistingJourneyOnHalfDay(int $userId, string $startDate, string $startTime): ?array
+    {
+        $journeyStartDate = new DateTimeImmutable($startDate);
+        $journeyStartTime = new DateTimeImmutable($startTime);
+
+        $startHour        = (int) $journeyStartTime->format('H') < 12 ? 0 : 12;
+        $dayStartDateTime = $journeyStartDate->setTime($startHour, 0, 0);
+        $dayEndDateTime   = $dayStartDateTime->modify('+12 hours');
+
+        return $this->journeyModel
+            ->where('user_id', $userId)
+            ->where('start_datetime >=', $dayStartDateTime->format('Y-m-d H:i:s'))
+            ->where('start_datetime <',  $dayEndDateTime->format('Y-m-d H:i:s'))
+            ->first();
+    }
+
+    /**
+     * Récupère l'ID d'une ville existante ou la crée si elle n'existe pas.
+     *
+     * @param string $name    Nom de la ville
+     * @param string $zipcode Code postal
+     * @return int|string ID de la ville
+     */
+    private function findOrCreateCity(string $name, string $zipcode)
+    {
+        return $this->cityModel
+                ->where('name', $name)
+                ->where('zipcode', $zipcode)
+                ->first()['id']
+            ?? $this->cityModel->insert([
+                'name'    => $name,
+                'zipcode' => $zipcode,
+            ]);
+    }
+
+    /**
+     * Récupère les données de localisation de chaque adresse du formulaire.
+     * Lève une exception si une adresse ne peut pas être géolocalisée.
+     *
+     * @param array $addresses Tableau d'adresses textuelles indexé par clé (start, stage0, ..., end)
+     * @return array           Tableau des données de localisation indexé par les mêmes clés
+     * @throws ExternalApiException Si l'API ne renvoie rien pour une adresse
+     */
+    private function fetchAllLocationsData(array $addresses): array
+    {
+        $locationsData = [];
+
+        foreach ($addresses as $key => $address) {
+            $data = $this->getLocationData($address);
+            if ($data === null) {
+                throw new ExternalApiException("Adresse introuvable: $address");
+            }
+            $locationsData[$key] = $data;
+        }
+
+        return $locationsData;
+    }
+
+    /**
+     * Récupère le tracé GeoJSON reliant l'ensemble des locations via l'API de routage.
+     *
+     * @param array $locationsData Données de localisation (avec latitude / longitude)
+     * @return string              Tracé au format GeoJSON
+     * @throws ExternalApiException Si l'API ne renvoie pas de tracé valide
+     */
+    private function fetchTrackOrFail(array $locationsData): string
+    {
+        $locationsCoordinates = [];
+        foreach ($locationsData as $location) {
+            $locationsCoordinates[] = [$location['latitude'], $location['longitude']];
+        }
+
+        $geoJsonTrack = $this->getTrack($locationsCoordinates);
+        if ($geoJsonTrack === null) {
+            throw new ExternalApiException('Calcul du tracé impossible.');
+        }
+
+        return $geoJsonTrack;
+    }
+
+    /**
+     * Persiste l'ensemble du trajet (track, locations, journey, stages) en transaction.
+     *
+     * Les étapes intermédiaires (stages) sont optionnelles : si le formulaire
+     * n'en contient aucune, la boucle d'insertion des stages ne s'exécute pas.
+     *
+     * @param int    $userId         Identifiant du conducteur
+     * @param array  $createFormData Données du formulaire (clés 'journey' et 'location')
+     * @param array  $locationsData  Données de localisation renvoyées par l'API de géocodage
+     * @param string $geoJsonTrack   Tracé GeoJSON renvoyé par l'API de routage
+     * @return int                   Identifiant du trajet créé
+     * @throws ModelValidationException Si un model refuse l'insertion
+     * @throws \RuntimeException        Si la transaction échoue
+     */
+    private function persistJourney(int $userId, array $createFormData, array $locationsData, string $geoJsonTrack): int
+    {
+        // ====== Préparation des entités hors transaction
+        $locationEntities         = $this->buildLocationEntities($locationsData);
+        $journeyStartDateTime     = $this->buildJourneyStartDateTime($createFormData['journey']);
+        $stagesDeparturesDateTime = $this->computeStageDepartures($createFormData['journey'], $geoJsonTrack);
+
+        // ====== Insertion dans la base
+        $db = \Config\Database::connect();
+        $db->transStart();
+
+        // --- Insertion du tracé
+        $trackId = $this->trackModel->insert(['geojson' => $geoJsonTrack]);
+        if ($trackId === false) {
+            throw new ModelValidationException($this->trackModel->errors());
+        }
+
+        // --- Insertion des locations
+        $locationsId = [];
+        foreach ($locationEntities as $location) {
+            $locationId = $this->locationModel->insert($location);
+            if ($locationId === false) {
+                throw new ModelValidationException($this->locationModel->errors());
+            }
+            $locationsId[] = $locationId;
+        }
+
+        // --- Insertion du journey
+        $journeyEntity = [
+            'start_datetime'    => $journeyStartDateTime->format('Y-m-d H:i:s'),
+            'seats'             => $createFormData['journey']['seats'],
+            'note'              => $createFormData['journey']['note'],
+            'smoking'           => $createFormData['journey']['smoking'],
+            'track_id'          => $trackId,
+            'user_id'           => $userId,
+            'location_start_id' => array_shift($locationsId),
+            'location_end_id'   => array_pop($locationsId),
+        ];
+
+        $journeyId = $this->journeyModel->insert($journeyEntity);
+        if ($journeyId === false) {
+            throw new ModelValidationException($this->journeyModel->errors());
+        }
+
+        // --- Insertion des stages (étapes intermédiaires restantes)
+        //     Si le trajet n'a pas d'étape, $locationsId est vide et la boucle ne s'exécute pas.
+        for ($i = 0; $i < count($locationsId); $i++) {
+            $stageId = $this->stageModel->insert([
+                'departure_time' => $stagesDeparturesDateTime[$i]->format('H:i:s'),
+                'location_id'    => $locationsId[$i],
+                'journey_id'     => $journeyId,
+                'position'       => $i + 1,
+            ]);
+            if ($stageId === false) {
+                throw new ModelValidationException($this->stageModel->errors());
+            }
+        }
+
+        $db->transComplete();
+
+        if (!$db->transStatus()) {
+            throw new \RuntimeException('Transaction échouée lors de la création du trajet.');
+        }
+
+        return $journeyId;
+    }
+
+    /**
+     * Construit les entités location prêtes à être insérées en base.
+     *
+     * @param array $locationsData Données renvoyées par l'API de géocodage
+     * @return array               Tableau d'entités location
+     */
+    private function buildLocationEntities(array $locationsData): array
+    {
+        $locationEntities = [];
+
+        foreach ($locationsData as $location) {
+            $cityId = $this->findOrCreateCity($location['city'], $location['postcode']);
+            $locationEntities[] = [
+                'longitude' => $location['longitude'],
+                'latitude'  => $location['latitude'],
+                'address'   => $location['name'],
+                'note'      => '',
+                'city_id'   => $cityId,
+            ];
+        }
+
+        return $locationEntities;
+    }
+
+    /**
+     * Construit la date/heure de départ du trajet à partir des champs du formulaire.
+     *
+     * @param array $journeyData Données du journey (clés 'startDate' et 'startTime')
+     * @return DateTimeImmutable Date/heure de départ du trajet
+     */
+    private function buildJourneyStartDateTime(array $journeyData): DateTimeImmutable
+    {
+        $journeyStartTimeArray = explode(':', $journeyData['startTime']);
+        $journeyStartHour      = (int) $journeyStartTimeArray[0];
+        $journeyStartMinute    = (int) $journeyStartTimeArray[1];
+
+        return (new DateTimeImmutable($journeyData['startDate']))
+            ->setTime($journeyStartHour, $journeyStartMinute, 0);
+    }
+
+    /**
+     * Calcule les heures de départ de chaque étape intermédiaire à partir
+     * des durées de segments renvoyées par l'API de routage.
+     *
+     * Cas particulier : si le trajet n'a aucune étape (uniquement start → end),
+     * l'API renvoie un seul segment et la fonction retourne un tableau vide.
+     *
+     * @param array  $journeyData  Données du journey (pour la date/heure de départ)
+     * @param string $geoJsonTrack Tracé GeoJSON renvoyé par l'API
+     * @return DateTimeImmutable[] Tableau des heures de départ des étapes (vide si pas d'étape)
+     * @throws ExternalApiException Si le GeoJSON ne contient aucun segment exploitable
+     */
+    private function computeStageDepartures(array $journeyData, string $geoJsonTrack): array
+    {
+        $data     = json_decode($geoJsonTrack, true);
+        $segments = $data['features'][0]['properties']['segments'] ?? [];
+
+        if (empty($segments)) {
+            throw new ExternalApiException('Tracé GeoJSON invalide: segments manquants.');
+        }
+
+        // Pas d'étape intermédiaire : un seul segment (start → end), rien à calculer.
+        if (count($segments) === 1) {
+            return [];
+        }
+
+        $departure                = $this->buildJourneyStartDateTime($journeyData);
+        $stagesDeparturesDateTime = [];
+
+        // On exclut le dernier segment qui mène à l'arrivée (pas une étape)
+        for ($i = 0; $i < count($segments) - 1; $i++) {
+            $departure                  = $departure->modify('+' . (int) $segments[$i]['duration'] . ' seconds');
+            $stagesDeparturesDateTime[] = $departure;
+        }
+
+        return $stagesDeparturesDateTime;
+    }
+
 }
