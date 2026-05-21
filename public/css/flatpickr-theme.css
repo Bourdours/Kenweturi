@@ -1,0 +1,122 @@
+/* ─── Flatpickr – thème Kenweturi ─────────────────────────── */
+
+.flatpickr-calendar {
+    background: rgb(var(--color-paper));
+    border: 1px solid rgb(var(--color-action) / 0.15);
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 24px rgb(var(--color-ink) / 0.08);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* Flèche du popup */
+.flatpickr-calendar.arrowTop::before { border-bottom-color: rgb(var(--color-action) / 0.15); }
+.flatpickr-calendar.arrowTop::after  { border-bottom-color: rgb(var(--color-paper)); }
+.flatpickr-calendar.arrowBottom::before { border-top-color: rgb(var(--color-action) / 0.15); }
+.flatpickr-calendar.arrowBottom::after  { border-top-color: rgb(var(--color-paper)); }
+
+/* En-tête mois */
+.flatpickr-months {
+    background: rgb(var(--color-surface));
+    border-radius: 0.75rem 0.75rem 0 0;
+    padding: 2px 0;
+}
+.flatpickr-month { color: rgb(var(--color-ink)); }
+.flatpickr-current-month .flatpickr-monthDropdown-months,
+.flatpickr-current-month input.cur-year {
+    color: rgb(var(--color-ink));
+    font-weight: 600;
+}
+.flatpickr-current-month .flatpickr-monthDropdown-months:hover,
+.flatpickr-current-month input.cur-year:hover {
+    background: transparent;
+}
+
+/* Flèches nav */
+.flatpickr-prev-month,
+.flatpickr-next-month {
+    color: rgb(var(--color-ink) / 0.4) !important;
+    fill: rgb(var(--color-ink) / 0.4) !important;
+}
+.flatpickr-prev-month:hover,
+.flatpickr-next-month:hover {
+    color: rgb(var(--color-action)) !important;
+    fill: rgb(var(--color-action)) !important;
+}
+.flatpickr-prev-month svg path,
+.flatpickr-next-month svg path {
+    fill: inherit;
+    stroke: none;
+}
+
+/* Noms des jours */
+.flatpickr-weekdays { background: rgb(var(--color-surface)); }
+.flatpickr-weekday {
+    background: transparent;
+    color: rgb(var(--color-ink) / 0.4);
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Cellules jours */
+.flatpickr-day {
+    color: rgb(var(--color-ink));
+    border-radius: 0.5rem;
+    font-size: 0.8rem;
+}
+.flatpickr-day:hover,
+.flatpickr-day:focus {
+    background: rgb(var(--color-action) / 0.1);
+    border-color: transparent;
+    color: rgb(var(--color-action));
+}
+.flatpickr-day.selected,
+.flatpickr-day.selected:hover,
+.flatpickr-day.selected:focus {
+    background: rgb(var(--color-action));
+    border-color: rgb(var(--color-action));
+    color: rgb(var(--color-paper));
+    font-weight: 600;
+}
+.flatpickr-day.today {
+    border-color: rgb(var(--color-action) / 0.5);
+    font-weight: 600;
+}
+.flatpickr-day.today:hover {
+    background: rgb(var(--color-action) / 0.1);
+    border-color: rgb(var(--color-action) / 0.5);
+    color: rgb(var(--color-action));
+}
+.flatpickr-day.prevMonthDay,
+.flatpickr-day.nextMonthDay {
+    color: rgb(var(--color-ink) / 0.2);
+}
+.flatpickr-day.flatpickr-disabled,
+.flatpickr-day.flatpickr-disabled:hover {
+    color: rgb(var(--color-ink) / 0.15);
+    background: transparent;
+}
+
+/* ─── Thème sombre ────────────────────────────────────────── */
+
+.dark .flatpickr-calendar {
+    background: rgb(var(--color-paper));
+    border-color: rgb(var(--color-action) / 0.2);
+    box-shadow: 0 4px 24px rgb(0 0 0 / 0.3);
+}
+.dark .flatpickr-calendar.arrowTop::after  { border-bottom-color: rgb(var(--color-paper)); }
+.dark .flatpickr-calendar.arrowBottom::after { border-top-color: rgb(var(--color-paper)); }
+
+.dark .flatpickr-months,
+.dark .flatpickr-weekdays { background: rgb(var(--color-surface)); }
+
+.dark .flatpickr-day { color: rgb(var(--color-ink)); }
+.dark .flatpickr-day:hover { background: rgb(var(--color-action) / 0.15); color: rgb(var(--color-action)); }
+.dark .flatpickr-day.selected,
+.dark .flatpickr-day.selected:hover { background: rgb(var(--color-action)); border-color: rgb(var(--color-action)); color: rgb(var(--color-paper)); }
+.dark .flatpickr-day.today { border-color: rgb(var(--color-action) / 0.6); }
+.dark .flatpickr-day.prevMonthDay,
+.dark .flatpickr-day.nextMonthDay { color: rgb(var(--color-ink) / 0.25); }
+.dark .flatpickr-current-month .flatpickr-monthDropdown-months,
+.dark .flatpickr-current-month input.cur-year { color: rgb(var(--color-ink)); }
