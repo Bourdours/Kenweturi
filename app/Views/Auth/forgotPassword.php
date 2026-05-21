@@ -1,4 +1,4 @@
-<?= view('partials/head') ?>
+<?= view('partials/head', ['extraJs' => [base_url('js/auth.js')]]) ?>
 <?= view('partials/header') ?>
 
 <div class="max-w-4xl mx-auto py-12 px-6 md:px-8 flex flex-col md:flex-row items-center md:items-start gap-12">
@@ -103,6 +103,5 @@
 
 </div>
 
-<script src="<?= base_url('js/auth.js') ?>" defer></script>
 
 <?= view('partials/footer') ?>
