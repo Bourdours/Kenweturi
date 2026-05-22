@@ -1,6 +1,6 @@
 // Champs du formulaire
-const cityInput = document.querySelector('input[name="cityName"]');
-const zipInput = document.querySelector('input[name="postalCode"]');
+const cityInput = document.querySelector('[data-city]');
+const zipInput = document.querySelector('[data-zip]');
 const form = cityInput ? cityInput.closest('form') : null;
 const errorText = document.querySelector('.errorMessage');
 
