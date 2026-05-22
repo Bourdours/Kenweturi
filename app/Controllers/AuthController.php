@@ -296,7 +296,7 @@ class AuthController extends BaseController
 
         $user = $this->userModel->where('email', $email)->first();
 
-        if (!$user) {
+        if (!$user || $user['deleted_at'] !== null) {
             return redirect()->back()->withInput()->with('success', 'Si un compte existe avec cet email, vous recevrez un lien de réinitialisation.');
         }
 
