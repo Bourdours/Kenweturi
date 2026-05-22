@@ -63,7 +63,8 @@ class JourneyController extends BaseController{
         if (empty($userId)) return redirect()->to('/login');
 
         // ====== Validation des données du formulaire
-        if (!$this->validate($this->getCreateValidationRules())) {
+        $createValidationRules = $this->getCreateValidationRules();
+        if (!$this->validate($createValidationRules)) {
             return redirect()->back()->withInput()
                 ->with('errors', $this->validator->getErrors());
         }
@@ -512,19 +513,23 @@ class JourneyController extends BaseController{
      * @return array           Tableau des données de localisation indexé par les mêmes clés
      * @throws ExternalApiException Si l'API ne renvoie rien pour une adresse
      */
-    private function fetchAllLocationsData(array $addresses): array
-    {
+    private function fetchAllLocationsData(array $addresses): array {
+
         $locationsData = [];
 
         foreach ($addresses as $key => $address) {
+
             $data = $this->getLocationData($address);
-            if ($data === null) {
-                throw new ExternalApiException("Adresse introuvable: $address");
+            // Un stage peut-être vide, dans ce cas on ne le prend pas en compte
+            if(!empty($address)){
+                if ($data === null && !empty($address)) throw new ExternalApiException("Adresse introuvable: $address");
+                $locationsData[$key] = $data;
             }
-            $locationsData[$key] = $data;
+
         }
 
         return $locationsData;
+        
     }
 
     /**
