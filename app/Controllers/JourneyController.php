@@ -80,7 +80,6 @@ class JourneyController extends BaseController{
 
         } catch (ExternalApiException $e) {
 
-            log_message('error', 'API externe KO: ' . $e->getMessage());
             return redirect()->back()->withInput()
                 ->with('errors', ['api' => 'Service de cartographie indisponible, réessayez plus tard.']);
 
@@ -91,7 +90,6 @@ class JourneyController extends BaseController{
 
         } catch (\Throwable $e) {
 
-            log_message('error', 'Erreur création trajet: ' . $e->getMessage());
             return redirect()->back()->withInput()
                 ->with('errors', ['db' => 'Une erreur est survenue lors de l\'enregistrement.']);
 
@@ -507,25 +505,6 @@ class JourneyController extends BaseController{
     }
 
     /**
-     * Récupère l'ID d'une ville existante ou la crée si elle n'existe pas.
-     *
-     * @param string $name    Nom de la ville
-     * @param string $zipcode Code postal
-     * @return int|string ID de la ville
-     */
-    private function findOrCreateCity(string $name, string $zipcode)
-    {
-        return $this->cityModel
-                ->where('name', $name)
-                ->where('zipcode', $zipcode)
-                ->first()['id']
-            ?? $this->cityModel->insert([
-                'name'    => $name,
-                'zipcode' => $zipcode,
-            ]);
-    }
-
-    /**
      * Récupère les données de localisation de chaque adresse du formulaire.
      * Lève une exception si une adresse ne peut pas être géolocalisée.
      *
@@ -662,7 +641,7 @@ class JourneyController extends BaseController{
         $locationEntities = [];
 
         foreach ($locationsData as $location) {
-            $cityId = $this->findOrCreateCity($location['city'], $location['postcode']);
+            $cityId = $this->cityModel->findOrCreateCity($location['city'], $location['postcode']);
             $locationEntities[] = [
                 'longitude' => $location['longitude'],
                 'latitude'  => $location['latitude'],
