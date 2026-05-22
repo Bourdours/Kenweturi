@@ -21,6 +21,6 @@ class AddRememberTokenToUsers extends Migration
 
     public function down()
     {
-        $this->forge->dropColumn('users', 'remember_token');
+        $this->forge->dropColumn('user', 'remember_token');
     }
 }
