@@ -152,6 +152,26 @@
       </div>
     </div>
 
+    <!-- Voitures -->
+    <div class="bg-surface rounded-2xl p-6 border border-action/10">
+      <h2 class="text-ink text-base font-semibold font-display mb-5 flex items-center gap-2">
+        <i class="fa-solid fa-align-left text-action text-sm"></i>Voiture
+      </h2>
+      <label for="car" class="text-ink/50 text-xs font-medium mb-1.5 block">Quelle voiture allez-vous conduire ? </label>
+      <select name="car" id="car" class="form-select">
+          <option value="">-- Choisir une voiture --</option>
+          <?php if (!empty($cars)) : ?>
+              <?php foreach ($cars as $car) : ?>
+                  <option value="<?= esc($car['id']) ?>">
+                      <?= esc($car['brand']) ?>
+                      <?= esc($car['model']) ?>
+                      <?= esc($car['color']) ?>
+                  </option>
+              <?php endforeach; ?>
+          <?php endif; ?>
+      </select>
+    </div>
+
     <!-- Note -->
     <div class="bg-surface rounded-2xl p-6 border border-action/10">
       <h2 class="text-ink text-base font-semibold font-display mb-5 flex items-center gap-2">
