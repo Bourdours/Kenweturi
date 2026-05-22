@@ -142,7 +142,7 @@ class AuthController extends BaseController
         $apiUrl        = "https://geo.api.gouv.fr/communes?codePostal={$zipCode}&fields=nom";
         $apiResponse   = @file_get_contents($apiUrl);
 
-        
+
         if ($apiResponse === false) {
             return redirect()->back()->withInput()->with('errors', [
                 'cityName' => 'Impossible de vérifier la ville. Veuillez réessayer.'
@@ -234,7 +234,8 @@ class AuthController extends BaseController
                     'avatar'     => $user['avatar'] ?? null,
                     'isLoggedIn' => true,
                 ];
-
+                
+                $session->regenerate();
                 $session->set($sessionData);
 
                 // Redirection vers l'accueil avec un message de bienvenue
