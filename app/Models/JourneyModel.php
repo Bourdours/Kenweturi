@@ -37,6 +37,7 @@ class JourneyModel extends BaseModel
         'canceled_at',
         'track_id',
         'user_id',
+        'car_id',
         'location_start_id',
         'location_end_id'
 
