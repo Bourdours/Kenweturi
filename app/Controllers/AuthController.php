@@ -208,7 +208,8 @@ class AuthController extends BaseController
                     'avatar'     => $user['avatar'] ?? null,
                     'isLoggedIn' => true,
                 ];
-
+                
+                $session->regenerate();
                 $session->set($sessionData);
 
                 // Redirection vers l'accueil avec un message de bienvenue

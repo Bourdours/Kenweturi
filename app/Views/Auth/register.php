@@ -108,7 +108,7 @@
               <label for="cityName" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
                 <i class="fa-solid fa-city text-sm"></i>Ville
               </label>
-              <input type="text" name="cityName" id="cityName"
+              <input type="text" name="cityName" id="cityName" data-city
                 value="<?= old('cityName') ?>" required placeholder="Paris"
                 class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30" />
             </div>
@@ -116,17 +116,17 @@
               <label for="postalCode" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
                 <i class="fa-solid fa-hashtag text-sm"></i>Code postal
               </label>
-              <input type="text" name="postalCode" id="postalCode"
+              <input type="text" name="postalCode" id="postalCode" data-zip
                 value="<?= old('postalCode') ?>" required placeholder="75001"
                 class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30" />
             </div>
           </div>
           <!-- Message d'erreur -->
           <p class="errorMessage text-red-600 mb-4 hidden"></p>
-          
+
           <div class="flex items-start gap-2.5 bg-action/5 border border-action/15 rounded-lg px-3 py-2.5">
             <i class="fa-solid fa-circle-info text-action/60 text-sm mt-0.5 shrink-0"></i>
-            
+
             <p class="text-xs text-ink/50 leading-relaxed">
               Votre ville nous permet de vous suggérer des trajets près de chez vous et de connecter les conducteurs et passagers d'une même région.
             </p>
