@@ -5,8 +5,8 @@ namespace App\Models;
 /**
  * Modèle gérant la table 'city'
  */
-class CityModel extends BaseModel
-{
+class CityModel extends BaseModel{
+
     protected $table = 'city';
     protected $primaryKey = 'id';
     protected $useAutoIncrement = true;
@@ -32,4 +32,23 @@ class CityModel extends BaseModel
             'numeric'    => 'Le code postal ne doit contenir que des chiffres.',
         ],
     ];
+
+    /**
+     * Récupère l'ID d'une ville existante ou la crée si elle n'existe pas.
+     *
+     * @param string $name    Nom de la ville
+     * @param string $zipcode Code postal
+     * @return int|string ID de la ville
+     */
+    public function findOrCreateCity(string $name, string $zipcode)
+    {
+        $city = $this->where('name', $name)
+                    ->where('zipcode', $zipcode)
+                    ->first();
+
+        return $city['id'] ?? $this->insert([
+            'name'    => $name,
+            'zipcode' => $zipcode,
+        ]);
+    }
 }

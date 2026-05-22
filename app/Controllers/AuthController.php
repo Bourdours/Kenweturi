@@ -167,21 +167,8 @@ class AuthController extends BaseController
             ]);
         }
 
-        $existingCity = $this->cityModel->where(['name' => $cityName, 'zipcode' => $zipCode])->first();
-
-        // Si elle existe, on récupère son ID existant
-        if ($existingCity) {
-            $cityId = $existingCity['id'];
-        } else {
-            // Si elle n'existe pas, on l'ajoute dans la table 'cities'
-            $this->cityModel->insert([
-                'name' => $cityName,
-                'zipcode' => $zipCode
-            ]);
-
-            // On récupère l'ID généré
-            $cityId = $this->cityModel->getInsertID();
-        }
+        // Vérification si la ville existe ou pas
+        $cityId = $this->cityModel->findOrCreateCity($cityName, $zipCode);
 
         // Préparation des données de l'utilisateur
         $data = [
