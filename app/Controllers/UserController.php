@@ -12,6 +12,7 @@ class UserController extends BaseController
 {
     private UserModel $userModel;
     private CityModel $cityModel;
+    private CarModel $carModel;
 
     public function __construct()
     {
@@ -204,18 +205,8 @@ class UserController extends BaseController
         $cityName = trim($this->request->getPost('cityProfile')    ?? '');
         $zipcode  = trim($this->request->getPost('zipcodeProfile') ?? '');
 
-        if (!empty($cityName)) {
-            $cityRow = $this->cityModel->where('name', $cityName)->first();
-            if ($cityRow) {
-                if (!empty($zipcode) && $cityRow['zipcode'] !== $zipcode) {
-                    $this->cityModel->update($cityRow['id'], ['zipcode' => $zipcode]);
-                }
-                $data['city_id'] = $cityRow['id'];
-            } else {
-                $this->cityModel->insert(['name' => $cityName, 'zipcode' => $zipcode]);
-                $data['city_id'] = $this->cityModel->getInsertID();
-            }
-        }
+        $cityNameChecked = $this->getCheckedCityName($cityName,$zipcode);
+        $data['city_id'] = $this->cityModel->findOrCreateCity($cityNameChecked,$zipcode);
 
         // Hachage du nouveau mot de passe si renseigné
         if (!empty($newPassword)) {
