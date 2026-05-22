@@ -38,10 +38,17 @@ class JourneyController extends BaseController{
         $this->stageModel = new StageModel();
     }
 
-    public function showCreateForm(): string
+    public function showCreateForm()
     {
+        // ====== Authentification
+        $userId = session('user_id');
+        if (empty($userId)) return redirect()->to('/login');
+
+        $userCars = $this->carModel->where(['user_id'=>$userId,])->findAll();
+
         return view('Journeys/newJourney', [
-            'title' => "Publier un trajet"
+            'title' => "Publier un trajet",
+            'cars' => $userCars,
         ]);
     }
 
@@ -325,6 +332,7 @@ class JourneyController extends BaseController{
             'smoking'       => 'in_list[0,1]',
             'startAddress'  => 'required|string|max_length[255]',
             'endAddress'    => 'required|string|max_length[255]',
+            'car'           => 'required|integer|greater_than[0]',
         ];
 
     }
@@ -350,11 +358,12 @@ class JourneyController extends BaseController{
     public function getJourneyCreateFormData(){
 
         return [
-            'startDate'    => $this->request->getPost('startDate'),
-            'startTime'    => $this->request->getPost('startTime'),
+            'startDate'     => $this->request->getPost('startDate'),
+            'startTime'     => $this->request->getPost('startTime'),
             'seats'         => $this->request->getPost('seats'),
             'note'          => $this->request->getPost('note'),
             'smoking'       => $this->request->getPost('smoking'),
+            'car'           => $this->request->getPost('car'),
         ];
 
     }
@@ -601,6 +610,7 @@ class JourneyController extends BaseController{
             'seats'             => $createFormData['journey']['seats'],
             'note'              => $createFormData['journey']['note'],
             'smoking'           => $createFormData['journey']['smoking'],
+            'car_id'            => $createFormData['journey']['car'],
             'track_id'          => $trackId,
             'user_id'           => $userId,
             'location_start_id' => array_shift($locationsId),
