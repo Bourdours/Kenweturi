@@ -136,38 +136,25 @@ class AuthController extends BaseController
         $zipCode  = $this->request->getPost('postalCode');
 
         // Gestion de la table 'cities' (Ville)
-        // On vérifie si la ville existe déjà pour éviter les doublons
 
-        // Interrogation de l'API Géo pour récupérer les communes correspondant au code postal saisi
-        $apiUrl        = "https://geo.api.gouv.fr/communes?codePostal={$zipCode}&fields=nom";
-        $apiResponse   = @file_get_contents($apiUrl);
+        $cityNameChecked = $this->getCheckedCityName($cityName, $zipCode);
 
-        
-        if ($apiResponse === false) {
+        if ($cityNameChecked === null) {
             return redirect()->back()->withInput()->with('errors', [
                 'cityName' => 'Impossible de vérifier la ville. Veuillez réessayer.'
             ]);
         }
 
-        $municipalities  = json_decode($apiResponse, true);
-        // Supprime accents, casse et caractères spéciaux
-        $normalize       = fn($s) => strtolower(preg_replace(
-            '/[^a-z0-9]/i',
-            '',
-            iconv('UTF-8', 'ASCII//TRANSLIT', $s)
-        ));
-
-        $normalizedCity  = $normalize($cityName);
-        $isCityValid     = !empty(array_filter($municipalities, fn($m) => $normalize($m['nom']) === $normalizedCity));
-
-        // Si aucune correspondance trouvée, on rejette le formulaire
-        if (!$isCityValid) {
+        if ($cityNameChecked === false) {
             return redirect()->back()->withInput()->with('errors', [
                 'cityName' => 'La ville et le code postal ne correspondent pas à une commune valide.'
             ]);
         }
 
-        // Vérification si la ville existe ou pas
+        // On remplace la saisie par la forme officielle avant insertion en BDD
+        $cityName = $cityNameChecked;
+
+        // Vérification si la ville existe ou pas dans la base pour éviter les doublons
         $cityId = $this->cityModel->findOrCreateCity($cityName, $zipCode);
 
         // Préparation des données de l'utilisateur
@@ -370,5 +357,57 @@ class AuthController extends BaseController
         ]);
 
         return redirect()->to('/login')->with('success', 'Mot de passe réinitialisé avec succès !');
+    }
+
+    /**
+     * Récupère le nom officiel d'une commune française à partir d'un couple (nom saisi, code postal)
+     * via l'API Découpage administratif (geo.api.gouv.fr).
+     *
+     * @param string $cityName Nom de la commune saisi par l'utilisateur
+     * @param string $zipCode  Code postal saisi par l'utilisateur
+     * @return string|false|null Nom officiel si valide, false si invalide, null si le service est indisponible
+     */
+    function getCheckedCityName(string $cityName, string $zipCode): string|false|null
+    {
+        $url = 'https://geo.api.gouv.fr/communes?' . http_build_query([
+            'nom'        => $cityName,
+            'codePostal' => $zipCode,
+            'fields'     => 'nom',
+            'limit'      => 5,
+        ]);
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT        => 10,
+            CURLOPT_HTTPHEADER     => ['Accept: application/json'],
+        ]);
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        if ($response === false || $httpCode !== 200) {
+            return null;
+        }
+
+        $municipalities = json_decode($response, true);
+        if (empty($municipalities)) {
+            return false;
+        }
+
+        // Normalisation : supprime accents, casse et caractères spéciaux
+        $normalize = fn($s) => strtolower(preg_replace(
+            '/[^a-z0-9]/i',
+            '',
+            iconv('UTF-8', 'ASCII//TRANSLIT', $s ?? '')
+        ));
+        $normalizedCity = $normalize($cityName);
+
+        foreach ($municipalities as $m) {
+            if ($normalize($m['nom']) === $normalizedCity) {
+                return $m['nom']; // forme officielle renvoyée par l'API
+            }
+        }
+
+        return false;
     }
 }
