@@ -192,7 +192,7 @@ class AuthController extends BaseController
             'birth_date'    => $this->request->getPost('birthDate'),
             'is_student'    => $this->request->getPost('isStudent') === 'on' ? 1 : 0,
             'password_hash' => $this->request->getPost('password'),
-            'city_id'       => $cityId
+            'city_id'       => $cityId,
         ];
 
         // Tentative de sauvegarde de l'utilisateur via le Model
@@ -234,10 +234,33 @@ class AuthController extends BaseController
                     'avatar'     => $user['avatar'] ?? null,
                     'isLoggedIn' => true,
                 ];
-                
+
                 $session->regenerate();
                 $session->set($sessionData);
 
+                // Si l'utilisateur a coché "Se souvenir de moi"
+                if ($this->request->getPost('rememberMe')) {
+                    // Génération d'un token aléatoire sécurisé
+                    $token = bin2hex(random_bytes(32));
+                    // Durée de validité : 30 jours en secondes
+                    $expiry = 30 * 24 * 60 * 60;
+
+                    // Sauvegarde du token hashé en base
+                    $this->userModel->update($user['id'], [
+                        'remember_token' => hash('sha256', $token),
+                    ]);
+                    // Redirection avec le cookie sécurisé 
+                    return redirect()->to('/')
+                        ->with('success', 'Ravi de vous revoir, ' . $user['firstname'] . ' !')
+                        ->setCookie([
+                            'name'     => 'remember_token',
+                            'value'    => $token,
+                            'expire'   => $expiry,
+                            'httponly' => true, // protection XSS
+                            'secure'   => false, // Passer à true en production (HTTPS)
+                            'samesite' => 'Strict',  // Protection CSRF
+                        ]);
+                }
                 // Redirection vers l'accueil avec un message de bienvenue
                 return redirect()->to('/')->with('success', 'Ravi de vous revoir, ' . $user['firstname'] . ' !');
             } else {
@@ -257,6 +280,16 @@ class AuthController extends BaseController
      */
     public function logout()
     {
+        // Suppression du token en base
+        $userId = session()->get('user_id');
+        if ($userId) {
+            $user = $this->userModel->find($userId);
+            if ($user && $user['remember_token'] !== null) {
+                $this->userModel->update($userId, ['remember_token' => null]);
+            }
+        }
+
+        $this->response->deleteCookie('remember_token');
         session()->destroy();
         return redirect()->to('/login')->with('success', 'Vous avez été déconnecté.');
     }

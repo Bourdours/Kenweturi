@@ -32,7 +32,8 @@ class UserModel extends BaseModel
         'avatar',
         'is_student',
         'registered_at', 
-        'password_hash',       
+        'password_hash', 
+        'remember_token',      
         'city_id',
         'reset_token',
         'reset_token_expiry'
