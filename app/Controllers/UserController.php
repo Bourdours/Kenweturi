@@ -207,6 +207,9 @@ class UserController extends BaseController
         if (!empty($cityName)) {
             $cityRow = $this->cityModel->where('name', $cityName)->first();
             if ($cityRow) {
+                if (!empty($zipcode) && $cityRow['zipcode'] !== $zipcode) {
+                    $this->cityModel->update($cityRow['id'], ['zipcode' => $zipcode]);
+                }
                 $data['city_id'] = $cityRow['id'];
             } else {
                 $this->cityModel->insert(['name' => $cityName, 'zipcode' => $zipcode]);
