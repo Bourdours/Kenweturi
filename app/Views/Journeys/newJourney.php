@@ -1,63 +1,181 @@
-<?= view('partials/head', ['extraJs' => [base_url('js/autocompletion.js')]]) ?>
+<?= view('partials/head', [
+    'extraCss' => [
+        'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css',
+        base_url('css/flatpickr-theme.css'),
+    ],
+    'extraJs' => [
+        'https://cdn.jsdelivr.net/npm/flatpickr',
+        'https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js',
+        base_url('js/datepicker.js'),
+        base_url('js/timepicker.js'),
+        base_url('js/newJourney.js'),
+    ],
+]) ?>
 <?= view('partials/header') ?>
 
-  <form id="addJourneyForm" action="/journeys/new" method="post">
+<div class="max-w-4xl mx-auto py-10 px-6 md:px-8 flex flex-col gap-6">
 
-      <div class="field" style="color: white;">
-        <label for="startAddress">Départ</label>
-        <input style="color: black;" id="startAddress" class="address" name="startAddress" type="text">
+  <div class="flex items-center justify-between">
+    <h1 class="text-ink text-2xl font-bold font-display">Publier un trajet</h1>
+    <a href="<?= site_url('dashboard') ?>" class="text-ink/50 hover:text-action text-sm flex items-center gap-1.5 transition-colors">
+      <i class="fa-solid fa-arrow-left text-xs"></i>Retour
+    </a>
+  </div>
+
+  <?php if (session()->has('errors')): ?>
+    <div class="bg-action/10 border border-action/30 rounded-xl p-4 flex gap-3 items-start">
+      <i class="fa-solid fa-triangle-exclamation text-action text-base shrink-0 mt-0.5"></i>
+      <div>
+        <p class="text-ink text-sm font-medium mb-2">Veuillez corriger les erreurs suivantes :</p>
+        <ul class="list-disc pl-4 flex flex-col gap-1">
+          <?php foreach (session('errors') as $error): ?>
+            <li class="text-action text-xs"><?= esc((string) $error) ?></li>
+          <?php endforeach ?>
+        </ul>
       </div>
+    </div>
+  <?php endif; ?>
 
-      <div class="field" style="color: white;">
-        <label for="endAddress">Arrivée</label>
-        <input style="color: black;" id="endAddress" class="address" name="endAddress" type="text">
+  <form id="addJourneyForm" action="/journeys/new" method="post" class="flex flex-col gap-6">
+    <?= csrf_field() ?>
+
+    <!-- Itinéraire -->
+    <div class="bg-surface rounded-2xl p-6 border border-action/10">
+      <h2 class="text-ink text-base font-semibold font-display mb-5 flex items-center gap-2">
+        <i class="fa-solid fa-route text-action text-sm"></i>Itinéraire
+      </h2>
+
+      <div class="flex flex-col">
+
+        <!-- Départ -->
+        <div class="flex gap-4 items-start">
+          <div class="flex flex-col items-center shrink-0 w-3 pt-8">
+            <div class="w-3 h-3 bg-brand rounded-full shrink-0"></div>
+            <div class="w-px flex-1 bg-ink/10 mt-1 min-h-10"></div>
+          </div>
+          <div class="flex-1 pb-4">
+            <label for="startAddress" class="text-ink/50 text-xs font-medium mb-1.5 block">Départ</label>
+            <input id="startAddress" class="address w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors" name="startAddress" type="text" placeholder="Adresse de départ...">
+            <input type="hidden" class="lng" name="startLng">
+            <input type="hidden" class="lat" name="startLat">
+          </div>
+        </div>
+
+        <!-- Étapes -->
+        <div id="stagesContainer">
+          <div class="flex gap-4 items-start">
+            <div class="flex flex-col items-center shrink-0 w-3 pt-8">
+              <div class="w-2 h-2 bg-ink/20 rounded-full shrink-0 mt-0.5"></div>
+              <div class="w-px flex-1 bg-ink/10 mt-1 min-h-10"></div>
+            </div>
+            <div class="flex-1 pb-4">
+              <label for="stage1" class="text-ink/50 text-xs font-medium mb-1.5 block">Étape 1 <span class="text-ink/30 font-normal">(optionnel)</span></label>
+              <input id="stage1" class="address w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors" name="stagesAddresses[]" type="text" placeholder="Adresse de l'étape...">
+              <input type="hidden" class="lng">
+              <input type="hidden" class="lat">
+            </div>
+          </div>
+        </div>
+
+        <!-- Ajouter une étape -->
+        <div class="flex gap-4 items-center">
+          <div class="flex flex-col items-center shrink-0 w-3 self-stretch">
+            <div class="w-px flex-1 bg-ink/10"></div>
+          </div>
+          <div class="py-1.5">
+            <button type="button" id="addStageBtn"
+              class="flex items-center gap-1.5 text-action/50 hover:text-action text-xs font-medium transition-colors cursor-pointer">
+              <i class="fa-solid fa-plus text-xs"></i>Ajouter une étape
+            </button>
+          </div>
+        </div>
+
+        <!-- Arrivée -->
+        <div class="flex gap-4 items-start">
+          <div class="flex flex-col items-center shrink-0 w-3 pt-8">
+            <div class="w-3 h-3 bg-action rounded-full shrink-0"></div>
+          </div>
+          <div class="flex-1">
+            <label for="endAddress" class="text-ink/50 text-xs font-medium mb-1.5 block">Arrivée</label>
+            <input id="endAddress" class="address w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors" name="endAddress" type="text" placeholder="Adresse d'arrivée...">
+            <input type="hidden" class="lng" name="endLng">
+            <input type="hidden" class="lat" name="endLat">
+          </div>
+        </div>
+
       </div>
+    </div>
 
-      <div class="field" style="color: white;">
-        <label for="stage1">Etape 1</label>
-        <input style="color: black;" id="stage1" class="address" name="stagesAddresses[]" type="text">
-      </div>
-
-      <div class="field" style="color: white;">
-        <label for="stage2">Etape 2</label>
-        <input style="color: black;" id="stage1" class="address" name="stagesAddresses[]" type="text">
-      </div>
-
-      <div class="field" style="color: white;">
-        <label for="startDateTime">Date de départ</label>
-        <input style="color: black;" id="startDateTime" name="startDate" type="Date">
-      </div>
-
-      <div class="field" style="color: white;">
-        <label for="startDateTime">Heure de départ</label>
-        <input style="color: black;" id="startDateTime" name="startTime" type="Time">
-      </div>
-
-      <div class="field" style="color: white;">
-        <label for="seats">Nombre de places</label>
-        <input style="color: black;" id="seats" name="seats" type="number">
-      </div>
-
-      <div class="field" style="color: white;">
-        <label>Fumeur</label>
+    <!-- Date & heure -->
+    <div class="bg-surface rounded-2xl p-6 border border-action/10">
+      <h2 class="text-ink text-base font-semibold font-display mb-5 flex items-center gap-2">
+        <i class="fa-solid fa-calendar text-action text-sm"></i>Date & heure
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <input type="radio" id="smoking-yes" name="smoking" value=1>
-          <label for="smoking-yes" style="color: white;">Oui</label>
-
-          <input type="radio" id="smoking-no" name="smoking" value=0>
-          <label for="smoking-no" style="color: white;">Non</label>
+          <label for="date" class="text-ink/50 text-xs font-medium mb-1.5 block">Date de départ</label>
+          <input id="date" name="startDate" type="text" readonly placeholder="jj/mm/aaaa"
+            class="w-full bg-paper border border-action/15 rounded-lg text-ink/60 text-sm px-3 py-2.5 outline-none focus:border-action/50 cursor-pointer transition-colors">
+        </div>
+        <div>
+          <label for="time" class="text-ink/50 text-xs font-medium mb-1.5 block">Heure de départ</label>
+          <input id="time" name="startTime" type="text" readonly placeholder="--:--"
+            class="w-full bg-paper border border-action/15 rounded-lg text-ink/60 text-sm px-3 py-2.5 outline-none focus:border-action/50 cursor-pointer transition-colors">
         </div>
       </div>
+    </div>
 
-      <div class="field" style="color: white;">
-        <label for="note">Note</label>
-        <textarea style="color: black;" id="note" name="note"></textarea>
+    <!-- Préférences -->
+    <div class="bg-surface rounded-2xl p-6 border border-action/10">
+      <h2 class="text-ink text-base font-semibold font-display mb-5 flex items-center gap-2">
+        <i class="fa-solid fa-sliders text-action text-sm"></i>Préférences
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label for="seats" class="text-ink/50 text-xs font-medium mb-1.5 block">Nombre de places</label>
+          <input id="seats" name="seats" type="number" min="1" max="9" placeholder="Ex: 3"
+            class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors">
+        </div>
+        <div>
+          <label class="text-ink/50 text-xs font-medium mb-1.5 block">Fumeur</label>
+          <div class="flex gap-2">
+            <label class="flex-1 flex items-center justify-center gap-2 bg-paper border border-action/15 rounded-lg px-3 py-2.5 text-ink text-sm font-medium cursor-pointer has-[:checked]:bg-action/10 has-[:checked]:border-action/50 transition-colors">
+              <input type="radio" name="smoking" value="1" class="hidden">
+              <i class="fa-solid fa-smoking text-xs"></i>Oui
+            </label>
+            <label class="flex-1 flex items-center justify-center gap-2 bg-paper border border-action/15 rounded-lg px-3 py-2.5 text-ink text-sm font-medium cursor-pointer has-[:checked]:bg-action/10 has-[:checked]:border-action/50 transition-colors">
+              <input type="radio" name="smoking" value="0" class="hidden">
+              <i class="fa-solid fa-ban-smoking text-xs"></i>Non
+            </label>
+          </div>
+        </div>
       </div>
+    </div>
 
-      <button type="submit" style="color: white;">Soumettre</button>
+    <!-- Note -->
+    <div class="bg-surface rounded-2xl p-6 border border-action/10">
+      <h2 class="text-ink text-base font-semibold font-display mb-5 flex items-center gap-2">
+        <i class="fa-solid fa-align-left text-action text-sm"></i>Note
+      </h2>
+      <label for="note" class="text-ink/50 text-xs font-medium mb-1.5 block">Message aux passagers <span class="text-ink/30 font-normal">(optionnel)</span></label>
+      <textarea id="note" name="note" rows="4"
+        placeholder="Informations utiles pour les passagers..."
+        class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 resize-none transition-colors"></textarea>
+    </div>
+
+    <!-- Boutons -->
+    <div class="flex items-center justify-end gap-3">
+      <a href="<?= site_url('dashboard') ?>"
+        class="flex items-center gap-2 border border-action/20 hover:border-action/50 text-ink/60 hover:text-ink font-medium rounded-lg px-5 py-2.5 text-sm transition-colors">
+        Annuler
+      </a>
+      <button type="submit"
+        class="flex items-center gap-2 bg-action hover:bg-action-dark text-ink font-semibold font-display rounded-lg px-5 py-2.5 text-sm transition-colors cursor-pointer">
+        <i class="fa-solid fa-check text-xs"></i>Publier le trajet
+      </button>
+    </div>
 
   </form>
-
-</main>
+</div>
 
 <?= view('partials/footer') ?>

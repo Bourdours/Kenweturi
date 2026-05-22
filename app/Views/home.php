@@ -17,6 +17,24 @@
 ]) ?>
 <?= view('partials/header') ?>
 
+<div class="relative">
+<!-- Sillon de fleuve — depuis S'inscrire (navbar) jusqu'au logo Kenweturi du footer -->
+<svg class="hidden md:block absolute inset-x-0 bottom-0 w-full pointer-events-none"
+     style="top: -70px"
+     viewBox="0 0 100 100"
+     preserveAspectRatio="none"
+     xmlns="http://www.w3.org/2000/svg">
+  <path
+    d="M 88 0 C 111 27, 12 35, 12 55 C 12 75, 76 88, 0 100"
+    fill="none"
+    stroke="rgb(var(--color-action))"
+    stroke-opacity="0.7"
+    stroke-width="20"
+    stroke-dasharray="6 24"
+    stroke-linecap="round"
+    vector-effect="non-scaling-stroke"
+  />
+</svg>
 
 <!-- Hero -->
 <section class="bg-gradient-to-b from-paper via-surface to-paper">
@@ -243,6 +261,8 @@
       </div>
     </div>
   <?php endif; ?>
+
+</div>
 
 </div>
 
