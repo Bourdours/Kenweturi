@@ -96,7 +96,7 @@ class JourneyController extends BaseController{
         } catch (\Throwable $e) {
 
             return redirect()->back()->withInput()
-                ->with('errors', ['db' => 'Une erreur est survenue lors de l\'enregistrement.']);
+                ->with('errors', ['db' => 'Une erreur est survenue lors de l\'enregistrement .']);
 
         }
 
