@@ -179,8 +179,8 @@
       </button>
 
       <!-- Modal -->
-      <div id="modalSupprimer" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:9999;">
-        <div class="bg-surface rounded-2xl p-6" style="max-width:400px; width:90%;">
+      <div id="modalSupprimer" class="hidden fixed inset-0 w-full h-full bg-black/50 items-center justify-center z-[9999]">
+        <div class="bg-surface rounded-2xl p-6 w-[90%] max-w-[400px]">
           <h2 class="text-danger font-semibold font-display mb-2">Supprimer mon compte</h2>
           <p class="text-ink text-sm mb-6">La suppression de votre compte est irréversible. Êtes-vous sûr ?</p>
           <div class="mb-5">
