@@ -139,6 +139,8 @@ class JourneyController extends BaseController{
         if(!$journey)
             return redirect()->to('/journeys');
 
+        $journey['end_datetime'] = ($this->getArrivaleDateTime($journey['id']))->format('Y-m-d H:i:s');
+
         // Récupération des stages ordonnés (hors départ et arrivée s'ils y sont dupliqués)
         $stages = $db->table('stage')
             ->select('stage.*, location.address, location.latitude, location.longitude, city.name as city_name')
@@ -721,6 +723,47 @@ class JourneyController extends BaseController{
         }
 
         return $stagesDeparturesDateTime;
+    }
+
+    /**
+     * Calcule l'heure d'arrivée d'un trajet
+     *
+     * @param int $journeyId ID du journey
+     * @return DateTimeImmutable Heure d'arrivée
+     */
+    private function getArrivaleDateTime(int $journeyId): DateTimeImmutable {
+    
+        $trackId = $this->journeyModel->select(['track_id'])->where([
+            'id'=>$journeyId,
+        ])->first();
+
+        $track = $this->trackModel->where([
+            'id'=>$trackId,
+        ])->first();
+
+        $trackDuration = $this->calculateTrackDuration(json_decode($track['geojson']));
+        $journeyStartDateTime = new DateTimeImmutable($this->journeyModel->select(['start_datetime'])->where(['id'=>$journeyId])->first()['start_datetime']);
+
+        return $journeyStartDateTime->modify('+'.$trackDuration.' seconds');
+    }
+
+
+    /**
+     * Calcul le temps de trajet d'un geoJson
+     *
+     * @param object $track trajet au format geoJson
+     * @return int Durée du trajet
+     */
+    private function calculateTrackDuration(?object $track): int {
+
+        $duration=0;
+        $segments = $track->features[0]->properties->segments ?? null;
+
+        foreach($segments as $segment){
+            $duration += $segment->duration;
+        }
+
+        return (int) $duration;
     }
 
 }
