@@ -19,56 +19,7 @@
 <?= view('partials/header') ?>
 
 <div class="relative overflow-hidden">
-  <!-- Sillon de fleuve — depuis S'inscrire (navbar) jusqu'au logo Kenweturi du footer -->
-  <svg class="hidden md:block absolute inset-x-0 bottom-0 w-full pointer-events-none"
-    style="top: -70px"
-    viewBox="0 0 100 100"
-    preserveAspectRatio="none"
-    xmlns="http://www.w3.org/2000/svg">
-    <path
-      d="M 88 0 C 111 27, 12 35, 12 55 C 12 75, 76 88, 0 100"
-      fill="none"
-      stroke="rgb(var(--color-action))"
-      stroke-opacity="0.2"
-      stroke-width="36"
-      stroke-linecap="butt"
-      vector-effect="non-scaling-stroke" />
-    <path
-      d="M 88 0 C 111 27, 12 35, 12 55 C 12 75, 76 88, 0 100"
-      fill="none"
-      stroke="rgb(var(--color-action))"
-      stroke-opacity="0.5"
-      stroke-width="3"
-      stroke-dasharray="24 32"
-      stroke-linecap="square"
-      vector-effect="non-scaling-stroke"
-      style="animation: snake 2s linear infinite" />
-    <style>
-      @keyframes snake {
-        to {
-          stroke-dashoffset: -56;
-        }
-      }
-
-      <!-- @keyframes wiggle {
-        0% {
-          d: path('M 88 0 C 111 27, 12 35, 12 55 C 12 75, 76 88, 0 100');
-        }
-
-        33% {
-          d: path('M 88 0 C 114 25,  9 37, 12 55 C 15 73, 73 90, 0 100');
-        }
-
-        66% {
-          d: path('M 88 0 C 108 29, 15 33, 12 55 C  9 77, 79 86, 0 100');
-        }
-
-        100% {
-          d: path('M 88 0 C 111 27, 12 35, 12 55 C 12 75, 76 88, 0 100');
-        }
-      } -->
-    </style>
-  </svg>
+  <?= view('partials/home_svg') ?>
 
   <!-- Hero -->
   <section class="bg-gradient-to-b from-paper via-surface to-paper">
@@ -152,7 +103,7 @@
   </section>
 
   <?php if (!empty($nextDriverJourney) || !empty($nextPassengerJourney)): ?>
-    <div class="max-w-4xl mx-auto px-6 md:px-8 pt-8">
+    <div class="max-w-4xl mx-auto px-6 md:px-8 pt-8 relative z-10">
       <div class="grid grid-cols-1 <?= (!empty($nextDriverJourney) && !empty($nextPassengerJourney)) ? 'sm:grid-cols-2' : '' ?> gap-3">
 
         <?php if (!empty($nextDriverJourney)): ?>
