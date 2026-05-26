@@ -30,9 +30,6 @@ class AuthController extends BaseController
      */
     public function showRegisterForm()
     {
-        if (session()->get('isLoggedIn')) {
-            return redirect()->to('/');
-        }
         return view(
             'Auth/register',
             [
@@ -49,9 +46,6 @@ class AuthController extends BaseController
      */
     public function showLoginForm()
     {
-        if (session()->get('isLoggedIn')) {
-            return redirect()->to('/');
-        }
         return view('Auth/login', [
             'title' => 'Connexion'
         ]);
@@ -275,9 +269,6 @@ class AuthController extends BaseController
      */
     public function showForgotPasswordForm()
     {
-        if (session()->get('isLoggedIn')) {
-            return redirect()->to('/');
-        }
 
         return view('Auth/forgotPassword', [
             'title' => 'Mot de passe oublié'
