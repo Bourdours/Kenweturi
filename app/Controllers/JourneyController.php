@@ -38,10 +38,17 @@ class JourneyController extends BaseController{
         $this->stageModel = new StageModel();
     }
 
-    public function showCreateForm(): string
+    public function showCreateForm()
     {
+        // ====== Authentification
+        $userId = session('user_id');
+        if (empty($userId)) return redirect()->to('/login');
+
+        $userCars = $this->carModel->where(['user_id'=>$userId,])->findAll();
+
         return view('Journeys/newJourney', [
-            'title' => "Publier un trajet"
+            'title' => "Publier un trajet",
+            'cars' => $userCars,
         ]);
     }
 
@@ -63,7 +70,8 @@ class JourneyController extends BaseController{
         if (empty($userId)) return redirect()->to('/login');
 
         // ====== Validation des données du formulaire
-        if (!$this->validate($this->getCreateValidationRules())) {
+        $createValidationRules = $this->getCreateValidationRules();
+        if (!$this->validate($createValidationRules)) {
             return redirect()->back()->withInput()
                 ->with('errors', $this->validator->getErrors());
         }
@@ -80,7 +88,6 @@ class JourneyController extends BaseController{
 
         } catch (ExternalApiException $e) {
 
-            log_message('error', 'API externe KO: ' . $e->getMessage());
             return redirect()->back()->withInput()
                 ->with('errors', ['api' => 'Service de cartographie indisponible, réessayez plus tard.']);
 
@@ -91,7 +98,6 @@ class JourneyController extends BaseController{
 
         } catch (\Throwable $e) {
 
-            log_message('error', 'Erreur création trajet: ' . $e->getMessage());
             return redirect()->back()->withInput()
                 ->with('errors', ['db' => 'Une erreur est survenue lors de l\'enregistrement.']);
 
@@ -326,6 +332,7 @@ class JourneyController extends BaseController{
             'smoking'       => 'in_list[0,1]',
             'startAddress'  => 'required|string|max_length[255]',
             'endAddress'    => 'required|string|max_length[255]',
+            'car'           => 'required|integer|greater_than[0]',
         ];
 
     }
@@ -351,11 +358,12 @@ class JourneyController extends BaseController{
     public function getJourneyCreateFormData(){
 
         return [
-            'startDate'    => $this->request->getPost('startDate'),
-            'startTime'    => $this->request->getPost('startTime'),
+            'startDate'     => $this->request->getPost('startDate'),
+            'startTime'     => $this->request->getPost('startTime'),
             'seats'         => $this->request->getPost('seats'),
             'note'          => $this->request->getPost('note'),
             'smoking'       => $this->request->getPost('smoking'),
+            'car'           => $this->request->getPost('car'),
         ];
 
     }
@@ -507,25 +515,6 @@ class JourneyController extends BaseController{
     }
 
     /**
-     * Récupère l'ID d'une ville existante ou la crée si elle n'existe pas.
-     *
-     * @param string $name    Nom de la ville
-     * @param string $zipcode Code postal
-     * @return int|string ID de la ville
-     */
-    private function findOrCreateCity(string $name, string $zipcode)
-    {
-        return $this->cityModel
-                ->where('name', $name)
-                ->where('zipcode', $zipcode)
-                ->first()['id']
-            ?? $this->cityModel->insert([
-                'name'    => $name,
-                'zipcode' => $zipcode,
-            ]);
-    }
-
-    /**
      * Récupère les données de localisation de chaque adresse du formulaire.
      * Lève une exception si une adresse ne peut pas être géolocalisée.
      *
@@ -533,19 +522,23 @@ class JourneyController extends BaseController{
      * @return array           Tableau des données de localisation indexé par les mêmes clés
      * @throws ExternalApiException Si l'API ne renvoie rien pour une adresse
      */
-    private function fetchAllLocationsData(array $addresses): array
-    {
+    private function fetchAllLocationsData(array $addresses): array {
+
         $locationsData = [];
 
         foreach ($addresses as $key => $address) {
+
             $data = $this->getLocationData($address);
-            if ($data === null) {
-                throw new ExternalApiException("Adresse introuvable: $address");
+            // Un stage peut-être vide, dans ce cas on ne le prend pas en compte
+            if(!empty($address)){
+                if ($data === null && !empty($address)) throw new ExternalApiException("Adresse introuvable: $address");
+                $locationsData[$key] = $data;
             }
-            $locationsData[$key] = $data;
+
         }
 
         return $locationsData;
+        
     }
 
     /**
@@ -617,6 +610,7 @@ class JourneyController extends BaseController{
             'seats'             => $createFormData['journey']['seats'],
             'note'              => $createFormData['journey']['note'],
             'smoking'           => $createFormData['journey']['smoking'],
+            'car_id'            => $createFormData['journey']['car'],
             'track_id'          => $trackId,
             'user_id'           => $userId,
             'location_start_id' => array_shift($locationsId),
@@ -662,7 +656,7 @@ class JourneyController extends BaseController{
         $locationEntities = [];
 
         foreach ($locationsData as $location) {
-            $cityId = $this->findOrCreateCity($location['city'], $location['postcode']);
+            $cityId = $this->cityModel->findOrCreateCity($location['city'], $location['postcode']);
             $locationEntities[] = [
                 'longitude' => $location['longitude'],
                 'latitude'  => $location['latitude'],

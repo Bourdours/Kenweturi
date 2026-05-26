@@ -33,10 +33,12 @@ class AuthController extends BaseController
         if (session()->get('isLoggedIn')) {
             return redirect()->to('/');
         }
-        return view('Auth/register', [
-             'title' => 'Inscription'
-        ]
-        
+        return view(
+            'Auth/register',
+            [
+                'title' => 'Inscription'
+            ]
+
         );
     }
 
@@ -51,7 +53,7 @@ class AuthController extends BaseController
             return redirect()->to('/');
         }
         return view('Auth/login', [
-             'title' => 'Connexion'
+            'title' => 'Connexion'
         ]);
     }
 
@@ -129,32 +131,31 @@ class AuthController extends BaseController
             ]);
         }
 
-        // Récupération des données liées à la ville depuis le formulaire
+        // Récupération des données liées à la ville depuis le formulaireu
         $cityName = $this->request->getPost('cityName');
         $zipCode  = $this->request->getPost('postalCode');
 
         // Gestion de la table 'cities' (Ville)
-        // On vérifie si la ville existe déjà pour éviter les doublons
-        // $existingCity = $this->cityModel->where('name', $cityName)->first();
 
-        $cityName = trim($this->request->getPost('cityName'));
-        $zipCode  = trim($this->request->getPost('postalCode'));
+        $cityNameChecked = $this->getCheckedCityName($cityName, $zipCode);
 
-        $existingCity = $this->cityModel->where(['name' => $cityName, 'zipcode' => $zipCode])->first();
-
-        // Si elle existe, on récupère son ID existant
-        if ($existingCity) {
-            $cityId = $existingCity['id'];
-        } else {
-            // Si elle n'existe pas, on l'ajoute dans la table 'cities'
-            $this->cityModel->insert([
-                'name' => $cityName,
-                'zipcode' => $zipCode
+        if ($cityNameChecked === null) {
+            return redirect()->back()->withInput()->with('errors', [
+                'cityName' => 'Impossible de vérifier la ville. Veuillez réessayer.'
             ]);
-
-            // On récupère l'ID généré
-            $cityId = $this->cityModel->getInsertID();
         }
+
+        if ($cityNameChecked === false) {
+            return redirect()->back()->withInput()->with('errors', [
+                'cityName' => 'La ville et le code postal ne correspondent pas à une commune valide.'
+            ]);
+        }
+
+        // On remplace la saisie par la forme officielle avant insertion en BDD
+        $cityName = $cityNameChecked;
+
+        // Vérification si la ville existe ou pas dans la base pour éviter les doublons
+        $cityId = $this->cityModel->findOrCreateCity($cityName, $zipCode);
 
         // Préparation des données de l'utilisateur
         $data = [
@@ -165,7 +166,7 @@ class AuthController extends BaseController
             'birth_date'    => $this->request->getPost('birthDate'),
             'is_student'    => $this->request->getPost('isStudent') === 'on' ? 1 : 0,
             'password_hash' => $this->request->getPost('password'),
-            'city_id'       => $cityId
+            'city_id'       => $cityId,
         ];
 
         // Tentative de sauvegarde de l'utilisateur via le Model
@@ -208,8 +209,32 @@ class AuthController extends BaseController
                     'isLoggedIn' => true,
                 ];
 
+                $session->regenerate();
                 $session->set($sessionData);
 
+                // Si l'utilisateur a coché "Se souvenir de moi"
+                if ($this->request->getPost('rememberMe')) {
+                    // Génération d'un token aléatoire sécurisé
+                    $token = bin2hex(random_bytes(32));
+                    // Durée de validité : 30 jours en secondes
+                    $expiry = 30 * 24 * 60 * 60;
+
+                    // Sauvegarde du token hashé en base
+                    $this->userModel->update($user['id'], [
+                        'remember_token' => hash('sha256', $token),
+                    ]);
+                    // Redirection avec le cookie sécurisé 
+                    return redirect()->to('/')
+                        ->with('success', 'Ravi de vous revoir, ' . $user['firstname'] . ' !')
+                        ->setCookie([
+                            'name'     => 'remember_token',
+                            'value'    => $token,
+                            'expire'   => $expiry,
+                            'httponly' => true, // protection XSS
+                            'secure'   => false, // Passer à true en production (HTTPS)
+                            'samesite' => 'Strict',  // Protection CSRF
+                        ]);
+                }
                 // Redirection vers l'accueil avec un message de bienvenue
                 return redirect()->to('/')->with('success', 'Ravi de vous revoir, ' . $user['firstname'] . ' !');
             } else {
@@ -229,6 +254,16 @@ class AuthController extends BaseController
      */
     public function logout()
     {
+        // Suppression du token en base
+        $userId = session()->get('user_id');
+        if ($userId) {
+            $user = $this->userModel->find($userId);
+            if ($user && $user['remember_token'] !== null) {
+                $this->userModel->update($userId, ['remember_token' => null]);
+            }
+        }
+
+        $this->response->deleteCookie('remember_token');
         session()->destroy();
         return redirect()->to('/login')->with('success', 'Vous avez été déconnecté.');
     }
@@ -239,10 +274,11 @@ class AuthController extends BaseController
      * @return string
      */
     public function showForgotPasswordForm()
-    {    if (session()->get('isLoggedIn')) {
+    {
+        if (session()->get('isLoggedIn')) {
             return redirect()->to('/');
         }
-        
+
         return view('Auth/forgotPassword', [
             'title' => 'Mot de passe oublié'
         ]);
@@ -260,7 +296,7 @@ class AuthController extends BaseController
 
         $user = $this->userModel->where('email', $email)->first();
 
-        if (!$user) {
+        if (!$user || $user['deleted_at'] !== null) {
             return redirect()->back()->withInput()->with('success', 'Si un compte existe avec cet email, vous recevrez un lien de réinitialisation.');
         }
 
@@ -356,4 +392,5 @@ class AuthController extends BaseController
 
         return redirect()->to('/login')->with('success', 'Mot de passe réinitialisé avec succès !');
     }
+
 }

@@ -2,8 +2,10 @@
 
 /** @var array $user */
 ?>
-<?= view('partials/head', ['extraJs' => [base_url('js/auth.js'), base_url('js/user.js')]]) ?>
-<script> window.baseUrl = "<?= base_url() ?>"; </script>
+<?= view('partials/head', ['extraJs' => [base_url('js/auth.js'), base_url('js/user.js'), base_url('js/app.js')]]) ?>
+<script>
+  window.baseUrl = "<?= base_url() ?>";
+</script>
 <?= view('partials/header') ?>
 
 <div class="max-w-4xl mx-auto py-10 px-6 md:px-8 flex flex-col gap-6">
@@ -114,21 +116,21 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="relative">
             <label for="cityProfile" class="text-ink/50 text-xs font-medium mb-1.5 block ">Ville</label>
-            <input type="text" id="cityProfile" name="cityName" value="<?= esc($city ?? '') ?>"
+            <input type="text" id="cityProfile" name="cityProfile" data-city value="<?= esc($city ?? '') ?>"
               placeholder="Votre ville..."
               autocomplete="off"
               class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors">
           </div>
           <div>
             <label for="zipcodeProfile" class="text-ink/50 text-xs font-medium mb-1.5 block">Code postal</label>
-            <input type="text" id="zipcodeProfile" name="postalCode" value="<?= esc($zipcode ?? '') ?>"
+            <input type="text" id="zipcodeProfile" name="zipcodeProfile" data-zip value="<?= esc($zipcode ?? '') ?>"
               placeholder="Ex: 75001"
               class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors">
           </div>
         </div>
 
-          <!-- Message d'erreur -->
-          <p class="errorMessage text-red-600 mb-4 w-full hidden"></p>
+        <!-- Message d'erreur -->
+        <p class="errorMessage text-red-600 mb-4 w-full hidden"></p>
 
       </div>
     </div>
