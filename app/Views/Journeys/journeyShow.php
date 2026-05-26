@@ -69,6 +69,7 @@
                     <div class="w-3 h-3 rounded-full bg-action shrink-0"></div>
                 </div>
                 <div class="flex-1 min-w-0">
+                    <p class="text-ink font-bold font-display text-lg leading-none mb-1"><?= esc(date('H:i', strtotime($journey['end_datetime']))) ?></p>
                     <p class="text-ink font-semibold"><?= esc($journey['city_end_name']) ?></p>
                     <p class="text-muted text-sm"><?= esc($journey['address_end']) ?></p>
                 </div>
@@ -122,7 +123,7 @@
                     <p class="text-ink font-bold font-display text-2xl"><?= esc($remainingSeats) ?></p>
                 </div>
             </div>
-            <form action="/journeys/<?= esc($journey['id']) ?>/book" method="POST"
+            <form action="<?= site_url('/journeys/') ?><?= esc($journey['id']) ?>/book" method="POST"
                 onsubmit="return confirm('Confirmer la réservation ?')">
                 <?= csrf_field() ?>
                 <button type="submit" class="w-full bg-action text-paper font-bold font-display rounded-full py-3 hover:bg-action-dark transition-colors">
