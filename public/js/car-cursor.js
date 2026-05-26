@@ -231,9 +231,7 @@
     currentScaleX += (targetScaleX - currentScaleX) * 0.12;
     currentTilt   += (targetTilt   - currentTilt)   * 0.08;
 
-    // scaleX(-1) inverse le sens visuel de rotate → on multiplie par currentScaleX
-    // pour que l'inclinaison reste cohérente dans les deux sens
-    const effectiveTilt = currentTilt * currentScaleX;
+    const effectiveTilt = currentTilt;
     const elemX = cx - OX - NOSE_OFF * currentScaleX;
 
     car.style.transform =
