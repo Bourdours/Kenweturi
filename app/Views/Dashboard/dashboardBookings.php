@@ -20,8 +20,8 @@
                                         <div class="w-2.5 h-2.5 rounded-full bg-action"></div>
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <p class="text-ink font-semibold truncate"><?= esc($booking['pickup_city_name']) ?></p>
-                                        <p class="text-ink font-semibold truncate"><?= esc($booking['dropoff_city_name']) ?></p>
+                                        <p class="text-ink font-semibold truncate"><?= esc($booking['pickup_city_name'] ?? $booking['city_start_name']) ?></p>
+                                        <p class="text-ink font-semibold truncate"><?= esc($booking['dropoff_city_name'] ?? $booking['city_end_name']) ?></p>
                                     </div>
                                     <div class="text-right shrink-0 space-y-1">
                                         <p class="text-ink font-bold font-display"><?= esc(date('H:i', strtotime($booking['start_datetime']))) ?></p>
@@ -30,12 +30,16 @@
                                 </div>
                                 <div class="mt-3 pt-3 border-t border-action/10 flex items-center justify-between text-sm text-ink/50">
                                     <div class="flex items-center gap-2">
-                                        <?php if ($booking['passenger_avatar']): ?>
-                                            <img src="<?= esc($booking['passenger_avatar']) ?>" class="w-5 h-5 rounded-full object-cover">
+                                        <?php if (!empty($booking['person_avatar'])): ?>
+                                            <img src="/<?= esc($booking['person_avatar']) ?>" class="w-5 h-5 rounded-full object-cover">
+                                        <?php else: ?>
+                                            <div class="w-5 h-5 rounded-full bg-action-dark text-paper text-xs flex items-center justify-center font-bold">
+                                                <?= strtoupper(substr($booking['person_firstname'], 0, 1)) ?>
+                                            </div>
                                         <?php endif ?>
-                                        <span><?= esc($booking['passenger_firstname']) ?> <?= esc($booking['passenger_lastname']) ?></span>
+                                        <span><?= esc($booking['person_firstname']) ?> <?= esc($booking['person_lastname']) ?></span>
                                     </div>
-                                    <span><?= $booking['passenger_is_student'] ? 'Élève' : 'Formateur' ?></span>
+                                    <span><?= $booking['person_is_student'] ? 'Élève' : 'Formateur' ?></span>
                                 </div>
                             </a>
                         <?php endforeach ?>
