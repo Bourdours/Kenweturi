@@ -1,6 +1,6 @@
 // Champs du formulaire
-const cityInput = document.querySelector('input[name="cityName"]');
-const zipInput = document.querySelector('input[name="postalCode"]');
+const cityInput = document.querySelector('[data-city]');
+const zipInput = document.querySelector('[data-zip]');
 const form = cityInput ? cityInput.closest('form') : null;
 const errorText = document.querySelector('.errorMessage');
 
@@ -10,7 +10,7 @@ if (cityInput && zipInput) {
   let isValid = false;
 
   if (cityInput.value.trim() && zipInput.value.trim().length === 5) {
-    isValid = true;
+    validateCityZip();
   }
 
   /**
@@ -130,9 +130,9 @@ if (cityInput && zipInput) {
     const typedCity = cityInput.value.trim();
     const typedZip = zipInput.value.trim();
 
-    if (isValid && typedCity && typedZip.length === 5) {
-      return;
-    }
+    // if (isValid && typedCity && typedZip.length === 5) {
+    //   return;
+    // }
 
     if (!typedCity || typedZip.length !== 5) {
       isValid = false;

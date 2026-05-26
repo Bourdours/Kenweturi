@@ -57,4 +57,56 @@ abstract class BaseController extends Controller
     {
         return 6371 * acos(cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * cos(deg2rad($lng2) - deg2rad($lng1)) + sin(deg2rad($lat1)) * sin(deg2rad($lat2)));
     }
+
+    /**
+     * Récupère le nom officiel d'une commune française à partir d'un couple (nom saisi, code postal)
+     * via l'API Découpage administratif (geo.api.gouv.fr).
+     *
+     * @param string $cityName Nom de la commune saisi par l'utilisateur
+     * @param string $zipCode  Code postal saisi par l'utilisateur
+     * @return string|false|null Nom officiel si valide, false si invalide, null si le service est indisponible
+     */
+    function getCheckedCityName(string $cityName, string $zipCode): string|false|null
+    {
+        $url = 'https://geo.api.gouv.fr/communes?' . http_build_query([
+            'nom'        => $cityName,
+            'codePostal' => $zipCode,
+            'fields'     => 'nom',
+            'limit'      => 5,
+        ]);
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT        => 10,
+            CURLOPT_HTTPHEADER     => ['Accept: application/json'],
+        ]);
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        if ($response === false || $httpCode !== 200) {
+            return null;
+        }
+
+        $municipalities = json_decode($response, true);
+        if (empty($municipalities)) {
+            return false;
+        }
+
+        // Normalisation : supprime accents, casse et caractères spéciaux
+        $normalize = fn($s) => strtolower(preg_replace(
+            '/[^a-z0-9]/i',
+            '',
+            iconv('UTF-8', 'ASCII//TRANSLIT', $s ?? '')
+        ));
+        $normalizedCity = $normalize($cityName);
+
+        foreach ($municipalities as $m) {
+            if ($normalize($m['nom']) === $normalizedCity) {
+                return $m['nom']; // forme officielle renvoyée par l'API
+            }
+        }
+
+        return false;
+    }
 }
