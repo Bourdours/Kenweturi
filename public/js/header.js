@@ -30,11 +30,17 @@ if (userMenuToggle && userDropdown) {
 
   sync();
 
-  if (btn) btn.addEventListener('click', function () {
+  function toggle() {
     var isDark = html.classList.contains('dark');
     html.classList.toggle('dark', !isDark);
     localStorage.setItem('theme', isDark ? 'light' : 'dark');
     sync();
+  }
+
+  if (btn) btn.addEventListener('click', toggle);
+
+  document.addEventListener('keydown', function (e) {
+    if (e.altKey && e.key === 't') toggle();
   });
 })();
 

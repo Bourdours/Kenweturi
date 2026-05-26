@@ -33,23 +33,15 @@ const deletePasswordError = document.querySelector('#deletePasswordError');
 if (deleteForm && modalSupprimer) {
   
   // Ouvrir le modal au clic sur "Supprimer mon compte"
-  btnOpenDeleteModal?.addEventListener('click', () => {
-    modalSupprimer.style.display = 'flex';
-    deleteAccountPassword.focus();
-  });
+  const openDeleteModal  = () => { modalSupprimer.classList.remove('hidden'); modalSupprimer.classList.add('flex'); deleteAccountPassword.focus(); };
+  const closeDeleteModal = () => { modalSupprimer.classList.remove('flex'); modalSupprimer.classList.add('hidden'); deletePasswordError.classList.add('hidden'); };
 
-  // Fermer le modal au clic sur "Annuler"
-  btnCancelDelete?.addEventListener('click', () => {
-    modalSupprimer.style.display = 'none';
-    deletePasswordError.classList.add('hidden');
-  });
+  btnOpenDeleteModal?.addEventListener('click', openDeleteModal);
 
-  // Fermer le modal si on clique à l'extérieur
+  btnCancelDelete?.addEventListener('click', closeDeleteModal);
+
   modalSupprimer.addEventListener('click', (e) => {
-    if (e.target === modalSupprimer) {
-      modalSupprimer.style.display = 'none';
-      deletePasswordError.classList.add('hidden');
-    }
+    if (e.target === modalSupprimer) closeDeleteModal();
   });
 
   // Intercepter la soumission pour valider que ce n'est pas vide
