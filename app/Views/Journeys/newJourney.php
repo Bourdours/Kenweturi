@@ -36,7 +36,7 @@
     </div>
   <?php endif; ?>
 
-  <form id="addJourneyForm" action="/journeys/new" method="post" class="flex flex-col gap-6">
+  <form id="addJourneyForm" action="<?= base_url('/journeys/new') ?>" method="post" class="flex flex-col gap-6">
     <?= csrf_field() ?>
 
     <!-- Itinéraire -->
