@@ -12,7 +12,6 @@
                 <?php else : ?>
                     <div class="space-y-3">
                         <?php foreach ($bookings as $booking) : ?>
-                            <?php var_dump($booking['id']); ?>
                             <a href="<?= site_url('dashboard/bookings/' . $booking['id']) ?>" class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors">
                                 <div class="flex items-center gap-4">
                                     <div class="flex flex-col items-center shrink-0">
