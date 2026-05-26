@@ -22,11 +22,14 @@ $routes->get('logout', 'AuthController::logout');
 // Routes dashboard
 $routes->get('dashboard/journeys',  'DashboardController::showJourneys');
 $routes->get('dashboard/bookings',  'DashboardController::showBookings');
+$routes->get('dashboard/bookings/(:num)', 'DashboardController::showBooking/$1');
 $routes->get('dashboard/reports',   'DashboardController::showReports');
 $routes->get('dashboard/reports/(:num)', 'DashboardController::showReport/$1');
 $routes->get('dashboard',           'DashboardController::show');
 
+
 // Routes bookings
+
 $routes->post('dashboard/bookings/(:num)/delete', 'BookingController::delete/$1');
 $routes->post('dashboard/bookings/(:num)/accept', 'BookingController::accept/$1');
 $routes->post('dashboard/bookings/(:num)/reject', 'BookingController::reject/$1');
