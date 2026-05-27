@@ -163,10 +163,12 @@
             </div>
             <form action="/journeys/<?= esc($journey['id']) ?>/book" method="POST" id="formBook">
                 <?= csrf_field() ?>
-                <button type="button" id="btnOpenBookModal"
-                    class="w-full bg-action text-ink font-bold font-display rounded-full py-3 hover:bg-action-dark transition-colors">
-                    Réserver <?= $availableSeats > 1 ? $availableSeats . ' places' : '1 place' ?>
-                </button>
+                <?php if (session('user_id') != $journey['user_id']): ?>
+                    <button type="button" id="btnOpenBookModal"
+                        class="w-full bg-action text-ink font-bold font-display rounded-full py-3 hover:bg-action-dark transition-colors">
+                        Réserver <?= $availableSeats > 1 ? $availableSeats . ' places' : '1 place' ?>
+                    </button>
+                <?php endif ?>
             </form> 
 
             <!-- Modal confirmation réservation -->
