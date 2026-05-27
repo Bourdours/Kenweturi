@@ -14,6 +14,7 @@
     'https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js',
     base_url('js/autocompletion.js'),
     base_url('js/datepicker.js'),
+    base_url('js/swapAddresses.js'),
   ],
 ]) ?>
 <?= view('partials/header') ?>
@@ -45,7 +46,7 @@
       <form id="addJourneyForm" action="<?= site_url('journeys') ?>" method="GET" class="w-full max-w-2xl">
         <div class="relative z-10 bg-paper rounded-2xl p-5 border border-action/10 shadow-sm space-y-4 text-left">
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] gap-3 sm:gap-x-2 sm:items-end">
             <div>
               <label for="startAddress" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
                 <i class="fa-solid fa-circle-dot text-sm"></i>Départ
@@ -55,6 +56,13 @@
                 placeholder="Ville ou adresse">
               <input type="text" class="lng" id="startAddressLng" name="startLng" hidden>
               <input type="text" class="lat" id="startAddressLat" name="startLat" hidden>
+            </div>
+            <div class="flex justify-center sm:mb-1">
+              <button type="button" id="swapAddresses"
+                class="w-8 h-8 flex items-center justify-center bg-surface border border-action/20 rounded-full text-ink/50 hover:text-action hover:border-action/40 transition-colors cursor-pointer"
+                title="Inverser départ et arrivée">
+                <i class="fa-solid fa-right-left rotate-90 sm:rotate-0 text-xs"></i>
+              </button>
             </div>
             <div>
               <label for="endAddress" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
@@ -68,7 +76,7 @@
             </div>
           </div>
 
-          <div class="grid grid-cols-2 gap-3">
+          <div class="grid grid-cols-[1fr_auto_1fr] gap-3 sm:gap-x-2">
             <div>
               <label for="date" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
                 <i class="fa-regular fa-calendar text-sm"></i>Date
@@ -77,6 +85,7 @@
                 placeholder="jj/mm/aaaa"
                 class="w-full bg-surface border border-action/15 rounded-lg text-ink/60 text-sm px-3 py-2.5 outline-none focus:border-action/50 cursor-pointer">
             </div>
+            <div class="w-8"></div>
             <div>
               <label for="availableSeats" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
                 <i class="fa-solid fa-user text-sm"></i>Passagers
