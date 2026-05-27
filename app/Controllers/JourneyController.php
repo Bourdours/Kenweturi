@@ -40,9 +40,8 @@ class JourneyController extends BaseController{
 
     public function showCreateForm()
     {
-        // ====== Authentification
+
         $userId = session('user_id');
-        if (empty($userId)) return redirect()->to('/login');
 
         $userCars = $this->carModel->where(['user_id'=>$userId,])->findAll();
 
@@ -65,9 +64,7 @@ class JourneyController extends BaseController{
      */
     public function create()
     {
-        // ====== Authentification
         $userId = session('user_id');
-        if (empty($userId)) return redirect()->to('/login');
 
         // ====== Validation des données du formulaire
         $createValidationRules = $this->getCreateValidationRules();
@@ -99,7 +96,7 @@ class JourneyController extends BaseController{
         } catch (\Throwable $e) {
 
             return redirect()->back()->withInput()
-                ->with('errors', ['db' => 'Une erreur est survenue lors de l\'enregistrement.']);
+                ->with('errors', ['db' => 'Une erreur est survenue lors de l\'enregistrement .']);
 
         }
 
