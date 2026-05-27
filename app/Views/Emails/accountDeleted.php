@@ -44,7 +44,7 @@
           <td style="background-color:#111a26;border-radius:0 0 12px 12px;padding:24px 40px;border-top:1px solid #1a3a5c;">
             <p style="margin:0;font-size:12px;color:#555;line-height:1.6;text-align:center;">
               Cordialement,<br>
-              <span style="color:#93b8d8;">L'équipe support</span>
+              <span style="color:#93b8d8;">L'équipe Kenweturi</span>
             </p>
           </td>
         </tr>
