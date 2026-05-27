@@ -231,8 +231,11 @@ class DashboardController extends BaseController
         $bookings = $builder->limit($perPage, ($page - 1) * $perPage)->get()->getResultArray();
         $pager    = \Config\Services::pager();
 
+        $back = $this->request->getGet('back');
+
         return view('Dashboard/dashboardBookings', [
             'title'    => $title,
+            'back'     => $back,
             'bookings' => $bookings,
             'pager'    => $pager,
             'total'    => $total,
@@ -290,9 +293,12 @@ class DashboardController extends BaseController
             return redirect()->to('/dashboard/bookings')->with('error', 'Réservation introuvable.');
 
         $isDriver = (int) $booking['driver_id'] === $userId;
+
+        $back = $this->request->getGet('back');
         
         return view('Bookings/bookingShow', [
             'title'    => 'Détail de la réservation',
+            'back'     => $back,
             'booking'  => $booking,
             'isDriver' => $isDriver,
         ]);

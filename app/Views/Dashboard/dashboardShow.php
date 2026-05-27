@@ -12,7 +12,7 @@
                 <?php else : ?>
                     <div class="space-y-3">
                         <?php foreach ($nextJourneys as $journey) : ?>
-                            <a href="/journeys/<?= esc($journey['id']) ?>" class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors">
+                            <a href="/journeys/<?= esc($journey['id']) ?>?back=<?= urlencode(current_url(true)) ?>" class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors">
                                 <div class="flex items-center gap-4">
                                     <div class="flex flex-col items-center shrink-0">
                                         <div class="w-2.5 h-2.5 rounded-full bg-brand"></div>
@@ -56,7 +56,7 @@
             <?php else : ?>
                 <div class="space-y-3">
                     <?php foreach ($lastJourneys as $journey) : ?>
-                        <a href="/journeys/<?= esc($journey['id']) ?>" class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors">
+                        <a href="/journeys/<?= esc($journey['id']) ?>?back=<?= urlencode(current_url(true)) ?>" class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors">
                             <div class="flex items-center gap-4">
                                 <div class="flex flex-col items-center shrink-0">
                                     <div class="w-2.5 h-2.5 rounded-full bg-brand"></div>
@@ -94,7 +94,7 @@
                 <?php else : ?>
                     <div class="space-y-3">
                         <?php foreach ($nextBookings as $booking) : ?>
-                            <a href="<?= site_url('dashboard/bookings/' . $booking['id']) ?>" class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors">
+                            <a href="<?= site_url('dashboard/bookings/' . $booking['id']) ?>?back=<?= urlencode(current_url(true)) ?>" class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors">
                                 <div class="flex items-center gap-4">
                                     <div class="flex flex-col items-center shrink-0">
                                         <div class="w-2.5 h-2.5 rounded-full bg-brand"></div>
@@ -140,7 +140,7 @@
         <?php else : ?>
             <div class="space-y-3">
             <?php foreach ($myBookings as $booking) : ?>
-                <a href="<?= site_url('dashboard/bookings/' . $booking['id']) ?>" class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors">
+                <a href="<?= site_url('dashboard/bookings/' . $booking['id']) ?>?back=<?= urlencode(current_url(true)) ?>" class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors">
                     <div class="flex items-center gap-4">
                         <div class="flex flex-col items-center shrink-0">
                             <div class="w-2.5 h-2.5 rounded-full bg-brand"></div>
@@ -180,7 +180,7 @@
         <?php if (empty($lastReport)) : ?>
             <p class="text-center text-muted py-8">Aucun signalement trouvé.</p>
             <?php else : ?>
-                <a href="/dashboard/reports/<?= esc($lastReport['id']) ?>" class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors">
+                <a href="/dashboard/reports/<?= esc($lastReport['id']) ?>?back=<?= urlencode(current_url(true)) ?>" class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors">
                     <div class="flex items-center gap-4">
                         <div class="flex flex-col items-center shrink-0">
                             <div class="w-2.5 h-2.5 rounded-full bg-brand"></div>

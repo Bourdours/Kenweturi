@@ -16,7 +16,7 @@ $person_label      = $isDriver ? 'Passager' : 'Conducteur';
     <!-- En-tête -->
     <div class="flex items-center justify-between mb-2">
         <h1 class="text-ink text-2xl font-bold font-display">Détail de la réservation</h1>
-        <a href="<?= site_url('dashboard/bookings') ?>" class="text-ink/50 hover:text-action text-sm flex items-center gap-1.5 transition-colors">
+        <a href="<?= esc($back ?? base_url('dashboard')) ?>" class="text-ink/50 hover:text-action text-sm flex items-center gap-1.5 transition-colors">
             <i class="fa-solid fa-arrow-left text-xs"></i>Retour
         </a>
     </div>
