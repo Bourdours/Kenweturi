@@ -248,7 +248,9 @@ class DashboardController extends BaseController
 
         $booking = $this->db->table('booking')
             ->select('booking.*, journey.start_datetime, journey.seats, journey.user_id as driver_id,
+                loc_start.address as start_address,
                 city_start.name as city_start_name,
+                loc_end.address as end_address,
                 city_end.name as city_end_name,
                 loc_pickup.address as pickup_address,
                 city_pickup.name as pickup_city_name,
