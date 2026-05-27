@@ -15,13 +15,14 @@
 
 <div class="max-w-4xl mx-auto py-10 px-6 md:px-8 space-y-6">
 
+    <h1 class="text-ink text-2xl font-bold font-display">Trouvez votre trajet</h1>
+
     <!-- Formulaire de recherche -->
     <form id="addJourneyForm" action="/journeys" method="GET">
         <div class="bg-surface rounded-2xl p-5 border border-action/10 space-y-4">
             <p class="text-ink/40 text-base mb-1">
                 <i class="fa-solid fa-magnifying-glass mr-2"></i>Recherche
             </p>
-            <h1 class="text-ink text-2xl font-semibold font-display mb-4">Trouvez votre trajet</h1>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
