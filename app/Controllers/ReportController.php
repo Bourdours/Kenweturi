@@ -21,11 +21,6 @@ class ReportController extends BaseController
      */
     public function create(int $journeyId)
     {
-        // Vérification de la session
-        if (!session()->get('isLoggedIn')) {
-            return redirect()->to('/login');
-        }
-
 
         $reporterId = (int) session()->get('user_id');
 
