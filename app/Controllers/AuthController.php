@@ -169,7 +169,7 @@ class AuthController extends BaseController
         }
 
         // Redirection vers la page de connexion avec un message flash
-        return redirect()->to('/login')->with('success', 'Compte créé avec succès !');
+        return redirect()->to('/login')->with('success', 'Inscription reçue ! <br> Notre équipe va examiner votre demande et vous recevrez une réponse par email.');
     }
 
     /**
