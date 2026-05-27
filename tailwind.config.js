@@ -52,5 +52,27 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    function({ addUtilities }) {
+      addUtilities({
+        '.scrollbar-none': {
+          '-ms-overflow-style': 'none',
+          'scrollbar-width': 'none',
+          '&::-webkit-scrollbar': { display: 'none' },
+        },
+        '.scrollbar-hover': {
+          'scrollbar-width': 'thin',
+          'scrollbar-color': 'transparent transparent',
+          '&::-webkit-scrollbar': { height: '4px', width: '4px' },
+          '&::-webkit-scrollbar-track': { background: 'transparent' },
+          '&::-webkit-scrollbar-thumb': {
+            background: 'transparent',
+            'border-radius': '9999px',
+          },
+          '&:hover': { 'scrollbar-color': 'rgb(var(--color-action)) transparent' },
+          '&:hover::-webkit-scrollbar-thumb': { background: 'rgb(var(--color-action))' },
+        },
+      })
+    },
+  ],
 }
