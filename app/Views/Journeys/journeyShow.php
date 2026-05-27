@@ -6,7 +6,7 @@
 /** @var int         $availableSeats */
 /** @var string|null $boardingCity */
 ?>
-<?= view('partials/head') ?>
+<?= view('partials/head', ['extraJs' => [base_url('js/journeyShow.js')]]) ?>
 <?= view('partials/header') ?>
 
 <div class="max-w-4xl mx-auto py-10 px-6 md:px-8 space-y-4">
@@ -14,7 +14,7 @@
     <!-- En-tête -->
     <div class="flex items-center justify-between mb-2">
         <h1 class="text-ink text-2xl font-bold font-display">Détails du trajet</h1>
-        <a href="<?= site_url('journeys') ?>" class="text-ink/50 hover:text-action text-sm flex items-center gap-1.5 transition-colors">
+        <a href="<?= esc($back ?? base_url('journeys')) ?>" class="text-ink/50 hover:text-action text-sm flex items-center gap-1.5 transition-colors">
             <i class="fa-solid fa-arrow-left text-xs"></i>Retour
         </a>
     </div>
@@ -76,6 +76,11 @@
             </div>
 
         </div>
+
+        <p class="text-muted/60 text-xs mt-4 flex items-start gap-1.5">
+            <i class="fa-solid fa-circle-info text-[10px] mt-0.5 shrink-0"></i>
+            Les horaires affichés sont des estimations calculées dans des conditions de trafic normales.
+        </p>
     </article>
 
     <!-- Conducteur -->
@@ -123,13 +128,31 @@
                     <p class="text-ink font-bold font-display text-2xl"><?= esc($remainingSeats) ?></p>
                 </div>
             </div>
-            <form action="<?= site_url('/journeys/') ?><?= esc($journey['id']) ?>/book" method="POST"
-                onsubmit="return confirm('Confirmer la réservation ?')">
+            <form action="/journeys/<?= esc($journey['id']) ?>/book" method="POST" id="formBook">
                 <?= csrf_field() ?>
-                <button type="submit" class="w-full bg-action text-paper font-bold font-display rounded-full py-3 hover:bg-action-dark transition-colors">
+                <button type="button" id="btnOpenBookModal"
+                    class="w-full bg-action text-paper font-bold font-display rounded-full py-3 hover:bg-action-dark transition-colors">
                     Réserver <?= $availableSeats > 1 ? $availableSeats . ' places' : '1 place' ?>
                 </button>
             </form>
+
+            <!-- Modal confirmation réservation -->
+            <div id="modalBook" class="hidden fixed inset-0 w-full h-full bg-black/50 items-center justify-center z-[9999]">
+                <div class="bg-surface rounded-2xl p-6 w-[90%] max-w-[400px]">
+                    <h2 class="text-action font-semibold font-display mb-2">Confirmer la réservation</h2>
+                    <p class="text-ink text-sm mb-6">Vous allez réserver <?= $availableSeats > 1 ? $availableSeats . ' places' : '1 place' ?> sur ce trajet.<br> Êtes-vous sûr ?</p>
+                    <div class="flex gap-3">
+                        <button type="button" id="btnCancelBook"
+                            class="flex-1 border border-ink/20 text-ink rounded-lg px-4 py-2 text-sm font-semibold">
+                            Annuler
+                        </button>
+                        <button type="button" id="btnConfirmBook"
+                            class="flex-1 bg-action text-paper rounded-lg px-4 py-2 text-sm font-semibold">
+                            Confirmer
+                        </button>
+                    </div>
+                </div>
+            </div>
         <?php else : ?>
             <p class="text-center text-muted font-semibold py-2">Trajet complet</p>
         <?php endif ?>

@@ -97,4 +97,43 @@ class JourneyModel extends BaseModel
             'is_not_unique' => 'Le lieu d\'arrivée sélectionné n\'existe pas.',
         ]
     ];
+
+    /**
+     * Récupère un trajet avec toutes ses informations liées :
+     * adresses et villes de départ/arrivée, conducteur, véhicule.
+     *
+     * Les trajets dont le conducteur a été supprimé (soft delete) sont exclus.
+     *
+     * @param int $journeyId Identifiant du trajet
+     * @return array|null    Trajet enrichi, ou null si introuvable
+     */
+    public function findWithDetails(int $journeyId): ?array
+    {
+        return $this->db->table($this->table)
+            ->select('journey.*,
+                loc_start.address as address_start,
+                loc_end.address   as address_end,
+                city_start.name   as city_start_name,
+                city_end.name     as city_end_name,
+                u.firstname       as driver_firstname,
+                u.lastname        as driver_lastname,
+                u.id              as driver_id,
+                u.avatar          as driver_avatar,
+                u.biography       as driver_biography,
+                u.is_student      as driver_is_student,
+                car.brand         as car_brand,
+                car.model         as car_model,
+                car.color         as car_color,
+                car.seats         as car_seats')
+            ->join('location loc_start', 'loc_start.id = journey.location_start_id')
+            ->join('location loc_end',   'loc_end.id = journey.location_end_id')
+            ->join('city city_start',    'city_start.id = loc_start.city_id')
+            ->join('city city_end',      'city_end.id = loc_end.city_id')
+            ->join('user u',             'u.id = journey.user_id')
+            ->join('car',                'car.id = journey.car_id', 'left')
+            ->where('journey.id', $journeyId)
+            ->where('u.deleted_at', null)
+            ->get()
+            ->getRowArray();
+    }
 }
