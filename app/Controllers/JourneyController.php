@@ -67,8 +67,9 @@ class JourneyController extends BaseController{
         $userId = session('user_id');
 
         // ====== Validation des données du formulaire
-        $createValidationRules    = $this->getCreateValidationRules();
-        $createValidationMessages = $this->getCreateValidationMessages();
+        $maxSeats                 = $this->getMaxAvailableSeatsFromPostedCar();
+        $createValidationRules    = $this->getCreateValidationRules($maxSeats);
+        $createValidationMessages = $this->getCreateValidationMessages($maxSeats);
         if (!$this->validate($createValidationRules, $createValidationMessages)) {
             return redirect()->back()->withInput()
                 ->with('errors', $this->validator->getErrors());
@@ -307,9 +308,7 @@ class JourneyController extends BaseController{
      * ne peut pas être résolue, on retombe sur une borne par défaut : la règle
      * sur 'car' invalidera le formulaire de toute façon.
      */
-    public function getCreateValidationRules(): array {
-
-        $maxSeats = $this->getMaxAvailableSeatsFromPostedCar();
+    public function getCreateValidationRules(int $maxSeats = 9): array {
 
         return [
             'startDate'     => 'required|valid_date',
@@ -324,7 +323,7 @@ class JourneyController extends BaseController{
 
     }
 
-    public function getCreateValidationMessages(): array {
+    public function getCreateValidationMessages(int $maxSeats = 9): array {
 
         return [
             'startDate'    => [
@@ -339,7 +338,7 @@ class JourneyController extends BaseController{
                 'required'      => 'Le nombre de places est obligatoire.',
                 'integer'       => 'Le nombre de places doit être un entier.',
                 'greater_than'  => 'Le nombre de places doit être supérieur à 0.',
-                'less_than'     => 'Le nombre de places doit être inférieur à 10.',
+                'less_than_equal_to' => "Le nombre de places ne peut pas dépasser {$maxSeats} (capacité de votre voiture).",
             ],
             'note'         => [
                 'max_length'    => 'La note ne peut pas dépasser 500 caractères.',
