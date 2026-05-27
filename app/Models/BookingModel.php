@@ -51,5 +51,19 @@ class BookingModel extends BaseModel
 
         return max(0, $totalSeats - (int) ($bookedSeats['seat_numbers'] ?? 0));
     }
+
+    /**
+     * Récupère les passagers ayant réservé un trajet.
+     *
+     * @param int $journeyId Identifiant du trajet
+     * @return array         Liste des passagers avec leurs informations
+     */
+    public function findPassengersByJourney(int $journeyId): array
+    {
+        return $this->select('booking.*, user.firstname, user.lastname, user.avatar, user.is_student')
+            ->join('user', 'user.id = booking.user_id')
+            ->where('booking.journey_id', $journeyId)
+            ->findAll();
+    }
     
 }

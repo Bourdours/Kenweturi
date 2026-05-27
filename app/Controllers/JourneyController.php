@@ -128,6 +128,9 @@ class JourneyController extends BaseController{
             (int) $journey['seats'],
         );
 
+        // ====== Récupération des passagers
+        $passengers = $this->bookingModel->findPassengersByJourney((int) $id);
+
         // ====== Récupération des filtres de réservation
         $availableSeats = $this->request->getGet('seats') ?? 1;
         $boardingCity   = $this->request->getGet('boardingCity');
@@ -142,6 +145,7 @@ class JourneyController extends BaseController{
             'remainingSeats' => $remainingSeats,
             'availableSeats' => $availableSeats,
             'boardingCity'   => $boardingCity,
+            'passengers'     => $passengers,
         ]);
     }
 
@@ -206,9 +210,12 @@ class JourneyController extends BaseController{
                     ->where('journey.start_datetime <=', $dateTimeTo);
         }
  
-        elseif ($filterDate)
+        elseif ($filterDate) {
             $builder->where('DATE(journey.start_datetime)', $filterDate);
-        else
+            if ($filterDate === date('Y-m-d')) {
+                $builder->where('journey.start_datetime >=', date('Y-m-d H:i:s'));
+            }
+        } else
             $builder->where('journey.start_datetime >=', date('Y-m-d H:i:s'));
  
         if ($availableSeats)
