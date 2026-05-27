@@ -26,6 +26,7 @@ class ReportController extends BaseController
 
         $reportModel  = new ReportModel();
         $journeyModel = new JourneyModel();
+        $bookingModel = new BookingModel();
 
         // Vérification que le trajet existe
         $journey = $journeyModel->find($journeyId);
@@ -46,6 +47,18 @@ class ReportController extends BaseController
             return redirect()->back()
                 ->with('error', 'Vous avez déjà signalé ce trajet.');
         }
+
+        $hasBookked = $bookingModel
+            ->join('journey', 'journey.id = booking.journey_id')
+            ->where('booking.journey_id', $journeyId)
+            ->where('booking.user_id', $reporerId)
+            ->where('journey.start_datetime <', date('Y-m-d H:i:s'))
+            ->countAllResults() > 0;
+        
+            if (!$hasBooked) {
+                return redirect()->back()
+                        ->with('error', 'Vous devez avoir effectué ce trajet pour le signaler.');
+            }
 
         // Validation et insertion via le model
         $data = [

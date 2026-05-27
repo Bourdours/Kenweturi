@@ -25,10 +25,7 @@ $routes->get('blog',              'PageController::blog');
 $routes->get('contact',           'PageController::contact');
 $routes->post('contact',          'PageController::sendContact');
 
-// Routes admin
-$routes->get('admin',                              'AdminController::index');
-$routes->post('admin/reports/(:num)/resolve',      'AdminController::resolveReport/$1');
-$routes->post('admin/users/(:num)/validate', 'AdminController::updateRegistration/$1');
+
 
 /* =========================================================
  *  ROUTES INVITÉS (interdites aux utilisateurs connectés)
@@ -95,4 +92,10 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('car/(:num)/edit',    'CarController::showEditForm/$1');
     $routes->post('car/(:num)/update', 'CarController::update/$1');
     $routes->post('car/(:num)/delete', 'CarController::delete/$1');
+
 });
+
+    // Routes admin
+    $routes->get('admin',                              'AdminController::index');
+    $routes->post('admin/reports/(:num)/resolve',      'AdminController::resolveReport/$1');
+    $routes->post('admin/users/(:num)/validate', 'AdminController::updateRegistration/$1');
