@@ -93,7 +93,7 @@ class DashboardController extends BaseController
             ->get()->getResultArray();
 
         // Réservations faites en tant que passager
-        $myBookings = $db->table('booking')
+        $myBookings = $this->db->table('booking')
             ->select('booking.*, journey.start_datetime, city_start.name as city_start_name, city_end.name as city_end_name, u.firstname as driver_firstname, u.lastname as driver_lastname, u.avatar as driver_avatar, u.is_student as driver_is_student, loc_start.address as address_start, loc_end.address as address_end')
             ->join('journey',            'journey.id = booking.journey_id')
             ->join('location loc_start', 'loc_start.id = journey.location_start_id')
@@ -109,7 +109,7 @@ class DashboardController extends BaseController
             ->get()->getResultArray();
 
         // Derniers signalements
-        $lastReports = $db->table('report')
+        $lastReports = $this->db->table('report')
             ->select('report.*, journey.start_datetime, city_start.name as city_start_name, city_end.name as city_end_name,
                 loc_start.address as address_start, loc_end.address as address_end')
             ->join('journey',            'journey.id = report.journey_id')
