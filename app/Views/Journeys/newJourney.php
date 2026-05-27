@@ -55,26 +55,55 @@
           </div>
           <div class="flex-1 pb-4">
             <label for="startAddress" class="text-ink/50 text-xs font-medium mb-1.5 block">Départ</label>
-            <input id="startAddress" class="address w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors" name="startAddress" type="text" placeholder="Adresse de départ...">
-            <input type="hidden" class="lng" name="startLng">
-            <input type="hidden" class="lat" name="startLat">
+            <input id="startAddress" class="address w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors" name="startAddress" type="text" placeholder="Adresse de départ..." value="<?= esc(old('startAddress')) ?>">
           </div>
         </div>
 
         <!-- Étapes -->
         <div id="stagesContainer">
-          <div class="flex gap-4 items-start">
-            <div class="flex flex-col items-center shrink-0 w-3 pt-8">
-              <div class="w-2 h-2 bg-ink/20 rounded-full shrink-0 mt-0.5"></div>
-              <div class="w-px flex-1 bg-ink/10 mt-1 min-h-10"></div>
-            </div>
-            <div class="flex-1 pb-4">
-              <label for="stage1" class="text-ink/50 text-xs font-medium mb-1.5 block">Étape 1 <span class="text-ink/30 font-normal">(optionnel)</span></label>
-              <input id="stage1" class="address w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors" name="stagesAddresses[]" type="text" placeholder="Adresse de l'étape...">
-              <input type="hidden" class="lng">
-              <input type="hidden" class="lat">
-            </div>
-          </div>
+          <?php
+            // Récupère les étapes saisies précédemment ; au minimum une étape vide (Étape 1 statique).
+            // Les éventuelles étapes supplémentaires sont rendues comme des .dynamic-stage afin
+            // d'être traitées comme si elles avaient été ajoutées par le JS.
+            $oldStages = old('stagesAddresses');
+            if (!is_array($oldStages) || $oldStages === []) {
+                $oldStages = [''];
+            }
+          ?>
+          <?php foreach ($oldStages as $index => $stageAddress): ?>
+            <?php if ($index === 0): ?>
+              <!-- Étape 1 : statique, non supprimable -->
+              <div class="flex gap-4 items-start">
+                <div class="flex flex-col items-center shrink-0 w-3 pt-8">
+                  <div class="w-2 h-2 bg-ink/20 rounded-full shrink-0 mt-0.5"></div>
+                  <div class="w-px flex-1 bg-ink/10 mt-1 min-h-10"></div>
+                </div>
+                <div class="flex-1 pb-4">
+                  <label for="stage1" class="text-ink/50 text-xs font-medium mb-1.5 block">Étape 1 <span class="text-ink/30 font-normal">(optionnel)</span></label>
+                  <input id="stage1" class="address w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors" name="stagesAddresses[]" type="text" placeholder="Adresse de l'étape..." value="<?= esc($stageAddress) ?>">
+                </div>
+              </div>
+            <?php else: ?>
+              <!-- Étape dynamique restaurée depuis old() -->
+              <div class="flex gap-4 items-start dynamic-stage">
+                <div class="flex flex-col items-center shrink-0 w-3 pt-8">
+                  <div class="w-2 h-2 bg-ink/20 rounded-full shrink-0 mt-0.5"></div>
+                  <div class="w-px flex-1 bg-ink/10 mt-1 min-h-10"></div>
+                </div>
+                <div class="flex-1 pb-4 flex items-start gap-2">
+                  <div class="flex-1">
+                    <label class="text-ink/50 text-xs font-medium mb-1.5 block">Étape <?= $index + 1 ?> <span class="text-ink/30 font-normal">(optionnel)</span></label>
+                    <input class="address w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors" name="stagesAddresses[]" type="text" placeholder="Adresse de l'étape..." value="<?= esc($stageAddress) ?>">
+                    <input type="hidden" class="lng">
+                    <input type="hidden" class="lat">
+                  </div>
+                  <button type="button" class="remove-stage mt-6 text-ink/30 hover:text-action text-sm transition-colors cursor-pointer shrink-0">
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
+                </div>
+              </div>
+            <?php endif; ?>
+          <?php endforeach; ?>
         </div>
 
         <!-- Ajouter une étape -->
@@ -97,9 +126,7 @@
           </div>
           <div class="flex-1">
             <label for="endAddress" class="text-ink/50 text-xs font-medium mb-1.5 block">Arrivée</label>
-            <input id="endAddress" class="address w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors" name="endAddress" type="text" placeholder="Adresse d'arrivée...">
-            <input type="hidden" class="lng" name="endLng">
-            <input type="hidden" class="lat" name="endLat">
+            <input id="endAddress" class="address w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors" name="endAddress" type="text" placeholder="Adresse d'arrivée..." value="<?= esc(old('endAddress')) ?>">
           </div>
         </div>
 
@@ -114,12 +141,12 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label for="date" class="text-ink/50 text-xs font-medium mb-1.5 block">Date de départ</label>
-          <input id="date" name="startDate" type="text" readonly placeholder="jj/mm/aaaa"
+          <input id="date" name="startDate" type="text" readonly placeholder="jj/mm/aaaa" value="<?= esc(old('startDate')) ?>"
             class="w-full bg-paper border border-action/15 rounded-lg text-ink/60 text-sm px-3 py-2.5 outline-none focus:border-action/50 cursor-pointer transition-colors">
         </div>
         <div>
           <label for="time" class="text-ink/50 text-xs font-medium mb-1.5 block">Heure de départ</label>
-          <input id="time" name="startTime" type="text" readonly placeholder="--:--"
+          <input id="time" name="startTime" type="text" readonly placeholder="--:--" value="<?= esc(old('startTime')) ?>"
             class="w-full bg-paper border border-action/15 rounded-lg text-ink/60 text-sm px-3 py-2.5 outline-none focus:border-action/50 cursor-pointer transition-colors">
         </div>
       </div>
@@ -133,18 +160,18 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label for="seats" class="text-ink/50 text-xs font-medium mb-1.5 block">Nombre de places</label>
-          <input id="seats" name="seats" type="number" min="1" max="9" placeholder="Ex: 3"
+          <input id="seats" name="seats" type="number" min="1" max="9" placeholder="Ex: 3" value="<?= esc(old('seats')) ?>"
             class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors">
         </div>
         <div>
           <label class="text-ink/50 text-xs font-medium mb-1.5 block">Fumeur</label>
           <div class="flex gap-2">
             <label class="flex-1 flex items-center justify-center gap-2 bg-paper border border-action/15 rounded-lg px-3 py-2.5 text-ink text-sm font-medium cursor-pointer has-[:checked]:bg-action/10 has-[:checked]:border-action/50 transition-colors">
-              <input type="radio" name="smoking" value="1" class="hidden">
+              <input type="radio" name="smoking" value="1" class="hidden" <?= old('smoking') === '1' ? 'checked' : '' ?>>
               <i class="fa-solid fa-smoking text-xs"></i>Oui
             </label>
             <label class="flex-1 flex items-center justify-center gap-2 bg-paper border border-action/15 rounded-lg px-3 py-2.5 text-ink text-sm font-medium cursor-pointer has-[:checked]:bg-action/10 has-[:checked]:border-action/50 transition-colors">
-              <input type="radio" name="smoking" value="0" class="hidden">
+              <input type="radio" name="smoking" value="0" class="hidden" <?= old('smoking') === '0' ? 'checked' : '' ?>>
               <i class="fa-solid fa-ban-smoking text-xs"></i>Non
             </label>
           </div>
@@ -185,7 +212,7 @@
       <label for="note" class="text-ink/50 text-xs font-medium mb-1.5 block">Message aux passagers <span class="text-ink/30 font-normal">(optionnel)</span></label>
       <textarea id="note" name="note" rows="4"
         placeholder="Informations utiles pour les passagers..."
-        class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 resize-none transition-colors"></textarea>
+        class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 resize-none transition-colors"><?= esc(old('note')) ?></textarea>
     </div>
 
     <!-- Boutons -->
