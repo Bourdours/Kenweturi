@@ -12,12 +12,16 @@ class DashboardController extends BaseController
     protected JourneyModel $journeyModel;
     protected BookingModel $bookingModel;
     protected ReportModel  $reportModel;
+    protected \CodeIgniter\Pager\Pager $pager;
+    protected \CodeIgniter\Database\ConnectionInterface $db;
 
     public function __construct()
     {
         $this->journeyModel = new JourneyModel();
         $this->bookingModel = new BookingModel();
         $this->reportModel  = new ReportModel();
+        $this->pager        = \Config\Services::pager();
+        $this->db           = \Config\Database::connect();
     }
 
     /**
@@ -27,10 +31,8 @@ class DashboardController extends BaseController
     public function show(): string
     {
         $userId = (int) session('user_id');
-        $db     = \Config\Database::connect();
 
-        // prochains trajets
-        $nextJourneys = $db->table('journey')
+        $nextJourneys = $this->db->table('journey')
             ->select('journey.*, city_start.name as city_start_name, city_end.name as city_end_name,
             COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id), 0) as booked_seats')
             ->join('location loc_start', 'loc_start.id = journey.location_start_id')
@@ -44,8 +46,7 @@ class DashboardController extends BaseController
             ->limit(1)
             ->get()->getResultArray();
 
-        // derniers trajets
-        $lastJourneys = $db->table('journey')
+        $lastJourneys = $this->db->table('journey')
             ->select('journey.*, city_start.name as city_start_name, city_end.name as city_end_name,
             COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id), 0) as booked_seats')
             ->join('location loc_start', 'loc_start.id = journey.location_start_id')
@@ -59,8 +60,7 @@ class DashboardController extends BaseController
             ->limit(1)
             ->get()->getResultArray();
 
-        // réservation faite sur mon trajet
-        $nextBookings = $db->table('booking')
+        $nextBookings = $this->db->table('booking')
             ->select('booking.*, journey.start_datetime, journey.seats,
                 city_start.name as city_start_name,
                 city_end.name as city_end_name,
@@ -88,8 +88,7 @@ class DashboardController extends BaseController
             ->limit(1)
             ->get()->getResultArray();
 
-        // Réservations faites en tant que passager
-        $myBookings = $db->table('booking')
+        $myBookings = $this->db->table('booking')
             ->select('booking.*, journey.start_datetime,
                 city_start.name as city_start_name,
                 city_end.name as city_end_name,
@@ -110,8 +109,7 @@ class DashboardController extends BaseController
             ->limit(1)
             ->get()->getResultArray();
 
-        // Dernier signalement
-        $lastReport = $db->table('report')
+        $lastReport = $this->db->table('report')
             ->select('report.*, journey.start_datetime, city_start.name as city_start_name, city_end.name as city_end_name')
             ->join('journey',            'journey.id = report.journey_id')
             ->join('location loc_start', 'loc_start.id = journey.location_start_id')
@@ -144,8 +142,7 @@ class DashboardController extends BaseController
         $filter  = $this->request->getGet('filter');
         $perPage = 10;
 
-        $db      = \Config\Database::connect();
-        $builder = $db->table('journey')
+        $builder = $this->db->table('journey')
             ->select('journey.*, city_start.name as city_start_name, city_end.name as city_end_name,
                 COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id), 0) as booked_seats')
             ->join('location loc_start', 'loc_start.id = journey.location_start_id')
@@ -167,12 +164,11 @@ class DashboardController extends BaseController
 
         $total    = $builder->countAllResults(false);
         $journeys = $builder->limit($perPage, ($page - 1) * $perPage)->get()->getResultArray();
-        $pager    = \Config\Services::pager();
 
         return view('Dashboard/dashboardJourneys', [
             'title'    => $filter === 'past' ? 'Trajets passés' : ($filter === 'upcoming' ? 'Prochains trajets' : 'Mes trajets'),
             'journeys' => $journeys,
-            'pager'    => $pager,
+            'pager'    => $this->pager,
             'total'    => $total,
             'page'     => $page,
             'perPage'  => $perPage,
@@ -181,7 +177,7 @@ class DashboardController extends BaseController
     }
 
     /**
-     * Liste paginée des réservations reçues en tant que driver.
+     * Liste paginée des réservations.
      * GET /dashboard/bookings
      */
     public function showBookings(): string
@@ -190,9 +186,8 @@ class DashboardController extends BaseController
         $page    = (int) ($this->request->getGet('page') ?? 1);
         $perPage = 10;
         $filter  = $this->request->getGet('filter');
-        $db      = \Config\Database::connect();
 
-        $builder = $db->table('booking')
+        $builder = $this->db->table('booking')
             ->select('booking.*, journey.start_datetime, journey.seats,
                 city_start.name as city_start_name,
                 city_end.name as city_end_name,
@@ -216,12 +211,12 @@ class DashboardController extends BaseController
             ->join('city city_dropoff',    'city_dropoff.id = loc_dropoff.city_id', 'left');
 
         if ($filter === 'mine') {
-            $builder->join('user u',          'u.id = journey.user_id')  // driver
+            $builder->join('user u',       'u.id = journey.user_id')
                     ->where('booking.user_id', $userId)
                     ->orderBy('journey.start_datetime', 'ASC');
             $title = 'Mes réservations';
         } else {
-            $builder->join('user u',          'u.id = booking.user_id')  // passager
+            $builder->join('user u',       'u.id = booking.user_id')
                     ->where('journey.user_id', $userId)
                     ->orderBy('booking.sent_at', 'ASC');
             $title = 'Réservations reçues';
@@ -229,15 +224,12 @@ class DashboardController extends BaseController
 
         $total    = $builder->countAllResults(false);
         $bookings = $builder->limit($perPage, ($page - 1) * $perPage)->get()->getResultArray();
-        $pager    = \Config\Services::pager();
-
-        $back = $this->request->getGet('back');
 
         return view('Dashboard/dashboardBookings', [
             'title'    => $title,
-            'back'     => $back,
+            'back'     => $this->request->getGet('back'),
             'bookings' => $bookings,
-            'pager'    => $pager,
+            'pager'    => $this->pager,
             'total'    => $total,
             'page'     => $page,
             'perPage'  => $perPage,
@@ -249,12 +241,11 @@ class DashboardController extends BaseController
      * Détail d'une réservation.
      * GET /dashboard/bookings/:id
      */
-    public function showBooking(int $id): string|RedirectResponse 
+    public function showBooking(int $id): string|RedirectResponse
     {
-        $userId  = (int) session('user_id');
-        $db     = \Config\Database::connect();
+        $userId = (int) session('user_id');
 
-        $booking = $db->table('booking')
+        $booking = $this->db->table('booking')
             ->select('booking.*, journey.start_datetime, journey.seats, journey.user_id as driver_id,
                 city_start.name as city_start_name,
                 city_end.name as city_end_name,
@@ -280,8 +271,8 @@ class DashboardController extends BaseController
             ->join('city city_pickup',     'city_pickup.id = loc_pickup.city_id', 'left')
             ->join('location loc_dropoff', 'loc_dropoff.id = booking.location_dropoff_id', 'left')
             ->join('city city_dropoff',    'city_dropoff.id = loc_dropoff.city_id', 'left')
-            ->join('user passenger', 'passenger.id = booking.user_id')
-            ->join('user driver',    'driver.id = journey.user_id')
+            ->join('user passenger',       'passenger.id = booking.user_id')
+            ->join('user driver',          'driver.id = journey.user_id')
             ->where('booking.id', $id)
             ->groupStart()
                 ->where('booking.user_id', $userId)
@@ -292,15 +283,11 @@ class DashboardController extends BaseController
         if (!$booking)
             return redirect()->to('/dashboard/bookings')->with('error', 'Réservation introuvable.');
 
-        $isDriver = (int) $booking['driver_id'] === $userId;
-
-        $back = $this->request->getGet('back');
-        
         return view('Bookings/bookingShow', [
             'title'    => 'Détail de la réservation',
-            'back'     => $back,
+            'back'     => $this->request->getGet('back'),
             'booking'  => $booking,
-            'isDriver' => $isDriver,
+            'isDriver' => (int) $booking['driver_id'] === $userId,
         ]);
     }
 
@@ -308,11 +295,65 @@ class DashboardController extends BaseController
      * Liste paginée des signalements effectués par le user.
      * GET /dashboard/reports
      */
-    public function showReports(): string { }
+    public function showReports(): string
+    {
+        $userId  = (int) session('user_id');
+        $page    = (int) ($this->request->getGet('page') ?? 1);
+        $perPage = 10;
+
+        $builder = $this->db->table('report')
+            ->select('report.*, journey.start_datetime,
+                city_start.name as city_start_name,
+                city_end.name as city_end_name')
+            ->join('journey',            'journey.id = report.journey_id')
+            ->join('location loc_start', 'loc_start.id = journey.location_start_id')
+            ->join('location loc_end',   'loc_end.id = journey.location_end_id')
+            ->join('city city_start',    'city_start.id = loc_start.city_id')
+            ->join('city city_end',      'city_end.id = loc_end.city_id')
+            ->where('report.user_id', $userId)
+            ->orderBy('report.created_at', 'DESC');
+
+        $total   = $builder->countAllResults(false);
+        $reports = $builder->limit($perPage, ($page - 1) * $perPage)->get()->getResultArray();
+
+        return view('Dashboard/dashboardReports', [
+            'title'   => 'Mes signalements',
+            'reports' => $reports,
+            'pager'   => $this->pager,
+            'total'   => $total,
+            'page'    => $page,
+            'perPage' => $perPage,
+        ]);
+    }
 
     /**
      * Détail d'un signalement.
      * GET /dashboard/reports/:id
      */
-    public function showReport(int $id): string|RedirectResponse { }
+    public function showReport(int $id): string|RedirectResponse
+    {
+        $userId = (int) session('user_id');
+
+        $report = $this->db->table('report')
+            ->select('report.*, journey.start_datetime,
+                city_start.name as city_start_name,
+                city_end.name as city_end_name')
+            ->join('journey',            'journey.id = report.journey_id')
+            ->join('location loc_start', 'loc_start.id = journey.location_start_id')
+            ->join('location loc_end',   'loc_end.id = journey.location_end_id')
+            ->join('city city_start',    'city_start.id = loc_start.city_id')
+            ->join('city city_end',      'city_end.id = loc_end.city_id')
+            ->where('report.id', $id)
+            ->where('report.user_id', $userId)
+            ->get()->getRowArray();
+
+        if (!$report)
+            return redirect()->to('/dashboard/reports')->with('error', 'Signalement introuvable.');
+
+        return view('Dashboard/dashboardReportShow', [
+            'title'  => 'Détail du signalement',
+            'back'   => $this->request->getGet('back'),
+            'report' => $report,
+        ]);
+    }
 }
