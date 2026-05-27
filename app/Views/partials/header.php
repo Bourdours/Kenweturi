@@ -51,6 +51,9 @@ $registerClassMobile = $onLoginPage
         <a href="<?= site_url('journeys') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Chercher un trajet</a>
         <a href="<?= site_url('journeys/new') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Publier un trajet</a>
         <a href="<?= site_url('comment-ca-marche') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Comment ça marche</a>
+                 <?php if (session()->get('isAdmin')): ?>
+        <a href="<?= site_url('admin') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Administration</a>
+        <?php endif; ?>
       </nav>
 
       <!-- Auth desktop + hamburger mobile -->
@@ -90,6 +93,7 @@ $registerClassMobile = $onLoginPage
                 <a href="<?= site_url('dashboard') ?>" class="flex items-center gap-2 px-4 py-2 text-ink/70 hover:text-action text-sm transition-colors duration-200">
                   <i class="fa-solid fa-gauge text-xs w-4"></i> Tableau de bord
                 </a>
+                
                 <div class="border-t border-action/10 mt-1 pt-1">
                   <a href="<?= site_url('logout') ?>" class="flex items-center gap-2 px-4 py-2 text-ink/70 hover:text-action text-sm transition-colors duration-200">
                     <i class="fa-solid fa-right-from-bracket text-xs w-4"></i> Déconnexion
@@ -148,7 +152,11 @@ $registerClassMobile = $onLoginPage
           <div class="flex flex-col gap-2 pt-4 border-t border-action/10 mt-4">
             <a href="<?= site_url('profile') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Mon profil</a>
             <a href="<?= site_url('dashboard') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Tableau de bord</a>
-          </div>
+         <?php if (session()->get('isAdmin')): ?>
+        <a href="<?= site_url('admin') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Administration</a>
+        <?php endif; ?>
+    </div>
+
       </nav>
 
       <div class="flex flex-col gap-2 pt-4 border-t border-action/10 mt-4">

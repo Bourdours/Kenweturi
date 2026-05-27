@@ -8,7 +8,7 @@ namespace App\Models;
  */
 class UserModel extends BaseModel
 {
-   // Indique la table de la base de données utilisée par ce modèle
+    // Indique la table de la base de données utilisée par ce modèle
     protected $table            = 'user';
 
     // Définit la clé primaire de la table
@@ -23,17 +23,20 @@ class UserModel extends BaseModel
 
     // Liste des colonnes que l'on autorise à modifier ou insérer (sécurité)
     protected $allowedFields = [
-        'firstname', 
-        'lastname', 
-        'email', 
+        'firstname',
+        'lastname',
+        'email',
         'gender',
-        'birth_date', 
-        'biography', 
+        'birth_date',
+        'biography',
         'avatar',
         'is_student',
-        'registered_at', 
-        'password_hash', 
-        'remember_token',      
+        'registered_at',
+        'password_hash',
+        'remember_token',
+        'is_admin',
+        'is_banned',
+        'status',
         'city_id',
         'reset_token',
         'reset_token_expiry'
@@ -46,7 +49,7 @@ class UserModel extends BaseModel
         'email'         => 'required|valid_email|is_unique[user.email]',
         'gender'        => 'required|in_list[Homme,Femme,Autre]',
         'birth_date'    => 'required|valid_date',
-        
+
     ];
 
     // Messages d'erreurs
@@ -91,5 +94,21 @@ class UserModel extends BaseModel
             $data['data']['registered_at'] = date('Y-m-d H:i:s');
         }
         return $data;
+    }
+
+    /**
+     * Récupère tous les utilisateurs en attente avec le nom de leur ville.
+     * Fait une jointure LEFT JOIN sur la table 'city' pour afficher le nom au lieu de l'ID.
+     *
+     * @return array Liste des utilisateurs avec le champ 'city_name'
+     */
+    public function getPendingUsersWithCity(): array
+    {
+        return $this->db->table('user')
+            ->select('user.*, city.name AS city_name')
+            ->join('city', 'city.id = user.city_id', 'left')
+            ->where('user.status', 'pending')
+            ->get()
+            ->getResultArray();
     }
 }
