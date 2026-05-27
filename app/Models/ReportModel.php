@@ -21,6 +21,10 @@ class ReportModel extends BaseModel
         'description',
         'journey_id',
         'user_id',
+        'status',      
+        'admin_comment', 
+        'resolved_at',   
+        'resolved_by',  
     ];
 
     protected $validationRules = [
@@ -52,6 +56,46 @@ class ReportModel extends BaseModel
             'is_not_unique'      => 'Cet utilisateur n\'existe pas.',
         ],
     ];
+/**
+     * Récupère les signalements ouverts avec les alias attendus par la vue
+     */
+    public function getOpenReports(): array
+    {
+        // En utilisant $this directement, on profite des capacités natives du modèle
+        return $this->select('report.*, 
+                      reporter.firstname AS reporter_firstname, reporter.lastname AS reporter_lastname,
+                      reported.firstname AS reported_firstname, reported.lastname AS reported_lastname,
+                      j.start_datetime AS journey_date')
+            ->join('user reporter', 'reporter.id = report.user_id')
+            ->join('journey j', 'j.id = report.journey_id')
+            ->join('user reported', 'reported.id = j.user_id')
+            ->where('report.status', 'open')
+            ->orderBy('report.created_at', 'DESC')
+            ->findAll(); // findAll() retourne directement un tableau de résultats
+    }
 
-    
+    /**
+     * Clôture un signalement
+     */
+    public function resolve(int $id, string $action, string $comment, int $adminId): bool
+    {
+        // Utilisation propre de la méthode native update() sans risque de conflit d'alias
+        return $this->update($id, [
+            'status'        => 'closed',
+            'admin_comment' => $comment,
+            'resolved_at'   => date('Y-m-d H:i:s'),
+            'resolved_by'   => $adminId,
+        ]);
+    }
+
+    /**
+     * Récupère un report spécifique avec l'ID du créateur du trajet
+     */
+    public function getWithJourneyOwner(int $id): ?array
+    {
+        return $this->select('report.*, j.user_id AS reported_user_id')
+            ->join('journey j', 'j.id = report.journey_id')
+            ->where('report.id', $id)
+            ->first(); // first() retourne la première ligne sous forme de tableau ou null
+    }
 }
