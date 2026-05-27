@@ -1,28 +1,75 @@
+<?php
+
+/** @var string $firstname */
+/** @var string $lastname */
+?>
 <!DOCTYPE html>
-<html>
+<html lang="fr">
+
 <head>
     <meta charset="UTF-8">
-    <title>Compte validé !</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Votre compte a été validé !</title>
 </head>
-<body style="font-family: sans-serif; color: #1e293b; line-height: 1.5;">
 
-    <h2 style="color: #10b981;">Bonne nouvelle, <?= esc($firstname) ?> !</h2>
-    
-    <p>Bonjour <?= esc($firstname) ?> <?= esc($lastname) ?>,</p>
-    
-    <p>Votre inscription sur la plateforme <strong>Kenweturi</strong> vient d'être validée par un administrateur.</p>
-    
-    <p>Vous pouvez dès à présent vous connecter à votre compte et profiter de tous nos services.</p>
-    
-    <p style="margin-top: 24px;">
-        <a href="<?= base_url('login') ?>" 
-           style="background-color: #4f46e5; color: white; padding: 10px 20px; text-decoration: none; border-radius: 8px; font-weight: bold;">
-           Me connecter
-        </a>
-    </p>
-    
-    <hr style="border: 0; border-top: 1px border #e2e8f0; margin-top: 32px;">
-    <p style="color: #64748b; text-align: center; font-size: 12px;">L'équipe Kenweturi</p>
+<body style="margin:0;padding:0;background-color:#111a26;font-family:'Helvetica Neue',Arial,sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#111a26;padding:40px 16px;">
+        <tr>
+            <td align="center">
+                <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;">
 
+                    <!-- Header -->
+                    <tr>
+                        <td style="background-color:#1a3a5c;border-radius:12px 12px 0 0;padding:28px 40px;text-align:center;">
+                            <span style="font-size:22px;font-weight:700;color:#ffffff;letter-spacing:-0.3px;">Ken</span><span style="font-size:22px;font-weight:700;color:#F2860E;letter-spacing:-0.3px;">weturi</span>
+                        </td>
+                    </tr>
+
+                    <!-- Body -->
+                    <tr>
+                        <td style="background-color:#16222e;padding:40px;">
+
+                            <!-- au lieu du <br>, augmenter le margin-bottom du titre -->
+                            <p style="margin:0 0 24px;font-size:20px;font-weight:700;color:#ffffff;letter-spacing:-0.2px;">
+                                Bonne nouvelle, <?= esc($firstname) ?> !
+                            </p>
+
+                            <p style="margin:0 0 28px;font-size:15px;color:#93b8d8;line-height:1.6;">
+                                Votre inscription sur la plateforme <strong style="color:#ffffff;">Kenweturi</strong> vient d'être validée par un administrateur.
+                            </p>
+                            <p style="margin:0 0 32px;font-size:15px;color:#93b8d8;line-height:1.6;">
+                                Vous pouvez dès à présent vous connecter à votre compte et profiter de tous nos services.
+                            </p>
+
+                            <!-- CTA -->
+                            <table cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td align="center" style="padding-bottom:8px;">
+                                        <a href="<?= site_url('login') ?>"
+                                            style="display:inline-block;background-color:#D85A30;color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:14px 36px;border-radius:8px;letter-spacing:0.1px;">
+                                            Me connecter
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color:#111a26;border-radius:0 0 12px 12px;padding:24px 40px;border-top:1px solid #1a3a5c;">
+                            <p style="margin:0;font-size:12px;color:#555;line-height:1.6;text-align:center;">
+                                Cordialement,<br>
+                                <span style="color:#93b8d8;">L'équipe Kenweturi</span>
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
 </body>
+
 </html>

@@ -7,6 +7,13 @@ use CodeIgniter\Router\RouteCollection;
  */
 
 /* =========================================================
+ *  DEV ONLY — prévisualisation des emails
+ * ========================================================= */
+if (ENVIRONMENT === 'development') {
+    $routes->get('dev/email/(:segment)', 'DevController::emailPreview/$1');
+}
+
+/* =========================================================
  *  ROUTES PUBLIQUES (accessibles à tous, connectés ou non)
  * ========================================================= */
 
