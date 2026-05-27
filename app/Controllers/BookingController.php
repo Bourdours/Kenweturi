@@ -11,7 +11,12 @@ use \CodeIgniter\HTTP\RedirectResponse;
 class BookingController extends BaseController
 {
 
+    protected BookingModel $bookingModel;
 
+    public function __construct()
+    {
+        $this->bookingModel = new BookingModel();
+    }
     /**
      * 
      * Gère la supression d'une réservation et la redirection avec message de succès.
@@ -30,6 +35,7 @@ class BookingController extends BaseController
         $this->bookingModel->delete($id);
 
         return redirect()->to('/dashboard')->with('success', 'Réservation annulée avec succès !');
+
     }
 
     /**

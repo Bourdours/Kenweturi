@@ -130,9 +130,12 @@ class JourneyController extends BaseController{
         $availableSeats = $this->request->getGet('seats') ?? 1;
         $boardingCity   = $this->request->getGet('boardingCity');
 
-        return view('Journeys/journeyShow', [
+        $back = $this->request->getGet('back');
+
+        return view('Journeys/journeyShow',[
             'title'          => 'Détail du trajet',
             'journey'        => $journey,
+            'back'           => $back,
             'stages'         => $stages,
             'remainingSeats' => $remainingSeats,
             'availableSeats' => $availableSeats,
