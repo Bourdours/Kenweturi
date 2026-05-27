@@ -34,4 +34,22 @@ class BookingModel extends BaseModel
             'less_than_equal_to' => 'le chiffre doit être inférieur ou égale à 8.'
         ],
     ];
+
+    /**
+     * Calcule le nombre de places encore disponibles sur un trajet.
+     *
+     * @param int $journeyId  Identifiant du trajet
+     * @param int $totalSeats Nombre total de places proposées par le conducteur
+     * @return int            Places restantes (>= 0)
+     */
+    public function countRemainingSeats(int $journeyId, int $totalSeats): int
+    {
+        $bookedSeats = $this->selectSum('seat_numbers')
+            ->where('journey_id', $journeyId)
+            ->get()
+            ->getRowArray();
+
+        return max(0, $totalSeats - (int) ($bookedSeats['seat_numbers'] ?? 0));
+    }
+    
 }
