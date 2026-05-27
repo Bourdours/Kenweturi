@@ -88,6 +88,7 @@ class DashboardController extends BaseController
             ->join('city city_dropoff',    'city_dropoff.id = loc_dropoff.city_id', 'left')
             ->join('user u',               'u.id = booking.user_id')
             ->where('journey.user_id',     $userId)
+            ->where('booking.status', 'pending')
             ->orderBy('booking.sent_at',   'DESC')
             ->limit(5)
             ->get()->getResultArray();
@@ -214,11 +215,13 @@ class DashboardController extends BaseController
         if ($filter === 'mine') {
             $builder->join('user u',       'u.id = journey.user_id')
                     ->where('booking.user_id', $userId)
+                    ->where('booking.status', 'pending')
                     ->orderBy('journey.start_datetime', 'ASC');
             $title = 'Mes réservations';
         } else {
             $builder->join('user u',       'u.id = booking.user_id')
                     ->where('journey.user_id', $userId)
+                    ->where('booking.status', 'pending')
                     ->orderBy('booking.sent_at', 'ASC');
             $title = 'Réservations reçues';
         }

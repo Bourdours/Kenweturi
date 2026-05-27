@@ -11,6 +11,7 @@ class BookingModel extends BaseModel
     protected $allowedFields = [
         'booking_date',
         'seat_numbers',
+        'status',
         'journey_id',
         'user_id'
     ];
@@ -46,6 +47,7 @@ class BookingModel extends BaseModel
     {
         $bookedSeats = $this->selectSum('seat_numbers')
             ->where('journey_id', $journeyId)
+            ->where('status', 'accepted')
             ->get()
             ->getRowArray();
 
@@ -63,6 +65,7 @@ class BookingModel extends BaseModel
         return $this->select('booking.*, user.firstname, user.lastname, user.avatar, user.is_student')
             ->join('user', 'user.id = booking.user_id')
             ->where('booking.journey_id', $journeyId)
+            ->where('booking.status', 'accepted')
             ->findAll();
     }
     
