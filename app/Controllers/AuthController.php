@@ -190,6 +190,18 @@ class AuthController extends BaseController
         $user = $this->userModel->where('email', $email)->first();
 
         if ($user) {
+            //  Vérification du bannissement
+            if ((bool)$user['is_banned'] === true) {
+                return redirect()->back()->withInput()->with('error', 'Votre compte a été suspendu par l\'équipe de modération.');
+            }
+            //  Vérification du status
+            if ($user['status'] === 'pending') {
+                return redirect()->back()->withInput()->with('error', 'Votre inscription est en cours de validation par un administrateur. Vous recevrez un e-mail dès qu\'elle sera acceptée.');
+            }
+            //  Vérification si l'utilisateur a été rejeté
+            if ($user['status'] === 'rejected') {
+                return redirect()->back()->withInput()->with('error', 'Désolé, votre demande d\'inscription sur la plateforme n\'a pas été validée.');
+            }
             // Vérification du mot de passe 
             if (password_verify($password, $user['password_hash'])) {
 
@@ -198,7 +210,7 @@ class AuthController extends BaseController
                     'firstname' => $user['firstname'],
                     'lastname'  => $user['lastname'],
                     'email'     => $user['email'],
-                    'is_admin'  => $user['is_admin'],
+                    'isAdmin'  => (bool) $user['is_admin'],
                     'avatar'     => $user['avatar'] ?? null,
                     'isLoggedIn' => true,
                 ];
@@ -383,5 +395,4 @@ class AuthController extends BaseController
 
         return redirect()->to('/login')->with('success', 'Mot de passe réinitialisé avec succès !');
     }
-
 }

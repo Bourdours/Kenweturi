@@ -25,6 +25,10 @@ $routes->get('blog',              'PageController::blog');
 $routes->get('contact',           'PageController::contact');
 $routes->post('contact',          'PageController::sendContact');
 
+// Routes admin
+$routes->get('admin',                              'AdminController::index');
+$routes->post('admin/reports/(:num)/resolve',      'AdminController::resolveReport/$1');
+$routes->post('admin/users/(:num)/validate', 'AdminController::updateRegistration/$1');
 
 /* =========================================================
  *  ROUTES INVITÉS (interdites aux utilisateurs connectés)
