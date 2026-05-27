@@ -6,6 +6,7 @@ use App\Models\ReportModel;
 use App\Models\JourneyModel;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use Config\Services;
+use App\Models\BookingModel;
 
 /**
  * Contrôleur gérant les signalements de trajets.
@@ -21,6 +22,9 @@ class ReportController extends BaseController
      */
     public function create(int $journeyId)
     {
+        if (!session()->get('isLoggedIn')) {
+    return redirect()->to('/login');
+}
 
         $reporterId = (int) session()->get('user_id');
 
@@ -51,7 +55,7 @@ class ReportController extends BaseController
         $hasBookked = $bookingModel
             ->join('journey', 'journey.id = booking.journey_id')
             ->where('booking.journey_id', $journeyId)
-            ->where('booking.user_id', $reporerId)
+            ->where('booking.user_id', $reporterId)
             ->where('journey.start_datetime <', date('Y-m-d H:i:s'))
             ->countAllResults() > 0;
         
