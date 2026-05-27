@@ -8,7 +8,7 @@ $person_avatar     = $isDriver ? $booking['passenger_avatar']     : $booking['dr
 $person_is_student = $isDriver ? $booking['passenger_is_student'] : $booking['driver_is_student'];
 $person_label      = $isDriver ? 'Passager' : 'Conducteur';
 ?>
-<?= view('partials/head') ?>
+<?= view('partials/head', ['extraJs' => [base_url('js/modal.js')]]) ?>
 <?= view('partials/header') ?>
 
 <div class="max-w-4xl mx-auto py-10 px-6 md:px-8 space-y-4">
@@ -37,8 +37,10 @@ $person_label      = $isDriver ? 'Passager' : 'Conducteur';
                 <div class="flex-1 min-w-0 pb-5">
                     <p class="text-ink font-bold font-display text-lg leading-none mb-1"><?= esc(date('H:i', strtotime($booking['start_datetime']))) ?></p>
                     <p class="text-ink font-semibold"><?= esc($booking['pickup_city_name'] ?? $booking['city_start_name']) ?></p>
-                    <?php if (!empty($booking['pickup_address'])): ?>
-                        <p class="text-muted text-sm"><?= esc($booking['pickup_address']) ?></p>
+                    <?php $pickup_addr = $booking['pickup_address'] ?? $booking['start_address']; ?>
+                    <?php $pickup_city = $booking['pickup_city_name'] ?? $booking['city_start_name']; ?>
+                    <?php if (!empty($pickup_addr) && $pickup_addr !== $pickup_city): ?>
+                        <p class="text-muted text-sm"><?= esc($pickup_addr) ?></p>
                     <?php endif ?>
                 </div>
             </div>
@@ -50,8 +52,10 @@ $person_label      = $isDriver ? 'Passager' : 'Conducteur';
                 </div>
                 <div class="flex-1 min-w-0">
                     <p class="text-ink font-semibold"><?= esc($booking['dropoff_city_name'] ?? $booking['city_end_name']) ?></p>
-                    <?php if (!empty($booking['dropoff_address'])): ?>
-                        <p class="text-muted text-sm"><?= esc($booking['dropoff_address']) ?></p>
+                    <?php $dropoff_addr = $booking['dropoff_address'] ?? $booking['end_address']; ?>
+                    <?php $dropoff_city = $booking['dropoff_city_name'] ?? $booking['city_end_name']; ?>
+                    <?php if (!empty($dropoff_addr) && $dropoff_addr !== $dropoff_city): ?>
+                        <p class="text-muted text-sm"><?= esc($dropoff_addr) ?></p>
                     <?php endif ?>
                 </div>
             </div>
@@ -96,22 +100,22 @@ $person_label      = $isDriver ? 'Passager' : 'Conducteur';
         <?php if ($isDriver): ?>
             <form action="<?= site_url('dashboard/bookings/' . $booking['id'] . '/accept') ?>" method="post" class="mb-3">
                 <?= csrf_field() ?>
-                <button type="submit" class="w-full bg-action text-paper font-bold font-display rounded-full py-3 hover:bg-action-dark transition-colors">
+                <button type="submit" class="w-full bg-action text-ink font-bold font-display rounded-full py-3 hover:bg-action-dark transition-colors">
                     Accepter la réservation
                 </button>
             </form>
-            <form action="<?= site_url('dashboard/bookings/' . $booking['id'] . '/reject') ?>" method="post"
-                  onsubmit="return confirm('Refuser cette réservation ?')">
+            <form id="form-confirm" action="<?= site_url('dashboard/bookings/' . $booking['id'] . '/reject') ?>" method="post">
                 <?= csrf_field() ?>
-                <button type="submit" class="w-full border border-red-400 text-red-400 font-bold font-display rounded-full py-3 hover:bg-red-400 hover:text-paper transition-colors">
+                <button type="button" onclick="openConfirmModal('Refuser cette réservation ?', 'form-confirm')"
+                        class="w-full border border-danger text-danger font-bold font-display rounded-full py-3 hover:bg-danger hover:text-paper transition-colors">
                     Refuser la réservation
                 </button>
             </form>
         <?php else: ?>
-            <form action="<?= site_url('dashboard/bookings/' . $booking['id'] . '/delete') ?>" method="post"
-                  onsubmit="return confirm('Annuler cette réservation ?')">
+            <form id="form-confirm" action="<?= site_url('dashboard/bookings/' . $booking['id'] . '/delete') ?>" method="post">
                 <?= csrf_field() ?>
-                <button type="submit" class="w-full border border-red-400 text-red-400 font-bold font-display rounded-full py-3 hover:bg-red-400 hover:text-paper transition-colors">
+                <button type="button" onclick="openConfirmModal('Annuler cette réservation ?', 'form-confirm')"
+                        class="w-full border border-danger text-danger font-bold font-display rounded-full py-3 hover:bg-danger hover:text-paper transition-colors">
                     Annuler ma réservation
                 </button>
             </form>
