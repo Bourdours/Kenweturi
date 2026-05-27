@@ -293,13 +293,20 @@ class JourneyController extends BaseController{
 
     /**
      * Retourne les règles de validation pour le formulaire de création de trajet.
+     *
+     * La borne max de 'seats' est calculée dynamiquement à partir de la capacité
+     * de la voiture sélectionnée (capacité - 1 pour le conducteur). Si la voiture
+     * ne peut pas être résolue, on retombe sur une borne par défaut : la règle
+     * sur 'car' invalidera le formulaire de toute façon.
      */
     public function getCreateValidationRules(): array {
+
+        $maxSeats = $this->getMaxAvailableSeatsFromPostedCar();
 
         return [
             'startDate'     => 'required|valid_date',
             'startTime'     => 'required|regex_match[/^([01]\d|2[0-3]):[0-5]\d$/]',
-            'seats'         => 'required|integer|greater_than[0]|less_than[10]',
+            'seats'         => 'required|integer|greater_than[0]|less_than_equal_to[' . $maxSeats . ']',
             'note'          => 'permit_empty|max_length[500]',
             'smoking'       => 'in_list[0,1]',
             'startAddress'  => 'required|string|max_length[255]',
@@ -307,6 +314,37 @@ class JourneyController extends BaseController{
             'car'           => 'required|integer|greater_than[0]',
         ];
 
+    }
+
+    /**
+     * Détermine le nombre maximum de places réservables en fonction de la voiture
+     * sélectionnée dans le POST (capacité de la voiture - 1 pour le conducteur).
+     *
+     *
+     * @return int Nombre maximum de places réservables pour la voiture
+     */
+    private function getMaxAvailableSeatsFromPostedCar(): int
+    {
+        
+        $absoluteMax = 9;
+
+        $userId = session('user_id');
+        $carId  = $this->request->getPost('car');
+
+        if (!is_numeric($carId) || (int) $carId <= 0) {
+            return $absoluteMax;
+        }
+
+        $car = $this->carModel->where([
+            'id'      => (int) $carId,
+            'user_id' => $userId,
+        ])->first();
+
+        if (!$car) {
+            return $absoluteMax;
+        }
+
+        return (int) $car['seats'] - 1;
     }
 
     public function getLocationsCreateFormData(): array{
