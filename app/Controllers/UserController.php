@@ -138,6 +138,12 @@ class UserController extends BaseController
         $userId = session()->get('user_id');
         $user   = $this->userModel->find($userId);
 
+        if (!$user) {
+            session()->destroy();
+            return redirect()->to(site_url('login'))
+                ->with('error', 'Ce compte n\'existe plus.');
+        }
+
         // Données de base du profil à mettre à jour
         $data = [
             'firstname'  => $this->request->getPost('firstNameProfile'),
@@ -205,8 +211,8 @@ class UserController extends BaseController
         $cityName = trim($this->request->getPost('cityProfile')    ?? '');
         $zipcode  = trim($this->request->getPost('zipcodeProfile') ?? '');
 
-        $cityNameChecked = $this->getCheckedCityName($cityName,$zipcode);
-        $data['city_id'] = $this->cityModel->findOrCreateCity($cityNameChecked,$zipcode);
+        $cityNameChecked = $this->getCheckedCityName($cityName, $zipcode);
+        $data['city_id'] = $this->cityModel->findOrCreateCity($cityNameChecked, $zipcode);
 
         // Hachage du nouveau mot de passe si renseigné
         if (!empty($newPassword)) {
@@ -224,6 +230,12 @@ class UserController extends BaseController
         // Gestion de l'upload de l'avatar
         $avatar = $this->request->getFile('avatarProfile');
         if ($avatar && $avatar->isValid() && !$avatar->hasMoved()) {
+            // Suppression de l'ancien avatar
+            $oldAvatar = $user['avatar'] ?? null;
+            if ($oldAvatar && file_exists(FCPATH . $oldAvatar)) {
+                unlink(FCPATH . $oldAvatar);
+            }
+
             $newName = $avatar->getRandomName();
             $avatar->move(FCPATH . 'data/images', $newName);
             $data['avatar'] = 'data/images/' . $newName;
@@ -237,8 +249,11 @@ class UserController extends BaseController
             'firstname' => $data['firstname'],
             'lastname'  => $data['lastname'],
             'email'     => $data['email'],
-            'avatar'    => $data['avatar'] ?? session()->get('avatar'),
         ]);
+        
+        if (isset($data['avatar'])) {
+            session()->set('avatar', $data['avatar']);
+        }
 
         return redirect()->to(site_url('profile'))->with('success', 'Profil mis à jour avec succès.');
     }
