@@ -36,7 +36,7 @@
     </div>
   <?php endif; ?>
 
-  <form id="addJourneyForm" action="/journeys/new" method="post" class="flex flex-col gap-6">
+  <form id="addJourneyForm" action="<?= base_url('/journeys/new') ?>" method="post" class="flex flex-col gap-6">
     <?= csrf_field() ?>
 
     <!-- Itinéraire -->
@@ -184,19 +184,24 @@
       <h2 class="text-ink text-base font-semibold font-display mb-5 flex items-center gap-2">
         <i class="fa-solid fa-align-left text-action text-sm"></i>Voiture
       </h2>
-      <label for="car" class="text-ink/50 text-xs font-medium mb-1.5 block">Quelle voiture allez-vous conduire ? </label>
-      <select name="car" id="car" class="form-select">
-          <option value="">-- Choisir une voiture --</option>
+      <label class="text-ink/50 text-xs font-medium mb-1.5 block">Quelle voiture allez-vous conduire ?</label>
+      <div class="relative" id="carDropdownWrapper">
+        <button type="button" id="carDropdownBtn"
+          class="w-full bg-paper border border-action/15 rounded-lg text-sm px-3 py-2.5 outline-none focus:border-action/50 transition-colors cursor-pointer text-left flex items-center justify-between">
+          <span id="carDropdownLabel" class="text-ink/30">-- Choisir une voiture --</span>
+          <i id="carDropdownArrow" class="fa-solid fa-chevron-down text-xs text-ink/30 transition-transform"></i>
+        </button>
+        <input type="hidden" name="car" id="carHidden">
+        <ul class="autocomplete-dropdown" id="carDropdownList">
           <?php if (!empty($cars)) : ?>
-              <?php foreach ($cars as $car) : ?>
-                  <option value="<?= esc($car['id']) ?>" <?= (string) old('car') === (string) $car['id'] ? 'selected' : '' ?>>
-                      <?= esc($car['brand']) ?>
-                      <?= esc($car['model']) ?>
-                      <?= esc($car['color']) ?>
-                  </option>
-              <?php endforeach; ?>
+            <?php foreach ($cars as $car) : ?>
+              <li class="autocomplete-item" data-value="<?= esc($car['id']) ?>">
+                <?= esc($car['brand']) ?> <?= esc($car['model']) ?> <?= esc($car['color']) ?>
+              </li>
+            <?php endforeach; ?>
           <?php endif; ?>
-      </select>
+        </ul>
+      </div>
     </div>
 
     <!-- Note -->

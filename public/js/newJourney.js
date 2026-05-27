@@ -142,6 +142,38 @@ if (seatsInput) {
 /* -----------------------------------------------------------------------------
  * Ajout et suppression dynamique d'étapes intermédiaires
  * -------------------------------------------------------------------------- */
+const carBtn    = document.getElementById('carDropdownBtn');
+const carLabel  = document.getElementById('carDropdownLabel');
+const carArrow  = document.getElementById('carDropdownArrow');
+const carList   = document.getElementById('carDropdownList');
+const carHidden = document.getElementById('carHidden');
+
+if (carBtn && carList) {
+    carBtn.addEventListener('click', () => {
+        const isOpen = carList.style.display === 'block';
+        carList.style.display = isOpen ? 'none' : 'block';
+        carArrow.style.transform = isOpen ? '' : 'rotate(180deg)';
+    });
+
+    carList.querySelectorAll('.autocomplete-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const value = item.dataset.value;
+            carHidden.value = value;
+            carLabel.textContent = item.textContent.trim();
+            carLabel.classList.remove('text-ink/30', 'text-ink');
+            carLabel.classList.add(value ? 'text-ink' : 'text-ink/30');
+            carList.style.display = 'none';
+            carArrow.style.transform = '';
+        });
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!carBtn.contains(e.target) && !carList.contains(e.target)) {
+            carList.style.display = 'none';
+            carArrow.style.transform = '';
+        }
+    });
+}
 
 const stagesContainer = document.getElementById('stagesContainer');
 const addStageBtn     = document.getElementById('addStageBtn');
