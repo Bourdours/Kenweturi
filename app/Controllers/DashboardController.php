@@ -72,10 +72,10 @@ class DashboardController extends BaseController
                 city_pickup.name as pickup_city_name,
                 loc_dropoff.address as dropoff_address,
                 city_dropoff.name as dropoff_city_name,
-                u.firstname as passenger_firstname,
-                u.lastname as passenger_lastname,
-                u.avatar as passenger_avatar,
-                u.is_student as passenger_is_student,
+                u.firstname as person_firstname,
+                u.lastname as person_lastname,
+                u.avatar as person_avatar,
+                u.is_student as person_is_student,
                 COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id), 0) as booked_seats')
             ->join('journey',              'journey.id = booking.journey_id')
             ->join('location loc_start',   'loc_start.id = journey.location_start_id')
@@ -93,7 +93,7 @@ class DashboardController extends BaseController
             ->get()->getResultArray();
 
         // Réservations faites en tant que passager
-        $myBookings = $db->table('booking')
+        $myBookings = $this->db->table('booking')
             ->select('booking.*, journey.start_datetime, city_start.name as city_start_name, city_end.name as city_end_name, u.firstname as driver_firstname, u.lastname as driver_lastname, u.avatar as driver_avatar, u.is_student as driver_is_student, loc_start.address as address_start, loc_end.address as address_end')
             ->join('journey',            'journey.id = booking.journey_id')
             ->join('location loc_start', 'loc_start.id = journey.location_start_id')
@@ -109,7 +109,7 @@ class DashboardController extends BaseController
             ->get()->getResultArray();
 
         // Derniers signalements
-        $lastReports = $db->table('report')
+        $lastReports = $this->db->table('report')
             ->select('report.*, journey.start_datetime, city_start.name as city_start_name, city_end.name as city_end_name,
                 loc_start.address as address_start, loc_end.address as address_end')
             ->join('journey',            'journey.id = report.journey_id')
