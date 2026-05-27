@@ -1,7 +1,12 @@
 <?php
-
 /** @var array $booking  */
 /** @var bool  $isDriver */
+
+$person_firstname  = $isDriver ? $booking['passenger_firstname']  : $booking['driver_firstname'];
+$person_lastname   = $isDriver ? $booking['passenger_lastname']   : $booking['driver_lastname'];
+$person_avatar     = $isDriver ? $booking['passenger_avatar']     : $booking['driver_avatar'];
+$person_is_student = $isDriver ? $booking['passenger_is_student'] : $booking['driver_is_student'];
+$person_label      = $isDriver ? 'Passager' : 'Conducteur';
 ?>
 <?= view('partials/head') ?>
 <?= view('partials/header') ?>
@@ -11,7 +16,7 @@
     <!-- En-tête -->
     <div class="flex items-center justify-between mb-2">
         <h1 class="text-ink text-2xl font-bold font-display">Détail de la réservation</h1>
-        <a href="<?= site_url('dashboard/bookings') ?>" class="text-ink/50 hover:text-action text-sm flex items-center gap-1.5 transition-colors">
+        <a href="<?= esc($back ?? base_url('dashboard')) ?>" class="text-ink/50 hover:text-action text-sm flex items-center gap-1.5 transition-colors">
             <i class="fa-solid fa-arrow-left text-xs"></i>Retour
         </a>
     </div>
@@ -32,7 +37,9 @@
                 <div class="flex-1 min-w-0 pb-5">
                     <p class="text-ink font-bold font-display text-lg leading-none mb-1"><?= esc(date('H:i', strtotime($booking['start_datetime']))) ?></p>
                     <p class="text-ink font-semibold"><?= esc($booking['pickup_city_name'] ?? $booking['city_start_name']) ?></p>
-                    <p class="text-muted text-sm"><?= esc($booking['pickup_address'] ?? '') ?></p>
+                    <?php if (!empty($booking['pickup_address'])): ?>
+                        <p class="text-muted text-sm"><?= esc($booking['pickup_address']) ?></p>
+                    <?php endif ?>
                 </div>
             </div>
 
@@ -43,21 +50,23 @@
                 </div>
                 <div class="flex-1 min-w-0">
                     <p class="text-ink font-semibold"><?= esc($booking['dropoff_city_name'] ?? $booking['city_end_name']) ?></p>
-                    <p class="text-muted text-sm"><?= esc($booking['dropoff_address'] ?? '') ?></p>
+                    <?php if (!empty($booking['dropoff_address'])): ?>
+                        <p class="text-muted text-sm"><?= esc($booking['dropoff_address']) ?></p>
+                    <?php endif ?>
                 </div>
             </div>
 
         </div>
     </article>
 
-    <!-- Passager -->
+    <!-- Conducteur / Passager -->
     <article class="bg-surface-card rounded-2xl p-6">
-        <h2 class="text-muted text-xs font-semibold uppercase tracking-wider mb-4">Passager</h2>
+        <h2 class="text-muted text-xs font-semibold uppercase tracking-wider mb-4"><?= $person_label ?></h2>
         <div class="flex items-center gap-4">
-            <?php $initials = strtoupper(substr($booking['passenger_firstname'], 0, 1) . substr($booking['passenger_lastname'], 0, 1)); ?>
-            <?php if (!empty($booking['passenger_avatar'])): ?>
+            <?php $initials = strtoupper(substr($person_firstname, 0, 1) . substr($person_lastname, 0, 1)); ?>
+            <?php if (!empty($person_avatar)): ?>
                 <div class="w-14 h-14 rounded-full overflow-hidden shrink-0">
-                    <img src="/<?= esc($booking['passenger_avatar']) ?>" alt="Avatar" class="w-full h-full object-cover"
+                    <img src="/<?= esc($person_avatar) ?>" alt="Avatar" class="w-full h-full object-cover"
                         onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
                 </div>
                 <div class="hidden w-14 h-14 rounded-full bg-action-dark text-paper font-bold text-base shrink-0 items-center justify-center">
@@ -69,8 +78,8 @@
                 </div>
             <?php endif ?>
             <div>
-                <p class="text-ink font-semibold"><?= esc($booking['passenger_firstname']) ?> <?= esc($booking['passenger_lastname']) ?></p>
-                <p class="text-muted text-sm"><?= $booking['passenger_is_student'] ? 'Étudiant' : 'Formateur' ?></p>
+                <p class="text-ink font-semibold"><?= esc($person_firstname) ?> <?= esc($person_lastname) ?></p>
+                <p class="text-muted text-sm"><?= $person_is_student ? 'Étudiant' : 'Formateur' ?></p>
             </div>
         </div>
 
