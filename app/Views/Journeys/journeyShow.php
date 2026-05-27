@@ -119,6 +119,39 @@
         </div>
     </article>
 
+    <!-- Passagers -->
+    <article class="bg-surface-card rounded-2xl p-6">
+        <h2 class="text-muted text-xs font-semibold uppercase tracking-wider mb-4">Passagers</h2>
+        <?php if (empty($passengers)): ?>
+            <p class="text-muted text-sm">Aucun passager pour l'instant.</p>
+        <?php else: ?>
+            <div class="flex flex-col gap-4">
+                <?php foreach ($passengers as $passenger): ?>
+                    <?php $initials = strtoupper(substr($passenger['firstname'], 0, 1) . substr($passenger['lastname'], 0, 1)); ?>
+                    <div class="flex items-center gap-4">
+                        <?php if (!empty($passenger['avatar'])): ?>
+                            <div class="jsAvatarOpen cursor-pointer w-14 h-14 rounded-full overflow-hidden shrink-0">
+                                <img src="/<?= esc($passenger['avatar']) ?>" alt="Avatar de <?= esc($passenger['firstname']) ?>" class="w-full h-full object-cover"
+                                    onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
+                            </div>
+                            <div class="jsAvatarOpen cursor-pointer hidden w-14 h-14 rounded-full bg-action-dark text-ink font-bold text-base shrink-0 items-center justify-center">
+                                <?= $initials ?>
+                            </div>
+                        <?php else: ?>
+                            <div class="jsAvatarOpen cursor-pointer flex w-14 h-14 rounded-full bg-action-dark text-ink font-bold text-base shrink-0 items-center justify-center">
+                                <?= $initials ?>
+                            </div>
+                        <?php endif ?>
+                        <div>
+                            <p class="text-ink font-semibold"><?= esc($passenger['firstname']) ?> <?= esc($passenger['lastname']) ?></p>
+                            <p class="text-muted text-sm"><?= $passenger['is_student'] ? 'Étudiant' : 'Formateur' ?></p>
+                        </div>
+                    </div>
+                <?php endforeach ?>
+            </div>
+        <?php endif ?>
+    </article>
+
     <!-- Réservation -->
     <article class="bg-surface-card rounded-2xl p-6">
         <?php if ($remainingSeats > 0) : ?>
@@ -130,10 +163,12 @@
             </div>
             <form action="/journeys/<?= esc($journey['id']) ?>/book" method="POST" id="formBook">
                 <?= csrf_field() ?>
-                <button type="button" id="btnOpenBookModal"
-                    class="w-full bg-action text-ink font-bold font-display rounded-full py-3 hover:bg-action-dark transition-colors">
-                    Réserver <?= $availableSeats > 1 ? $availableSeats . ' places' : '1 place' ?>
-                </button>
+                <?php if (session('user_id') != $journey['user_id']): ?>
+                    <button type="button" id="btnOpenBookModal"
+                        class="w-full bg-action text-ink font-bold font-display rounded-full py-3 hover:bg-action-dark transition-colors">
+                        Réserver <?= $availableSeats > 1 ? $availableSeats . ' places' : '1 place' ?>
+                    </button>
+                <?php endif ?>
             </form> 
 
             <!-- Modal confirmation réservation -->
