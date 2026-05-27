@@ -1,26 +1,21 @@
 <?= view('partials/head', [
-    'extraCss' => [
-        'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css',
-        base_url('css/flatpickr-theme.css'),
-    ],
-    'extraJs' => [
-        'https://cdn.jsdelivr.net/npm/flatpickr',
-        'https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js',
-        base_url('js/datepicker.js'),
-        base_url('js/timepicker.js'),
-        base_url('js/newJourney.js'),
-    ],
+  'extraCss' => [
+    'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css',
+    base_url('css/flatpickr-theme.css'),
+  ],
+  'extraJs' => [
+    'https://cdn.jsdelivr.net/npm/flatpickr',
+    'https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js',
+    base_url('js/datepicker.js'),
+    base_url('js/timepicker.js'),
+    base_url('js/newJourney.js'),
+  ],
 ]) ?>
 <?= view('partials/header') ?>
 
 <div class="max-w-4xl mx-auto py-10 px-6 md:px-8 flex flex-col gap-6">
 
-  <div class="flex items-center justify-between">
-    <h1 class="text-ink text-2xl font-bold font-display">Publier un trajet</h1>
-    <a href="<?= site_url('dashboard') ?>" class="text-ink/50 hover:text-action text-sm flex items-center gap-1.5 transition-colors">
-      <i class="fa-solid fa-arrow-left text-xs"></i>Retour
-    </a>
-  </div>
+  <h1 class="text-ink text-2xl font-bold font-display">Publier un trajet</h1>
 
   <?php if (session()->has('errors')): ?>
     <div class="bg-action/10 border border-action/30 rounded-xl p-4 flex gap-3 items-start">
@@ -62,13 +57,13 @@
         <!-- Étapes -->
         <div id="stagesContainer">
           <?php
-            // Récupère les étapes saisies précédemment ; au minimum une étape vide (Étape 1 statique).
-            // Les éventuelles étapes supplémentaires sont rendues comme des .dynamic-stage afin
-            // d'être traitées comme si elles avaient été ajoutées par le JS.
-            $oldStages = old('stagesAddresses');
-            if (!is_array($oldStages) || $oldStages === []) {
-                $oldStages = [''];
-            }
+          // Récupère les étapes saisies précédemment ; au minimum une étape vide (Étape 1 statique).
+          // Les éventuelles étapes supplémentaires sont rendues comme des .dynamic-stage afin
+          // d'être traitées comme si elles avaient été ajoutées par le JS.
+          $oldStages = old('stagesAddresses');
+          if (!is_array($oldStages) || $oldStages === []) {
+            $oldStages = [''];
+          }
           ?>
           <?php foreach ($oldStages as $index => $stageAddress): ?>
             <?php if ($index === 0): ?>

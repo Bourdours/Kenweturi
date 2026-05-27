@@ -2,7 +2,7 @@
 
 /** @var array $user */
 ?>
-<?= view('partials/head', ['extraJs' => [base_url('js/auth.js'), base_url('js/user.js'), base_url('js/app.js')]]) ?>
+<?= view('partials/head', ['extraJs' => [base_url('js/auth.js'), base_url('js/user.js')]]) ?>
 <script>
   window.baseUrl = "<?= base_url() ?>";
 </script>

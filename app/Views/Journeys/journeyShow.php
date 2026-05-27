@@ -93,11 +93,11 @@
                     <img src="/<?= esc($journey['driver_avatar']) ?>" alt="Avatar de <?= esc($journey['driver_firstname']) ?>" class="w-full h-full object-cover"
                         onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
                 </div>
-                <div class="jsAvatarOpen cursor-pointer hidden w-14 h-14 rounded-full bg-action-dark text-paper font-bold text-base shrink-0 items-center justify-center">
+                <div class="jsAvatarOpen cursor-pointer hidden w-14 h-14 rounded-full bg-action-dark text-ink font-bold text-base shrink-0 items-center justify-center">
                     <?= $initials ?>
                 </div>
             <?php else: ?>
-                <div class="jsAvatarOpen cursor-pointer flex w-14 h-14 rounded-full bg-action-dark text-paper font-bold text-base shrink-0 items-center justify-center">
+                <div class="jsAvatarOpen cursor-pointer flex w-14 h-14 rounded-full bg-action-dark text-ink font-bold text-base shrink-0 items-center justify-center">
                     <?= $initials ?>
                 </div>
             <?php endif; ?>
@@ -131,10 +131,10 @@
             <form action="/journeys/<?= esc($journey['id']) ?>/book" method="POST" id="formBook">
                 <?= csrf_field() ?>
                 <button type="button" id="btnOpenBookModal"
-                    class="w-full bg-action text-paper font-bold font-display rounded-full py-3 hover:bg-action-dark transition-colors">
+                    class="w-full bg-action text-ink font-bold font-display rounded-full py-3 hover:bg-action-dark transition-colors">
                     Réserver <?= $availableSeats > 1 ? $availableSeats . ' places' : '1 place' ?>
                 </button>
-            </form>
+            </form> 
 
             <!-- Modal confirmation réservation -->
             <div id="modalBook" class="hidden fixed inset-0 w-full h-full bg-black/50 items-center justify-center z-[9999]">
