@@ -107,7 +107,7 @@
       <div class="grid grid-cols-1 <?= (!empty($nextDriverJourney) && !empty($nextPassengerJourney)) ? 'sm:grid-cols-2' : '' ?> gap-3">
 
         <?php if (!empty($nextDriverJourney)): ?>
-          <a href="<?= site_url('journeys/' . $nextDriverJourney['id']) ?>"
+          <a href="<?= site_url('journeys/' . $nextDriverJourney['id']) ?>?back=<?= urlencode(current_url(true)) ?>"
             class="flex items-center gap-4 bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors">
             <div class="w-10 h-10 rounded-xl bg-action/10 flex items-center justify-center shrink-0">
               <i class="fa-solid fa-car-side text-action text-sm"></i>
@@ -128,7 +128,7 @@
         <?php endif; ?>
 
         <?php if (!empty($nextPassengerJourney)): ?>
-          <a href="<?= site_url('journeys/' . $nextPassengerJourney['id']) ?>"
+          <a href="<?= site_url('journeys/' . $nextPassengerJourney['id']) ?>?back=<?= urlencode(current_url(true)) ?>"
             class="flex items-center gap-4 bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors">
             <div class="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center shrink-0">
               <i class="fa-solid fa-person-walking text-brand text-sm"></i>
