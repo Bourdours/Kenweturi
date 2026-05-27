@@ -8,24 +8,38 @@ class AddIsBannedToUser extends Migration
 {
     public function up(): void
     {
-        $this->forge->addColumn('user', [
-            'is_banned' => [
+        $fields = [];
+
+        $existingColumns = $this->db->getFieldNames('user');
+
+        if (! in_array('is_banned', $existingColumns)) {
+            $fields['is_banned'] = [
                 'type'       => 'TINYINT',
                 'constraint' => 1,
                 'default'    => 0,
                 'after'      => 'is_admin',
-            ],
-            'status' => [
+            ];
+        }
+
+        if (! in_array('status', $existingColumns)) {
+            $fields['status'] = [
                 'type'       => 'ENUM',
                 'constraint' => ['pending', 'active', 'rejected'],
                 'default'    => 'pending',
-                'after'      => 'email', 
-            ],
-            'deleted_at' => [
+                'after'      => 'email',
+            ];
+        }
+
+        if (! in_array('deleted_at', $existingColumns)) {
+            $fields['deleted_at'] = [
                 'type' => 'DATETIME',
                 'null' => true,
-            ],
-        ]);
+            ];
+        }
+
+        if (! empty($fields)) {
+            $this->forge->addColumn('user', $fields);
+        }
     }
 
     public function down(): void
