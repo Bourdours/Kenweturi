@@ -67,8 +67,9 @@ class JourneyController extends BaseController{
         $userId = session('user_id');
 
         // ====== Validation des données du formulaire
-        $createValidationRules = $this->getCreateValidationRules();
-        if (!$this->validate($createValidationRules)) {
+        $createValidationRules    = $this->getCreateValidationRules();
+        $createValidationMessages = $this->getCreateValidationMessages();
+        if (!$this->validate($createValidationRules, $createValidationMessages)) {
             return redirect()->back()->withInput()
                 ->with('errors', $this->validator->getErrors());
         }
@@ -305,6 +306,46 @@ class JourneyController extends BaseController{
             'startAddress'  => 'required|string|max_length[255]',
             'endAddress'    => 'required|string|max_length[255]',
             'car'           => 'required|integer|greater_than[0]',
+        ];
+
+    }
+
+    public function getCreateValidationMessages(): array {
+
+        return [
+            'startDate'    => [
+                'required'   => 'La date de départ est obligatoire.',
+                'valid_date' => 'La date de départ n\'est pas valide.',
+            ],
+            'startTime'    => [
+                'required'      => 'L\'heure de départ est obligatoire.',
+                'regex_match'   => 'L\'heure de départ n\'est pas valide (format HH:MM).',
+            ],
+            'seats'        => [
+                'required'      => 'Le nombre de places est obligatoire.',
+                'integer'       => 'Le nombre de places doit être un entier.',
+                'greater_than'  => 'Le nombre de places doit être supérieur à 0.',
+                'less_than'     => 'Le nombre de places doit être inférieur à 10.',
+            ],
+            'note'         => [
+                'max_length'    => 'La note ne peut pas dépasser 500 caractères.',
+            ],
+            'startAddress' => [
+                'required'      => 'L\'adresse de départ est obligatoire.',
+                'max_length'    => 'L\'adresse de départ ne peut pas dépasser 255 caractères.',
+            ],
+            'endAddress'   => [
+                'required'      => 'L\'adresse d\'arrivée est obligatoire.',
+                'max_length'    => 'L\'adresse d\'arrivée ne peut pas dépasser 255 caractères.',
+            ],
+            'car'          => [
+                'required'      => 'Veuillez sélectionner un véhicule.',
+                'integer'       => 'Le véhicule sélectionné n\'est pas valide.',
+                'greater_than'  => 'Veuillez sélectionner un véhicule.',
+            ],
+            'smoking'      => [
+                'in_list'       => 'Veuillez indiquer si le covoiturage est fumeur ou non.',
+            ],
         ];
 
     }

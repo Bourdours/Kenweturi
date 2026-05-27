@@ -69,11 +69,11 @@ $registerClassMobile = $onLoginPage
                     <img src="<?= esc(base_url(session()->get('avatar'))) ?>" alt="" class="w-full h-full object-cover"
                       onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
                   </div>
-                  <div class="hidden w-9 h-9 rounded-full bg-action text-paper font-bold text-xs shrink-0 items-center justify-center">
+                  <div class="hidden w-9 h-9 rounded-full bg-action text-ink font-bold text-xs shrink-0 items-center justify-center">
                     <?= $initials ?>
                   </div>
                 <?php else: ?>
-                  <div class="flex w-9 h-9 rounded-full bg-action text-paper font-bold text-xs shrink-0 items-center justify-center">
+                  <div class="flex w-9 h-9 rounded-full bg-action text-ink font-bold text-xs shrink-0 items-center justify-center">
                     <?= $initials ?>
                   </div>
                 <?php endif; ?>
@@ -127,11 +127,11 @@ $registerClassMobile = $onLoginPage
               <img src="<?= esc(base_url(session()->get('avatar'))) ?>" alt="" class="w-full h-full object-cover"
                 onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
             </div>
-            <div class="hidden w-10 h-10 rounded-full bg-action text-paper font-bold text-xs shrink-0 items-center justify-center">
+            <div class="hidden w-10 h-10 rounded-full bg-action text-ink font-bold text-xs shrink-0 items-center justify-center">
               <?= $initials ?>
             </div>
           <?php else: ?>
-            <div class="flex w-10 h-10 rounded-full bg-action text-paper font-bold text-xs shrink-0 items-center justify-center">
+            <div class="flex w-10 h-10 rounded-full bg-action text-ink font-bold text-xs shrink-0 items-center justify-center">
               <?= $initials ?>
             </div>
           <?php endif; ?>

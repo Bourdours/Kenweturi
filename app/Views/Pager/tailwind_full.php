@@ -31,7 +31,7 @@ $pager->setSurroundCount(2);
                 <a href="<?= $link['uri'] ?>"
                    class="flex items-center justify-center w-9 h-9 rounded-lg text-sm font-medium transition-colors
                           <?= $link['active']
-                              ? 'bg-action text-paper font-semibold shadow-sm'
+                              ? 'bg-action text-ink font-semibold shadow-sm'
                               : 'text-ink/60 hover:bg-action/10 hover:text-action' ?>">
                     <?= $link['title'] ?>
                 </a>
