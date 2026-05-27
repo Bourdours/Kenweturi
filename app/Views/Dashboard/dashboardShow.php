@@ -1,207 +1,262 @@
 <?= view('partials/head') ?>
 <?= view('partials/header') ?>
 
+<div class="max-w-4xl mx-auto px-4 py-6 space-y-8">
+
+    <!-- En-tête -->
+    <div>
+        <h1 class="font-display font-bold text-ink text-2xl">Bonjour, <?= esc(session()->get('firstname')) ?></h1>
+        <p class="text-muted text-sm mt-1">Voici un résumé de votre activité.</p>
+    </div>
+
     <!-- Prochains trajets -->
     <div>
-        <div class="flex justify-between mb-3">
-            <h2>Prochains trajets</h2>
-            <a href="/dashboard/journeys?filter=upcoming">Voir tous</a>
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="font-display font-bold text-ink text-base">Prochains trajets</h2>
+            <a href="/dashboard/journeys?filter=upcoming" class="text-brand text-sm font-medium hover:text-action transition-colors">Voir tous</a>
         </div>
-            <?php if (empty($nextJourneys)) : ?>
-                <p class="text-center text-muted py-8">Aucun trajet trouvé.</p>
-                <?php else : ?>
-                    <div class="space-y-3">
-                        <?php foreach ($nextJourneys as $journey) : ?>
-                            <a href="/journeys/<?= esc($journey['id']) ?>?back=<?= urlencode(current_url(true)) ?>" class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors">
-                                <div class="flex items-center gap-4">
-                                    <div class="flex flex-col items-center shrink-0">
-                                        <div class="w-2.5 h-2.5 rounded-full bg-brand"></div>
-                                        <div class="w-px h-6 bg-ink/10 my-0.5"></div>
-                                        <div class="w-2.5 h-2.5 rounded-full bg-action"></div>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <p class="text-ink font-semibold truncate"><?= esc($journey['city_start_name']) ?></p>
-                                        <p class="text-ink font-semibold truncate"><?= esc($journey['city_end_name']) ?></p>
-                                    </div>
-                                    <div class="text-right shrink-0 space-y-1">
-                                        <p class="text-ink font-bold font-display"><?= esc(date('H:i', strtotime($journey['start_datetime']))) ?></p>
-                                        <p class="text-ink/40 text-xs"><?= esc(date('d/m', strtotime($journey['start_datetime']))) ?></p>
-                                    </div>
-                                </div>
-                                <div class="mt-3 pt-3 border-t border-action/10 flex items-center justify-between text-sm text-ink/50">
-                                    <span><?= esc($journey['booked_seats']) ?> place<?= $journey['booked_seats'] > 1 ? 's' : '' ?> réservée<?= $journey['booked_seats'] > 1 ? 's' : '' ?></span>
-                                    <?php if ($journey['booked_seats'] >= $journey['seats']): ?>
-                                        <span>Complet</span>
-                                    <?php else: ?>
-                                        <span>
-                                            <?= esc($journey['seats'] - $journey['booked_seats']) ?>
-                                            place<?= ($journey['seats'] - $journey['booked_seats']) > 1 ? 's' : '' ?>
-                                            restante<?= ($journey['seats'] - $journey['booked_seats']) > 1 ? 's' : '' ?>
-                                        </span>
-                                    <?php endif ?>
-                                </div>
-                            </a>
-                        <?php endforeach ?>
-                    </div>
-                <?php endif ?>
-    </div>    
-    <!-- Derniers trajets -->
-    <div>
-        <div class="flex justify-between mb-3">
-            <h2>Trajets passés</h2>
-            <a href="/dashboard/journeys?filter=past">Voir tous</a>
-        </div>  
-        <?php if (empty($lastJourneys)) : ?>
+        <?php if (empty($nextJourneys)) : ?>
             <p class="text-center text-muted py-8">Aucun trajet trouvé.</p>
-            <?php else : ?>
-                <div class="space-y-3">
-                    <?php foreach ($lastJourneys as $journey) : ?>
-                        <a href="/journeys/<?= esc($journey['id']) ?>?back=<?= urlencode(current_url(true)) ?>" class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors">
-                            <div class="flex items-center gap-4">
-                                <div class="flex flex-col items-center shrink-0">
-                                    <div class="w-2.5 h-2.5 rounded-full bg-brand"></div>
-                                    <div class="w-px h-6 bg-ink/10 my-0.5"></div>
-                                    <div class="w-2.5 h-2.5 rounded-full bg-action"></div>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-ink font-semibold truncate"><?= esc($journey['city_start_name']) ?></p>
-                                    <p class="text-ink font-semibold truncate"><?= esc($journey['city_end_name']) ?></p>
-                                </div>
-                                <div class="text-right shrink-0 space-y-1">
-                                    <p class="text-ink font-bold font-display"><?= esc(date('H:i', strtotime($journey['start_datetime']))) ?></p>
-                                    <p class="text-ink/40 text-xs"><?= esc(date('d/m', strtotime($journey['start_datetime']))) ?></p>
-                                </div>
-                            </div>
-                            <div class="mt-3 pt-3 border-t border-action/10 flex items-center justify-between text-sm text-ink/50">
-                                <span><?= esc($journey['booked_seats']) ?> place<?= $journey['booked_seats'] > 1 ? 's' : '' ?> réservée<?= $journey['booked_seats'] > 1 ? 's' : '' ?></span>
-                                <span><?= esc($journey['seats']) ?> place<?= $journey['seats'] > 1 ? 's' : '' ?> au total</span>
-                            </div>
-                        </a>
-                    <?php endforeach ?>
-                </div>
-        <?php endif ?>
-    </div>
-
-
-    <!-- Réservations reçues -->
-    <div>
-        <div class="flex justify-between mb-3">
-            <h2>Réservations reçues</h2>
-            <a href="/dashboard/bookings">Voir tous</a>
-        </div>
-            <?php if (empty($nextBookings)) : ?>
-                <p class="text-center text-muted py-8">Aucune réservation trouvée.</p>
-                <?php else : ?>
-                    <div class="space-y-3">
-                        <?php foreach ($nextBookings as $booking) : ?>
-                            <a href="<?= site_url('dashboard/bookings/' . $booking['id']) ?>?back=<?= urlencode(current_url(true)) ?>" class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors">
-                                <div class="flex items-center gap-4">
-                                    <div class="flex flex-col items-center shrink-0">
-                                        <div class="w-2.5 h-2.5 rounded-full bg-brand"></div>
-                                        <div class="w-px h-6 bg-ink/10 my-0.5"></div>
-                                        <div class="w-2.5 h-2.5 rounded-full bg-action"></div>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <p class="text-ink font-semibold truncate"><?= esc($booking['pickup_city_name']) ?></p>
-                                        <p class="text-ink font-semibold truncate"><?= esc($booking['dropoff_city_name']) ?></p>
-                                    </div>
-                                    <div class="text-right shrink-0 space-y-1">
-                                        <p class="text-ink font-bold font-display"><?= esc(date('H:i', strtotime($booking['start_datetime']))) ?></p>
-                                        <p class="text-ink/40 text-xs"><?= esc(date('d/m', strtotime($booking['start_datetime']))) ?></p>
-                                    </div>
-                                </div>
-                                <div class="mt-3 pt-3 border-t border-action/10 flex items-center justify-between text-sm text-ink/50">
-                                    <div class="flex items-center gap-2">
-                                        <?php if (!empty($booking['passenger_avatar'])): ?>
-                                            <img src="/<?= esc($booking['passenger_avatar']) ?>" class="w-5 h-5 rounded-full object-cover">
-                                        <?php else: ?>
-                                            <div class="w-5 h-5 rounded-full bg-action-dark text-paper text-xs flex items-center justify-center font-bold">
-                                                <?= strtoupper(substr($booking['passenger_firstname'], 0, 1)) ?>
-                                            </div>
-                                        <?php endif ?>
-                                        <span><?= esc($booking['passenger_firstname']) ?> <?= esc($booking['passenger_lastname']) ?></span>
-                                    </div>
-                                    <span><?= $booking['passenger_is_student'] ? 'Élève' : 'Formateur' ?></span>
-                                </div>
-                            </a>
-                        <?php endforeach ?>
-                    </div>
-            <?php endif ?>
-    </div>
-
-    <!-- Réservations faites -->
-    <div>
-        <div class="flex justify-between mb-3">
-            <h2>Mes réservations</h2>
-            <a href="/dashboard/bookings?filter=mine">Voir tous</a>
-        </div>
-        <?php if (empty($myBookings)) : ?>
-            <p class="text-center text-muted py-8">Aucune réservation trouvée.</p>
         <?php else : ?>
-            <div class="space-y-3">
-            <?php foreach ($myBookings as $booking) : ?>
-                <a href="<?= site_url('dashboard/bookings/' . $booking['id']) ?>?back=<?= urlencode(current_url(true)) ?>" class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors">
-                    <div class="flex items-center gap-4">
-                        <div class="flex flex-col items-center shrink-0">
-                            <div class="w-2.5 h-2.5 rounded-full bg-brand"></div>
-                            <div class="w-px h-6 bg-ink/10 my-0.5"></div>
-                            <div class="w-2.5 h-2.5 rounded-full bg-action"></div>
+            <div class="grid grid-cols-1 gap-3 overflow-y-auto max-h-[19.5rem] pr-2 scrollbar-hover sm:flex sm:flex-row sm:overflow-x-auto sm:overflow-y-hidden sm:max-h-none sm:pr-0 sm:pb-2 sm:snap-x sm:snap-mandatory">
+                <?php foreach ($nextJourneys as $journey) : ?>
+                    <a href="/journeys/<?= esc($journey['id']) ?>?back=<?= urlencode(current_url(true)) ?>" class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors sm:shrink-0 sm:w-[calc(50%-6px)] sm:snap-start sm:[&:only-child]:w-full">
+                        <div class="flex items-stretch gap-4">
+                            <div class="flex flex-col items-center shrink-0 pt-0.5">
+                                <div class="w-2.5 h-2.5 rounded-full bg-brand shrink-0"></div>
+                                <div class="w-px flex-1 bg-ink/10 my-1"></div>
+                                <div class="w-2.5 h-2.5 rounded-full bg-action shrink-0"></div>
+                            </div>
+                            <div class="flex-1 min-w-0 flex flex-col justify-between gap-2">
+                                <p class="text-ink/50 truncate">
+                                    <span class="text-ink font-semibold"><?= esc($journey['city_start_name']) ?></span>
+                                    <?php if (!empty($journey['address_start']) && $journey['address_start'] !== $journey['city_start_name']): ?>
+                                        <span class="font-normal"> - <?= esc($journey['address_start']) ?></span>
+                                    <?php endif ?>
+                                </p>
+                                <p class="text-ink/50 truncate">
+                                    <span class="text-ink font-semibold"><?= esc($journey['city_end_name']) ?></span>
+                                    <?php if (!empty($journey['address_end']) && $journey['address_end'] !== $journey['city_end_name']): ?>
+                                        <span class="font-normal"> - <?= esc($journey['address_end']) ?></span>
+                                    <?php endif ?>
+                                </p>
+                            </div>
+                            <div class="text-right shrink-0 space-y-1 self-center">
+                                <p class="text-ink font-bold font-display"><?= esc(date('H:i', strtotime($journey['start_datetime']))) ?></p>
+                                <p class="text-ink/40 text-xs"><?= esc(date('d/m', strtotime($journey['start_datetime']))) ?></p>
+                            </div>
                         </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-ink font-semibold truncate"><?= esc($booking['city_start_name']) ?></p>
-                            <p class="text-ink font-semibold truncate"><?= esc($booking['city_end_name']) ?></p>
-                        </div>
-                        <div class="text-right shrink-0 space-y-1">
-                            <p class="text-ink font-bold font-display"><?= esc(date('H:i', strtotime($booking['start_datetime']))) ?></p>
-                            <p class="text-ink/40 text-xs"><?= esc(date('d/m', strtotime($booking['start_datetime']))) ?></p>
-                        </div>
-                    </div>
-                    <div class="mt-3 pt-3 border-t border-action/10 flex items-center justify-between text-sm text-ink/50">
-                        <div class="flex items-center gap-2">
-                            <?php if (!empty($booking['driver_avatar'])): ?>
-                                <img src="/<?= esc($booking['driver_avatar']) ?>" class="w-5 h-5 rounded-full object-cover">
+                        <div class="mt-3 pt-3 border-t border-action/10 flex items-center justify-between text-sm text-ink/50">
+                            <span><?= esc($journey['booked_seats']) ?> place<?= $journey['booked_seats'] > 1 ? 's' : '' ?> réservée<?= $journey['booked_seats'] > 1 ? 's' : '' ?></span>
+                            <?php if ($journey['booked_seats'] >= $journey['seats']): ?>
+                                <span>Complet</span>
                             <?php else: ?>
-                                <div class="w-5 h-5 rounded-full bg-action-dark text-paper text-xs flex items-center justify-center font-bold">
-                                    <?= strtoupper(substr($booking['driver_firstname'], 0, 1)) ?>
-                                </div>
+                                <span>
+                                    <?= esc($journey['seats'] - $journey['booked_seats']) ?>
+                                    place<?= ($journey['seats'] - $journey['booked_seats']) > 1 ? 's' : '' ?>
+                                    restante<?= ($journey['seats'] - $journey['booked_seats']) > 1 ? 's' : '' ?>
+                                </span>
                             <?php endif ?>
-                            <span><?= esc($booking['driver_firstname']) ?> <?= esc($booking['driver_lastname']) ?></span>
                         </div>
-                        <span><?= $booking['driver_is_student'] ? 'Élève' : 'Formateur' ?></span>
-                    </div>
-                </a>
-            <?php endforeach ?>
+                    </a>
+                <?php endforeach ?>
             </div>
         <?php endif ?>
     </div>
 
-    <!-- Dernier signalement -->
-    <a href="/dashboard/reports" class="block">
-        <?php if (empty($lastReport)) : ?>
-            <p class="text-center text-muted py-8">Aucun signalement trouvé.</p>
-            <?php else : ?>
-                <a href="/dashboard/reports/<?= esc($lastReport['id']) ?>?back=<?= urlencode(current_url(true)) ?>" class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors">
-                    <div class="flex items-center gap-4">
-                        <div class="flex flex-col items-center shrink-0">
-                            <div class="w-2.5 h-2.5 rounded-full bg-brand"></div>
-                            <div class="w-px h-6 bg-ink/10 my-0.5"></div>
-                            <div class="w-2.5 h-2.5 rounded-full bg-action"></div>
+    <!-- Trajets passés -->
+    <div>
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="font-display font-bold text-ink text-base">Trajets passés</h2>
+            <a href="/dashboard/journeys?filter=past" class="text-brand text-sm font-medium hover:text-action transition-colors">Voir tous</a>
+        </div>
+        <?php if (empty($lastJourneys)) : ?>
+            <p class="text-center text-muted py-8">Aucun trajet trouvé.</p>
+        <?php else : ?>
+            <div class="grid grid-cols-1 gap-3 overflow-y-auto max-h-[19.5rem] pr-2 scrollbar-hover sm:flex sm:flex-row sm:overflow-x-auto sm:overflow-y-hidden sm:max-h-none sm:pr-0 sm:pb-2 sm:snap-x sm:snap-mandatory">
+                <?php foreach ($lastJourneys as $journey) : ?>
+                    <a href="/journeys/<?= esc($journey['id']) ?>?back=<?= urlencode(current_url(true)) ?>" class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors sm:shrink-0 sm:w-[calc(50%-6px)] sm:snap-start sm:[&:only-child]:w-full">
+                        <div class="flex items-stretch gap-4">
+                            <div class="flex flex-col items-center shrink-0 pt-0.5">
+                                <div class="w-2.5 h-2.5 rounded-full bg-brand shrink-0"></div>
+                                <div class="w-px flex-1 bg-ink/10 my-1"></div>
+                                <div class="w-2.5 h-2.5 rounded-full bg-action shrink-0"></div>
+                            </div>
+                            <div class="flex-1 min-w-0 flex flex-col justify-between gap-2">
+                                <p class="text-ink/50 truncate">
+                                    <span class="text-ink font-semibold"><?= esc($journey['city_start_name']) ?></span>
+                                    <?php if (!empty($journey['address_start']) && $journey['address_start'] !== $journey['city_start_name']): ?>
+                                        <span class="font-normal"> - <?= esc($journey['address_start']) ?></span>
+                                    <?php endif ?>
+                                </p>
+                                <p class="text-ink/50 truncate">
+                                    <span class="text-ink font-semibold"><?= esc($journey['city_end_name']) ?></span>
+                                    <?php if (!empty($journey['address_end']) && $journey['address_end'] !== $journey['city_end_name']): ?>
+                                        <span class="font-normal"> - <?= esc($journey['address_end']) ?></span>
+                                    <?php endif ?>
+                                </p>
+                            </div>
+                            <div class="text-right shrink-0 space-y-1 self-center">
+                                <p class="text-ink font-bold font-display"><?= esc(date('H:i', strtotime($journey['start_datetime']))) ?></p>
+                                <p class="text-ink/40 text-xs"><?= esc(date('d/m', strtotime($journey['start_datetime']))) ?></p>
+                            </div>
                         </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-ink font-semibold truncate"><?= esc($lastReport['city_start_name']) ?></p>
-                            <p class="text-ink font-semibold truncate"><?= esc($lastReport['city_end_name']) ?></p>
+                        <div class="mt-3 pt-3 border-t border-action/10 flex items-center justify-between text-sm text-ink/50">
+                            <span><?= esc($journey['booked_seats']) ?> place<?= $journey['booked_seats'] > 1 ? 's' : '' ?> réservée<?= $journey['booked_seats'] > 1 ? 's' : '' ?></span>
+                            <span><?= esc($journey['seats']) ?> place<?= $journey['seats'] > 1 ? 's' : '' ?> au total</span>
                         </div>
-                        <div class="text-right shrink-0 space-y-1">
-                            <p class="text-ink font-bold font-display"><?= esc(date('H:i', strtotime($lastReport['start_datetime']))) ?></p>
-                            <p class="text-ink/40 text-xs"><?= esc(date('d/m', strtotime($lastReport['start_datetime']))) ?></p>
-                        </div>
-                    </div>
-                    <div class="mt-3 pt-3 border-t border-action/10 flex items-center justify-between text-sm text-ink/50">
-                        <span><?= esc($lastReport['title']) ?></span>
-                        <span><?= esc(date('d/m/Y', strtotime($lastReport['created_at']))) ?></span>
-                    </div>
-                </a>
+                    </a>
+                <?php endforeach ?>
+            </div>
         <?php endif ?>
-    </a>
+    </div>
+
+    <!-- Réservations reçues -->
+    <div>
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="font-display font-bold text-ink text-base">Réservations reçues</h2>
+            <a href="/dashboard/bookings" class="text-brand text-sm font-medium hover:text-action transition-colors">Voir tous</a>
+        </div>
+        <?php if (empty($nextBookings)) : ?>
+            <p class="text-center text-muted py-8">Aucune réservation trouvée.</p>
+        <?php else : ?>
+            <div class="grid grid-cols-1 gap-3 overflow-y-auto max-h-[19.5rem] pr-2 scrollbar-hover sm:flex sm:flex-row sm:overflow-x-auto sm:overflow-y-hidden sm:max-h-none sm:pr-0 sm:pb-2 sm:snap-x sm:snap-mandatory">
+                <?php foreach ($nextBookings as $booking) : ?>
+                    <a href="<?= site_url('dashboard/bookings/' . $booking['id']) ?>?back=<?= urlencode(current_url(true)) ?>" class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors sm:shrink-0 sm:w-[calc(50%-6px)] sm:snap-start sm:[&:only-child]:w-full">
+                        <div class="flex items-stretch gap-4">
+                            <div class="flex flex-col items-center shrink-0 pt-0.5">
+                                <div class="w-2.5 h-2.5 rounded-full bg-brand shrink-0"></div>
+                                <div class="w-px flex-1 bg-ink/10 my-1"></div>
+                                <div class="w-2.5 h-2.5 rounded-full bg-action shrink-0"></div>
+                            </div>
+                            <div class="flex-1 min-w-0 flex flex-col justify-between gap-2">
+                                <p class="text-ink/50 truncate">
+                                    <span class="text-ink font-semibold"><?= esc($booking['city_start_name']) ?></span>
+                                    <?php if (!empty($booking['address_start']) && $booking['address_start'] !== $booking['city_start_name']): ?>
+                                        <span class="font-normal"> - <?= esc($booking['address_start']) ?></span>
+                                    <?php endif ?>
+                                </p>
+                                <p class="text-ink/50 truncate">
+                                    <span class="text-ink font-semibold"><?= esc($booking['city_end_name']) ?></span>
+                                    <?php if (!empty($booking['address_end']) && $booking['address_end'] !== $booking['city_end_name']): ?>
+                                        <span class="font-normal"> - <?= esc($booking['address_end']) ?></span>
+                                    <?php endif ?>
+                                </p>
+                            </div>
+                            <div class="text-right shrink-0 space-y-1 self-center">
+                                <p class="text-ink font-bold font-display"><?= esc(date('H:i', strtotime($booking['start_datetime']))) ?></p>
+                                <p class="text-ink/40 text-xs"><?= esc(date('d/m', strtotime($booking['start_datetime']))) ?></p>
+                            </div>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-action/10 flex items-center justify-between text-sm text-ink/50">
+                            <div class="flex items-center gap-2">
+                                <?php if ($booking['passenger_avatar']): ?>
+                                    <img src="<?= esc($booking['passenger_avatar']) ?>" class="w-5 h-5 rounded-full object-cover">
+                                <?php endif ?>
+                                <span><?= esc($booking['passenger_firstname']) ?> <?= esc($booking['passenger_lastname']) ?></span>
+                            </div>
+                            <span><?= $booking['passenger_is_student'] ? 'Élève' : 'Formateur' ?></span>
+                        </div>
+                    </a>
+                <?php endforeach ?>
+            </div>
+        <?php endif ?>
+    </div>
+
+    <!-- Mes réservations -->
+    <div>
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="font-display font-bold text-ink text-base">Mes réservations</h2>
+            <a href="/dashboard/bookings?filter=mine" class="text-brand text-sm font-medium hover:text-action transition-colors">Voir tous</a>
+        </div>
+        <?php if (empty($myBookings)) : ?>
+            <p class="text-center text-muted py-8">Aucune réservation trouvée.</p>
+        <?php else : ?>
+            <div class="grid grid-cols-1 gap-3 overflow-y-auto max-h-[19.5rem] pr-2 scrollbar-hover sm:flex sm:flex-row sm:overflow-x-auto sm:overflow-y-hidden sm:max-h-none sm:pr-0 sm:pb-2 sm:snap-x sm:snap-mandatory">
+                <?php foreach ($myBookings as $booking) : ?>
+                    <a href="<?= site_url('dashboard/bookings/' . $booking['id']) ?>?back=<?= urlencode(current_url(true)) ?>" class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors sm:shrink-0 sm:w-[calc(50%-6px)] sm:snap-start sm:[&:only-child]:w-full">
+                        <div class="flex items-stretch gap-4">
+                            <div class="flex flex-col items-center shrink-0 pt-0.5">
+                                <div class="w-2.5 h-2.5 rounded-full bg-brand shrink-0"></div>
+                                <div class="w-px flex-1 bg-ink/10 my-1"></div>
+                                <div class="w-2.5 h-2.5 rounded-full bg-action shrink-0"></div>
+                            </div>
+                            <div class="flex-1 min-w-0 flex flex-col justify-between gap-2">
+                                <p class="text-ink/50 truncate">
+                                    <span class="text-ink font-semibold"><?= esc($booking['city_start_name']) ?></span>
+                                    <?php if (!empty($booking['address_start']) && $booking['address_start'] !== $booking['city_start_name']): ?>
+                                        <span class="font-normal"> - <?= esc($booking['address_start']) ?></span>
+                                    <?php endif ?>
+                                </p>
+                                <p class="text-ink/50 truncate">
+                                    <span class="text-ink font-semibold"><?= esc($booking['city_end_name']) ?></span>
+                                    <?php if (!empty($booking['address_end']) && $booking['address_end'] !== $booking['city_end_name']): ?>
+                                        <span class="font-normal"> - <?= esc($booking['address_end']) ?></span>
+                                    <?php endif ?>
+                                </p>
+                            </div>
+                            <div class="text-right shrink-0 space-y-1 self-center">
+                                <p class="text-ink font-bold font-display"><?= esc(date('H:i', strtotime($booking['start_datetime']))) ?></p>
+                                <p class="text-ink/40 text-xs"><?= esc(date('d/m', strtotime($booking['start_datetime']))) ?></p>
+                            </div>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-action/10 flex items-center justify-between text-sm text-ink/50">
+                            <span><?= esc($booking['seat_numbers']) ?> place<?= $booking['seat_numbers'] > 1 ? 's' : '' ?> réservée<?= $booking['seat_numbers'] > 1 ? 's' : '' ?></span>
+                            <span><?= esc(date('d/m/Y', strtotime($booking['sent_at']))) ?></span>
+                        </div>
+                    </a>
+                <?php endforeach ?>
+            </div>
+        <?php endif ?>
+    </div>
+
+    <!-- Derniers signalements -->
+    <div>
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="font-display font-bold text-ink text-base">Derniers signalements</h2>
+            <a href="/dashboard/reports" class="text-brand text-sm font-medium hover:text-action transition-colors">Voir tous</a>
+        </div>
+        <?php if (empty($lastReports)) : ?>
+            <p class="text-center text-muted py-8">Aucun signalement trouvé.</p>
+        <?php else : ?>
+            <div class="grid grid-cols-1 gap-3 overflow-y-auto max-h-[19.5rem] pr-2 scrollbar-hover sm:flex sm:flex-row sm:overflow-x-auto sm:overflow-y-hidden sm:max-h-none sm:pr-0 sm:pb-2 sm:snap-x sm:snap-mandatory">
+                <?php foreach ($lastReports as $report) : ?>
+                    <a href="/dashboard/reports/<?= esc($report['id']) ?>?back=<?= urlencode(current_url(true)) ?>" class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors sm:shrink-0 sm:w-[calc(50%-6px)] sm:snap-start sm:[&:only-child]:w-full">
+                        <div class="flex items-stretch gap-4">
+                            <div class="flex flex-col items-center shrink-0 pt-0.5">
+                                <div class="w-2.5 h-2.5 rounded-full bg-brand shrink-0"></div>
+                                <div class="w-px flex-1 bg-ink/10 my-1"></div>
+                                <div class="w-2.5 h-2.5 rounded-full bg-action shrink-0"></div>
+                            </div>
+                            <div class="flex-1 min-w-0 flex flex-col justify-between gap-2">
+                                <p class="text-ink/50 truncate">
+                                    <span class="text-ink font-semibold"><?= esc($report['city_start_name']) ?></span>
+                                    <?php if (!empty($report['address_start']) && $report['address_start'] !== $report['city_start_name']): ?>
+                                        <span class="font-normal"> - <?= esc($report['address_start']) ?></span>
+                                    <?php endif ?>
+                                </p>
+                                <p class="text-ink/50 truncate">
+                                    <span class="text-ink font-semibold"><?= esc($report['city_end_name']) ?></span>
+                                    <?php if (!empty($report['address_end']) && $report['address_end'] !== $report['city_end_name']): ?>
+                                        <span class="font-normal"> - <?= esc($report['address_end']) ?></span>
+                                    <?php endif ?>
+                                </p>
+                            </div>
+                            <div class="text-right shrink-0 space-y-1 self-center">
+                                <p class="text-ink font-bold font-display"><?= esc(date('H:i', strtotime($report['start_datetime']))) ?></p>
+                                <p class="text-ink/40 text-xs"><?= esc(date('d/m', strtotime($report['start_datetime']))) ?></p>
+                            </div>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-action/10 flex items-center justify-between text-sm text-ink/50">
+                            <span><?= esc($report['title']) ?></span>
+                            <span><?= esc(date('d/m/Y', strtotime($report['created_at']))) ?></span>
+                        </div>
+                    </a>
+                <?php endforeach ?>
+            </div>
+        <?php endif ?>
+    </div>
+
+</div>
 
 <?= view('partials/footer') ?>
