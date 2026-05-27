@@ -55,7 +55,7 @@
       <i class="fa-solid fa-flag text-xs"></i>
       Signalements
       <?php if (!empty($reports)): ?>
-        <span class="bg-danger text-white text-xs font-bold px-1.5 py-0.5 rounded-full leading-none">
+        <span class="bg-danger text-ink text-xs font-bold px-1.5 py-0.5 rounded-full leading-none">
           <?= count($reports) ?>
         </span>
       <?php endif; ?>
