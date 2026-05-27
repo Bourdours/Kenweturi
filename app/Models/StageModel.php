@@ -28,4 +28,27 @@ class StageModel extends BaseModel
             'valid_time' => 'Veuillez renseigner une date valide.',
         ]
     ];
+
+    /**
+     * Récupère les étapes intermédiaires d'un trajet, ordonnées par position.
+     *
+     *
+     * @param int $journeyId Identifiant du trajet
+     * @return array         Étapes enrichies (adresse, coordonnées, ville)
+     */
+    public function findByJourney(int $journeyId): array
+    {
+        return $this->db->table($this->table)
+            ->select('stage.*,
+                location.address,
+                location.latitude,
+                location.longitude,
+                city.name as city_name')
+            ->join('location', 'location.id = stage.location_id')
+            ->join('city',     'city.id = location.city_id')
+            ->where('stage.journey_id', $journeyId)
+            ->orderBy('stage.position', 'ASC')
+            ->get()
+            ->getResultArray();
+    }
 }
