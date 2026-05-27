@@ -106,68 +106,38 @@ class JourneyController extends BaseController{
 
     public function show($id): string|RedirectResponse
     {
-        $db      = \Config\Database::connect();
-        $journey = $db->table('journey')
-            ->select('journey.*, 
-                loc_start.address as address_start,
-                loc_end.address as address_end,
-                city_start.name as city_start_name, 
-                city_end.name as city_end_name, 
-                u.firstname as driver_firstname, 
-                u.lastname as driver_lastname, 
-                u.id as driver_id,
-                u.avatar as driver_avatar,
-                u.biography as driver_biography,
-                u.is_student as driver_is_student,
-                car.brand as car_brand,
-                car.model as car_model,
-                car.color as car_color,
-                car.seats as car_seats')
-            ->join('location loc_start', 'loc_start.id = journey.location_start_id')
-            ->join('location loc_end',   'loc_end.id = journey.location_end_id')
-            ->join('city city_start',    'city_start.id = loc_start.city_id')
-            ->join('city city_end',      'city_end.id = loc_end.city_id')
-            ->join('user u',             'u.id = journey.user_id')
-            ->join('car',                'car.id = journey.car_id', 'left')
-            ->where('journey.id', $id)
-            ->where('u.deleted_at', null)
-            ->get()->getRowArray();
+        // ====== Récupération du trajet
+        $journey = $this->journeyModel->findWithDetails((int) $id);
 
-        if(!$journey)
+        if (!$journey) {
             return redirect()->to('/journeys');
+        }
 
-        $journey['end_datetime'] = ($this->getArrivaleDateTime($journey['id']))->format('Y-m-d H:i:s');
+        // ====== Enrichissement du trajet
+        $journey['end_datetime'] = $this->getArrivaleDateTime($journey['id'])
+            ->format('Y-m-d H:i:s');
 
-        // Récupération des stages ordonnés (hors départ et arrivée s'ils y sont dupliqués)
-        $stages = $db->table('stage')
-            ->select('stage.*, location.address, location.latitude, location.longitude, city.name as city_name')
-            ->join('location', 'location.id = stage.location_id')
-            ->join('city',     'city.id = location.city_id')
-            ->where('stage.journey_id', $id)
-            ->where('stage.location_id !=', $journey['location_start_id'])
-            ->where('stage.location_id !=', $journey['location_end_id'])
-            ->orderBy('stage.position', 'ASC')
-            ->get()->getResultArray();
+        // ====== Récupération des étapes intermédiaires
+        $stages = $this->stageModel->findByJourney((int) $id);
 
-        // --- Calcul des places restantes
-        $bookedSeats = $db->table('booking')
-            ->selectSum('seat_numbers')
-            ->where('journey_id', $id)
-            ->get()->getRowArray();
+        // ====== Calcul des places restantes
+        $remainingSeats = $this->bookingModel->countRemainingSeats(
+            (int) $id,
+            (int) $journey['seats'],
+        );
 
-        $remainingSeats = $journey['seats'] - ($bookedSeats['seat_numbers'] ?? 0);
-
+        // ====== Récupération des filtres de réservation
         $availableSeats = $this->request->getGet('seats') ?? 1;
         $boardingCity   = $this->request->getGet('boardingCity');
 
-        return view('Journeys/journeyShow',[
+        return view('Journeys/journeyShow', [
             'title'          => 'Détail du trajet',
             'journey'        => $journey,
             'stages'         => $stages,
             'remainingSeats' => $remainingSeats,
             'availableSeats' => $availableSeats,
             'boardingCity'   => $boardingCity,
-            ]);
+        ]);
     }
 
     public function showAll(): string|RedirectResponse 
