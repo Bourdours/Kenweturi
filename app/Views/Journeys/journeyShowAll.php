@@ -9,6 +9,7 @@
         base_url('js/autocompletion.js'),
         base_url('js/datepicker.js'),
         base_url('js/timepicker.js'),
+        base_url('js/swapAddresses.js'),
     ],
 ]) ?>
 <?= view('partials/header') ?>
@@ -24,7 +25,7 @@
                 <i class="fa-solid fa-magnifying-glass mr-2"></i>Recherche
             </p>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] gap-3 sm:gap-x-2 sm:items-end">
                 <div>
                     <label for="startAddress" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
                         <i class="fa-solid fa-circle-dot text-sm"></i>Départ
@@ -32,6 +33,13 @@
                     <input type="text" id="startAddress" class="address w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30" name="startAddress" value="<?= esc($startAddress ?? '') ?>" placeholder="Ville ou adresse">
                     <input type="text" class="lng" id="startAddressLng" name="startLng" value="<?= esc($lngStart ?? '') ?>" hidden>
                     <input type="text" class="lat" id="startAddressLat" name="startLat" value="<?= esc($latStart ?? '') ?>" hidden>
+                </div>
+                <div class="flex justify-center sm:mb-1">
+                    <button type="button" id="swapAddresses"
+                        class="w-8 h-8 flex items-center justify-center bg-paper border border-action/20 rounded-full text-ink/50 hover:text-action hover:border-action/40 transition-colors cursor-pointer"
+                        title="Inverser départ et arrivée">
+                        <i class="fa-solid fa-right-left rotate-90 sm:rotate-0 text-xs"></i>
+                    </button>
                 </div>
                 <div>
                     <label for="endAddress" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
