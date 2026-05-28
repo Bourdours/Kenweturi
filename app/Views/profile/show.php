@@ -33,7 +33,7 @@
       <?php $initials = strtoupper(substr($user['firstname'], 0, 1) . substr($user['lastname'], 0, 1)); ?>
       <?php if (!empty($user['avatar'])): ?>
         <div class="jsAvatarOpen ring-2 ring-action/20 hover:ring-action/50 transition-all cursor-pointer w-20 h-20 rounded-full overflow-hidden shrink-0">
-          <img src="<?= esc($user['avatar']) ?>" alt="Avatar de <?= esc($user['firstname']) ?>" class="w-full h-full object-cover"
+          <img src="<?= site_url(esc($user['avatar'])) ?>" alt="Avatar de <?= esc($user['firstname']) ?>" class="w-full h-full object-cover"
             onerror="this.parentElement.classList.add('hidden'); this.parentElement.nextElementSibling.classList.remove('hidden'); this.parentElement.nextElementSibling.classList.add('flex');">
         </div>
         <div class="jsAvatarOpen ring-2 ring-action/20 hover:ring-action/50 transition-all cursor-pointer hidden w-20 h-20 rounded-full bg-action-dark text-paper font-bold text-2xl shrink-0 items-center justify-center">
