@@ -90,7 +90,7 @@
             <?php $initials = strtoupper(substr($journey['driver_firstname'], 0, 1) . substr($journey['driver_lastname'], 0, 1)); ?>
             <?php if (!empty($journey['driver_avatar'])): ?>
                 <div class="jsAvatarOpen cursor-pointer w-14 h-14 rounded-full overflow-hidden shrink-0">
-                    <img src="/<?= esc($journey['driver_avatar']) ?>" alt="Avatar de <?= esc($journey['driver_firstname']) ?>" class="w-full h-full object-cover"
+                    <img src="<?= site_url(esc($journey['driver_avatar'])) ?>" alt="Avatar de <?= esc($journey['driver_firstname']) ?>" class="w-full h-full object-cover"
                         onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
                 </div>
                 <div class="jsAvatarOpen cursor-pointer hidden w-14 h-14 rounded-full bg-action-dark text-ink font-bold text-base shrink-0 items-center justify-center">
@@ -131,7 +131,7 @@
                     <div class="flex items-center gap-4">
                         <?php if (!empty($passenger['avatar'])): ?>
                             <div class="jsAvatarOpen cursor-pointer w-14 h-14 rounded-full overflow-hidden shrink-0">
-                                <img src="/<?= esc($passenger['avatar']) ?>" alt="Avatar de <?= esc($passenger['firstname']) ?>" class="w-full h-full object-cover"
+                                <img src="<?= site_url(esc($passenger['avatar'])) ?>" alt="Avatar de <?= esc($passenger['firstname']) ?>" class="w-full h-full object-cover"
                                     onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
                             </div>
                             <div class="jsAvatarOpen cursor-pointer hidden w-14 h-14 rounded-full bg-action-dark text-ink font-bold text-base shrink-0 items-center justify-center">
@@ -161,7 +161,7 @@
                     <p class="text-ink font-bold font-display text-2xl"><?= esc($remainingSeats) ?></p>
                 </div>
             </div>
-            <form action="/journeys/<?= esc($journey['id']) ?>/book" method="POST" id="formBook">
+            <form action="<?= site_url('journeys/' . esc($journey['id']) . '/book') ?>" method="POST" id="formBook">
                 <?= csrf_field() ?>
                 <?php if (session('user_id') != $journey['user_id']): ?>
                     <button type="button" id="btnOpenBookModal"
