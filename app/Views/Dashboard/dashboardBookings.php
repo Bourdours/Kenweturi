@@ -30,11 +30,19 @@
                                 </div>
                                 <div class="mt-3 pt-3 border-t border-action/10 flex items-center justify-between text-sm text-ink/50">
                                     <div class="flex items-center gap-2">
+                                        <?php $initials = strtoupper(substr($booking['person_firstname'], 0, 1) . substr($booking['person_lastname'], 0, 1)); ?>
+
                                         <?php if (!empty($booking['person_avatar'])): ?>
-                                            <img src="/<?= esc($booking['person_avatar']) ?>" class="w-5 h-5 rounded-full object-cover">
+                                            <div class="w-5 h-5 rounded-full overflow-hidden shrink-0">
+                                                <img src="/<?= esc($booking['person_avatar']) ?>" alt="Avatar de <?= esc($booking['person_firstname']) ?>" class="w-full h-full object-cover"
+                                                    onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
+                                            </div>
+                                            <div class="hidden w-6 h-6 rounded-full bg-action-dark text-paper text-xs shrink-0 items-center justify-center font-bold">
+                                                <?= $initials ?>
+                                            </div>
                                         <?php else: ?>
-                                            <div class="w-5 h-5 rounded-full bg-action-dark text-paper text-xs flex items-center justify-center font-bold">
-                                                <?= strtoupper(substr($booking['person_firstname'], 0, 1)) ?>
+                                            <div class="flex w-6 h-6 rounded-full bg-action-dark text-paper text-xs shrink-0 items-center justify-center font-bold">
+                                                <?= $initials ?>
                                             </div>
                                         <?php endif ?>
                                         <span><?= esc($booking['person_firstname']) ?> <?= esc($booking['person_lastname']) ?></span>
