@@ -46,7 +46,29 @@ class BookingController extends BaseController
      */
     public function accept(int $id): RedirectResponse
     {
-        // À implémenter quand la colonne status sera ajoutée en base
+        $userId = (int) session()->get('user_id');
+
+        // Vérification que la réservation existe et appartient à un trajet du driver
+        $db = \Config\Database::connect();
+
+        $booking = $db->table('booking')
+            ->select('booking.*, journey.user_id as driver_id')
+            ->join('journey', 'journey.id = booking.journey_id')
+            ->where('booking.id', $id)
+            ->where('journey.user_id', $userId)
+            ->get()->getRowArray();
+        
+        
+
+        if (!$booking)
+            return redirect()->to('/dashboard/bookings')->with('error', 'Réservation introuvable.');
+
+        if ($booking['status'] !== 'pending')
+            return redirect()->to('/dashboard/bookings')->with('error', 'Cette réservation a déjà été traitée.');
+
+        $this->bookingModel->update($id, ['status' => 'accepted']);
+
+        return redirect()->to('/dashboard/bookings')->with('success', 'Réservation acceptée.');    
     }
 
     /**
@@ -57,7 +79,26 @@ class BookingController extends BaseController
      */
     public function reject(int $id): RedirectResponse
     {
-        // À implémenter quand la colonne status sera ajoutée en base
+        $userId = (int) session()->get('user_id');
+
+        $db = \Config\Database::connect();
+
+        $booking = $db->table('booking')
+            ->select('booking.*, journey.user_id as driver_id')
+            ->join('journey', 'journey.id = booking.journey_id')
+            ->where('booking.id', $id)
+            ->where('journey.user_id', $userId)
+            ->get()->getRowArray();
+
+        if (!$booking)
+            return redirect()->to('/dashboard/bookings')->with('error', 'Réservation introuvable.');
+
+        if ($booking['status'] !== 'pending')
+            return redirect()->to('/dashboard/bookings')->with('error', 'Cette réservation a déjà été traitée.');
+
+        $this->bookingModel->update($id, ['status' => 'rejected']);
+
+        return redirect()->to('/dashboard/bookings')->with('success', 'Réservation refusée.');
     }
 
 }
