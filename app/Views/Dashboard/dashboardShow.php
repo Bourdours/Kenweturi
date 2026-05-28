@@ -28,14 +28,16 @@
                 <i class="fa-solid fa-car text-brand text-sm"></i>
                 Mes prochains trajets
             </h2>
-            <a href="/dashboard/journeys?filter=upcoming" class="text-brand text-sm font-medium hover:text-action transition-colors">Voir tous</a>
+            <?php if (!empty($nextJourneys)) : ?>
+                <a href="<?= site_url('dashboard/journeys') ?>?filter=upcoming" class="text-brand text-sm font-medium hover:text-action transition-colors">Voir tous</a>
+            <?php endif ?>
         </div>
         <?php if (empty($nextJourneys)) : ?>
             <p class="text-center text-muted py-8">Aucun trajet trouvé.</p>
         <?php else : ?>
             <div class="grid grid-cols-1 gap-3 overflow-y-auto max-h-[19.5rem] pr-2 scrollbar-hover sm:flex sm:flex-row sm:overflow-x-auto sm:overflow-y-hidden sm:max-h-none sm:pr-0 sm:pb-2 sm:snap-x sm:snap-mandatory">
                 <?php foreach ($nextJourneys as $journey) : ?>
-                    <a href="/journeys/<?= esc($journey['id']) ?>?back=<?= urlencode(current_url(true)) ?>" class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors sm:shrink-0 sm:w-[calc(50%-6px)] sm:snap-start sm:[&:only-child]:w-full">
+                    <a href="<?= site_url('journeys/' . esc($journey['id'])) ?>?back=<?= urlencode(current_url(true)) ?>" class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors sm:shrink-0 sm:w-[calc(50%-6px)] sm:snap-start sm:[&:only-child]:w-full">
                         <div class="flex items-stretch gap-4">
                             <div class="flex flex-col items-center shrink-0 pt-0.5">
                                 <div class="w-2.5 h-2.5 rounded-full bg-brand shrink-0"></div>
@@ -86,7 +88,9 @@
                 <i class="fa-solid fa-inbox text-brand text-sm"></i>
                 Mes demandes de réservation reçues
             </h2>
-            <a href="/dashboard/bookings" class="text-brand text-sm font-medium hover:text-action transition-colors">Voir tous</a>
+            <?php if (!empty($nextBookings)) : ?>
+                <a href="<?= site_url('dashboard/bookings') ?>" class="text-brand text-sm font-medium hover:text-action transition-colors">Voir tous</a>
+            <?php endif ?>
         </div>
         <?php if (empty($nextBookings)) : ?>
             <p class="text-center text-muted py-8">Aucune réservation trouvée.</p>
@@ -153,14 +157,16 @@
                 <i class="fa-solid fa-clock-rotate-left text-brand text-sm"></i>
                 Trajets passés
             </h2>
-            <a href="/dashboard/journeys?filter=past" class="text-brand text-sm font-medium hover:text-action transition-colors">Voir tous</a>
+            <?php if (!empty($lastJourneys)) : ?>
+                <a href="<?= site_url('dashboard/journeys') ?>?filter=past" class="text-brand text-sm font-medium hover:text-action transition-colors">Voir tous</a>
+            <?php endif ?>
         </div>
         <?php if (empty($lastJourneys)) : ?>
             <p class="text-center text-muted py-8">Aucun trajet trouvé.</p>
         <?php else : ?>
             <div class="grid grid-cols-1 gap-3 overflow-y-auto max-h-[19.5rem] pr-2 scrollbar-hover sm:flex sm:flex-row sm:overflow-x-auto sm:overflow-y-hidden sm:max-h-none sm:pr-0 sm:pb-2 sm:snap-x sm:snap-mandatory">
                 <?php foreach ($lastJourneys as $journey) : ?>
-                    <a href="/journeys/<?= esc($journey['id']) ?>?back=<?= urlencode(current_url(true)) ?>" class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors sm:shrink-0 sm:w-[calc(50%-6px)] sm:snap-start sm:[&:only-child]:w-full">
+                    <a href="<?= site_url('journeys/' . esc($journey['id'])) ?>?back=<?= urlencode(current_url(true)) ?>" class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors sm:shrink-0 sm:w-[calc(50%-6px)] sm:snap-start sm:[&:only-child]:w-full">
                         <div class="flex items-stretch gap-4">
                             <div class="flex flex-col items-center shrink-0 pt-0.5">
                                 <div class="w-2.5 h-2.5 rounded-full bg-brand shrink-0"></div>
@@ -203,6 +209,9 @@
                 <i class="fa-solid fa-route text-brand text-sm"></i>
                 Mes prochains trajets
             </h2>
+            <?php if (!empty($myNextJourneys)) : ?>
+                <a href="<?= site_url('dashboard/bookings') ?>?filter=upcoming" class="text-brand text-sm font-medium hover:text-action transition-colors">Voir tous</a>
+            <?php endif ?>
         </div>
         <?php if (empty($myNextJourneys)) : ?>
             <p class="text-center text-muted py-8">Aucun trajet trouvé.</p>
@@ -252,7 +261,9 @@
                 <i class="fa-solid fa-paper-plane text-brand text-sm"></i>
                 Mes demandes de réservation
             </h2>
-            <a href="/dashboard/bookings?filter=mine" class="text-brand text-sm font-medium hover:text-action transition-colors">Voir tous</a>
+            <?php if (!empty($myBookings)) : ?>
+                <a href="<?= site_url('dashboard/bookings') ?>?filter=mine" class="text-brand text-sm font-medium hover:text-action transition-colors">Voir tous</a>
+            <?php endif ?>
         </div>
         <?php if (empty($myBookings)) : ?>
             <p class="text-center text-muted py-8">Aucune réservation trouvée.</p>
@@ -302,6 +313,9 @@
                 <i class="fa-solid fa-clock-rotate-left text-brand text-sm"></i>
                 Trajets passés
             </h2>
+            <?php if (!empty($lastPassengerJourneys)) : ?>
+                <a href="<?= site_url('dashboard/bookings') ?>?filter=past" class="text-brand text-sm font-medium hover:text-action transition-colors">Voir tous</a>
+            <?php endif ?>
         </div>
         <?php if (empty($lastPassengerJourneys)) : ?>
             <p class="text-center text-muted py-8">Aucun trajet trouvé.</p>
