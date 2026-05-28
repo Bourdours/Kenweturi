@@ -34,7 +34,7 @@
 
                                         <?php if (!empty($booking['person_avatar'])): ?>
                                             <div class="w-5 h-5 rounded-full overflow-hidden shrink-0">
-                                                <img src="/<?= esc($booking['person_avatar']) ?>" alt="Avatar de <?= esc($booking['person_firstname']) ?>" class="w-full h-full object-cover"
+                                                <img src="<?= site_url(esc($booking['person_avatar'])) ?>" alt="Avatar de <?= esc($booking['person_firstname']) ?>" class="w-full h-full object-cover"
                                                     onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
                                             </div>
                                             <div class="hidden w-6 h-6 rounded-full bg-action-dark text-paper text-xs shrink-0 items-center justify-center font-bold">
