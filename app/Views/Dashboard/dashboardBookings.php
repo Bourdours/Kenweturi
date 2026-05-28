@@ -29,15 +29,16 @@
                 </a>
             </div>
         <?php else: ?>
-            <div class="flex bg-surface border border-action/15 rounded-full p-1 gap-1" role="group" aria-label="Filtre des réservations">
-                <a href="<?= site_url('dashboard/bookings') ?>"
-                   class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= $filter === null ? 'bg-action text-paper' : 'text-ink/60 hover:text-ink' ?>">
-                    Reçues
-                </a>
-                <a href="<?= site_url('dashboard/bookings') ?>?filter=mine"
-                   class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= $filter === 'mine' ? 'bg-action text-paper' : 'text-ink/60 hover:text-ink' ?>">
-                    Envoyées
-                </a>
+            <div class="flex bg-surface border border-action/15 rounded-full p-1" role="group" aria-label="Filtre des réservations">
+                <?php if ($filter === 'mine'): ?>
+                    <span class="px-4 py-1.5 rounded-full text-sm font-medium bg-action text-paper">
+                        Envoyées
+                    </span>
+                <?php else: ?>
+                    <span class="px-4 py-1.5 rounded-full text-sm font-medium bg-action text-paper">
+                        Reçues
+                    </span>
+                <?php endif ?>
             </div>
         <?php endif ?>
     </div>
