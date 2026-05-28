@@ -8,7 +8,7 @@ function applyDashboardRole(role) {
         el.style.display = el.dataset.role === role ? '' : 'none';
     });
 
-    var activeClasses   = ['bg-action', 'text-paper'];
+    var activeClasses   = ['bg-action', 'text-ink'];
     var inactiveClasses = ['text-muted'];
 
     var btnPassenger = document.getElementById('toggle-passenger');

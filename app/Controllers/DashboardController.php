@@ -180,10 +180,11 @@ class DashboardController extends BaseController
         $userId  = (int) session('user_id');
         $page    = (int) ($this->request->getGet('page') ?? 1);
         $filter  = $this->request->getGet('filter');
-        $perPage = 10;
+        $perPage = 5;
 
         $builder = $this->db->table('journey')
             ->select("journey.*, city_start.name as city_start_name, city_end.name as city_end_name,
+                loc_start.address as address_start, loc_end.address as address_end,
                 COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id AND b.status = 'accepted'), 0) as booked_seats")
             ->join('location loc_start', 'loc_start.id = journey.location_start_id')
             ->join('location loc_end',   'loc_end.id = journey.location_end_id')
@@ -224,13 +225,15 @@ class DashboardController extends BaseController
     {
         $userId  = (int) session('user_id');
         $page    = (int) ($this->request->getGet('page') ?? 1);
-        $perPage = 10;
+        $perPage = 5;
         $filter  = $this->request->getGet('filter');
 
         $builder = $this->db->table('booking')
             ->select("booking.*, journey.start_datetime, journey.seats,
                 city_start.name as city_start_name,
                 city_end.name as city_end_name,
+                loc_start.address as address_start,
+                loc_end.address as address_end,
                 loc_pickup.address as pickup_address,
                 city_pickup.name as pickup_city_name,
                 loc_dropoff.address as dropoff_address,
@@ -250,12 +253,27 @@ class DashboardController extends BaseController
             ->join('location loc_dropoff', 'loc_dropoff.id = booking.location_dropoff_id', 'left')
             ->join('city city_dropoff',    'city_dropoff.id = loc_dropoff.city_id', 'left');
 
-        if ($filter === 'mine') {
+        if ($filter === 'upcoming') {
+            $builder->join('user u',       'u.id = journey.user_id')
+                    ->where('booking.user_id', $userId)
+                    ->where('booking.status', 'accepted')
+                    ->where('journey.canceled_at', null)
+                    ->where('journey.start_datetime >=', date('Y-m-d H:i:s'))
+                    ->orderBy('journey.start_datetime', 'ASC');
+            $title = 'Mes prochains trajets';
+        } elseif ($filter === 'past') {
+            $builder->join('user u',       'u.id = journey.user_id')
+                    ->where('booking.user_id', $userId)
+                    ->where('booking.status', 'accepted')
+                    ->where('journey.start_datetime <', date('Y-m-d H:i:s'))
+                    ->orderBy('journey.start_datetime', 'DESC');
+            $title = 'Mes trajets passés';
+        } elseif ($filter === 'mine') {
             $builder->join('user u',       'u.id = journey.user_id')
                     ->where('booking.user_id', $userId)
                     ->where('booking.status', 'pending')
                     ->orderBy('journey.start_datetime', 'ASC');
-            $title = 'Mes réservations';
+            $title = 'Mes demandes de réservation';
         } else {
             $builder->join('user u',       'u.id = booking.user_id')
                     ->where('journey.user_id', $userId)

@@ -68,8 +68,8 @@
                 <?php $initials = strtoupper(substr($personFirstname, 0, 1) . substr($personLastname, 0, 1)); ?>
                 <?php if (!empty($personAvatar)): ?>
                     <div class="w-14 h-14 rounded-full overflow-hidden shrink-0">
-                        <img src="/<?= esc($personAvatar) ?>" alt="Avatar" class="w-full h-full object-cover"
-                            onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
+                        <img src="<?= site_url(esc($person_avatar)) ?>" alt="Avatar" class="w-full h-full object-cover"
+                        onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
                     </div>
                     <div class="hidden w-14 h-14 rounded-full bg-action-dark text-ink font-bold text-base shrink-0 items-center justify-center">
                         <?= $initials ?>
