@@ -33,9 +33,9 @@ class DashboardController extends BaseController
         $userId = (int) session('user_id');
 
         $nextJourneys = $this->db->table('journey')
-            ->select('journey.*, city_start.name as city_start_name, city_end.name as city_end_name,
-            loc_start.address as address_start, loc_end.address as address_end,
-            COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id), 0) as booked_seats')
+            ->select("journey.*, city_start.name as city_start_name, city_end.name as city_end_name,
+                loc_start.address as address_start, loc_end.address as address_end,
+                COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id AND b.status = 'accepted'), 0) as booked_seats")
             ->join('location loc_start', 'loc_start.id = journey.location_start_id')
             ->join('location loc_end',   'loc_end.id = journey.location_end_id')
             ->join('city city_start',    'city_start.id = loc_start.city_id')
@@ -48,9 +48,9 @@ class DashboardController extends BaseController
             ->get()->getResultArray();
 
         $lastJourneys = $this->db->table('journey')
-            ->select('journey.*, city_start.name as city_start_name, city_end.name as city_end_name,
-            loc_start.address as address_start, loc_end.address as address_end,
-            COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id), 0) as booked_seats')
+            ->select("journey.*, city_start.name as city_start_name, city_end.name as city_end_name,
+                loc_start.address as address_start, loc_end.address as address_end,
+                COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id AND b.status = 'accepted'), 0) as booked_seats")
             ->join('location loc_start', 'loc_start.id = journey.location_start_id')
             ->join('location loc_end',   'loc_end.id = journey.location_end_id')
             ->join('city city_start',    'city_start.id = loc_start.city_id')
@@ -63,7 +63,7 @@ class DashboardController extends BaseController
             ->get()->getResultArray();
 
         $nextBookings = $this->db->table('booking')
-            ->select('booking.*, journey.start_datetime, journey.seats,
+            ->select("booking.*, journey.start_datetime, journey.seats,
                 city_start.name as city_start_name,
                 city_end.name as city_end_name,
                 loc_start.address as address_start,
@@ -76,7 +76,7 @@ class DashboardController extends BaseController
                 u.lastname as person_lastname,
                 u.avatar as person_avatar,
                 u.is_student as person_is_student,
-                COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id), 0) as booked_seats')
+                COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id AND b.status = 'accepted'), 0) as booked_seats")
             ->join('journey',              'journey.id = booking.journey_id')
             ->join('location loc_start',   'loc_start.id = journey.location_start_id')
             ->join('location loc_end',     'loc_end.id = journey.location_end_id')
@@ -93,7 +93,24 @@ class DashboardController extends BaseController
             ->limit(5)
             ->get()->getResultArray();
 
-        // Réservations faites en tant que passager
+        // Prochains trajets en tant que passager (réservations acceptées)
+        $myNextJourneys = $this->db->table('booking')
+            ->select('booking.*, journey.start_datetime, city_start.name as city_start_name, city_end.name as city_end_name, u.firstname as driver_firstname, u.lastname as driver_lastname, u.avatar as driver_avatar, u.is_student as driver_is_student, loc_start.address as address_start, loc_end.address as address_end')
+            ->join('journey',            'journey.id = booking.journey_id')
+            ->join('location loc_start', 'loc_start.id = journey.location_start_id')
+            ->join('location loc_end',   'loc_end.id = journey.location_end_id')
+            ->join('city city_start',    'city_start.id = loc_start.city_id')
+            ->join('city city_end',      'city_end.id = loc_end.city_id')
+            ->join('user u',             'u.id = journey.user_id')
+            ->where('booking.user_id', $userId)
+            ->where('booking.status', 'accepted')
+            ->where('journey.canceled_at', null)
+            ->where('journey.start_datetime >=', date('Y-m-d H:i:s'))
+            ->orderBy('journey.start_datetime', 'ASC')
+            ->limit(5)
+            ->get()->getResultArray();
+
+        // Demandes de réservation en attente en tant que passager
         $myBookings = $this->db->table('booking')
             ->select('booking.*, journey.start_datetime, city_start.name as city_start_name, city_end.name as city_end_name, u.firstname as driver_firstname, u.lastname as driver_lastname, u.avatar as driver_avatar, u.is_student as driver_is_student, loc_start.address as address_start, loc_end.address as address_end')
             ->join('journey',            'journey.id = booking.journey_id')
@@ -103,9 +120,28 @@ class DashboardController extends BaseController
             ->join('city city_end',      'city_end.id = loc_end.city_id')
             ->join('user u',             'u.id = journey.user_id')
             ->where('booking.user_id', $userId)
+            ->where('booking.status', 'pending')
             ->where('journey.canceled_at', null)
             ->where('journey.start_datetime >=', date('Y-m-d H:i:s'))
             ->orderBy('journey.start_datetime', 'ASC')
+            ->limit(5)
+            ->get()->getResultArray();
+
+        // Trajets passés en tant que passager
+        $lastPassengerJourneys = $this->db->table('booking')
+            ->select('booking.*, journey.start_datetime, city_start.name as city_start_name, city_end.name as city_end_name,
+                u.firstname as driver_firstname, u.lastname as driver_lastname,
+                loc_start.address as address_start, loc_end.address as address_end')
+            ->join('journey',            'journey.id = booking.journey_id')
+            ->join('location loc_start', 'loc_start.id = journey.location_start_id')
+            ->join('location loc_end',   'loc_end.id = journey.location_end_id')
+            ->join('city city_start',    'city_start.id = loc_start.city_id')
+            ->join('city city_end',      'city_end.id = loc_end.city_id')
+            ->join('user u',             'u.id = journey.user_id')
+            ->where('booking.user_id', $userId)
+            ->where('journey.canceled_at', null)
+            ->where('journey.start_datetime <', date('Y-m-d H:i:s'))
+            ->orderBy('journey.start_datetime', 'DESC')
             ->limit(5)
             ->get()->getResultArray();
 
@@ -124,12 +160,14 @@ class DashboardController extends BaseController
             ->get()->getResultArray();
 
         return view('Dashboard/dashboardShow', [
-            'title'        => 'Mon dashboard',
-            'nextJourneys' => $nextJourneys,
-            'lastJourneys' => $lastJourneys,
-            'nextBookings' => $nextBookings,
-            'myBookings'   => $myBookings,
-            'lastReports'  => $lastReports,
+            'title'                 => 'Mon dashboard',
+            'nextJourneys'          => $nextJourneys,
+            'lastJourneys'          => $lastJourneys,
+            'nextBookings'          => $nextBookings,
+            'myNextJourneys'        => $myNextJourneys,
+            'myBookings'            => $myBookings,
+            'lastPassengerJourneys' => $lastPassengerJourneys,
+            'lastReports'           => $lastReports,
         ]);
     }
 
@@ -142,11 +180,12 @@ class DashboardController extends BaseController
         $userId  = (int) session('user_id');
         $page    = (int) ($this->request->getGet('page') ?? 1);
         $filter  = $this->request->getGet('filter');
-        $perPage = 10;
+        $perPage = 5;
 
         $builder = $this->db->table('journey')
-            ->select('journey.*, city_start.name as city_start_name, city_end.name as city_end_name,
-                COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id), 0) as booked_seats')
+            ->select("journey.*, city_start.name as city_start_name, city_end.name as city_end_name,
+                loc_start.address as address_start, loc_end.address as address_end,
+                COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id AND b.status = 'accepted'), 0) as booked_seats")
             ->join('location loc_start', 'loc_start.id = journey.location_start_id')
             ->join('location loc_end',   'loc_end.id = journey.location_end_id')
             ->join('city city_start',    'city_start.id = loc_start.city_id')
@@ -186,13 +225,15 @@ class DashboardController extends BaseController
     {
         $userId  = (int) session('user_id');
         $page    = (int) ($this->request->getGet('page') ?? 1);
-        $perPage = 10;
+        $perPage = 5;
         $filter  = $this->request->getGet('filter');
 
         $builder = $this->db->table('booking')
-            ->select('booking.*, journey.start_datetime, journey.seats,
+            ->select("booking.*, journey.start_datetime, journey.seats,
                 city_start.name as city_start_name,
                 city_end.name as city_end_name,
+                loc_start.address as address_start,
+                loc_end.address as address_end,
                 loc_pickup.address as pickup_address,
                 city_pickup.name as pickup_city_name,
                 loc_dropoff.address as dropoff_address,
@@ -201,7 +242,7 @@ class DashboardController extends BaseController
                 u.lastname as person_lastname,
                 u.avatar as person_avatar,
                 u.is_student as person_is_student,
-                COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id), 0) as booked_seats')
+                COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id AND b.status = 'accepted'), 0) as booked_seats")
             ->join('journey',              'journey.id = booking.journey_id')
             ->join('location loc_start',   'loc_start.id = journey.location_start_id')
             ->join('location loc_end',     'loc_end.id = journey.location_end_id')
@@ -212,12 +253,27 @@ class DashboardController extends BaseController
             ->join('location loc_dropoff', 'loc_dropoff.id = booking.location_dropoff_id', 'left')
             ->join('city city_dropoff',    'city_dropoff.id = loc_dropoff.city_id', 'left');
 
-        if ($filter === 'mine') {
+        if ($filter === 'upcoming') {
+            $builder->join('user u',       'u.id = journey.user_id')
+                    ->where('booking.user_id', $userId)
+                    ->where('booking.status', 'accepted')
+                    ->where('journey.canceled_at', null)
+                    ->where('journey.start_datetime >=', date('Y-m-d H:i:s'))
+                    ->orderBy('journey.start_datetime', 'ASC');
+            $title = 'Mes prochains trajets';
+        } elseif ($filter === 'past') {
+            $builder->join('user u',       'u.id = journey.user_id')
+                    ->where('booking.user_id', $userId)
+                    ->where('booking.status', 'accepted')
+                    ->where('journey.start_datetime <', date('Y-m-d H:i:s'))
+                    ->orderBy('journey.start_datetime', 'DESC');
+            $title = 'Mes trajets passés';
+        } elseif ($filter === 'mine') {
             $builder->join('user u',       'u.id = journey.user_id')
                     ->where('booking.user_id', $userId)
                     ->where('booking.status', 'pending')
                     ->orderBy('journey.start_datetime', 'ASC');
-            $title = 'Mes réservations';
+            $title = 'Mes demandes de réservation';
         } else {
             $builder->join('user u',       'u.id = booking.user_id')
                     ->where('journey.user_id', $userId)
@@ -250,24 +306,24 @@ class DashboardController extends BaseController
         $userId = (int) session('user_id');
 
         $booking = $this->db->table('booking')
-            ->select('booking.*, journey.start_datetime, journey.seats, journey.user_id as driver_id,
-                loc_start.address as start_address,
-                city_start.name as city_start_name,
-                loc_end.address as end_address,
-                city_end.name as city_end_name,
-                loc_pickup.address as pickup_address,
-                city_pickup.name as pickup_city_name,
-                loc_dropoff.address as dropoff_address,
-                city_dropoff.name as dropoff_city_name,
-                passenger.firstname as passenger_firstname,
-                passenger.lastname as passenger_lastname,
-                passenger.avatar as passenger_avatar,
-                passenger.is_student as passenger_is_student,
-                driver.firstname as driver_firstname,
-                driver.lastname as driver_lastname,
-                driver.avatar as driver_avatar,
-                driver.is_student as driver_is_student,
-                COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id), 0) as booked_seats')
+    ->select("booking.*, journey.start_datetime, journey.seats, journey.user_id as driver_id,
+              loc_start.address as start_address,
+              city_start.name as city_start_name,
+              loc_end.address as end_address,
+              city_end.name as city_end_name,
+              loc_pickup.address as pickup_address,
+              city_pickup.name as pickup_city_name,
+              loc_dropoff.address as dropoff_address,
+              city_dropoff.name as dropoff_city_name,
+              passenger.firstname as passenger_firstname,
+              passenger.lastname as passenger_lastname,
+              passenger.avatar as passenger_avatar,
+              passenger.is_student as passenger_is_student,
+              driver.firstname as driver_firstname,
+              driver.lastname as driver_lastname,
+              driver.avatar as driver_avatar,
+              driver.is_student as driver_is_student,
+              COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id AND b.status = 'accepted'), 0) as booked_seats")
             ->join('journey',              'journey.id = booking.journey_id')
             ->join('location loc_start',   'loc_start.id = journey.location_start_id')
             ->join('location loc_end',     'loc_end.id = journey.location_end_id')
