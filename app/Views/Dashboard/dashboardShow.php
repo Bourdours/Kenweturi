@@ -218,7 +218,7 @@
         <?php else : ?>
             <div class="grid grid-cols-1 gap-3 overflow-y-auto max-h-[19.5rem] pr-2 scrollbar-hover sm:flex sm:flex-row sm:overflow-x-auto sm:overflow-y-hidden sm:max-h-none sm:pr-0 sm:pb-2 sm:snap-x sm:snap-mandatory">
                 <?php foreach ($myNextJourneys as $booking) : ?>
-                    <a href="<?= site_url('dashboard/bookings/' . $booking['id']) ?>?back=<?= urlencode(current_url(true)) ?>" class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors sm:shrink-0 sm:w-[calc(50%-6px)] sm:snap-start sm:[&:only-child]:w-full">
+                    <a href="<?= site_url('journeys/' . esc($booking['journey_id'])) ?>?back=<?= urlencode(current_url(true)) ?>" class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors sm:shrink-0 sm:w-[calc(50%-6px)] sm:snap-start sm:[&:only-child]:w-full">
                         <div class="flex items-stretch gap-4">
                             <div class="flex flex-col items-center shrink-0 pt-0.5">
                                 <div class="w-2.5 h-2.5 rounded-full bg-brand shrink-0"></div>
@@ -322,7 +322,7 @@
         <?php else : ?>
             <div class="grid grid-cols-1 gap-3 overflow-y-auto max-h-[19.5rem] pr-2 scrollbar-hover sm:flex sm:flex-row sm:overflow-x-auto sm:overflow-y-hidden sm:max-h-none sm:pr-0 sm:pb-2 sm:snap-x sm:snap-mandatory">
                 <?php foreach ($lastPassengerJourneys as $booking) : ?>
-                    <a href="<?= site_url('dashboard/bookings/' . $booking['id']) ?>?back=<?= urlencode(current_url(true)) ?>" class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors sm:shrink-0 sm:w-[calc(50%-6px)] sm:snap-start sm:[&:only-child]:w-full">
+                    <a href="<?= site_url('journeys/' . esc($booking['journey_id'])) ?>?back=<?= urlencode(current_url(true)) ?>" class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors sm:shrink-0 sm:w-[calc(50%-6px)] sm:snap-start sm:[&:only-child]:w-full">
                         <div class="flex items-stretch gap-4">
                             <div class="flex flex-col items-center shrink-0 pt-0.5">
                                 <div class="w-2.5 h-2.5 rounded-full bg-brand shrink-0"></div>
