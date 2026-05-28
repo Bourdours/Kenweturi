@@ -86,26 +86,29 @@
     <!-- Conducteur -->
     <article class="bg-surface-card rounded-2xl p-6">
         <h2 class="text-muted text-xs font-semibold uppercase tracking-wider mb-4">Conducteur</h2>
-        <div class="flex items-center gap-4">
-            <?php $initials = strtoupper(substr($journey['driver_firstname'], 0, 1) . substr($journey['driver_lastname'], 0, 1)); ?>
-            <?php if (!empty($journey['driver_avatar'])): ?>
-                <div class="jsAvatarOpen cursor-pointer w-14 h-14 rounded-full overflow-hidden shrink-0">
-                    <img src="/<?= esc($journey['driver_avatar']) ?>" alt="Avatar de <?= esc($journey['driver_firstname']) ?>" class="w-full h-full object-cover"
-                        onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
+        <a href="<?= site_url('users/' . $journey['driver_id']) ?>?back=<?= urlencode(current_url(true)) ?>"
+         class="flex items-center gap-4 pt-4 first:pt-0 first:border-t-0">
+            <div class="flex items-center gap-4">
+                <?php $initials = strtoupper(substr($journey['driver_firstname'], 0, 1) . substr($journey['driver_lastname'], 0, 1)); ?>
+                <?php if (!empty($journey['driver_avatar'])): ?>
+                    <div class="jsAvatarOpen cursor-pointer w-14 h-14 rounded-full overflow-hidden shrink-0">
+                        <img src="/<?= esc($journey['driver_avatar']) ?>" alt="Avatar de <?= esc($journey['driver_firstname']) ?>" class="w-full h-full object-cover"
+                            onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
+                    </div>
+                    <div class="jsAvatarOpen cursor-pointer hidden w-14 h-14 rounded-full bg-action-dark text-ink font-bold text-base shrink-0 items-center justify-center">
+                        <?= $initials ?>
+                    </div>
+                <?php else: ?>
+                    <div class="jsAvatarOpen cursor-pointer flex w-14 h-14 rounded-full bg-action-dark text-ink font-bold text-base shrink-0 items-center justify-center">
+                        <?= $initials ?>
+                    </div>
+                <?php endif; ?>
+                <div>
+                    <p class="text-ink font-semibold"><?= esc($journey['driver_firstname']) ?> <?= esc($journey['driver_lastname']) ?></p>
+                    <p class="text-muted text-sm"><?= $journey['driver_is_student'] ? 'Étudiant' : 'Formateur' ?></p>
                 </div>
-                <div class="jsAvatarOpen cursor-pointer hidden w-14 h-14 rounded-full bg-action-dark text-ink font-bold text-base shrink-0 items-center justify-center">
-                    <?= $initials ?>
-                </div>
-            <?php else: ?>
-                <div class="jsAvatarOpen cursor-pointer flex w-14 h-14 rounded-full bg-action-dark text-ink font-bold text-base shrink-0 items-center justify-center">
-                    <?= $initials ?>
-                </div>
-            <?php endif; ?>
-            <div>
-                <p class="text-ink font-semibold"><?= esc($journey['driver_firstname']) ?> <?= esc($journey['driver_lastname']) ?></p>
-                <p class="text-muted text-sm"><?= $journey['driver_is_student'] ? 'Étudiant' : 'Formateur' ?></p>
             </div>
-        </div>
+        </a>
 
         <div class="mt-4 pt-4 border-t border-ink/5 flex flex-wrap gap-3 text-sm text-muted">
             <span class="flex items-center gap-1.5">
@@ -127,26 +130,29 @@
         <?php else: ?>
             <div class="flex flex-col gap-4">
                 <?php foreach ($passengers as $passenger): ?>
-                    <?php $initials = strtoupper(substr($passenger['firstname'], 0, 1) . substr($passenger['lastname'], 0, 1)); ?>
-                    <div class="flex items-center gap-4">
-                        <?php if (!empty($passenger['avatar'])): ?>
-                            <div class="jsAvatarOpen cursor-pointer w-14 h-14 rounded-full overflow-hidden shrink-0">
-                                <img src="/<?= esc($passenger['avatar']) ?>" alt="Avatar de <?= esc($passenger['firstname']) ?>" class="w-full h-full object-cover"
-                                    onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
+                    <a href="<?= site_url('users/' . $passenger['user_id']) ?>?back=<?= urlencode(current_url(true)) ?>"
+                        class="flex items-center gap-4 pt-4 first:pt-0 border-t border-ink/5 first:border-t-0">
+                        <?php $initials = strtoupper(substr($passenger['firstname'], 0, 1) . substr($passenger['lastname'], 0, 1)); ?>
+                        <div class="flex items-center gap-4 pt-4 first:pt-0 border-t border-ink/5 first:border-t-0">
+                            <?php if (!empty($passenger['avatar'])): ?>
+                                <div class="jsAvatarOpen cursor-pointer w-14 h-14 rounded-full overflow-hidden shrink-0">
+                                    <img src="/<?= esc($passenger['avatar']) ?>" alt="Avatar de <?= esc($passenger['firstname']) ?>" class="w-full h-full object-cover"
+                                        onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
+                                </div>
+                                <div class="jsAvatarOpen cursor-pointer hidden w-14 h-14 rounded-full bg-action-dark text-ink font-bold text-base shrink-0 items-center justify-center">
+                                    <?= $initials ?>
+                                </div>
+                            <?php else: ?>
+                                <div class="jsAvatarOpen cursor-pointer flex w-14 h-14 rounded-full bg-action-dark text-ink font-bold text-base shrink-0 items-center justify-center">
+                                    <?= $initials ?>
+                                </div>
+                            <?php endif ?>
+                            <div>
+                                <p class="text-ink font-semibold"><?= esc($passenger['firstname']) ?> <?= esc($passenger['lastname']) ?></p>
+                                <p class="text-muted text-sm"><?= $passenger['is_student'] ? 'Étudiant' : 'Formateur' ?></p>
                             </div>
-                            <div class="jsAvatarOpen cursor-pointer hidden w-14 h-14 rounded-full bg-action-dark text-ink font-bold text-base shrink-0 items-center justify-center">
-                                <?= $initials ?>
-                            </div>
-                        <?php else: ?>
-                            <div class="jsAvatarOpen cursor-pointer flex w-14 h-14 rounded-full bg-action-dark text-ink font-bold text-base shrink-0 items-center justify-center">
-                                <?= $initials ?>
-                            </div>
-                        <?php endif ?>
-                        <div>
-                            <p class="text-ink font-semibold"><?= esc($passenger['firstname']) ?> <?= esc($passenger['lastname']) ?></p>
-                            <p class="text-muted text-sm"><?= $passenger['is_student'] ? 'Étudiant' : 'Formateur' ?></p>
                         </div>
-                    </div>
+                    </a>
                 <?php endforeach ?>
             </div>
         <?php endif ?>
