@@ -4,6 +4,8 @@ const input   = document.getElementById('subject-input');
 const label   = document.getElementById('subject-label');
 const chevron = document.getElementById('subject-chevron');
 
+if (!trigger || !list || !input || !label || !chevron) return;
+
 trigger.addEventListener('click', () => {
   const isOpen = list.style.display === 'block';
   list.style.display = isOpen ? 'none' : 'block';
