@@ -19,7 +19,7 @@
     <h1 class="text-ink text-2xl font-bold font-display">Trouvez votre trajet</h1>
 
     <!-- Formulaire de recherche -->
-    <form id="addJourneyForm" action="/journeys" method="GET">
+    <form id="addJourneyForm" action="<?= site_url('/journeys') ?>" method="GET">
         <div class="bg-surface rounded-2xl p-5 border border-action/10 space-y-4">
             <p class="text-ink/40 text-base mb-1">
                 <i class="fa-solid fa-magnifying-glass mr-2"></i>Recherche
