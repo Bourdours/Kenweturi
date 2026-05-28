@@ -1,6 +1,9 @@
-document.getElementById('menu-toggle').addEventListener('click', function () {
-  document.getElementById('mobile-menu').classList.toggle('hidden');
-});
+const menuToggle = document.getElementById('menu-toggle');
+if (menuToggle) {
+  menuToggle.addEventListener('click', function () {
+    document.getElementById('mobile-menu').classList.toggle('hidden');
+  });
+}
 
 const userMenuToggle = document.getElementById('user-menu-toggle');
 const userDropdown   = document.getElementById('user-dropdown');
