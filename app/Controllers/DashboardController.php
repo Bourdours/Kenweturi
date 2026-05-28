@@ -93,7 +93,24 @@ class DashboardController extends BaseController
             ->limit(5)
             ->get()->getResultArray();
 
-        // Réservations faites en tant que passager
+        // Prochains trajets en tant que passager (réservations acceptées)
+        $myNextJourneys = $this->db->table('booking')
+            ->select('booking.*, journey.start_datetime, city_start.name as city_start_name, city_end.name as city_end_name, u.firstname as driver_firstname, u.lastname as driver_lastname, u.avatar as driver_avatar, u.is_student as driver_is_student, loc_start.address as address_start, loc_end.address as address_end')
+            ->join('journey',            'journey.id = booking.journey_id')
+            ->join('location loc_start', 'loc_start.id = journey.location_start_id')
+            ->join('location loc_end',   'loc_end.id = journey.location_end_id')
+            ->join('city city_start',    'city_start.id = loc_start.city_id')
+            ->join('city city_end',      'city_end.id = loc_end.city_id')
+            ->join('user u',             'u.id = journey.user_id')
+            ->where('booking.user_id', $userId)
+            ->where('booking.status', 'accepted')
+            ->where('journey.canceled_at', null)
+            ->where('journey.start_datetime >=', date('Y-m-d H:i:s'))
+            ->orderBy('journey.start_datetime', 'ASC')
+            ->limit(5)
+            ->get()->getResultArray();
+
+        // Demandes de réservation en attente en tant que passager
         $myBookings = $this->db->table('booking')
             ->select('booking.*, journey.start_datetime, city_start.name as city_start_name, city_end.name as city_end_name, u.firstname as driver_firstname, u.lastname as driver_lastname, u.avatar as driver_avatar, u.is_student as driver_is_student, loc_start.address as address_start, loc_end.address as address_end')
             ->join('journey',            'journey.id = booking.journey_id')
@@ -103,9 +120,28 @@ class DashboardController extends BaseController
             ->join('city city_end',      'city_end.id = loc_end.city_id')
             ->join('user u',             'u.id = journey.user_id')
             ->where('booking.user_id', $userId)
+            ->where('booking.status', 'pending')
             ->where('journey.canceled_at', null)
             ->where('journey.start_datetime >=', date('Y-m-d H:i:s'))
             ->orderBy('journey.start_datetime', 'ASC')
+            ->limit(5)
+            ->get()->getResultArray();
+
+        // Trajets passés en tant que passager
+        $lastPassengerJourneys = $this->db->table('booking')
+            ->select('booking.*, journey.start_datetime, city_start.name as city_start_name, city_end.name as city_end_name,
+                u.firstname as driver_firstname, u.lastname as driver_lastname,
+                loc_start.address as address_start, loc_end.address as address_end')
+            ->join('journey',            'journey.id = booking.journey_id')
+            ->join('location loc_start', 'loc_start.id = journey.location_start_id')
+            ->join('location loc_end',   'loc_end.id = journey.location_end_id')
+            ->join('city city_start',    'city_start.id = loc_start.city_id')
+            ->join('city city_end',      'city_end.id = loc_end.city_id')
+            ->join('user u',             'u.id = journey.user_id')
+            ->where('booking.user_id', $userId)
+            ->where('journey.canceled_at', null)
+            ->where('journey.start_datetime <', date('Y-m-d H:i:s'))
+            ->orderBy('journey.start_datetime', 'DESC')
             ->limit(5)
             ->get()->getResultArray();
 
@@ -124,12 +160,14 @@ class DashboardController extends BaseController
             ->get()->getResultArray();
 
         return view('Dashboard/dashboardShow', [
-            'title'        => 'Mon dashboard',
-            'nextJourneys' => $nextJourneys,
-            'lastJourneys' => $lastJourneys,
-            'nextBookings' => $nextBookings,
-            'myBookings'   => $myBookings,
-            'lastReports'  => $lastReports,
+            'title'                 => 'Mon dashboard',
+            'nextJourneys'          => $nextJourneys,
+            'lastJourneys'          => $lastJourneys,
+            'nextBookings'          => $nextBookings,
+            'myNextJourneys'        => $myNextJourneys,
+            'myBookings'            => $myBookings,
+            'lastPassengerJourneys' => $lastPassengerJourneys,
+            'lastReports'           => $lastReports,
         ]);
     }
 
