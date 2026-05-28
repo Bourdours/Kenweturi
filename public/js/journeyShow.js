@@ -5,7 +5,7 @@
     const btnConfirm = document.getElementById('btnConfirmBook');
     const form       = document.getElementById('formBook');
 
-    if (!modal) return;
+    if (!modal || !btnOpen) return;
 
     const openModal  = () => { modal.classList.remove('hidden'); modal.classList.add('flex'); };
     const closeModal = () => { modal.classList.remove('flex'); modal.classList.add('hidden'); };

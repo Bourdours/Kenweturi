@@ -14,11 +14,11 @@ function closeOnEsc(e) {
   if (e.key === 'Escape') closeAvatarModal();
 }
 
-document.querySelectorAll('.jsAvatarOpen').forEach(function (el) {
-  el.addEventListener('click', openAvatarModal);
-});
-
 if (modal) {
+  document.querySelectorAll('.jsAvatarOpen').forEach(function (el) {
+    el.addEventListener('click', openAvatarModal);
+  });
+
   modal.addEventListener('click', closeAvatarModal);
 }
 
@@ -175,16 +175,18 @@ const deleteCarForm   = document.querySelector('#deleteCarForm');
 const deleteCarLabel  = document.querySelector('#deleteCarLabel');
 const cancelDeleteCar = document.querySelector('#cancelDeleteCar');
 
-document.querySelectorAll('.deleteCar').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const id    = btn.dataset.carId;
-    const label = btn.dataset.carLabel;
-    deleteCarLabel.textContent = label;
-    deleteCarForm.action = `${window.baseUrl}car/${id}/delete`;
-    deleteCarModal.classList.remove('hidden');
-    deleteCarModal.classList.add('flex');
+if (deleteCarModal && deleteCarForm && deleteCarLabel) {
+  document.querySelectorAll('.deleteCar').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id    = btn.dataset.carId;
+      const label = btn.dataset.carLabel;
+      deleteCarLabel.textContent = label;
+      deleteCarForm.action = `${window.baseUrl}car/${id}/delete`;
+      deleteCarModal.classList.remove('hidden');
+      deleteCarModal.classList.add('flex');
+    });
   });
-});
+}
 
 cancelDeleteCar?.addEventListener('click', () => {
   deleteCarModal.classList.add('hidden');
