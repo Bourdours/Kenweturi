@@ -161,7 +161,7 @@
                     <p class="text-ink font-bold font-display text-2xl"><?= esc($remainingSeats) ?></p>
                 </div>
             </div>
-            <form action="/journeys/<?= esc($journey['id']) ?>/book" method="POST" id="formBook">
+            <form action="<?= site_url('/journeys/' . esc($journey['id']) . '/book') ?>" method="POST" id="formBook">
                 <?= csrf_field() ?>
                 <?php if (session('user_id') != $journey['user_id']): ?>
                     <button type="button" id="btnOpenBookModal"
