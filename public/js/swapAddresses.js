@@ -1,6 +1,5 @@
 const swapBtn = document.getElementById('swapAddresses');
-if (!swapBtn) return;
-swapBtn.addEventListener('click', function () {
+if (swapBtn) swapBtn.addEventListener('click', function () {
     const pairs = [
         ['startAddress', 'endAddress'],
         ['startAddressLng', 'endAddressLng'],
