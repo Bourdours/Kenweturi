@@ -29,7 +29,9 @@
                         </div>
                         <div class="mt-3 pt-3 border-t border-action/10 flex items-center justify-between text-sm text-ink/50">
                             <span><?= esc($journey['booked_seats']) ?> place<?= $journey['booked_seats'] > 1 ? 's' : '' ?> réservée<?= $journey['booked_seats'] > 1 ? 's' : '' ?></span>
-                            <?php if ($journey['booked_seats'] >= $journey['seats']): ?>
+                            <?php if ($filter === 'past'): ?>
+                                <span><?= esc($journey['seats']) ?> place<?= $journey['seats'] > 1 ? 's' : '' ?> au total</span>
+                            <?php elseif ($journey['booked_seats'] >= $journey['seats']): ?>
                                 <span>Complet</span>
                             <?php else: ?>
                                 <span>
