@@ -20,22 +20,22 @@
         <?php if (in_array($filter, ['upcoming', 'past'])): ?>
             <div class="flex bg-surface border border-action/15 rounded-full p-1 gap-1" role="group" aria-label="Filtre des trajets">
                 <a href="<?= site_url('dashboard/bookings') ?>?filter=upcoming"
-                   class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= $filter === 'upcoming' ? 'bg-action text-paper' : 'text-ink/60 hover:text-ink' ?>">
+                   class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= $filter === 'upcoming' ? 'bg-action text-ink' : 'text-ink/60 hover:text-ink' ?>">
                     À venir
                 </a>
                 <a href="<?= site_url('dashboard/bookings') ?>?filter=past"
-                   class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= $filter === 'past' ? 'bg-action text-paper' : 'text-ink/60 hover:text-ink' ?>">
+                   class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= $filter === 'past' ? 'bg-action text-ink' : 'text-ink/60 hover:text-ink' ?>">
                     Passés
                 </a>
             </div>
         <?php else: ?>
             <div class="flex bg-surface border border-action/15 rounded-full p-1" role="group" aria-label="Filtre des réservations">
                 <?php if ($filter === 'mine'): ?>
-                    <span class="px-4 py-1.5 rounded-full text-sm font-medium bg-action text-paper">
+                    <span class="px-4 py-1.5 rounded-full text-sm font-medium bg-action text-ink">
                         Envoyées
                     </span>
                 <?php else: ?>
-                    <span class="px-4 py-1.5 rounded-full text-sm font-medium bg-action text-paper">
+                    <span class="px-4 py-1.5 rounded-full text-sm font-medium bg-action text-ink">
                         Reçues
                     </span>
                 <?php endif ?>
@@ -46,7 +46,7 @@
     <!-- Sous-navigation -->
     <div class="flex items-center justify-between">
         <?php if (in_array($filter, ['upcoming', 'past'])): ?>
-            <a href="<?= site_url('journeys') ?>" class="inline-flex items-center gap-2 bg-action text-paper text-sm font-medium px-4 py-2 rounded-full hover:opacity-90 transition-opacity">
+            <a href="<?= site_url('journeys') ?>" class="inline-flex items-center gap-2 bg-action text-ink text-sm font-medium px-4 py-2 rounded-full hover:opacity-90 transition-opacity">
                 <i class="fa-solid fa-magnifying-glass text-xs"></i>
                 Trouver un trajet
             </a>
