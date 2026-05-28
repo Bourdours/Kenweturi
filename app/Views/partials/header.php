@@ -12,6 +12,9 @@ $loginClassMobile   = $onLoginPage
 $registerClassMobile = $onLoginPage
   ? 'text-ink/70 hover:text-action font-medium py-2'
   : 'text-center bg-action text-ink px-5 py-2 rounded-full font-semibold font-display hover:bg-action-dark';
+$initials = session()->get('isLoggedIn')
+  ? strtoupper(substr((string) session()->get('firstname'), 0, 1) . substr((string) session()->get('lastname'), 0, 1))
+  : '';
 ?>
 
 <body class="flex flex-col min-h-screen">
@@ -51,9 +54,6 @@ $registerClassMobile = $onLoginPage
         <a href="<?= site_url('journeys') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Chercher un trajet</a>
         <a href="<?= site_url('journeys/new') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Publier un trajet</a>
         <a href="<?= site_url('comment-ca-marche') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Comment ça marche</a>
-                 <?php if (session()->get('isAdmin')): ?>
-        <a href="<?= site_url('admin') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Administration</a>
-        <?php endif; ?>
       </nav>
 
       <!-- Auth desktop + hamburger mobile -->
@@ -63,7 +63,6 @@ $registerClassMobile = $onLoginPage
             <!-- Menu utilisateur avec dropdown -->
             <div class="relative" id="user-menu-wrapper">
               <button id="user-menu-toggle" class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
-                <?php $initials = strtoupper(substr((string) session()->get('firstname'), 0, 1) . substr((string) session()->get('lastname'), 0, 1)); ?>
                 <?php if (session()->get('avatar')): ?>
                   <div class="w-9 h-9 rounded-full overflow-hidden shrink-0 desktop-avatar-img">
                     <img src="<?= esc(base_url(session()->get('avatar'))) ?>" alt="" class="w-full h-full object-cover"
@@ -93,7 +92,12 @@ $registerClassMobile = $onLoginPage
                 <a href="<?= site_url('dashboard') ?>" class="flex items-center gap-2 px-4 py-2 text-ink/70 hover:text-action text-sm transition-colors duration-200">
                   <i class="fa-solid fa-gauge text-xs w-4"></i> Tableau de bord
                 </a>
-                
+                <?php if (session()->get('isAdmin')): ?>
+                <a href="<?= site_url('admin') ?>" class="flex items-center gap-2 px-4 py-2 text-ink/70 hover:text-action text-sm transition-colors duration-200">
+                  <i class="fa-solid fa-shield-halved text-xs w-4"></i> Administration
+                </a>
+                <?php endif; ?>
+
                 <div class="border-t border-action/10 mt-1 pt-1">
                   <a href="<?= site_url('logout') ?>" class="flex items-center gap-2 px-4 py-2 text-ink/70 hover:text-action text-sm transition-colors duration-200">
                     <i class="fa-solid fa-right-from-bracket text-xs w-4"></i> Déconnexion

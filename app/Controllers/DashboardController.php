@@ -250,22 +250,24 @@ class DashboardController extends BaseController
         $userId = (int) session('user_id');
 
         $booking = $this->db->table('booking')
-            ->select("booking.*, journey.start_datetime, journey.seats, journey.user_id as driver_id,
-                city_start.name as city_start_name,
-                city_end.name as city_end_name,
-                loc_pickup.address as pickup_address,
-                city_pickup.name as pickup_city_name,
-                loc_dropoff.address as dropoff_address,
-                city_dropoff.name as dropoff_city_name,
-                passenger.firstname as passenger_firstname,
-                passenger.lastname as passenger_lastname,
-                passenger.avatar as passenger_avatar,
-                passenger.is_student as passenger_is_student,
-                driver.firstname as driver_firstname,
-                driver.lastname as driver_lastname,
-                driver.avatar as driver_avatar,
-                driver.is_student as driver_is_student,
-                COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id AND b.status = 'accepted'), 0) as booked_seats")
+    ->select("booking.*, journey.start_datetime, journey.seats, journey.user_id as driver_id,
+              loc_start.address as start_address,
+              city_start.name as city_start_name,
+              loc_end.address as end_address,
+              city_end.name as city_end_name,
+              loc_pickup.address as pickup_address,
+              city_pickup.name as pickup_city_name,
+              loc_dropoff.address as dropoff_address,
+              city_dropoff.name as dropoff_city_name,
+              passenger.firstname as passenger_firstname,
+              passenger.lastname as passenger_lastname,
+              passenger.avatar as passenger_avatar,
+              passenger.is_student as passenger_is_student,
+              driver.firstname as driver_firstname,
+              driver.lastname as driver_lastname,
+              driver.avatar as driver_avatar,
+              driver.is_student as driver_is_student,
+              COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id AND b.status = 'accepted'), 0) as booked_seats")
             ->join('journey',              'journey.id = booking.journey_id')
             ->join('location loc_start',   'loc_start.id = journey.location_start_id')
             ->join('location loc_end',     'loc_end.id = journey.location_end_id')
