@@ -98,7 +98,7 @@ class JourneyModel extends BaseModel
         ]
     ];
 
-    /**
+/**
      * Récupère un trajet avec toutes ses informations liées :
      * adresses et villes de départ/arrivée, conducteur, véhicule.
      *
@@ -136,4 +136,4 @@ class JourneyModel extends BaseModel
             ->get()
             ->getRowArray();
     }
-}
+    }
