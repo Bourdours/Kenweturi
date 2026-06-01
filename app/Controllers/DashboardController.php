@@ -312,25 +312,25 @@ class DashboardController extends BaseController
 
         $passengers = $this->bookingModel->findPassengersByJourney((int) $booking['journey_id']);
 
-        $isDriver = (int) $booking['driver_id'] === $userId;
+        $is_driver = (int) $booking['driver_id'] === $userId;
 
-        $personFirstname  = $isDriver ? $booking['passenger_firstname']  : $booking['driver_firstname'];
-        $personLastname   = $isDriver ? $booking['passenger_lastname']   : $booking['driver_lastname'];
-        $personAvatar     = $isDriver ? $booking['passenger_avatar']     : $booking['driver_avatar'];
-        $personIsStudent  = $isDriver ? $booking['passenger_is_student'] : $booking['driver_is_student'];
-        $personLabel      = $isDriver ? 'Passager' : 'Conducteur';
+        $person_firstname  = $is_driver ? $booking['passenger_firstname']  : $booking['driver_firstname'];
+        $person_lastname   = $is_driver ? $booking['passenger_lastname']   : $booking['driver_lastname'];
+        $person_avatar     = $is_driver ? $booking['passenger_avatar']     : $booking['driver_avatar'];
+        $person_is_student  = $is_driver ? $booking['passenger_is_student'] : $booking['driver_is_student'];
+        $person_label      = $is_driver ? 'Passager' : 'Conducteur';
 
         return view('Bookings/bookingShow', [
             'title'           => 'Détail de la réservation',
             'back'            => $this->request->getGet('back'),
             'booking'         => $booking,
-            'isDriver'        => $isDriver,
+            'is_driver'        => $is_driver,
             'passengers'      => $passengers,
-            'personFirstname' => $personFirstname,
-            'personLastname'  => $personLastname,
-            'personAvatar'    => $personAvatar,
-            'personIsStudent' => $personIsStudent,
-            'personLabel'     => $personLabel,
+            'person_firstname' => $person_firstname,
+            'person_lastname'  => $person_lastname,
+            'person_avatar'    => $person_avatar,
+            'person_is_student' => $person_is_student,
+            'person_label'     => $person_label,
         ]);
     }
 
