@@ -198,6 +198,16 @@
             <p class="text-center text-muted font-semibold py-2">Trajet complet</p>
         <?php endif ?>
     </article>
+    
+    <!-- bouton signaler -->
+    <div class="deleteAccount w-full">
+        <?php if (session()->get('user_id') != $journey['user_id']): ?>
+        <a href="<?= site_url('journeys/' . $journey['id'] . '/report') ?>"
+            class="inline-flex items-center gap-2 bg-danger/10 hover:bg-danger text-danger hover:text-white border border-danger/30 hover:border-danger font-semibold rounded-lg px-4 py-2 text-sm transition-colors cursor-pointer">
+            <i class="fa-solid fa-flag text-xs"></i> Signaler un problème
+        </a>
+        <?php endif ?> 
+    </div>
 
 </div>
 </div>

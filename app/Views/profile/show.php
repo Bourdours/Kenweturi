@@ -36,11 +36,11 @@
           <img src="<?= site_url(esc($user['avatar'])) ?>" alt="Avatar de <?= esc($user['firstname']) ?>" class="w-full h-full object-cover"
             onerror="this.parentElement.classList.add('hidden'); this.parentElement.nextElementSibling.classList.remove('hidden'); this.parentElement.nextElementSibling.classList.add('flex');">
         </div>
-        <div class="jsAvatarOpen ring-2 ring-action/20 hover:ring-action/50 transition-all cursor-pointer hidden w-20 h-20 rounded-full bg-action-dark text-paper font-bold text-2xl shrink-0 items-center justify-center">
+        <div class="jsAvatarOpen ring-2 ring-action/20 hover:ring-action/50 transition-all cursor-pointer hidden w-20 h-20 rounded-full bg-action-dark text-ink font-bold text-2xl shrink-0 items-center justify-center">
           <?= $initials ?>
         </div>
       <?php else: ?>
-        <div class="jsAvatarOpen ring-2 ring-action/20 flex w-20 h-20 rounded-full bg-action text-paper font-bold text-2xl shrink-0 items-center justify-center">
+        <div class="jsAvatarOpen ring-2 ring-action/20 flex w-20 h-20 rounded-full bg-action text-ink font-bold text-2xl shrink-0 items-center justify-center">
           <?= $initials ?>
         </div>
       <?php endif; ?>
@@ -96,15 +96,18 @@
     </h2>
     <dl class="flex flex-col divide-y divide-action/10">
 
-      <div class="flex items-center gap-4 py-3 first:pt-0 last:pb-0">
-        <div class="w-8 h-8 rounded-lg bg-action/10 flex items-center justify-center shrink-0">
-          <i class="fa-solid fa-envelope text-action text-xs"></i>
+      <?php if ($isOwnProfile): ?>
+        <div class="flex items-center gap-4 py-3 first:pt-0 last:pb-0">
+          <div class="w-8 h-8 rounded-lg bg-action/10 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-envelope text-action text-xs"></i>
+          </div>
+          
+          <div>
+            <dt class="text-ink/40 text-xs mb-0.5">Email</dt>
+            <dd class="text-ink text-sm font-medium"><?= esc($user['email']) ?></dd>
+          </div>
         </div>
-        <div>
-          <dt class="text-ink/40 text-xs mb-0.5">Email</dt>
-          <dd class="text-ink text-sm font-medium"><?= esc($user['email']) ?></dd>
-        </div>
-      </div>
+      <?php endif ?>
 
       <div class="flex items-center gap-4 py-3 first:pt-0 last:pb-0">
         <div class="w-8 h-8 rounded-lg bg-action/10 flex items-center justify-center shrink-0">

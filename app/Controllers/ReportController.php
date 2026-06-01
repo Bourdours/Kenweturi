@@ -15,6 +15,13 @@ use App\Models\BookingModel;
 class ReportController extends BaseController
 {
 
+    public function __construct() {
+
+        $this->reportModel  = new ReportModel();
+        $this->journeyModel = new JourneyModel();
+        $this->bookingModel = new BookingModel();
+    }
+
     /**
      * Traite la soumission d'un signalement pour un trajet donné.
      *
@@ -24,13 +31,11 @@ class ReportController extends BaseController
     {
         if (!session()->get('isLoggedIn')) {
     return redirect()->to('/login');
-}
+    }
 
         $reporterId = (int) session()->get('user_id');
 
-        $reportModel  = new ReportModel();
-        $journeyModel = new JourneyModel();
-        $bookingModel = new BookingModel();
+        
 
         // Vérification que le trajet existe
         $journey = $journeyModel->find($journeyId);
@@ -83,6 +88,25 @@ class ReportController extends BaseController
 
         return redirect()->back()
             ->with('success', 'Signalement envoyé. Notre équipe le traitera sous 48h.');
+    }
+
+    /**
+     * Affiche le formulaire de signalement
+     * 
+     * @return string
+     */
+    public function showCreateForm(int $journeyId): string|RedirectResponse
+    {
+        $journey = $this->journeyModel->find($journeyId);
+
+        if(!$journey) {
+            return redirect()->to('/journeys')->with('error', 'Trajet introuvable.');
+        }
+
+        return view('Reports/reportShow', [
+            'title'   => 'Signaler un trajet',
+            'journey' => $journey,
+        ]);
     }
 
     /**

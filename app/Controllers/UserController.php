@@ -26,17 +26,22 @@ class UserController extends BaseController
      *
      * @return string
      */
-    public function show()
+    public function show(int $id = 0): string|RedirectResponse
     {
         // Récupération de l'utilisateur et de sa ville depuis la session
-        $userId = session()->get('user_id');
-        $user   = $this->userModel->find($userId);
+        $userId = $id ?: (int) session()->get('user_id');
+        $isOwnProfile = $userId === (int) session()->get('user_id');
+
+        $user = $this->userModel->find($userId);
 
 
         if (!$user) {
-            session()->destroy();
-            return redirect()->to(site_url('login'))
-                ->with('error', 'Ce compte n\'existe plus.');
+            if($isOwnProfile) {
+                session()->destroy();
+                return redirect()->to(site_url('login'))
+                    ->with('error', 'Ce compte n\'existe plus.');
+            }
+            return redirect()->back()->with('error', 'Utilisateur introuvable.');
         }
 
 
@@ -44,11 +49,10 @@ class UserController extends BaseController
         $memberSince = ucfirst(Time::parse($user['registered_at'], 'Europe/Paris', 'fr_FR')->toLocalizedString('MMMM yyyy'));
 
         return view('profile/show', [
-            'title'        => 'Mon profil',
             'user'         => $user,
             'city'         => $city['name'] ?? null,
             'cars'         => $this->carModel->where('user_id', $userId)->findAll(),
-            'isOwnProfile' => true,
+            'isOwnProfile' => $isOwnProfile,
             'memberSince'  => $memberSince,
         ]);
     }

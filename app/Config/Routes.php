@@ -94,6 +94,13 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->post('profile/update', 'UserController::update');
     $routes->post('profile/delete', 'UserController::delete');
 
+    // Users
+    $routes->get('users/(:num)', 'UserController::show/$1');
+
+    // Reports
+    $routes->get('journeys/(:num)/report',  'ReportController::showCreateForm/$1');
+    $routes->post('journeys/(:num)/report', 'ReportController::create/$1');
+
     // Cars
     $routes->post('car/create',        'CarController::create');
     $routes->get('car/(:num)/edit',    'CarController::showEditForm/$1');

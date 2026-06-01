@@ -29,6 +29,7 @@ class JourneyController extends BaseController{
     protected StageModel $stageModel;
 
     public function __construct(){
+        
         $this->trackModel = new TrackModel();
         $this->journeyModel = new JourneyModel();
         $this->carModel = new CarModel();

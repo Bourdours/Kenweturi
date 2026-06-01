@@ -10,31 +10,23 @@ class JourneyRequestController extends BaseController
 {
     private const NOT_FOUND = 'Demande introuvable.';
 
-    /**
-     * Affiche la liste des demandes de trajet.
-     *
-     * @return string
-     */
-    public function showAll(): string
-    {
-        $journeyRequestModel = new JourneyRequestModel();
-        $data = [
-            'title'           => 'Demandes de trajet',
-            'journeyRequests' => $journeyRequestModel->findAll()
-        ];
+    protected JourneyRequestModel $journeyRequestModel;
 
-        return view('JourneyRequests/journeyRequestShowAll', $data);
+    public function __construct() {
+        $this->journeyRequestModel = new JourneyRequestModel();
     }
 
-    /**
-     * Affiche le détail d'une demande de trajet.
-     *
-     * @return string|RedirectResponse
-     */
+    public function showAll(): string
+    {
+        return view('JourneyRequests/journeyRequestShowAll', [
+            'title'           => 'Demandes de trajet',
+            'journeyRequests' => $this->journeyRequestModel->findAll()
+        ]);
+    }
+
     public function show(int $id): string|RedirectResponse
     {
-        $journeyRequestModel = new JourneyRequestModel();
-        $journeyRequest = $journeyRequestModel->find($id);
+        $journeyRequest = $this->journeyRequestModel->find($id);
 
         if (!$journeyRequest) {
             return redirect()->to('/journey-requests')->with('error', self::NOT_FOUND);
@@ -46,11 +38,6 @@ class JourneyRequestController extends BaseController
         ]);
     }
 
-    /**
-     * Affiche le formulaire de création d'une demande de trajet.
-     *
-     * @return string
-     */
     public function showCreateForm(): string
     {
         return view('JourneyRequests/journeyRequestAdd', [
@@ -58,14 +45,8 @@ class JourneyRequestController extends BaseController
         ]);
     }
 
-    /**
-     * Traite les données envoyées par le formulaire.
-     *
-     * @return RedirectResponse
-     */
     public function create(): RedirectResponse
     {
-        $journeyRequestModel = new JourneyRequestModel();
         $data = [
             'start_datetime'    => $this->request->getPost('start_datetime'),
             'seats'             => $this->request->getPost('seats'),
@@ -75,22 +56,16 @@ class JourneyRequestController extends BaseController
             'location_end_id'   => $this->request->getPost('location_end_id'),
         ];
 
-        if (!$journeyRequestModel->save($data)) {
-            return redirect()->back()->withInput()->with('errors', $journeyRequestModel->errors());
+        if (!$this->journeyRequestModel->save($data)) {
+            return redirect()->back()->withInput()->with('errors', $this->journeyRequestModel->errors());
         }
 
         return redirect()->to('/journey-requests')->with('success', 'Demande publiée avec succès.');
     }
 
-    /**
-     * Affiche le formulaire de modification d'une demande de trajet.
-     *
-     * @return string|RedirectResponse
-     */
     public function showEditForm(int $id): string|RedirectResponse
     {
-        $journeyRequestModel = new JourneyRequestModel();
-        $journeyRequest = $journeyRequestModel->where('user_id', session()->get('user_id'))->find($id);
+        $journeyRequest = $this->journeyRequestModel->where('user_id', session()->get('user_id'))->find($id);
 
         if (!$journeyRequest) {
             return redirect()->to('/journey-requests')->with('error', self::NOT_FOUND);
@@ -102,15 +77,9 @@ class JourneyRequestController extends BaseController
         ]);
     }
 
-    /**
-     * Gère la modification d'une demande de trajet.
-     *
-     * @return RedirectResponse
-     */
     public function update(int $id): RedirectResponse
     {
-        $journeyRequestModel = new JourneyRequestModel();
-        $journeyRequest = $journeyRequestModel->where('user_id', session()->get('user_id'))->find($id);
+        $journeyRequest = $this->journeyRequestModel->where('user_id', session()->get('user_id'))->find($id);
 
         if (!$journeyRequest) {
             return redirect()->to('/journey-requests')->with('error', self::NOT_FOUND);
@@ -122,28 +91,22 @@ class JourneyRequestController extends BaseController
             'message'        => $this->request->getPost('message'),
         ];
 
-        if (!$journeyRequestModel->update($id, $data)) {
-            return redirect()->back()->withInput()->with('errors', $journeyRequestModel->errors());
+        if (!$this->journeyRequestModel->update($id, $data)) {
+            return redirect()->back()->withInput()->with('errors', $this->journeyRequestModel->errors());
         }
 
         return redirect()->to('/journey-requests/' . $id)->with('success', 'Demande modifiée avec succès.');
     }
 
-    /**
-     * Supprime une demande de trajet.
-     *
-     * @return RedirectResponse
-     */
     public function delete(int $id): RedirectResponse
     {
-        $journeyRequestModel = new JourneyRequestModel();
-        $journeyRequest = $journeyRequestModel->where('user_id', session()->get('user_id'))->find($id);
+        $journeyRequest = $this->journeyRequestModel->where('user_id', session()->get('user_id'))->find($id);
 
         if (!$journeyRequest) {
             return redirect()->to('/journey-requests')->with('error', self::NOT_FOUND);
         }
 
-        $journeyRequestModel->delete($id);
+        $this->journeyRequestModel->delete($id);
 
         return redirect()->to('/journey-requests')->with('success', 'Demande annulée avec succès.');
     }
