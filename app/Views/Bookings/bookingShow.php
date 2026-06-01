@@ -61,12 +61,12 @@
 
     <!-- Conducteur -->
     <article class="bg-surface-card rounded-2xl p-6">
-        <h2 class="text-muted text-xs font-semibold uppercase tracking-wider mb-4"><?= $personLabel ?></h2>
+        <h2 class="text-muted text-xs font-semibold uppercase tracking-wider mb-4"><?= $person_label ?></h2>
         <div class="flex items-center gap-4">
-            <a href="<?= site_url('users/' . ($isDriver ? $booking['user_id'] : $booking['driver_id'])) ?>?back=<?= urlencode(current_url(true)) ?>"
+            <a href="<?= site_url('users/' . ($is_driver ? $booking['user_id'] : $booking['driver_id'])) ?>?back=<?= urlencode(current_url(true)) ?>"
         class="flex items-center gap-4">
-                <?php $initials = strtoupper(substr($personFirstname, 0, 1) . substr($personLastname, 0, 1)); ?>
-                <?php if (!empty($personAvatar)): ?>
+                <?php $initials = strtoupper(substr($person_firstname, 0, 1) . substr($person_lastname, 0, 1)); ?>
+                <?php if (!empty($person_avatar)): ?>
                     <div class="w-14 h-14 rounded-full overflow-hidden shrink-0">
                         <img src="<?= site_url(esc($person_avatar)) ?>" alt="Avatar" class="w-full h-full object-cover"
                         onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
@@ -80,8 +80,8 @@
                     </div>
                 <?php endif ?>
                 <div>
-                    <p class="text-ink font-semibold"><?= esc($personFirstname) ?> <?= esc($personLastname) ?></p>
-                    <p class="text-muted text-sm"><?= $personIsStudent ? 'Étudiant' : 'Formateur' ?></p>
+                    <p class="text-ink font-semibold"><?= esc($person_firstname) ?> <?= esc($person_lastname) ?></p>
+                    <p class="text-muted text-sm"><?= $person_is_student ? 'Étudiant' : 'Formateur' ?></p>
                 </div>
             </a>
         </div>
@@ -125,9 +125,9 @@
     </article>
 
     <!-- Actions -->
-    <?php if ($isDriver || strtotime($booking['start_datetime']) > time()): ?>
+    <?php if ($is_driver || strtotime($booking['start_datetime']) > time()): ?>
         <article class="bg-surface-card rounded-2xl p-6">
-            <?php if ($isDriver): ?>
+            <?php if ($is_driver): ?>
                 <form action="<?= site_url('dashboard/bookings/' . $booking['id'] . '/accept') ?>" method="post" class="mb-3">
                     <?= csrf_field() ?>
                     <button type="submit" class="w-full bg-action text-ink font-bold font-display rounded-full py-3 hover:bg-action-dark transition-colors">
