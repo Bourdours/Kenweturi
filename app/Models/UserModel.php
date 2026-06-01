@@ -39,7 +39,8 @@ class UserModel extends BaseModel
         'status',
         'city_id',
         'reset_token',
-        'reset_token_expiry'
+        'reset_token_expiry',
+        'role',
     ];
 
     // Règles de validation appliquées automatiquement avant chaque insertion
