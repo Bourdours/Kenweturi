@@ -87,7 +87,7 @@
                 </div>
                 <div class="flex-1 pb-4 flex items-start gap-2">
                   <div class="flex-1">
-                    <label class="text-ink/50 text-xs font-medium mb-1.5 block">Étape <?= $index + 1 ?> <span class="text-ink/30 font-normal">(optionnel)</span></label>
+                    <label class="text-ink/50 text-xs font-medium mb-1.5 block">Étape <?= esc($index + 1) ?> <span class="text-ink/30 font-normal">(optionnel)</span></label>
                     <input class="address w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors" name="stagesAddresses[]" type="text" placeholder="Adresse de l'étape..." value="<?= esc($stageAddress) ?>">
                     <input type="hidden" class="lng">
                     <input type="hidden" class="lat">
@@ -186,7 +186,7 @@
           <span id="carDropdownLabel" class="text-ink/30">-- Choisir une voiture --</span>
           <i id="carDropdownArrow" class="fa-solid fa-chevron-down text-xs text-ink/30 transition-transform"></i>
         </button>
-        <input type="hidden" name="car" id="carHidden">
+        <input type="hidden" name="car" id="carHidden" value="<?= esc(old('car'), 'attr') ?>">
         <ul class="autocomplete-dropdown" id="carDropdownList">
           <?php if (!empty($cars)) : ?>
             <?php foreach ($cars as $car) : ?>
