@@ -217,7 +217,7 @@
 
 </div>
 
-<?= view('partials/avatar_modal', ['avatarSrc' => base_url($user['avatar'] ?? ''), 'firstname' => $user['firstname'], 'initials' => $initials]) ?>
+<?= view('partials/avatar_modal', ['avatarSrc' =>  site_url(esc($user['avatar'] ?? '')), 'firstname' => $user['firstname'], 'initials' => $initials]) ?>
 
 
 <?= view('partials/footer') ?>
