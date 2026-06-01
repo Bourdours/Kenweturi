@@ -14,7 +14,7 @@ use App\Models\StageModel;
 
 use App\Exceptions\ExternalApiException;
 use App\Exceptions\ModelValidationException;
-
+use App\Exceptions\AddressValidationException;
 use DateTimeImmutable;
 use DateTime;
 
@@ -92,6 +92,10 @@ class JourneyController extends BaseController{
 
         } catch (ModelValidationException $e) {
 
+            return redirect()->back()->withInput()
+                ->with('errors', $e->getErrors());
+
+        } catch (AddressValidationException $e) {
             return redirect()->back()->withInput()
                 ->with('errors', $e->getErrors());
 
@@ -590,6 +594,7 @@ class JourneyController extends BaseController{
      * @param array $addresses Tableau d'adresses textuelles indexé par clé (start, stage0, ..., end)
      * @return array           Tableau des données de localisation indexé par les mêmes clés
      * @throws ExternalApiException Si l'API ne renvoie rien pour une adresse
+     * @throws AddressValidationException Si une ou plusieurs adresses sont incomplètes
      */
     private function fetchAllLocationsData(array $addresses): array {
 
@@ -601,9 +606,17 @@ class JourneyController extends BaseController{
             // Un stage peut-être vide, dans ce cas on ne le prend pas en compte
             if(!empty($address)){
                 if ($data === null && !empty($address)) throw new ExternalApiException("Adresse introuvable: $address");
+                if (empty($data['street']) && empty($data['locality'])) {
+                    $errors[$key . 'Address'] = "L'adresse \"$address\" doit contenir un nom de rue.";
+                    continue;
+                }
                 $locationsData[$key] = $data;
             }
 
+        }
+
+        if (!empty($errors)) {
+            throw new AddressValidationException($errors);
         }
 
         return $locationsData;
