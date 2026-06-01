@@ -2,9 +2,10 @@
 
 namespace App\Controllers;
 
+use App\Libraries\MailerExample;
+use App\Models\JourneyModel;
 use App\Models\ReportModel;
 use App\Models\UserModel;
-use App\Libraries\MailerExample;
 
 class AdminController extends BaseController
 {
@@ -32,6 +33,21 @@ class AdminController extends BaseController
         return null;
     }
 
+    /**
+     * Vérifie que l'utilisateur connecté est bien un super-administrateur.
+     * Si ce n'est pas le cas, redirige vers la page d'accueil avec un message d'erreur.
+     *
+     * @return \CodeIgniter\HTTP\RedirectResponse|null  Redirection si non superadmin, null sinon
+     */
+    private function requireSuperAdmin()
+    {
+        if (session()->get('role') !== 'superadmin') {
+            return redirect()->to(site_url('/'))
+                ->with('error', 'Accès réservé aux super-administrateurs.');
+        }
+        return null;
+    }
+
     public function index()
     {
         // Vérifie les droits administrateur avant tout traitement
@@ -43,6 +59,7 @@ class AdminController extends BaseController
         $tab = $this->request->getGet('tab') ?? 'registrations';
         $reports      = [];
         $pendingUsers = [];
+        $allUsers     = [];
 
         if ($tab === 'registrations') {
             // Charge les utilisateurs dont l'inscription est en attente de validation
@@ -50,7 +67,13 @@ class AdminController extends BaseController
         } elseif ($tab === 'reports') {
             // Charge les signalements encore ouverts
             $reports = $this->reportModel->getOpenReports();
+        } elseif ($tab === 'admins') {
+            if (session()->get('role') !== 'superadmin') {
+                return redirect()->to(site_url('admin'))->with('error', 'Accès refusé.');
+            }
+            $allUsers = $this->userModel->where('status', 'active')->findAll();
         }
+
 
         // Compte le nombre total d'inscriptions en attente
         $nPendingUsers = $this->userModel->where('status', 'pending')->countAllResults();
@@ -61,6 +84,7 @@ class AdminController extends BaseController
             'reports'       => $reports,
             'pendingUsers'  => $pendingUsers,
             'nPendingUsers' => $nPendingUsers,
+            'allUsers'      => $allUsers,
         ]);
     }
 
@@ -115,6 +139,81 @@ class AdminController extends BaseController
         $message = ($action === 'validate') ? 'L’utilisateur a été activé.' : 'L’utilisateur a été refusé.';
         return redirect()->to(site_url('admin?tab=registrations'))
             ->with('success', $message);
+    }
+
+    /**
+     * Modifie le rôle d'un utilisateur.
+     * Seuls les Super-Administrateurs peuvent effectuer cette action.
+     *
+     * @param  int  $id  Identifiant de l'utilisateur cible
+     * @return \CodeIgniter\HTTP\Response
+     */
+    public function updateRole(int $id)
+    {
+        if ($response = $this->requireSuperAdmin()) return $response;
+
+        $newRole = $this->request->getPost('role');
+
+        if (!in_array($newRole, ['user', 'admin'], true)) {
+            return redirect()->to(site_url('admin?tab=admins'))
+                ->with('error', 'Rôle invalide.');
+        }
+
+        $target = $this->userModel->find($id);
+        if (!$target) {
+            return redirect()->to(site_url('admin?tab=admins'))
+                ->with('error', 'Utilisateur introuvable.');
+        }
+        if ($target['role'] === 'superadmin') {
+            return redirect()->to(site_url('admin?tab=admins'))
+                ->with('error', 'Impossible de modifier un super-administrateur.');
+        }
+
+        $this->userModel->update($id, [
+            'role'     => $newRole,
+            'is_admin' => $newRole === 'admin' ? 1 : 0,
+        ]);
+
+        $message = $newRole === 'admin'
+            ? "{$target['firstname']} est maintenant administrateur."
+            : "{$target['firstname']} a été rétrogradé en utilisateur.";
+
+        return redirect()->to(site_url('admin?tab=admins'))->with('success', $message);
+    }
+
+    /**
+     * Supprime un utilisateur (Soft Delete) et annule ses trajets en cours.
+     * Seuls les Super-Administrateurs peuvent effectuer cette action.
+     *
+     * @param  int  $id  Identifiant de l'utilisateur à supprimer
+     * @return \CodeIgniter\HTTP\Response
+     */
+    public function deleteUser(int $id)
+    {
+        if ($response = $this->requireSuperAdmin()) return $response;
+
+        $target = $this->userModel->find($id);
+        if (!$target) {
+            return redirect()->to(site_url('admin?tab=admins'))
+                ->with('error', 'Utilisateur introuvable.');
+        }
+        if ($target['role'] === 'superadmin') {
+            return redirect()->to(site_url('admin?tab=admins'))
+                ->with('error', 'Impossible de supprimer un super-administrateur.');
+        }
+
+        // Soft delete, remplit deleted_at
+        $this->userModel->delete($id);
+
+        // Annulation de tous ses trajets actifs
+        $journeyModel = new JourneyModel();
+        $journeyModel->where('user_id', $id)
+            ->where('canceled_at', null)
+            ->set(['canceled_at' => date('Y-m-d H:i:s')])
+            ->update();
+
+        return redirect()->to(site_url('admin?tab=admins'))
+            ->with('success', "{$target['firstname']} a été supprimé et ses trajets annulés.");
     }
 
     /**
