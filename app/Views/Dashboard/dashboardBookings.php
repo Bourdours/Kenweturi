@@ -104,11 +104,11 @@
                                     <img src="<?= site_url(esc($booking['person_avatar'])) ?>" alt="Avatar de <?= esc($booking['person_firstname']) ?>" class="w-full h-full object-cover"
                                         onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
                                 </div>
-                                <div class="hidden w-5 h-5 rounded-full bg-action-dark text-paper text-xs shrink-0 items-center justify-center font-bold">
+                                <div class="hidden w-6 h-6 rounded-full bg-action-dark text-ink text-xs shrink-0 items-center justify-center font-bold">
                                     <?= $initials ?>
                                 </div>
                             <?php else: ?>
-                                <div class="flex w-5 h-5 rounded-full bg-action-dark text-paper text-xs shrink-0 items-center justify-center font-bold">
+                                <div class="flex w-6 h-6 rounded-full bg-action-dark text-ink text-xs shrink-0 items-center justify-center font-bold">
                                     <?= $initials ?>
                                 </div>
                             <?php endif ?>
