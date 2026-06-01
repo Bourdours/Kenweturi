@@ -113,8 +113,28 @@
                             <p class="text-ink/40 text-xs"><?= esc(date('d/m', strtotime($journey['start_datetime']))) ?></p>
                         </div>
                     </div>
+                    
                     <div class="mt-3 pt-3 border-t border-action/10 flex items-center justify-between text-sm text-ink/50">
-                        <span><?= esc($journey['driver_firstname']) ?> <?= esc($journey['driver_lastname']) ?></span>
+                        <div class="flex items-center gap-4">
+                            <?php $initials = strtoupper(substr($journey['driver_firstname'], 0, 1) . substr($journey['driver_lastname'], 0, 1)); ?>
+                            <?php if (!empty($journey['driver_avatar'])): ?>
+                                <div class="jsAvatarOpen cursor-pointer w-7 h-7 rounded-full overflow-hidden shrink-0">
+                                    <img src="<?= site_url(esc($journey['driver_avatar'])) ?>" alt="Avatar de <?= esc($journey['driver_firstname']) ?>" class="w-full h-full object-cover"
+                                    onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
+                                </div>
+                                <div class="jsAvatarOpen cursor-pointer hidden w-7 h-7 rounded-full bg-action-dark text-ink font-bold text-xs shrink-0 items-center justify-center">
+                                    <?= $initials ?>
+                                </div>
+                            <?php else: ?>
+                                <div class="jsAvatarOpen cursor-pointer flex w-7 h-7 rounded-full bg-action-dark text-ink font-bold text-xs shrink-0 items-center justify-center">
+                                    <?= $initials ?>
+                                </div>
+                            <?php endif; ?>
+                            <div>
+                                <p class="text-ink font-semibold"><?= esc($journey['driver_firstname']) ?> <?= esc($journey['driver_lastname']) ?></p>
+                                <p class="text-muted text-sm"><?= $journey['driver_is_student'] ? 'Étudiant' : 'Formateur' ?></p>
+                            </div>
+                        </div>
                         <span class="flex items-center gap-1.5">
                             <i class="fa-solid fa-user text-xs"></i>
                             <?= esc($journey['remaining_seats']) ?> place<?= $journey['remaining_seats'] > 1 ? 's' : '' ?>

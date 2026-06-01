@@ -50,11 +50,11 @@
             <img src="<?= site_url(esc($user['avatar'])) ?>" alt="Avatar actuel" class="w-full h-full object-cover"
               onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
           </div>
-          <div class="jsAvatarOpen cursor-pointer hidden w-14 h-14 rounded-full bg-action text-paper font-bold text-base shrink-0 items-center justify-center">
+          <div class="jsAvatarOpen cursor-pointer hidden w-14 h-14 rounded-full bg-action text-ink font-bold text-base shrink-0 items-center justify-center">
             <?= $initials ?>
           </div>
         <?php else: ?>
-          <div class="jsAvatarOpen cursor-pointer flex w-14 h-14 rounded-full bg-action text-paper font-bold text-base shrink-0 items-center justify-center">
+          <div class="jsAvatarOpen cursor-pointer flex w-14 h-14 rounded-full bg-action text-ink font-bold text-base shrink-0 items-center justify-center">
             <?= $initials ?>
           </div>
         <?php endif; ?>
