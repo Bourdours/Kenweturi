@@ -115,7 +115,8 @@ class JourneyController extends BaseController{
             return redirect()->to('/journeys');
         }
 
-        // ====== Enrichissement du trajet
+
+        // ====== Calcul de la date d'arrivée du trajet
         $journey['end_datetime'] = $this->getArrivaleDateTime($journey['id'])
             ->format('Y-m-d H:i:s');
 
@@ -149,7 +150,7 @@ class JourneyController extends BaseController{
         ]);
     }
 
-    public function showAll(): string|RedirectResponse 
+    public function showAll(): string|RedirectResponse
     {
         // --- Récupération des filtres
         $startAddress   = $this->request->getGet('startAddress');
@@ -163,18 +164,18 @@ class JourneyController extends BaseController{
         $availableSeats = (int) ($this->request->getGet('availableSeats') ?? 1);
         $smoking        = $this->request->getGet('smoking');
         $page           = (int) ($this->request->getGet('page') ?? 1);
- 
-        // --- Construction de la requête
+
+        // --- Construction de la requête (filtres NON géographiques uniquement)
         $db = \Config\Database::connect();
- 
-        if ($latStart && $lngStart) {
-            $selectBoarding = "CASE WHEN (6371 * acos(cos(radians($latStart)) * cos(radians(loc_start.latitude)) * cos(radians(loc_start.longitude) - radians($lngStart)) + sin(radians($latStart)) * sin(radians(loc_start.latitude)))) <= 10 THEN city_start.name ELSE COALESCE((SELECT c.name FROM stage s JOIN location l ON l.id = s.location_id JOIN city c ON c.id = l.city_id WHERE s.journey_id = journey.id AND s.location_id != journey.location_end_id AND (6371 * acos(cos(radians($latStart)) * cos(radians(l.latitude)) * cos(radians(l.longitude) - radians($lngStart)) + sin(radians($latStart)) * sin(radians(l.latitude)))) <= 10 ORDER BY s.position ASC LIMIT 1), city_start.name) END";
-        } else {
-            $selectBoarding = 'city_start.name';
-        }
- 
+
         $builder = $db->table('journey')
-            ->select("journey.*, city_start.name as city_start_name, city_end.name as city_end_name, u.firstname as driver_firstname, u.lastname as driver_lastname, (journey.seats - COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id), 0)) as remaining_seats, $selectBoarding as city_boarding_name")
+            ->select("journey.*,
+                city_start.name as city_start_name,
+                city_end.name   as city_end_name,
+                city_start.name as city_boarding_name,
+                u.firstname     as driver_firstname,
+                u.lastname      as driver_lastname,
+                (journey.seats - COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id), 0)) as remaining_seats")
             ->join('location loc_start', 'loc_start.id = journey.location_start_id')
             ->join('location loc_end',   'loc_end.id = journey.location_end_id')
             ->join('city city_start',    'city_start.id = loc_start.city_id')
@@ -183,53 +184,45 @@ class JourneyController extends BaseController{
             ->where('journey.canceled_at', null)
             ->where('u.deleted_at', null)
             ->orderBy('journey.start_datetime', 'ASC');
- 
-        if ($latStart && $lngStart) {
-            $distStart     = "(6371 * acos(cos(radians($latStart)) * cos(radians(loc_start.latitude)) * cos(radians(loc_start.longitude) - radians($lngStart)) + sin(radians($latStart)) * sin(radians(loc_start.latitude)))) <= 10";
-            $subStageStart = "journey.id IN (SELECT s.journey_id FROM stage s JOIN location l ON l.id = s.location_id WHERE l.id != journey.location_end_id AND (6371 * acos(cos(radians($latStart)) * cos(radians(l.latitude)) * cos(radians(l.longitude) - radians($lngStart)) + sin(radians($latStart)) * sin(radians(l.latitude)))) <= 10)";
-            $builder->groupStart()
-                        ->where($distStart, null, false)
-                        ->orWhere($subStageStart, null, false)
-                    ->groupEnd();
-        }
- 
-        if ($latEnd && $lngEnd) {
-            $distEnd     = "(6371 * acos(cos(radians($latEnd)) * cos(radians(loc_end.latitude)) * cos(radians(loc_end.longitude) - radians($lngEnd)) + sin(radians($latEnd)) * sin(radians(loc_end.latitude)))) <= 10";
-            $subStageEnd = "journey.id IN (SELECT s.journey_id FROM stage s JOIN location l ON l.id = s.location_id WHERE l.id != journey.location_start_id AND (6371 * acos(cos(radians($latEnd)) * cos(radians(l.latitude)) * cos(radians(l.longitude) - radians($lngEnd)) + sin(radians($latEnd)) * sin(radians(l.latitude)))) <= 10)";
-            $builder->groupStart()
-                        ->where($distEnd, null, false)
-                        ->orWhere($subStageEnd, null, false)
-                    ->groupEnd();
-        }
- 
+
         if ($filterDate && $filterTime) {
             $dateTimeCenter = strtotime($filterDate . ' ' . $filterTime . ':00');
             $dateTimeFrom   = date('Y-m-d H:i:s', $dateTimeCenter - 1800);
             $dateTimeTo     = date('Y-m-d H:i:s', $dateTimeCenter + 1800);
             $builder->where('journey.start_datetime >=', $dateTimeFrom)
                     ->where('journey.start_datetime <=', $dateTimeTo);
-        }
- 
-        elseif ($filterDate) {
+        } elseif ($filterDate) {
             $builder->where('DATE(journey.start_datetime)', $filterDate);
             if ($filterDate === date('Y-m-d')) {
                 $builder->where('journey.start_datetime >=', date('Y-m-d H:i:s'));
             }
-        } else
+        } else {
             $builder->where('journey.start_datetime >=', date('Y-m-d H:i:s'));
- 
-        if ($availableSeats)
+        }
+
+        if ($availableSeats) {
             $builder->where("(journey.seats - COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id), 0)) >=", $availableSeats);
- 
-        if ($smoking !== null && $smoking !== '')
+        }
+
+        if ($smoking !== null && $smoking !== '') {
             $builder->where('journey.smoking', $smoking);
- 
-        // --- Pagination
+        }
+
+        // --- Récupération de tous les candidats (sans filtre géographique)
+        $candidates = $builder->get()->getResultArray();
+
+        // --- Filtrage géographique en PHP (matching sur le tracé)
+        $start = ($latStart !== null && $lngStart !== null) ? ['lat' => $latStart, 'lon' => $lngStart] : null;
+        $end   = ($latEnd   !== null && $lngEnd   !== null) ? ['lat' => $latEnd,   'lon' => $lngEnd]   : null;
+
+        $matchingJourneys = $this->findMatchingJourneys($candidates, $start, $end);
+
+        // --- Pagination en PHP
         $perPage  = 5;
-        $total    = $builder->countAllResults(false);
-        $journeys = $builder->limit($perPage, ($page - 1) * $perPage)->get()->getResultArray();
+        $total    = count($matchingJourneys);
+        $journeys = array_slice($matchingJourneys, ($page - 1) * $perPage, $perPage);
         $pager    = \Config\Services::pager();
- 
+
         return view('Journeys/journeyShowAll', [
             'title'          => 'Rechercher un trajet',
             'journeys'       => $journeys,
@@ -248,7 +241,7 @@ class JourneyController extends BaseController{
             'availableSeats' => $availableSeats,
             'smoking'        => $smoking,
         ]);
-    } 
+    }
     
     public function book($id): RedirectResponse
     {
@@ -431,6 +424,26 @@ class JourneyController extends BaseController{
             "journey"=>$this->getJourneyCreateFormData(),
         ];
 
+    }
+
+    private function getShowAllFilter(){
+
+        return[
+
+            $startAddress   = $this->request->getGet('startAddress'),
+            $endAddress     = $this->request->getGet('endAddress'),
+            $latStart       = $this->request->getGet('startLat') !== null ? (float) $this->request->getGet('startLat') : null,
+            $lngStart       = $this->request->getGet('startLng') !== null ? (float) $this->request->getGet('startLng') : null,
+            $latEnd         = $this->request->getGet('endLat')   !== null ? (float) $this->request->getGet('endLat')   : null,
+            $lngEnd         = $this->request->getGet('endLng')   !== null ? (float) $this->request->getGet('endLng')   : null,
+            $filterDate     = $this->request->getGet('date'),
+            $filterTime     = $this->request->getGet('time'),
+            $availableSeats = (int) ($this->request->getGet('availableSeats') ?? 1),
+            $smoking        = $this->request->getGet('smoking'),
+            $page           = (int) ($this->request->getGet('page') ?? 1),
+
+        ];
+        
     }
 
     private function sanitizeAddress($value): string{
@@ -818,6 +831,156 @@ class JourneyController extends BaseController{
         }
 
         return (int) $duration;
+    }
+
+
+    /**
+     * Filtre une liste de trajets candidats en ne gardant que ceux dont le tracé
+     * passe à proximité du départ ET de l'arrivée recherchés.
+     *
+     * Pour chaque trajet : on récupère les points du tracé GeoJSON, on cherche le
+     * point le plus proche du départ ; s'il est dans le rayon, on cherche le point
+     * le plus proche de l'arrivée PARMI LES POINTS SUIVANTS (pour garantir que le
+     * trajet va bien dans le sens départ -> arrivée).
+     *
+     * Filtres partiels gérés : seul le départ, seule l'arrivée, ou aucun des deux
+     * (auquel cas tous les trajets sont retournés).
+     *
+     * @param array[]    $journeys      Trajets candidats (doivent contenir 'track_id')
+     * @param array|null $start         Point de départ ['lat' => float, 'lon' => float] ou null
+     * @param array|null $end           Point d'arrivée ['lat' => float, 'lon' => float] ou null
+     * @param float      $maxDistanceKm Rayon de tolérance en km (défaut : 10)
+     * @return array[]   Sous-ensemble des trajets correspondants
+     */
+    private function findMatchingJourneys(array $journeys, ?array $start, ?array $end, float $maxDistanceKm = 10): array
+    {
+        // Aucun critère géographique : pas de filtrage.
+        if ($start === null && $end === null) {
+            return $journeys;
+        }
+
+        $matchingJourneys = [];
+
+        foreach ($journeys as $journey) {
+
+            // --- Récupération des points du tracé
+            $points = $this->getTrackPoints((int) $journey['track_id']);
+
+            $trackIsEmpty = empty($points);
+            if ($trackIsEmpty) {
+                continue;
+            }
+
+            // Par défaut, on commence la recherche de l'arrivée au début du tracé.
+            // Si un départ est demandé, ce point de départ sera mis à jour ci-dessous.
+            $startIndex = 0;
+
+            // --- Contrainte sur le départ
+            if ($start !== null) {
+
+                $startIndex          = $this->findClosestPointIndex($points, $start);
+                $distanceToStart     = $this->calculateDistance($start, $points[$startIndex]);
+                $startIsTooFar       = $distanceToStart > $maxDistanceKm;
+
+                if ($startIsTooFar) {
+                    continue;
+                }
+            }
+
+            // --- Contrainte sur l'arrivée
+            // La recherche démarre à $startIndex pour garantir le sens départ -> arrivée.
+            if ($end !== null) {
+
+                $endIndex          = $this->findClosestPointIndex($points, $end, $startIndex);
+                $distanceToEnd     = $this->calculateDistance($end, $points[$endIndex]);
+                $endIsTooFar       = $distanceToEnd > $maxDistanceKm;
+
+                if ($endIsTooFar) {
+                    continue;
+                }
+            }
+
+            // --- Trajet validé : il passe à proximité du départ ET de l'arrivée
+            $matchingJourneys[] = $journey;
+        }
+
+        return $matchingJourneys;
+    }
+
+    /**
+     * Récupère et normalise les points du tracé d'un trajet.
+     *
+     * @param int $trackId Identifiant du tracé
+     * @return array[] Points ['lat' => float, 'lon' => float] ; vide si tracé absent/invalide
+     */
+    private function getTrackPoints(int $trackId): array
+    {
+        $track = $this->trackModel->find($trackId);
+        if (empty($track['geojson'])) {
+            return [];
+        }
+
+        $data        = json_decode($track['geojson'], true);
+        $coordinates = $data['features'][0]['geometry']['coordinates'] ?? [];
+
+        $points = [];
+        foreach ($coordinates as $coordinate) {
+            // GeoJSON => [longitude, latitude]
+            $points[] = ['lat' => (float) $coordinate[1], 'lon' => (float) $coordinate[0]];
+        }
+
+        return $points;
+    }
+
+    /**
+     * Renvoie l'indice du point du tracé le plus proche d'une cible.
+     *
+     * @param array[] $points    Points du tracé (['lat','lon'])
+     * @param array   $target    Point cible (['lat','lon'])
+     * @param int     $fromIndex Indice de départ de la recherche (contrainte de sens)
+     * @return int|null Indice du point le plus proche, ou null si la plage est vide
+     */
+    private function findClosestPointIndex(array $points, array $target, int $fromIndex = 0): ?int
+    {
+        $closestIndex = null;
+        $minDistance  = INF;
+        $count        = count($points);
+
+        for ($i = $fromIndex; $i < $count; $i++) {
+            $distance = $this->calculateDistance($target, $points[$i]);
+            if ($distance < $minDistance) {
+                $minDistance  = $distance;
+                $closestIndex = $i;
+            }
+        }
+
+        return $closestIndex;
+    }
+
+    /**
+     * Distance en kilomètres entre deux points (formule de Haversine).
+     *
+     * @param array $coord1 ['lat' => float, 'lon' => float]
+     * @param array $coord2 ['lat' => float, 'lon' => float]
+     * @return float Distance en km
+     */
+    private function calculateDistance(array $coord1, array $coord2): float
+    {
+        $earthRadiusKm = 6371;
+
+        $lat1 = deg2rad($coord1['lat']);
+        $lon1 = deg2rad($coord1['lon']);
+        $lat2 = deg2rad($coord2['lat']);
+        $lon2 = deg2rad($coord2['lon']);
+
+        $dLat = $lat2 - $lat1;
+        $dLon = $lon2 - $lon1;
+
+        $a = sin($dLat / 2) ** 2
+        + cos($lat1) * cos($lat2) * sin($dLon / 2) ** 2;
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+        return $earthRadiusKm * $c;
     }
 
 }
