@@ -175,6 +175,7 @@ class JourneyController extends BaseController{
                 city_start.name as city_boarding_name,
                 u.firstname     as driver_firstname,
                 u.lastname      as driver_lastname,
+                u.is_student    as driver_is_student,
                 (journey.seats - COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id), 0)) as remaining_seats")
             ->join('location loc_start', 'loc_start.id = journey.location_start_id')
             ->join('location loc_end',   'loc_end.id = journey.location_end_id')
