@@ -4,6 +4,7 @@
 /** @var array  $reports      Liste des signalements ouverts */
 /** @var array  $pendingUsers Liste des utilisateurs en attente de validation */
 /** @var int    $nPendingUsers Nombre d'inscriptions en attente */
+/** @var array  $allUsers      Liste de tous les utilisateurs (superadmin uniquement) */
 ?>
 <?= view('partials/head') ?>
 <?= view('partials/header') ?>
@@ -60,6 +61,17 @@
         </span>
       <?php endif; ?>
     </a>
+
+    <!-- Gestion des admins (superadmin uniquement) -->
+    <?php if (session()->get('role') === 'superadmin'): ?>
+      <a href="<?= site_url('admin?tab=admins') ?>"
+        class="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold font-display rounded-t-lg transition-colors
+                  <?= ($tab === 'admins') ? 'bg-surface border border-b-surface border-action/10 text-ink sm:-mb-px' : 'text-ink/40 hover:text-ink' ?>">
+        <i class="fa-solid fa-user-shield text-xs"></i>
+        Admins
+      </a>
+    <?php endif; ?>
+
   </div>
 
   <!-- Contenu de l'onglet actif  -->
@@ -68,6 +80,8 @@
       <?= view('Admin/registrations_tab', ['pendingUsers' => $pendingUsers]) ?>
     <?php elseif ($tab === 'reports'): ?>
       <?= view('Admin/reports_tab', ['reports' => $reports]) ?>
+    <?php elseif ($tab === 'admins' && session()->get('role') === 'superadmin'): ?>
+      <?= view('Admin/admins_tab', ['allUsers' => $allUsers]) ?>
     <?php endif; ?>
   </div>
 </div>

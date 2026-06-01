@@ -99,10 +99,13 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('car/(:num)/edit',    'CarController::showEditForm/$1');
     $routes->post('car/(:num)/update', 'CarController::update/$1');
     $routes->post('car/(:num)/delete', 'CarController::delete/$1');
-
 });
 
-    // Routes admin
-    $routes->get('admin',                              'AdminController::index');
-    $routes->post('admin/reports/(:num)/resolve',      'AdminController::resolveReport/$1');
-    $routes->post('admin/users/(:num)/validate', 'AdminController::updateRegistration/$1');
+// Admin
+$routes->group('admin', ['filter' => 'auth'], function ($routes) {
+    $routes->get('/',                        'AdminController::index');
+    $routes->post('reports/(:num)/resolve',  'AdminController::resolveReport/$1');
+    $routes->post('users/(:num)/validate',   'AdminController::updateRegistration/$1');
+    $routes->post('users/(:num)/role',       'AdminController::updateRole/$1');
+    $routes->post('users/(:num)/delete',     'AdminController::deleteUser/$1');
+});
