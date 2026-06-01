@@ -305,51 +305,32 @@ class DashboardController extends BaseController
     {
         $userId = (int) session('user_id');
 
-        $booking = $this->db->table('booking')
-    ->select("booking.*, journey.start_datetime, journey.seats, journey.user_id as driver_id,
-              loc_start.address as start_address,
-              city_start.name as city_start_name,
-              loc_end.address as end_address,
-              city_end.name as city_end_name,
-              loc_pickup.address as pickup_address,
-              city_pickup.name as pickup_city_name,
-              loc_dropoff.address as dropoff_address,
-              city_dropoff.name as dropoff_city_name,
-              passenger.firstname as passenger_firstname,
-              passenger.lastname as passenger_lastname,
-              passenger.avatar as passenger_avatar,
-              passenger.is_student as passenger_is_student,
-              driver.firstname as driver_firstname,
-              driver.lastname as driver_lastname,
-              driver.avatar as driver_avatar,
-              driver.is_student as driver_is_student,
-              COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id AND b.status = 'accepted'), 0) as booked_seats")
-            ->join('journey',              'journey.id = booking.journey_id')
-            ->join('location loc_start',   'loc_start.id = journey.location_start_id')
-            ->join('location loc_end',     'loc_end.id = journey.location_end_id')
-            ->join('city city_start',      'city_start.id = loc_start.city_id')
-            ->join('city city_end',        'city_end.id = loc_end.city_id')
-            ->join('location loc_pickup',  'loc_pickup.id = booking.location_pickup_id', 'left')
-            ->join('city city_pickup',     'city_pickup.id = loc_pickup.city_id', 'left')
-            ->join('location loc_dropoff', 'loc_dropoff.id = booking.location_dropoff_id', 'left')
-            ->join('city city_dropoff',    'city_dropoff.id = loc_dropoff.city_id', 'left')
-            ->join('user passenger',       'passenger.id = booking.user_id')
-            ->join('user driver',          'driver.id = journey.user_id')
-            ->where('booking.id', $id)
-            ->groupStart()
-                ->where('booking.user_id', $userId)
-                ->orWhere('journey.user_id', $userId)
-            ->groupEnd()
-            ->get()->getRowArray();
+        $booking = $this->bookingModel->findWithDetails($id, $userId);
 
         if (!$booking)
             return redirect()->to('/dashboard/bookings')->with('error', 'Réservation introuvable.');
 
+        $passengers = $this->bookingModel->findPassengersByJourney((int) $booking['journey_id']);
+
+        $isDriver = (int) $booking['driver_id'] === $userId;
+
+        $personFirstname  = $isDriver ? $booking['passenger_firstname']  : $booking['driver_firstname'];
+        $personLastname   = $isDriver ? $booking['passenger_lastname']   : $booking['driver_lastname'];
+        $personAvatar     = $isDriver ? $booking['passenger_avatar']     : $booking['driver_avatar'];
+        $personIsStudent  = $isDriver ? $booking['passenger_is_student'] : $booking['driver_is_student'];
+        $personLabel      = $isDriver ? 'Passager' : 'Conducteur';
+
         return view('Bookings/bookingShow', [
-            'title'    => 'Détail de la réservation',
-            'back'     => $this->request->getGet('back'),
-            'booking'  => $booking,
-            'isDriver' => (int) $booking['driver_id'] === $userId,
+            'title'           => 'Détail de la réservation',
+            'back'            => $this->request->getGet('back'),
+            'booking'         => $booking,
+            'isDriver'        => $isDriver,
+            'passengers'      => $passengers,
+            'personFirstname' => $personFirstname,
+            'personLastname'  => $personLastname,
+            'personAvatar'    => $personAvatar,
+            'personIsStudent' => $personIsStudent,
+            'personLabel'     => $personLabel,
         ]);
     }
 
