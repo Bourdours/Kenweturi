@@ -17,7 +17,6 @@ use App\Exceptions\ExternalApiException;
 use App\Exceptions\ModelValidationException;
 use App\Exceptions\AddressValidationException;
 use DateTimeImmutable;
-use DateTime;
 
 class JourneyController extends BaseController{
 
@@ -267,76 +266,6 @@ class JourneyController extends BaseController{
             'availableSeats' => $availableSeats,
             'smoking'        => $smoking,
         ]);
-    }
-    
-    public function book($id): RedirectResponse
-    {
-        $userId = session('user_id');
-
-        // --- Vérification que le trajet existe et n'est pas annulé
-        $journey = $this->journeyModel->where('id', $id)
-                        ->where('canceled_at', null)
-                        ->first();
-
-        if (!$journey)
-            return redirect()->to('/journeys');
-
-        // --- Vérification que c'est pas le driver
-        if ($journey['user_id'] === $userId)
-            return redirect()->to('/journeys/' . $id)
-                ->with('errors', ['booking' => 'Vous ne pouvez pas réserver votre propre trajet.']);
-
-        // --- Vérification pas déjà réservé
-        $existing = $this->bookingModel->where('journey_id', $id)
-                                       ->where('user_id', $userId)
-                                       ->first();
-
-        if ($existing)
-            return redirect()->to('/journeys/' . $id)
-                ->with('errors', ['booking' => 'Vous avez déjà réservé ce trajet.']);
-
-        // --- Vérification places restantes
-        $bookSeats = $this->bookingModel->selectSum('seat_numbers')
-                                        ->where('journey_id', $id)
-                                        ->get()->getRowArray();
-        $remainingSeats = $journey['seats'] - ($bookSeats['seat_numbers'] ?? 0);
-
-        $seatsRequested = $this->request->getPost('seat_numbers') ?? 1;
-
-        if ($seatsRequested > $remainingSeats)
-            return redirect()->to('/journeys/' . $id)
-                ->with('errors', ['booking' => 'Plus assez de places disponibles.']);
-
-        // --- Insertion de la réservation
-        $bookingId = $this->bookingModel->insert([
-            'booking_date' => date('Y-m-d H:i:s'),
-            'seat_numbers' => $seatsRequested,
-            'journey_id'   => $id,
-            'user_id'      => $userId
-        ]);
-
-        if ($bookingId) {
-            $booking = $this->bookingModel->findWithDetails((int) $bookingId, $userId);
-            if ($booking) {
-                $date = date('d/m/Y', strtotime($booking['start_datetime'])) . ' à ' . date('H:i', strtotime($booking['start_datetime']));
-                $mailer = new MailerExample();
-                $mailer->sendHtml(
-                    $booking['driver_email'],
-                    'Nouvelle demande de réservation',
-                    view('Emails/bookingRequest', [
-                        'firstname'          => $booking['driver_firstname'],
-                        'passengerFirstname' => $booking['passenger_firstname'],
-                        'passengerLastname'  => $booking['passenger_lastname'],
-                        'cityStart'          => $booking['city_start_name'],
-                        'cityEnd'            => $booking['city_end_name'],
-                        'date'               => $date,
-                    ])
-                );
-            }
-        }
-
-        return redirect()->to('/journeys/' . $id)
-            ->with('success', 'Réservation effectuée avec succès.');
     }
 
     /**

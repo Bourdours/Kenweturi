@@ -74,16 +74,16 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('dashboard/reports/(:num)', 'DashboardController::showReport/$1');
 
     // Bookings
-    $routes->post('dashboard/bookings/(:num)/delete', 'BookingController::delete/$1');
-    $routes->post('dashboard/bookings/(:num)/accept', 'BookingController::accept/$1');
-    $routes->post('dashboard/bookings/(:num)/reject', 'BookingController::reject/$1');
+    $routes->post('dashboard/bookings/(:num)/delete',   'BookingController::delete/$1');
+    $routes->post('dashboard/bookings/(:num)/accept',   'BookingController::accept/$1');
+    $routes->post('dashboard/bookings/(:num)/reject',   'BookingController::reject/$1');
+    $routes->post('journeys/(:num)/book',               'BookingController::create/$1');
 
     // Journeys
     $routes->get('journeys',                'JourneyController::showAll');
     $routes->get('journeys/new',            'JourneyController::showCreateForm');
     $routes->post('journeys/new',           'JourneyController::create');
     $routes->get('journeys/(:num)',         'JourneyController::show/$1');
-    $routes->post('journeys/(:num)/book',   'JourneyController::book/$1');
     $routes->post('journeys/(:num)/cancel', 'JourneyController::cancel/$1');
     $routes->post('journeys/(:num)/delete', 'JourneyController::delete/$1');
 
