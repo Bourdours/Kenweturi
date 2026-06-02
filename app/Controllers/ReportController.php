@@ -46,15 +46,12 @@ class ReportController extends BaseController
             throw new PageNotFoundException("Trajet introuvable.");
         }
 
-        if ($reporterId === (int) $journey['user_id']) {
-            return redirect()->back()
-                ->with('error', 'Vous ne pouvez pas signaler votre propre trajet.');
-        }
-
         if ($this->reportModel->alreadyReported($reporterId, $journeyId)) {
             return redirect()->back()
                 ->with('error', 'Vous avez déjà signalé ce trajet.');
         }
+
+        $isDriver = $reporterId === (int) $journey['user_id'];
 
         $hasBooked = $this->bookingModel
             ->join('journey', 'journey.id = booking.journey_id')
@@ -63,7 +60,7 @@ class ReportController extends BaseController
             ->where('journey.start_datetime <', date('Y-m-d H:i:s'))
             ->countAllResults() > 0;
 
-        if (!$hasBooked) {
+        if (!$isDriver && !$hasBooked) {
             return redirect()->back()
                 ->with('error', 'Vous devez avoir effectué ce trajet pour le signaler.');
         }

@@ -57,7 +57,7 @@
         <form action="<?= site_url('admin/reports/' . $report['id'] . '/resolve') ?>" method="POST"
           class="flex flex-col gap-2" onclick="event.stopPropagation()">
           <?= csrf_field() ?>
-          <textarea name="commentAdmin" rows="2" required placeholder="Commentaire obligatoire…"
+          <textarea name="commentAdmin" rows="2" placeholder="Commentaire obligatoire…"
             class="w-full rounded-lg border border-action/20 bg-paper px-3 py-2 text-xs text-ink placeholder:text-ink/30 focus:outline-none focus:border-action/50 resize-none"></textarea>
           <div class="flex gap-2">
             <button type="submit" name="actionAdmin" value="warn"
@@ -127,7 +127,7 @@
             <td class="px-6 py-4" onclick="event.stopPropagation()">
               <form action="<?= site_url('admin/reports/' . $report['id'] . '/resolve') ?>" method="POST" class="flex flex-col gap-2">
                 <?= csrf_field() ?>
-                <textarea name="commentAdmin" rows="1" required placeholder="Commentaire…"
+                <textarea name="commentAdmin" rows="1" placeholder="Commentaire…"
                   class="w-full rounded-lg border border-action/20 bg-paper px-3 py-1.5 text-xs text-ink placeholder:text-ink/30 focus:outline-none focus:border-action/50 resize-none"></textarea>
                 <div class="flex gap-1.5">
                   <button type="submit" name="actionAdmin" value="warn"

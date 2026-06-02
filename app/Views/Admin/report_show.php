@@ -87,7 +87,7 @@ $date->setTimezone(new DateTimeZone('Europe/Paris'));
           <label for="commentAdmin" class="text-ink/50 text-xs font-medium mb-1.5 block">
             Commentaire <span class="text-ink/30 font-normal">(obligatoire)</span>
           </label>
-          <textarea id="commentAdmin" name="commentAdmin" rows="3" required
+          <textarea id="commentAdmin" name="commentAdmin" rows="3"
             placeholder="Expliquez votre décision..."
             class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 resize-none transition-colors"></textarea>
         </div>
