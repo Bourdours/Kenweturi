@@ -358,6 +358,15 @@
         <?php endif ?>
     </div>
 
+    <!-- Signalements -->
+    <div class="flex items-center justify-between">
+        <h2 class="font-display font-bold text-ink text-base flex items-center gap-2">
+            <i class="fa-solid fa-flag text-brand text-sm"></i>
+            Mes signalements
+        </h2>
+        <a href="<?= site_url('dashboard/reports') ?>" class="text-brand text-sm font-medium hover:text-action transition-colors">Voir tous</a>
+    </div>
+
 </div>
 
 <?= view('partials/footer') ?>

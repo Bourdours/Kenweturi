@@ -111,6 +111,7 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
 // Admin
 $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->get('/',                        'AdminController::index');
+    $routes->get('reports/(:num)',           'AdminController::showReport/$1');
     $routes->post('reports/(:num)/resolve',  'AdminController::resolveReport/$1');
     $routes->post('users/(:num)/validate',   'AdminController::updateRegistration/$1');
     $routes->post('users/(:num)/role',       'AdminController::updateRole/$1');
