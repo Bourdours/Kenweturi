@@ -14,6 +14,9 @@ use App\Models\BookingModel;
  */
 class ReportController extends BaseController
 {
+    protected ReportModel $reportModel;
+    protected JourneyModel $journeyModel;
+    protected BookingModel $bookingModel;
 
     public function __construct() {
 
