@@ -150,7 +150,7 @@ class JourneyController extends BaseController{
         $availableSeats = $this->request->getGet('seats') ?? 1;
         $boardingCity   = $this->request->getGet('boardingCity');
 
-        $back = $this->request->getGet('back');
+        $back = $this->validateBackUrl($this->request->getGet('back'));
 
         return view('Journeys/journeyShow',[
             'title'          => 'Détail du trajet',
