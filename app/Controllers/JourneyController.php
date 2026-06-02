@@ -142,6 +142,7 @@ class JourneyController extends BaseController{
         $userBooking = $this->bookingModel
             ->where('journey_id', (int) $id)
             ->where('user_id', session('user_id'))
+            ->where('status', 'accepted')
             ->first();
         $isBooked = $userBooking !== null;
 
@@ -149,7 +150,7 @@ class JourneyController extends BaseController{
         $availableSeats = $this->request->getGet('seats') ?? 1;
         $boardingCity   = $this->request->getGet('boardingCity');
 
-        $back = $this->request->getGet('back');
+        $back = $this->validateBackUrl($this->request->getGet('back'));
 
         return view('Journeys/journeyShow',[
             'title'          => 'Détail du trajet',
@@ -200,7 +201,7 @@ class JourneyController extends BaseController{
                 u.firstname     as driver_firstname,
                 u.lastname      as driver_lastname,
                 u.is_student    as driver_is_student,
-                (journey.seats - COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id), 0)) as remaining_seats")
+                (journey.seats - COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id AND b.status = 'accepted'), 0)) as remaining_seats")
             ->join('location loc_start', 'loc_start.id = journey.location_start_id')
             ->join('location loc_end',   'loc_end.id = journey.location_end_id')
             ->join('city city_start',    'city_start.id = loc_start.city_id')
@@ -226,7 +227,7 @@ class JourneyController extends BaseController{
         }
 
         if ($availableSeats) {
-            $builder->where("(journey.seats - COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id), 0)) >=", $availableSeats);
+            $builder->having("remaining_seats >=", $availableSeats);
         }
 
         if ($smoking !== null && $smoking !== '') {

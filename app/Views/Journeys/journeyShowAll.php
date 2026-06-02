@@ -16,8 +16,11 @@
 
 <div class="max-w-4xl mx-auto py-10 px-6 md:px-8 space-y-6">
 
-    <h1 class="text-ink text-2xl font-bold font-display">Trouvez votre trajet</h1>
-
+    <div class="flex items-center justify-between">
+      <h1 class="text-ink text-2xl font-bold font-display">Chercher un trajet</h1>
+      <a href="<?= esc($back ?? base_url('journeys')) ?>" class="text-ink/50 hover:text-action text-sm flex items-center gap-1.5 transition-colors">
+      </a>
+  </div>
     <!-- Formulaire de recherche -->
     <form id="addJourneyForm" action="<?= site_url('/journeys') ?>" method="GET">
         <div class="bg-surface rounded-2xl p-5 border border-action/10 space-y-4">

@@ -15,6 +15,11 @@ use Config\Services;
  */
 class ReportController extends BaseController
 {
+    protected ReportModel $reportModel;
+    protected JourneyModel $journeyModel;
+    protected BookingModel $bookingModel;
+    protected UserModel $userModel;
+
     public function __construct()
     {
         $this->reportModel  = new ReportModel();
