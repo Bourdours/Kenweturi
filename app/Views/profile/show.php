@@ -25,6 +25,14 @@
     </div>
   <?php endif; ?>
 
+  <!-- En-tête -->
+  <div class="flex items-center justify-between">
+      <h1 class="text-ink text-2xl font-bold font-display">Profil</h1>
+      <a href="<?= esc($back ?? base_url('journeys')) ?>" class="text-ink/50 hover:text-action text-sm flex items-center gap-1.5 transition-colors">
+          <i class="fa-solid fa-arrow-left text-xs"></i>Retour
+      </a>
+  </div>
+
   <!-- Carte identité -->
   <div class="bg-surface rounded-2xl p-6 border border-action/10 flex flex-col sm:flex-row items-center sm:items-start gap-5">
 
