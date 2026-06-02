@@ -138,6 +138,9 @@ class JourneyController extends BaseController{
         // ====== Récupération des passagers
         $passengers = $this->bookingModel->findPassengersByJourney((int) $id);
 
+        // ====== Récupération des reservations en cours pour un trajet
+        $pendingBookings = $this->bookingModel->countPendingBookings((int) $id);
+
         // ====== Réservation de l'utilisateur courant sur ce trajet (si elle existe)
         $userBooking = $this->bookingModel
             ->where('journey_id', (int) $id)
@@ -163,6 +166,7 @@ class JourneyController extends BaseController{
             'passengers'     => $passengers,
             'isBooked'       => $isBooked,
             'userBooking'    => $userBooking,
+            'pendingBookings' => $pendingBookings,
         ]);
     }
 
@@ -234,8 +238,28 @@ class JourneyController extends BaseController{
             $builder->where('journey.smoking', $smoking);
         }
 
+
         // --- Récupération de tous les candidats (sans filtre géographique)
         $candidates = $builder->get()->getResultArray();
+
+        // --- Ajout du nombre de demandes en attente pour chaque trajet
+        $journeyIds = array_column($candidates, 'id');
+        if (!empty($journeyIds)) {
+            $pendingCounts = $db->table('booking')
+                ->select('journey_id, COUNT(*) as pending_bookings')
+                ->where('status', 'pending')
+                ->whereIn('journey_id', $journeyIds)
+                ->groupBy('journey_id')
+                ->get()
+                ->getResultArray();
+
+            $pendingByJourney = array_column($pendingCounts, 'pending_bookings', 'journey_id');
+
+            foreach ($candidates as &$candidate) {
+                $candidate['pending_bookings'] = $pendingByJourney[$candidate['id']] ?? 0;
+            }
+            unset($candidate);
+        }
 
         // --- Filtrage géographique en PHP (matching sur le tracé)
         $start = ($latStart !== null && $lngStart !== null) ? ['lat' => $latStart, 'lon' => $lngStart] : null;
