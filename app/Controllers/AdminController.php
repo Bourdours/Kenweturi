@@ -212,6 +212,16 @@ class AdminController extends BaseController
             ->set(['canceled_at' => date('Y-m-d H:i:s')])
             ->update();
 
+        $mailer = new MailerExample();
+        $mailer->sendHtml(
+            $target['email'],
+            'Votre compte a été supprimé',
+            view('Emails/adminDeletedAccount', [
+                'firstname' => $target['firstname'],
+                'lastname'  => $target['lastname'],
+            ])
+        );
+
         return redirect()->to(site_url('admin?tab=admins'))
             ->with('success', "{$target['firstname']} a été supprimé et ses trajets annulés.");
     }
@@ -252,16 +262,24 @@ class AdminController extends BaseController
         $reportedUserId = $report['reported_user_id'];
         $reportedUser   = $this->userModel->find($reportedUserId);
 
-        if ($action === 'ban') {
-            // Bannissement
+        if ($action === 'ban' && $reportedUser) {
             $this->userModel->ban($reportedUserId);
+            $mailer = new MailerExample();
+            $mailer->sendHtml(
+                $reportedUser['email'],
+                'Votre compte a été suspendu',
+                view('Emails/accountBanned', [
+                    'firstname' => $reportedUser['firstname'],
+                    'lastname'  => $reportedUser['lastname'],
+                ])
+            );
         } elseif ($action === 'warn' && $reportedUser) {
             // Envoi d'un email d'avertissement à l'utilisateur signalé avec le commentaire admin
             $mailer = new MailerExample();
             $mailer->sendHtml(
                 $reportedUser['email'],
                 'Avertissement - Kenweturi',
-                $this->buildEmailHtml($reportedUser['firstname'], $reportedUser['lastname'], $comment)
+                $this->renderWarnEmail($reportedUser['firstname'], $reportedUser['lastname'], $comment)
             );
         }
 
@@ -279,9 +297,9 @@ class AdminController extends BaseController
      * @param  string  $comment    Commentaire de l'administrateur expliquant l'avertissement
      * @return string              HTML de l'email généré
      */
-    private function buildEmailHtml(string $firstname, string $lastname, string $comment): string
+    private function renderWarnEmail(string $firstname, string $lastname, string $comment): string
     {
-        return view('Auth/Emails/adminWarn', [
+        return view('Emails/adminWarn', [
             'firstname' => $firstname,
             'lastname'  => $lastname,
             'comment'   => $comment,

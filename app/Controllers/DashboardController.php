@@ -89,6 +89,7 @@ class DashboardController extends BaseController
             ->join('user u',               'u.id = booking.user_id')
             ->where('journey.user_id',     $userId)
             ->where('booking.status', 'pending')
+            ->where('journey.start_datetime >=', date('Y-m-d H:i:s'))
             ->orderBy('booking.sent_at',   'DESC')
             ->limit(5)
             ->get()->getResultArray();
@@ -139,6 +140,7 @@ class DashboardController extends BaseController
             ->join('city city_end',      'city_end.id = loc_end.city_id')
             ->join('user u',             'u.id = journey.user_id')
             ->where('booking.user_id', $userId)
+            ->where('booking.status', 'accepted')
             ->where('journey.canceled_at', null)
             ->where('journey.start_datetime <', date('Y-m-d H:i:s'))
             ->orderBy('journey.start_datetime', 'DESC')

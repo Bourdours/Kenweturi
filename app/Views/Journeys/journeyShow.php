@@ -5,8 +5,10 @@
 /** @var int         $remainingSeats */
 /** @var int         $availableSeats */
 /** @var string|null $boardingCity */
+/** @var bool        $isBooked */
+/** @var array|null  $userBooking */
 ?>
-<?= view('partials/head', ['extraJs' => [base_url('js/journeyShow.js')]]) ?>
+<?= view('partials/head', ['extraJs' => [base_url('js/journeyShow.js'), base_url('js/modal.js')]]) ?>
 <?= view('partials/header') ?>
 
 <div class="max-w-4xl mx-auto py-10 px-6 md:px-8 space-y-4">
@@ -160,40 +162,48 @@
 
     <!-- Réservation -->
     <article class="bg-surface-card rounded-2xl p-6">
-        <?php if ($remainingSeats > 0) : ?>
+        <?php if ($isBooked): ?>
+            <form id="form-cancel" action="<?= site_url('dashboard/bookings/' . esc($userBooking['id']) . '/delete') ?>" method="POST">
+                <?= csrf_field() ?>
+                <button type="button" onclick="openConfirmModal('Annuler cette réservation ?', 'form-cancel')"
+                    class="w-full border border-danger text-danger font-bold font-display rounded-full py-3 hover:bg-danger hover:text-paper transition-colors">
+                    Annuler ma réservation
+                </button>
+            </form>
+        <?php elseif ($remainingSeats > 0) : ?>
             <div class="flex items-center justify-between mb-6">
                 <div>
                     <p class="text-muted text-sm">Places disponibles</p>
                     <p class="text-ink font-bold font-display text-2xl"><?= esc($remainingSeats) ?></p>
                 </div>
             </div>
-            <form action="<?= site_url('journeys/' . esc($journey['id']) . '/book') ?>" method="POST" id="formBook">
-                <?= csrf_field() ?>
-                <?php if (session('user_id') != $journey['user_id']): ?>
+            <?php if (session('user_id') != $journey['user_id']): ?>
+                <form action="<?= site_url('journeys/' . esc($journey['id']) . '/book') ?>" method="POST" id="formBook">
+                    <?= csrf_field() ?>
                     <button type="button" id="btnOpenBookModal"
                         class="w-full bg-action text-ink font-bold font-display rounded-full py-3 hover:bg-action-dark transition-colors">
                         Réserver <?= $availableSeats > 1 ? $availableSeats . ' places' : '1 place' ?>
                     </button>
-                <?php endif ?>
-            </form> 
+                </form>
 
-            <!-- Modal confirmation réservation -->
-            <div id="modalBook" class="hidden fixed inset-0 w-full h-full bg-black/50 items-center justify-center z-[9999]">
-                <div class="bg-surface rounded-2xl p-6 w-[90%] max-w-[400px]">
-                    <h2 class="text-action font-semibold font-display mb-2">Confirmer la réservation</h2>
-                    <p class="text-ink text-sm mb-6">Vous allez réserver <?= $availableSeats > 1 ? $availableSeats . ' places' : '1 place' ?> sur ce trajet.<br> Êtes-vous sûr ?</p>
-                    <div class="flex gap-3">
-                        <button type="button" id="btnCancelBook"
-                            class="flex-1 border border-ink/20 text-ink rounded-lg px-4 py-2 text-sm font-semibold">
-                            Annuler
-                        </button>
-                        <button type="button" id="btnConfirmBook"
-                            class="flex-1 bg-action text-paper rounded-lg px-4 py-2 text-sm font-semibold">
-                            Confirmer
-                        </button>
+                <!-- Modal confirmation réservation -->
+                <div id="modalBook" class="hidden fixed inset-0 w-full h-full bg-black/50 items-center justify-center z-[9999]">
+                    <div class="bg-surface rounded-2xl p-6 w-[90%] max-w-[400px]">
+                        <h2 class="text-action font-semibold font-display mb-2">Confirmer la réservation</h2>
+                        <p class="text-ink text-sm mb-6">Vous allez réserver <?= $availableSeats > 1 ? $availableSeats . ' places' : '1 place' ?> sur ce trajet.<br> Êtes-vous sûr ?</p>
+                        <div class="flex gap-3">
+                            <button type="button" id="btnCancelBook"
+                                class="flex-1 border border-ink/20 text-ink rounded-lg px-4 py-2 text-sm font-semibold">
+                                Annuler
+                            </button>
+                            <button type="button" id="btnConfirmBook"
+                                class="flex-1 bg-action text-paper rounded-lg px-4 py-2 text-sm font-semibold">
+                                Confirmer
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
+            <?php endif ?>
         <?php else : ?>
             <p class="text-center text-muted font-semibold py-2">Trajet complet</p>
         <?php endif ?>

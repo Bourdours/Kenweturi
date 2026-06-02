@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use \CodeIgniter\HTTP\RedirectResponse;
 
+use App\Libraries\MailerExample;
 use \App\Models\UserModel;
 use \App\Models\CityModel;
 use DateTime;
@@ -166,6 +167,18 @@ class AuthController extends BaseController
         // Tentative de sauvegarde de l'utilisateur via le Model
         if (!$this->userModel->save($data)) {
             return redirect()->back()->withInput()->with('errors', $this->userModel->errors());
+        }
+
+        // Notification aux admins
+        $admins = $this->userModel->where('is_admin', 1)->where('status', 'active')->findAll();
+        $emailBody = view('Emails/newRegistration', [
+            'firstname' => $data['firstname'],
+            'lastname'  => $data['lastname'],
+            'email'     => $data['email'],
+        ]);
+        $mailer = new MailerExample();
+        foreach ($admins as $admin) {
+            $mailer->sendHtml($admin['email'], 'Nouvelle demande d\'inscription', $emailBody);
         }
 
         // Redirection vers la page de connexion avec un message flash
@@ -393,6 +406,18 @@ class AuthController extends BaseController
             'reset_token'        => null,
             'reset_token_expiry' => null,
         ]);
+
+        $mailer = new MailerExample();
+        $mailer->sendHtml(
+            $user['email'],
+            'Votre mot de passe a été modifié',
+            view('Emails/passwordChanged', [
+                'firstname' => $user['firstname'],
+                'lastname'  => $user['lastname'],
+                'date'      => ucfirst(\CodeIgniter\I18n\Time::now('Europe/Paris', 'fr_FR')->toLocalizedString('d MMMM yyyy à HH:mm')),
+                'support'   => env('mailer.from'),
+            ])
+        );
 
         return redirect()->to('/login')->with('success', 'Mot de passe réinitialisé avec succès !');
     }

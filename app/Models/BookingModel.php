@@ -72,10 +72,12 @@ class BookingModel extends BaseModel
                 city_dropoff.name as dropoff_city_name,
                 passenger.firstname as passenger_firstname,
                 passenger.lastname as passenger_lastname,
+                passenger.email as passenger_email,
                 passenger.avatar as passenger_avatar,
                 passenger.is_student as passenger_is_student,
                 driver.firstname as driver_firstname,
                 driver.lastname as driver_lastname,
+                driver.email as driver_email,
                 driver.avatar as driver_avatar,
                 driver.is_student as driver_is_student,
                 COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id AND b.status = 'accepted'), 0) as booked_seats")
