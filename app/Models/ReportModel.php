@@ -21,17 +21,19 @@ class ReportModel extends BaseModel
         'description',
         'journey_id',
         'user_id',
-        'status',      
-        'admin_comment', 
-        'resolved_at',   
-        'resolved_by',  
+        'reported_user_id',
+        'status',
+        'admin_comment',
+        'resolved_at',
+        'resolved_by',
     ];
 
     protected $validationRules = [
-        'title'       => 'required|min_length[3]|max_length[127]',
-        'description' => 'required|min_length[10]|max_length[1000]',
-        'journey_id'  => 'required|is_natural_no_zero|is_not_unique[journey.id]',
-        'user_id'     => 'required|is_natural_no_zero|is_not_unique[user.id]',
+        'title'            => 'required|min_length[3]|max_length[127]',
+        'description'      => 'required|min_length[10]|max_length[1000]',
+        'journey_id'       => 'required|is_natural_no_zero|is_not_unique[journey.id]',
+        'user_id'          => 'required|is_natural_no_zero|is_not_unique[user.id]',
+        'reported_user_id' => 'required|is_natural_no_zero|is_not_unique[user.id]',
     ];
 
     protected $validationMessages = [
@@ -56,22 +58,56 @@ class ReportModel extends BaseModel
             'is_not_unique'      => 'Cet utilisateur n\'existe pas.',
         ],
     ];
-/**
+    public function getReportDetail(int $id): ?array
+    {
+        return $this->select('report.*,
+                reporter.firstname AS reporter_firstname, reporter.lastname AS reporter_lastname, reporter.email AS reporter_email,
+                reported.firstname AS reported_firstname, reported.lastname AS reported_lastname, reported.email AS reported_email,
+                j.id AS journey_id, j.start_datetime AS journey_date')
+            ->join('user reporter', 'reporter.id = report.user_id')
+            ->join('journey j',     'j.id = report.journey_id')
+            ->join('user reported', 'reported.id = report.reported_user_id')
+            ->where('report.id', $id)
+            ->first();
+    }
+
+    public function alreadyReported(int $userId, int $journeyId): bool
+    {
+        return $this->where('user_id', $userId)
+            ->where('journey_id', $journeyId)
+            ->countAllResults() > 0;
+    }
+
+    /**
      * Récupère les signalements ouverts avec les alias attendus par la vue
      */
     public function getOpenReports(): array
     {
         // En utilisant $this directement, on profite des capacités natives du modèle
-        return $this->select('report.*, 
+        return $this->select('report.*,
                       reporter.firstname AS reporter_firstname, reporter.lastname AS reporter_lastname,
                       reported.firstname AS reported_firstname, reported.lastname AS reported_lastname,
                       j.start_datetime AS journey_date')
-            ->join('user reporter', 'reporter.id = report.user_id')
-            ->join('journey j', 'j.id = report.journey_id')
-            ->join('user reported', 'reported.id = j.user_id')
+            ->join('user reporter',  'reporter.id = report.user_id')
+            ->join('journey j',      'j.id = report.journey_id')
+            ->join('user reported',  'reported.id = report.reported_user_id', 'left')
             ->where('report.status', 'open')
             ->orderBy('report.created_at', 'DESC')
             ->findAll(); // findAll() retourne directement un tableau de résultats
+    }
+
+    public function getClosedReports(): array
+    {
+        return $this->select('report.*,
+                      reporter.firstname AS reporter_firstname, reporter.lastname AS reporter_lastname,
+                      reported.firstname AS reported_firstname, reported.lastname AS reported_lastname,
+                      j.start_datetime AS journey_date')
+            ->join('user reporter',  'reporter.id = report.user_id')
+            ->join('journey j',      'j.id = report.journey_id')
+            ->join('user reported',  'reported.id = report.reported_user_id', 'left')
+            ->where('report.status', 'closed')
+            ->orderBy('report.resolved_at', 'DESC')
+            ->findAll();
     }
 
     /**
@@ -93,9 +129,6 @@ class ReportModel extends BaseModel
      */
     public function getWithJourneyOwner(int $id): ?array
     {
-        return $this->select('report.*, j.user_id AS reported_user_id')
-            ->join('journey j', 'j.id = report.journey_id')
-            ->where('report.id', $id)
-            ->first(); // first() retourne la première ligne sous forme de tableau ou null
+        return $this->where('id', $id)->first();
     }
 }

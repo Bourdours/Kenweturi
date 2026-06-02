@@ -4,9 +4,10 @@ namespace App\Controllers;
 
 use App\Models\ReportModel;
 use App\Models\JourneyModel;
+use App\Models\UserModel;
+use App\Models\BookingModel;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use Config\Services;
-use App\Models\BookingModel;
 
 /**
  * Contrôleur gérant les signalements de trajets.
@@ -14,12 +15,12 @@ use App\Models\BookingModel;
  */
 class ReportController extends BaseController
 {
-
-    public function __construct() {
-
+    public function __construct()
+    {
         $this->reportModel  = new ReportModel();
         $this->journeyModel = new JourneyModel();
         $this->bookingModel = new BookingModel();
+        $this->userModel    = new UserModel();
     }
 
     /**
@@ -30,60 +31,59 @@ class ReportController extends BaseController
     public function create(int $journeyId)
     {
         if (!session()->get('isLoggedIn')) {
-    return redirect()->to('/login');
-    }
+            return redirect()->to('/login');
+        }
 
         $reporterId = (int) session()->get('user_id');
 
-        
-
-        // Vérification que le trajet existe
-        $journey = $journeyModel->find($journeyId);
+        $journey = $this->journeyModel->find($journeyId);
         if (!$journey) {
             throw new PageNotFoundException("Trajet introuvable.");
         }
 
-        $journeyOwnerId = (int) $journey['user_id'];
-
-        // Un utilisateur ne peut pas signaler son propre trajet
-        if ($reporterId === $journeyOwnerId) {
+        if ($reporterId === (int) $journey['user_id']) {
             return redirect()->back()
                 ->with('error', 'Vous ne pouvez pas signaler votre propre trajet.');
         }
 
-        // Anti-doublon 
-        if ($reportModel->alreadyReported($reporterId, $journeyId)) {
+        if ($this->reportModel->alreadyReported($reporterId, $journeyId)) {
             return redirect()->back()
                 ->with('error', 'Vous avez déjà signalé ce trajet.');
         }
 
-        $hasBookked = $bookingModel
+        $hasBooked = $this->bookingModel
             ->join('journey', 'journey.id = booking.journey_id')
             ->where('booking.journey_id', $journeyId)
             ->where('booking.user_id', $reporterId)
             ->where('journey.start_datetime <', date('Y-m-d H:i:s'))
             ->countAllResults() > 0;
-        
-            if (!$hasBooked) {
-                return redirect()->back()
-                        ->with('error', 'Vous devez avoir effectué ce trajet pour le signaler.');
-            }
 
-        // Validation et insertion via le model
-        $data = [
-            'title'       => $this->request->getPost('titleReport'),
-            'description' => $this->request->getPost('reasonReport'),
-            'journey_id'  => $journeyId,
-            'user_id'     => $reporterId,
-        ];
-
-        if (!$reportModel->insert($data)) {
+        if (!$hasBooked) {
             return redirect()->back()
-                ->withInput()
-                ->with('validationErrors', $reportModel->errors());
+                ->with('error', 'Vous devez avoir effectué ce trajet pour le signaler.');
         }
 
-        // Notification admin par email
+        $reportedUserId = (int) $this->request->getPost('reportedUserId');
+        if ($reportedUserId === $reporterId) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Vous ne pouvez pas vous signaler vous-même.');
+        }
+
+        $data = [
+            'title'            => $this->request->getPost('titleReport'),
+            'description'      => $this->request->getPost('reasonReport'),
+            'journey_id'       => $journeyId,
+            'user_id'          => $reporterId,
+            'reported_user_id' => $reportedUserId,
+        ];
+
+        if (!$this->reportModel->insert($data)) {
+            return redirect()->back()
+                ->withInput()
+                ->with('validationErrors', $this->reportModel->errors());
+        }
+
         $this->notifyAdmin($journey, $data['description'], $reporterId);
 
         return redirect()->back()
@@ -92,45 +92,64 @@ class ReportController extends BaseController
 
     /**
      * Affiche le formulaire de signalement
-     * 
-     * @return string
      */
     public function showCreateForm(int $journeyId): string|RedirectResponse
     {
         $journey = $this->journeyModel->find($journeyId);
 
-        if(!$journey) {
+        if (!$journey) {
             return redirect()->to('/journeys')->with('error', 'Trajet introuvable.');
         }
 
+        $currentUserId = (int) session()->get('user_id');
+
+        // Conducteur
+        $driver = $this->userModel->find((int) $journey['user_id']);
+
+        // Passagers acceptés (hors utilisateur courant)
+        $passengers = $this->bookingModel->findPassengersByJourney($journeyId);
+
+        // Liste des utilisateurs signalables (conducteur + passagers, hors soi-même)
+        $reportableUsers = [];
+
+        if ($driver && (int) $driver['id'] !== $currentUserId) {
+            $reportableUsers[] = [
+                'id'        => $driver['id'],
+                'firstname' => $driver['firstname'],
+                'lastname'  => $driver['lastname'],
+                'role'      => 'Conducteur',
+            ];
+        }
+
+        foreach ($passengers as $p) {
+            if ((int) $p['user_id'] !== $currentUserId) {
+                $reportableUsers[] = [
+                    'id'        => $p['user_id'],
+                    'firstname' => $p['firstname'],
+                    'lastname'  => $p['lastname'],
+                    'role'      => 'Passager',
+                ];
+            }
+        }
+
         return view('Reports/reportShow', [
-            'title'   => 'Signaler un trajet',
-            'journey' => $journey,
+            'title'           => 'Signaler un trajet',
+            'journey'         => $journey,
+            'reportableUsers' => $reportableUsers,
         ]);
     }
 
-    /**
-     * Envoie un email de notification à l'administrateur
-     * lors d'un nouveau signalement.
-     *
-     * @param array  $journey     Les données du trajet signalé
-     * @param string $description La description du signalement
-     * @param int    $reporterId  L'id de l'utilisateur qui signale
-     */
     private function notifyAdmin(array $journey, string $description, int $reporterId): void
     {
         $email = Services::email();
 
         $email->setTo(getenv('ADMIN_EMAIL') ?: 'admin@exemple.com');
         $email->setSubject('[Signalement] Nouveau signalement à traiter');
-        $email->setMessage("
-            Un nouveau signalement a été soumis.<br><br>
-            <strong>Signalé par (user_id) :</strong> {$reporterId}<br>
-            <strong>Trajet signalé (journey_id) :</strong> {$journey['id']}<br>
-            <strong>Propriétaire du trajet (user_id) :</strong> {$journey['user_id']}<br>
-            <strong>Description :</strong> " . nl2br(esc($description)) . "<br><br>
-            À traiter sous 48h dans l'interface d'administration.
-        ");
+        $email->setMessage(view('Emails/adminNewReport', [
+            'reporterId'  => $reporterId,
+            'journeyId'   => $journey['id'],
+            'description' => $description,
+        ]));
 
         $email->send();
     }

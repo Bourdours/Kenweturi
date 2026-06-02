@@ -1,10 +1,12 @@
 <?php
 
-/** @var string $tab          Onglet actif ('registrations' ou 'reports') */
-/** @var array  $reports      Liste des signalements ouverts */
-/** @var array  $pendingUsers Liste des utilisateurs en attente de validation */
-/** @var int    $nPendingUsers Nombre d'inscriptions en attente */
-/** @var array  $allUsers      Liste de tous les utilisateurs (superadmin uniquement) */
+/** @var string $tab            Onglet actif ('registrations' ou 'reports') */
+/** @var array  $reports        Liste des signalements ouverts */
+/** @var array  $closedReports  Liste des signalements clôturés */
+/** @var int    $nOpenReports   Nombre de signalements ouverts */
+/** @var array  $pendingUsers   Liste des utilisateurs en attente de validation */
+/** @var int    $nPendingUsers  Nombre d'inscriptions en attente */
+/** @var array  $allUsers       Liste de tous les utilisateurs (superadmin uniquement) */
 ?>
 <?= view('partials/head') ?>
 <?= view('partials/header') ?>
@@ -55,9 +57,9 @@
             <?= ($tab === 'reports') ? 'bg-surface border border-b-surface border-action/10 text-ink sm:-mb-px' : 'text-ink/40 hover:text-ink' ?>">
       <i class="fa-solid fa-flag text-xs"></i>
       Signalements
-      <?php if (!empty($reports)): ?>
+      <?php if ($nOpenReports > 0): ?>
         <span class="bg-danger text-ink text-xs font-bold px-1.5 py-0.5 rounded-full leading-none">
-          <?= count($reports) ?>
+          <?= $nOpenReports ?>
         </span>
       <?php endif; ?>
     </a>
