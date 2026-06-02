@@ -57,16 +57,18 @@ class AdminController extends BaseController
 
         // Récupère l'onglet actif depuis l'URL
         $tab = $this->request->getGet('tab') ?? 'registrations';
-        $reports      = [];
-        $pendingUsers = [];
-        $allUsers     = [];
+        $reports        = [];
+        $closedReports  = [];
+        $pendingUsers   = [];
+        $allUsers       = [];
 
         if ($tab === 'registrations') {
             // Charge les utilisateurs dont l'inscription est en attente de validation
             $pendingUsers = $this->userModel->getPendingUsersWithCity();
         } elseif ($tab === 'reports') {
-            // Charge les signalements encore ouverts
-            $reports = $this->reportModel->getOpenReports();
+            // Charge les signalements encore ouverts et les clôturés
+            $reports       = $this->reportModel->getOpenReports();
+            $closedReports = $this->reportModel->getClosedReports();
         } elseif ($tab === 'admins') {
             if (session()->get('role') !== 'superadmin') {
                 return redirect()->to(site_url('admin'))->with('error', 'Accès refusé.');
@@ -76,15 +78,18 @@ class AdminController extends BaseController
 
 
         // Compte le nombre total d'inscriptions en attente
-        $nPendingUsers = $this->userModel->where('status', 'pending')->countAllResults();
+        $nPendingUsers  = $this->userModel->where('status', 'pending')->countAllResults();
+        $nOpenReports   = $this->reportModel->where('status', 'open')->countAllResults();
 
         return view('Admin/index', [
-            'title'         => 'Administration',
-            'tab'           => $tab,
-            'reports'       => $reports,
-            'pendingUsers'  => $pendingUsers,
-            'nPendingUsers' => $nPendingUsers,
-            'allUsers'      => $allUsers,
+            'title'          => 'Administration',
+            'tab'            => $tab,
+            'reports'        => $reports,
+            'closedReports'  => $closedReports,
+            'nOpenReports'   => $nOpenReports,
+            'pendingUsers'   => $pendingUsers,
+            'nPendingUsers'  => $nPendingUsers,
+            'allUsers'       => $allUsers,
         ]);
     }
 
@@ -224,6 +229,24 @@ class AdminController extends BaseController
 
         return redirect()->to(site_url('admin?tab=admins'))
             ->with('success', "{$target['firstname']} a été supprimé et ses trajets annulés.");
+    }
+
+    public function showReport(int $id)
+    {
+        if ($response = $this->requireAdmin()) {
+            return $response;
+        }
+
+        $report = $this->reportModel->getReportDetail($id);
+        if (!$report) {
+            return redirect()->to(site_url('admin?tab=reports'))
+                ->with('error', 'Signalement introuvable.');
+        }
+
+        return view('Admin/report_show', [
+            'title'  => 'Signalement #' . $id,
+            'report' => $report,
+        ]);
     }
 
     /**
