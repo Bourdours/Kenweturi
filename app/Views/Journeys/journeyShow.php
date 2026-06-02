@@ -191,7 +191,7 @@
         <?php elseif ($remainingSeats > 0) : ?>
             <div class="flex items-center justify-between mb-6">
                 <div>
-                    <p class="text-muted text-sm">Places disponibles</p>
+                    <p class="text-muted text-sm"><?= $remainingSeats > 1 ? 'Places disponibles' : 'Place disponible' ?></p>
                     <p class="text-ink font-bold font-display text-2xl"><?= esc($remainingSeats) ?></p>
                 </div>
             </div>

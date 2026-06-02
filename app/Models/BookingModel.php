@@ -114,5 +114,18 @@ class BookingModel extends BaseModel
             ->where('booking.status', 'accepted')
             ->findAll();
     }
+
+    /**
+     * Récupère les reservations envoyées (en cours) pour un trajet.
+     *
+     * @param int $journeyId Identifiant du trajet
+     * @return array         nombres de reservation envoyées 
+     */
+    public function countPendingBookings(int $journeyId): int
+    {
+        return $this->where('journey_id', $journeyId)
+                    ->where('status', 'pending')
+                    ->countAllResults();
+    }
     
 }
