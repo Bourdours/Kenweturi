@@ -180,7 +180,7 @@
 
     <!-- Réservation -->
     <article class="bg-surface-card rounded-2xl p-6">
-        <?php if ($isBooked): ?>
+        <?php if ($isBooked && $journey['start_datetime'] > date('Y-m-d H:i:s')): ?>
             <form id="form-cancel" action="<?= site_url('dashboard/bookings/' . esc($userBooking['id']) . '/delete') ?>" method="POST">
                 <?= csrf_field() ?>
                 <button type="button" onclick="openConfirmModal('Annuler cette réservation ?', 'form-cancel')"
@@ -229,7 +229,7 @@
     
     <!-- bouton signaler -->
     <div class="deleteAccount w-full">
-        <?php if (session()->get('user_id') != $journey['user_id'] && $isBooked && $journey['start_datetime'] < date('Y-m-d H:i:s')): ?>
+        <?php if (($isBooked || session()->get('user_id') == $journey['user_id']) && $journey['start_datetime'] < date('Y-m-d H:i:s')): ?>
             <a href="<?= site_url('journeys/' . $journey['id'] . '/report') ?>"
             class="inline-flex items-center gap-2 bg-danger/10 hover:bg-danger text-danger hover:text-white border border-danger/30 hover:border-danger font-semibold rounded-lg px-4 py-2 text-sm transition-colors cursor-pointer">
                 <i class="fa-solid fa-flag text-xs"></i> Signaler un problème
