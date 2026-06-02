@@ -35,6 +35,7 @@ class Home extends BaseController
                 ->join('city city_start',    'city_start.id = loc_start.city_id')
                 ->join('city city_end',      'city_end.id = loc_end.city_id')
                 ->where('booking.user_id', $userId)
+                ->where('booking.status', 'accepted')
                 ->where('journey.canceled_at', null)
                 ->where('journey.start_datetime >', $now)
                 ->orderBy('journey.start_datetime', 'ASC')

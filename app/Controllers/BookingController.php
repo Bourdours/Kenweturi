@@ -2,8 +2,9 @@
 
 namespace App\Controllers;
 
+use App\Libraries\MailerExample;
 use App\Models\BookingModel;
-use \CodeIgniter\HTTP\RedirectResponse; 
+use \CodeIgniter\HTTP\RedirectResponse;
 
 /**
  * Contrôleur gérant l'objet booking
@@ -25,17 +26,32 @@ class BookingController extends BaseController
      */
     public function delete(int $id): RedirectResponse
     {
-        $booking = $this->bookingModel
-            ->where('user_id', session()->get('user_id'))
-            ->find($id);
+        $userId = (int) session()->get('user_id');
 
-        if (!$booking)
+        $booking = $this->bookingModel->findWithDetails($id, $userId);
+
+        if (!$booking || (int) $booking['user_id'] !== $userId)
             return redirect()->to('/dashboard')->with('error', 'Réservation introuvable.');
 
         $this->bookingModel->delete($id);
 
-        return redirect()->to('/dashboard')->with('success', 'Réservation annulée avec succès !');
+        $date = date('d/m/Y', strtotime($booking['start_datetime'])) . ' à ' . date('H:i', strtotime($booking['start_datetime']));
 
+        $mailer = new MailerExample();
+        $mailer->sendHtml(
+            $booking['driver_email'],
+            'Annulation d\'une réservation',
+            view('Emails/bookingCancelled', [
+                'firstname'          => $booking['driver_firstname'],
+                'passengerFirstname' => $booking['passenger_firstname'],
+                'passengerLastname'  => $booking['passenger_lastname'],
+                'cityStart'          => $booking['city_start_name'],
+                'cityEnd'            => $booking['city_end_name'],
+                'date'               => $date,
+            ])
+        );
+
+        return redirect()->to('/dashboard')->with('success', 'Réservation annulée avec succès !');
     }
 
     /**
@@ -48,19 +64,9 @@ class BookingController extends BaseController
     {
         $userId = (int) session()->get('user_id');
 
-        // Vérification que la réservation existe et appartient à un trajet du driver
-        $db = \Config\Database::connect();
+        $booking = $this->bookingModel->findWithDetails($id, $userId);
 
-        $booking = $db->table('booking')
-            ->select('booking.*, journey.user_id as driver_id')
-            ->join('journey', 'journey.id = booking.journey_id')
-            ->where('booking.id', $id)
-            ->where('journey.user_id', $userId)
-            ->get()->getRowArray();
-        
-        
-
-        if (!$booking)
+        if (!$booking || (int) $booking['driver_id'] !== $userId)
             return redirect()->to('/dashboard/bookings')->with('error', 'Réservation introuvable.');
 
         if ($booking['status'] !== 'pending')
@@ -68,7 +74,23 @@ class BookingController extends BaseController
 
         $this->bookingModel->update($id, ['status' => 'accepted']);
 
-        return redirect()->to('/dashboard/bookings')->with('success', 'Réservation acceptée.');    
+        $date = date('d/m/Y', strtotime($booking['start_datetime'])) . ' à ' . date('H:i', strtotime($booking['start_datetime']));
+
+        $mailer = new MailerExample();
+        $mailer->sendHtml(
+            $booking['passenger_email'],
+            'Votre réservation a été acceptée',
+            view('Emails/bookingAccepted', [
+                'firstname'       => $booking['passenger_firstname'],
+                'driverFirstname' => $booking['driver_firstname'],
+                'driverLastname'  => $booking['driver_lastname'],
+                'cityStart'       => $booking['city_start_name'],
+                'cityEnd'         => $booking['city_end_name'],
+                'date'            => $date,
+            ])
+        );
+
+        return redirect()->to('/dashboard/bookings')->with('success', 'Réservation acceptée.');
     }
 
     /**
@@ -81,22 +103,29 @@ class BookingController extends BaseController
     {
         $userId = (int) session()->get('user_id');
 
-        $db = \Config\Database::connect();
+        $booking = $this->bookingModel->findWithDetails($id, $userId);
 
-        $booking = $db->table('booking')
-            ->select('booking.*, journey.user_id as driver_id')
-            ->join('journey', 'journey.id = booking.journey_id')
-            ->where('booking.id', $id)
-            ->where('journey.user_id', $userId)
-            ->get()->getRowArray();
-
-        if (!$booking)
+        if (!$booking || (int) $booking['driver_id'] !== $userId)
             return redirect()->to('/dashboard/bookings')->with('error', 'Réservation introuvable.');
 
         if ($booking['status'] !== 'pending')
             return redirect()->to('/dashboard/bookings')->with('error', 'Cette réservation a déjà été traitée.');
 
         $this->bookingModel->update($id, ['status' => 'rejected']);
+
+        $date = date('d/m/Y', strtotime($booking['start_datetime'])) . ' à ' . date('H:i', strtotime($booking['start_datetime']));
+
+        $mailer = new MailerExample();
+        $mailer->sendHtml(
+            $booking['passenger_email'],
+            'Votre réservation n\'a pas été retenue',
+            view('Emails/bookingRejected', [
+                'firstname' => $booking['passenger_firstname'],
+                'cityStart' => $booking['city_start_name'],
+                'cityEnd'   => $booking['city_end_name'],
+                'date'      => $date,
+            ])
+        );
 
         return redirect()->to('/dashboard/bookings')->with('success', 'Réservation refusée.');
     }
