@@ -2,6 +2,7 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
+use App\Libraries\MailerExample;
 use CodeIgniter\HTTP\RedirectResponse;
 
 use App\Models\TrackModel;
@@ -137,6 +138,13 @@ class JourneyController extends BaseController{
         // ====== Récupération des passagers
         $passengers = $this->bookingModel->findPassengersByJourney((int) $id);
 
+        // ====== Réservation de l'utilisateur courant sur ce trajet (si elle existe)
+        $userBooking = $this->bookingModel
+            ->where('journey_id', (int) $id)
+            ->where('user_id', session('user_id'))
+            ->first();
+        $isBooked = $userBooking !== null;
+
         // ====== Récupération des filtres de réservation
         $availableSeats = $this->request->getGet('seats') ?? 1;
         $boardingCity   = $this->request->getGet('boardingCity');
@@ -152,6 +160,8 @@ class JourneyController extends BaseController{
             'availableSeats' => $availableSeats,
             'boardingCity'   => $boardingCity,
             'passengers'     => $passengers,
+            'isBooked'       => $isBooked,
+            'userBooking'    => $userBooking,
         ]);
     }
 
@@ -288,12 +298,32 @@ class JourneyController extends BaseController{
                 ->with('errors', ['booking' => 'Plus assez de places disponibles.']);
 
         // --- Insertion de la réservation
-        $this->bookingModel->insert([
+        $bookingId = $this->bookingModel->insert([
             'booking_date' => date('Y-m-d H:i:s'),
             'seat_numbers' => $seatsRequested,
             'journey_id'   => $id,
             'user_id'      => $userId
         ]);
+
+        if ($bookingId) {
+            $booking = $this->bookingModel->findWithDetails((int) $bookingId, $userId);
+            if ($booking) {
+                $date = date('d/m/Y', strtotime($booking['start_datetime'])) . ' à ' . date('H:i', strtotime($booking['start_datetime']));
+                $mailer = new MailerExample();
+                $mailer->sendHtml(
+                    $booking['driver_email'],
+                    'Nouvelle demande de réservation',
+                    view('Emails/bookingRequest', [
+                        'firstname'          => $booking['driver_firstname'],
+                        'passengerFirstname' => $booking['passenger_firstname'],
+                        'passengerLastname'  => $booking['passenger_lastname'],
+                        'cityStart'          => $booking['city_start_name'],
+                        'cityEnd'            => $booking['city_end_name'],
+                        'date'               => $date,
+                    ])
+                );
+            }
+        }
 
         return redirect()->to('/journeys/' . $id)
             ->with('success', 'Réservation effectuée avec succès.');
