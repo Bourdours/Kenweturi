@@ -138,10 +138,25 @@
                                 <p class="text-muted text-sm"><?= $journey['driver_is_student'] ? 'Étudiant' : 'Formateur' ?></p>
                             </div>
                         </div>
-                        <span class="flex items-center gap-1.5">
-                            <i class="fa-solid fa-user text-xs"></i>
-                            <?= esc($journey['remaining_seats']) ?> place<?= $journey['remaining_seats'] > 1 ? 's' : '' ?>
-                        </span>
+                        <div class="min-w-[175]">
+                            <span class="flex items-center gap-1.5">
+                                <i class="fa-solid fa-user text-xs"></i>
+                                <?= esc($journey['remaining_seats']) ?> place disponible<?= $journey['remaining_seats'] > 1 ? 's' : '' ?>
+                            </span>
+                            <?php if ($journey['pending_bookings'] > 0): ?>
+                                <span class="flex items-center gap-1.5">
+                                <p>
+                                    <i class="fa-solid fa-download text-xs"></i>
+                                    <?= esc($journey['pending_bookings']) ?> réservation en attente<?= $journey['pending_bookings'] > 1 ? 's' : '' ?>
+                                </p>
+                            <?php else: ?>
+                                <p class="hidden">
+                                    <i class="fa-solid fa-download text-xs"></i>
+                                    <?= esc($journey['pending_bookings']) ?> réservation en attente<?= $journey['pending_bookings'] > 1 ? 's' : '' ?>
+                                </p>
+                            </span>
+                            <?php endif; ?>
+                        </div>
                     </div>
                 </a>
             <?php endforeach ?>
