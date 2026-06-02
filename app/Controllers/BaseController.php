@@ -6,6 +6,8 @@ use CodeIgniter\Controller;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
+use CodeIgniter\HTTP\URI;
+use CodeIgniter\HTTP\Exceptions\HTTPException;
 
 /**
  * BaseController provides a convenient place for loading components
@@ -108,5 +110,39 @@ abstract class BaseController extends Controller
         }
 
         return false;
+    }
+
+    /**
+     * Valide une URL de retour pour éviter les redirections ouvertes (open redirect).
+     * L'URL doit avoir le même host que l'application et utiliser un schéma http/https.
+     *
+     * @param string|null $url URL de retour à valider
+     * @return string URL validée si conforme, URL de repli (page journeys) sinon
+     */
+    function validateBackUrl(?string $url): string
+    {
+        $fallback = site_url('journeys');
+
+        if (empty($url)) {
+            return $fallback;
+        }
+
+        try {
+            $uri = new URI($url);
+            $baseUri = new URI(base_url());
+
+            // Même host ET même scheme
+            if ($uri->getHost() !== $baseUri->getHost()) {
+                return $fallback;
+            }
+
+            if (! in_array($uri->getScheme(), ['http', 'https'], true)) {
+                return $fallback;
+            }
+
+            return (string) $uri;
+        } catch (HTTPException $e) {
+            return $fallback;
+        }
     }
 }
