@@ -160,10 +160,19 @@ class JourneyController extends BaseController{
         // --- Récupération des filtres
         $startAddress   = $this->request->getGet('startAddress');
         $endAddress     = $this->request->getGet('endAddress');
-        $latStart       = $this->request->getGet('startLat') !== null ? (float) $this->request->getGet('startLat') : null;
-        $lngStart       = $this->request->getGet('startLng') !== null ? (float) $this->request->getGet('startLng') : null;
-        $latEnd         = $this->request->getGet('endLat')   !== null ? (float) $this->request->getGet('endLat')   : null;
-        $lngEnd         = $this->request->getGet('endLng')   !== null ? (float) $this->request->getGet('endLng')   : null;
+
+        $raw      = $this->request->getGet('startLat');
+        $latStart = ($raw !== null && $raw !== '') ? (float) $raw : null;
+
+        $raw      = $this->request->getGet('startLng');
+        $lngStart = ($raw !== null && $raw !== '') ? (float) $raw : null;
+
+        $raw      = $this->request->getGet('endLat');
+        $latEnd   = ($raw !== null && $raw !== '') ? (float) $raw : null;
+
+        $raw      = $this->request->getGet('endLng');
+        $lngEnd   = ($raw !== null && $raw !== '') ? (float) $raw : null;
+
         $filterDate     = $this->request->getGet('date');
         $filterTime     = $this->request->getGet('time');
         $availableSeats = (int) ($this->request->getGet('availableSeats') ?? 1);
