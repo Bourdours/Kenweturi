@@ -83,7 +83,7 @@
     <?php elseif ($tab === 'reports'): ?>
       <?= view('Admin/reports_tab', ['reports' => $reports]) ?>
     <?php elseif ($tab === 'admins' && session()->get('isAdmin')): ?>
-      <?= view('Admin/admins_tab', ['allUsers' => $allUsers]) ?>
+      <?= view('Admin/admins_tab', ['allUsers' => $allUsers, 'superadminCount' => $superadminCount, 'adminCount' => $adminCount]) ?>
     <?php endif; ?>
   </div>
 </div>
