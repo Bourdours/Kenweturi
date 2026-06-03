@@ -188,6 +188,14 @@
                     Annuler ma réservation
                 </button>
             </form>
+        <?php elseif ($isPending && $journey['start_datetime'] > date('Y-m-d H:i:s')): ?>
+            <form id="form-cancel" action="<?= site_url('dashboard/bookings/' . esc($userBooking['id']) . '/delete') ?>" method="POST">
+                <?= csrf_field() ?>
+                <button type="button" onclick="openConfirmModal('Annuler cette demande de réservation ?', 'form-cancel')"
+                    class="w-full border border-danger text-danger font-bold font-display rounded-full py-3 hover:bg-danger hover:text-paper transition-colors">
+                    Annuler cette demande de réservation
+                </button>
+            </form>
         <?php elseif ($remainingSeats > 0) : ?>
             <div class="flex items-center justify-between mb-6">
                 <div>
