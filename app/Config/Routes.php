@@ -87,6 +87,15 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->post('journeys/(:num)/cancel', 'JourneyController::cancel/$1');
     $routes->post('journeys/(:num)/delete', 'JourneyController::delete/$1');
 
+    // Journey Requests
+    $routes->get('journey-requests',                    'JourneyRequestController::showAll');
+    $routes->get('journey-requests/new',                'JourneyRequestController::showCreateForm');
+    $routes->post('journey-requests/new',               'JourneyRequestController::create');
+    $routes->get('journey-requests/(:num)',             'JourneyRequestController::show/$1');
+    $routes->get('journey-requests/(:num)/edit',        'JourneyRequestController::showEditForm/$1');
+    $routes->post('journey-requests/(:num)/edit',       'JourneyRequestController::update/$1');
+    $routes->post('journey-requests/(:num)/cancel',     'JourneyRequestController::delete/$1');
+
     // Profile
     $routes->get('profile',         'UserController::show');
     $routes->get('profile/edit',    'UserController::showEditForm');
