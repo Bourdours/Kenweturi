@@ -105,6 +105,14 @@
                         Refuser la réservation
                     </button>
                 </form>
+            <?php elseif($isPending): ?>
+                <form id="form-confirm" action="<?= site_url('dashboard/bookings/' . $booking['id'] . '/delete') ?>" method="post">
+                    <?= csrf_field() ?>
+                    <button type="button" onclick="openConfirmModal('Annuler ma demande de réservation ?', 'form-confirm')"
+                            class="w-full border border-danger text-danger font-bold font-display rounded-full py-3 hover:bg-danger hover:text-paper transition-colors">
+                        Annuler ma demande de réservation
+                    </button>
+                </form>
             <?php else: ?>
                 <form id="form-confirm" action="<?= site_url('dashboard/bookings/' . $booking['id'] . '/delete') ?>" method="post">
                     <?= csrf_field() ?>
