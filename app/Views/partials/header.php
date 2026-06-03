@@ -69,11 +69,11 @@ $initials = session()->get('isLoggedIn')
                       onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
                   </div>
                   <div class="hidden w-9 h-9 rounded-full bg-action text-ink font-bold text-xs shrink-0 items-center justify-center">
-                    <?= $initials ?>
+                    <?= esc($initials) ?>
                   </div>
                 <?php else: ?>
                   <div class="flex w-9 h-9 rounded-full bg-action text-ink font-bold text-xs shrink-0 items-center justify-center">
-                    <?= $initials ?>
+                    <?= esc($initials) ?>
                   </div>
                 <?php endif; ?>
                 <span class="text-ink font-medium text-sm"><?= esc((string) session()->get('firstname')) ?></span>
@@ -132,11 +132,11 @@ $initials = session()->get('isLoggedIn')
                 onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
             </div>
             <div class="hidden w-10 h-10 rounded-full bg-action text-ink font-bold text-xs shrink-0 items-center justify-center">
-              <?= $initials ?>
+              <?= esc($initials) ?>
             </div>
           <?php else: ?>
             <div class="flex w-10 h-10 rounded-full bg-action text-ink font-bold text-xs shrink-0 items-center justify-center">
-              <?= $initials ?>
+              <?= esc($initials) ?>
             </div>
           <?php endif; ?>
           <div class="flex flex-col">

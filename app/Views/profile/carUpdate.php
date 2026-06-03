@@ -1,7 +1,7 @@
 <?php
 
 /** @var array $car */ ?>
-<?= view('partials/head') ?>
+<?= view('partials/head', ['extraJs' => [base_url('js/user.js')]]) ?>
 <?= view('partials/header') ?>
 
 <div class="max-w-4xl mx-auto py-10 px-6 flex flex-col gap-6">
@@ -33,9 +33,13 @@
 
     <div class="grid grid-cols-1 my-1 sm:grid-cols-2 gap-4">
       <div>
-        <label for="brand" class="text-ink/50 text-xs my-1 font-medium mb-1.5 block">Marque</label>
-        <input type="text" id="brand" name="brand" value="<?= esc($car['brand']) ?>" required
-          class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 transition-colors">
+        <label for="vehicleBrand" class="text-ink/50 text-xs my-1 font-medium mb-1.5 block">Marque</label>
+        <div class="relative w-full">
+          <input type="text" id="vehicleBrand" name="brand" value="<?= esc($car['brand']) ?>" required
+            autocomplete="off"
+            class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 transition-colors">
+          <ul id="brandSuggestions" class="absolute left-0 top-full z-50 w-full bg-paper border border-action/15 rounded-b-lg shadow-lg max-h-48 overflow-y-auto hidden flex flex-col pointer-events-auto"></ul>
+        </div>
       </div>
       <div>
         <label for="model" class="text-ink/50 text-xs my-1 font-medium mb-1.5 block">Modèle</label>

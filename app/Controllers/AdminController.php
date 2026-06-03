@@ -51,10 +51,17 @@ class AdminController extends BaseController
      */
     private function requireSuperAdmin()
     {
-        if (session()->get('role') !== 'superadmin') {
+        $user = $this->userModel->find(session()->get('user_id'));
+
+        if (!$user || $user['role'] !== 'superadmin') {
             return redirect()->to(site_url('/'))
                 ->with('error', 'Accès réservé aux super-administrateurs.');
         }
+
+        if (session()->get('role') !== $user['role']) {
+            session()->set('role', $user['role']);
+        }
+
         return null;
     }
 

@@ -54,7 +54,7 @@ class BookingController extends BaseController
                                         ->get()->getRowArray();
         $remainingSeats = $journey['seats'] - ($bookSeats['seat_numbers'] ?? 0);
 
-        $seatsRequested = $this->request->getPost('seat_numbers') ?? 1;
+        $seatsRequested = max(1, (int) ($this->request->getPost('seat_numbers') ?? 1));
 
         if ($seatsRequested > $remainingSeats)
             return redirect()->to('/journeys/' . $id)

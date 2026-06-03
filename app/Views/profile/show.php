@@ -13,7 +13,7 @@
   <?php if (session()->getFlashdata('success')): ?>
     <div class="bg-success/10 border border-success/20 rounded-xl px-5 py-3 text-success text-sm flex items-center gap-2">
       <i class="fa-solid fa-circle-check shrink-0"></i>
-      <?= session()->getFlashdata('success') ?>
+      <?= esc(session()->getFlashdata('success')) ?>
     </div>
   <?php endif; ?>
 
@@ -21,7 +21,7 @@
   <?php if (session()->getFlashdata('error')): ?>
     <div class="bg-danger/10 border border-danger/20 rounded-xl px-5 py-3 text-danger text-sm flex items-center gap-2">
       <i class="fa-solid fa-circle-exclamation shrink-0"></i>
-      <?= session()->getFlashdata('error') ?>
+      <?= esc(session()->getFlashdata('error')) ?>
     </div>
   <?php endif; ?>
 
@@ -45,11 +45,11 @@
             onerror="this.parentElement.classList.add('hidden'); this.parentElement.nextElementSibling.classList.remove('hidden'); this.parentElement.nextElementSibling.classList.add('flex');">
         </div>
         <div class="jsAvatarOpen ring-2 ring-action/20 hover:ring-action/50 transition-all cursor-pointer hidden w-20 h-20 rounded-full bg-action-dark text-ink font-bold text-2xl shrink-0 items-center justify-center">
-          <?= $initials ?>
+          <?= esc($initials) ?>
         </div>
       <?php else: ?>
         <div class="jsAvatarOpen ring-2 ring-action/20 flex w-20 h-20 rounded-full bg-action text-ink font-bold text-2xl shrink-0 items-center justify-center">
-          <?= $initials ?>
+          <?= esc($initials) ?>
         </div>
       <?php endif; ?>
     </div>
