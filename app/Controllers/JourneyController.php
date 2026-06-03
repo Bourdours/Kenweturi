@@ -13,6 +13,9 @@ use App\Models\BookingModel;
 use App\Models\CityModel;
 use App\Models\StageModel;
 
+use App\Services\JourneyService;
+use App\Services\GeoService;
+
 use App\Exceptions\ExternalApiException;
 use App\Exceptions\ModelValidationException;
 use App\Exceptions\AddressValidationException;
@@ -27,6 +30,9 @@ class JourneyController extends BaseController{
     protected LocationModel $locationModel;
     protected CityModel $cityModel;
     protected StageModel $stageModel;
+    
+    protected JourneyService $journeyService;
+    protected GeoService $geoService;
 
     public function __construct(){
         
@@ -37,6 +43,9 @@ class JourneyController extends BaseController{
         $this->locationModel = new LocationModel();
         $this->cityModel = new CityModel();
         $this->stageModel = new StageModel();
+        
+        $this->journeyService = new JourneyService();
+        $this->geoService = new GeoService();
     }
 
     /**
@@ -117,6 +126,13 @@ class JourneyController extends BaseController{
             return redirect()->back()->withInput()
                 ->with('errors', ['db' => 'Une erreur est survenue lors de l\'enregistrement .']);
 
+        }
+
+        // ====== Matching avec les demandes de trajet existantes
+        try {
+            $this->journeyService->notifyMatchingRequests($journeyId, $geoJsonTrack);
+        } catch (\Throwable $e) {
+            log_message('error', 'notifyMatchingRequests: ' . $e->getMessage());
         }
 
         return redirect()->to('/journeys/' . $journeyId);
@@ -283,7 +299,7 @@ public function showAll(): string|RedirectResponse
         ? ['lat' => $filters['latEnd'], 'lon' => $filters['lngEnd']]
         : null;
 
-    $matchingJourneys = $this->findMatchingJourneys($candidates, $start, $end);
+    $matchingJourneys = $this->geoService->findMatchingJourneys($candidates, $start, $end);
 
     // --- Pagination en PHP
     $perPage  = 5;
