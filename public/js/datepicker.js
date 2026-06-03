@@ -1,9 +1,19 @@
 const dateInput = document.getElementById('date');
 if (dateInput) {
+    const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+    const frLocale = flatpickr.l10ns.fr;
     flatpickr(dateInput, {
-        locale: 'fr',
+        locale: {
+            ...frLocale,
+            months: {
+                longhand:  frLocale.months.longhand.map(cap),
+                shorthand: frLocale.months.shorthand.map(cap),
+            },
+        },
         dateFormat: 'Y-m-d',
+        altInput: true,
+        altFormat: 'd/m/Y',
         disableMobile: true,
-        defaultDate: dateInput.value || null,
+        defaultDate: dateInput.value || new Date(),
     });
 }

@@ -26,6 +26,12 @@
     color: rgb(var(--color-ink));
     font-weight: 600;
 }
+.flatpickr-current-month .flatpickr-monthDropdown-months {
+    text-transform: capitalize;
+}
+.flatpickr-monthDropdown-month {
+    text-transform: capitalize;
+}
 .flatpickr-current-month .flatpickr-monthDropdown-months:hover,
 .flatpickr-current-month input.cur-year:hover {
     background: transparent;
