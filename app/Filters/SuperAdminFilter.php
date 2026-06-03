@@ -1,0 +1,41 @@
+<?php
+
+namespace App\Filters;
+
+use App\Models\UserModel;
+use CodeIgniter\Filters\FilterInterface;
+use CodeIgniter\HTTP\RequestInterface;
+use CodeIgniter\HTTP\ResponseInterface;
+
+class SuperAdminFilter implements FilterInterface
+{
+    public function before(RequestInterface $request, $arguments = null)
+    {
+        $userId = session()->get('user_id');
+
+        // Pas connecté → renvoi vers la page de connexion
+        if (! $userId) {
+            session()->set('redirect_url', current_url());
+            return redirect()->to('/login')
+                ->with('error', 'Veuillez vous connecter pour accéder à cette page.');
+        }
+
+        // Resynchronisation avec la base pour le rôle
+        $user = (new UserModel())->find($userId);
+
+        if (! $user || ($user['role'] ?? 'user') !== 'superadmin') {
+            session()->set('role', $user['role'] ?? 'user');
+            return redirect()->to(site_url('admin'))
+                ->with('error', 'Accès réservé aux super-administrateurs.');
+        }
+
+        // Resync session
+        session()->set('isAdmin', true);
+        session()->set('role', 'superadmin');
+    }
+
+    public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
+    {
+        // rien
+    }
+}
