@@ -14,6 +14,7 @@
     'https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js',
     base_url('js/autocompletion.js'),
     base_url('js/datepicker.js'),
+    base_url('js/timepicker.js'),
     base_url('js/swapAddresses.js'),
   ],
 ]) ?>
@@ -87,11 +88,11 @@
             </div>
             <div class="w-8"></div>
             <div>
-              <label for="availableSeats" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
-                <i class="fa-solid fa-user text-sm"></i>Passagers
+              <label for="time" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
+                <i class="fa-regular fa-clock text-sm"></i>À partir de
               </label>
-              <input type="number" id="availableSeats" name="availableSeats" min="1"
-                class="w-full bg-surface border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50">
+              <input type="text" id="time" name="time" readonly placeholder="--:--"
+                class="w-full bg-surface border border-action/15 rounded-lg text-ink/60 text-sm px-3 py-2.5 outline-none focus:border-action/50 cursor-pointer">
             </div>
           </div>
 

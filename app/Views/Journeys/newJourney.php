@@ -106,7 +106,7 @@
           <div class="flex flex-col items-center shrink-0 w-3 self-stretch">
             <div class="w-px flex-1 bg-ink/10"></div>
           </div>
-          <div class="py-1.5">
+          <div class="pt-0 pb-4">
             <button type="button" id="addStageBtn"
               class="flex items-center gap-1.5 text-action/50 hover:text-action text-xs font-medium transition-colors cursor-pointer">
               <i class="fa-solid fa-plus text-xs"></i>Ajouter une étape
