@@ -33,7 +33,6 @@ $routes->get('contact',           'PageController::contact');
 $routes->post('contact',          'PageController::sendContact');
 
 
-
 /* =========================================================
  *  ROUTES INVITÉS (interdites aux utilisateurs connectés)
  * ========================================================= */
@@ -66,18 +65,18 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('logout', 'AuthController::logout');
 
     // Dashboard
-    $routes->get('dashboard',                'DashboardController::show');
-    $routes->get('dashboard/journeys',       'DashboardController::showJourneys');
-    $routes->get('dashboard/bookings',       'DashboardController::showBookings');
+    $routes->get('dashboard',                 'DashboardController::show');
+    $routes->get('dashboard/journeys',        'DashboardController::showJourneys');
+    $routes->get('dashboard/bookings',        'DashboardController::showBookings');
     $routes->get('dashboard/bookings/(:num)', 'DashboardController::showBooking/$1');
-    $routes->get('dashboard/reports',        'DashboardController::showReports');
-    $routes->get('dashboard/reports/(:num)', 'DashboardController::showReport/$1');
+    $routes->get('dashboard/reports',         'DashboardController::showReports');
+    $routes->get('dashboard/reports/(:num)',  'DashboardController::showReport/$1');
 
     // Bookings
-    $routes->post('dashboard/bookings/(:num)/delete',   'BookingController::delete/$1');
-    $routes->post('dashboard/bookings/(:num)/accept',   'BookingController::accept/$1');
-    $routes->post('dashboard/bookings/(:num)/reject',   'BookingController::reject/$1');
-    $routes->post('journeys/(:num)/book',               'BookingController::create/$1');
+    $routes->post('dashboard/bookings/(:num)/delete', 'BookingController::delete/$1');
+    $routes->post('dashboard/bookings/(:num)/accept', 'BookingController::accept/$1');
+    $routes->post('dashboard/bookings/(:num)/reject', 'BookingController::reject/$1');
+    $routes->post('journeys/(:num)/book',             'BookingController::create/$1');
 
     // Journeys
     $routes->get('journeys',                'JourneyController::showAll');
@@ -88,13 +87,13 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->post('journeys/(:num)/delete', 'JourneyController::delete/$1');
 
     // Journey Requests
-    $routes->get('journey-requests',                    'JourneyRequestController::showAll');
-    $routes->get('journey-requests/new',                'JourneyRequestController::showCreateForm');
-    $routes->post('journey-requests/new',               'JourneyRequestController::create');
-    $routes->get('journey-requests/(:num)',             'JourneyRequestController::show/$1');
-    $routes->get('journey-requests/(:num)/edit',        'JourneyRequestController::showEditForm/$1');
-    $routes->post('journey-requests/(:num)/edit',       'JourneyRequestController::update/$1');
-    $routes->post('journey-requests/(:num)/cancel',     'JourneyRequestController::delete/$1');
+    $routes->get('journey-requests',                'JourneyRequestController::showAll');
+    $routes->get('journey-requests/new',            'JourneyRequestController::showCreateForm');
+    $routes->post('journey-requests/new',           'JourneyRequestController::create');
+    $routes->get('journey-requests/(:num)',         'JourneyRequestController::show/$1');
+    $routes->get('journey-requests/(:num)/edit',    'JourneyRequestController::showEditForm/$1');
+    $routes->post('journey-requests/(:num)/edit',   'JourneyRequestController::update/$1');
+    $routes->post('journey-requests/(:num)/cancel', 'JourneyRequestController::delete/$1');
 
     // Profile
     $routes->get('profile',         'UserController::show');
@@ -117,12 +116,21 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->post('car/(:num)/delete', 'CarController::delete/$1');
 });
 
-// Admin
-$routes->group('admin', ['filter' => 'auth'], function ($routes) {
-    $routes->get('/',                        'AdminController::index');
-    $routes->get('reports/(:num)',           'AdminController::showReport/$1');
-    $routes->post('reports/(:num)/resolve',  'AdminController::resolveReport/$1');
-    $routes->post('users/(:num)/validate',   'AdminController::updateRegistration/$1');
-    $routes->post('users/(:num)/role',       'AdminController::updateRole/$1');
-    $routes->post('users/(:num)/delete',     'AdminController::deleteUser/$1');
+
+/* =========================================================
+ *  ROUTES ADMIN (réservées aux administrateurs)
+ * ========================================================= */
+$routes->group('admin', ['filter' => 'admin'], function ($routes) {
+    $routes->get('/',                       'AdminController::index');
+    $routes->get('reports/(:num)',          'AdminController::showReport/$1');
+    $routes->post('reports/(:num)/resolve', 'AdminController::resolveReport/$1');
+    $routes->post('users/(:num)/validate',  'AdminController::updateRegistration/$1');
+    $routes->post('users/(:num)/delete',    'AdminController::deleteUser/$1');
+});
+
+/* =========================================================
+ *  ROUTES SUPER-ADMIN (réservées aux super-administrateurs)
+ * ========================================================= */
+$routes->group('admin', ['filter' => 'superadmin'], function ($routes) {
+    $routes->post('users/(:num)/role', 'AdminController::updateRole/$1');
 });
