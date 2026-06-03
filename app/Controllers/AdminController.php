@@ -26,10 +26,20 @@ class AdminController extends BaseController
      */
     private function requireAdmin()
     {
-        if (!session()->get('isAdmin')) {
+        $user = $this->userModel->find(session()->get('user_id'));
+
+        if (!$user || !$user['is_admin']) {
+            session()->set('isAdmin', false);
+            session()->set('role', $user['role'] ?? 'user');
             return redirect()->to(site_url('/'))
                 ->with('error', 'Accès réservé aux administrateurs.');
         }
+
+        // Resynchronise la session si le rôle a changé depuis la connexion
+        if (session()->get('role') !== $user['role']) {
+            session()->set('role', $user['role']);
+        }
+
         return null;
     }
 
@@ -61,6 +71,8 @@ class AdminController extends BaseController
         $closedReports  = [];
         $pendingUsers   = [];
         $allUsers       = [];
+        $superadminCount = 0;
+        $adminCount      = 0;
 
         if ($tab === 'registrations') {
             // Charge les utilisateurs dont l'inscription est en attente de validation
@@ -70,10 +82,9 @@ class AdminController extends BaseController
             $reports       = $this->reportModel->getOpenReports();
             $closedReports = $this->reportModel->getClosedReports();
         } elseif ($tab === 'admins') {
-            if (session()->get('role') !== 'superadmin') {
-                return redirect()->to(site_url('admin'))->with('error', 'Accès refusé.');
-            }
-            $allUsers = $this->userModel->where('status', 'active')->findAll();
+            $allUsers        = $this->userModel->where('status', 'active')->findAll();
+            $superadminCount = $this->userModel->where('status', 'active')->where('role', 'superadmin')->countAllResults();
+            $adminCount      = $this->userModel->where('status', 'active')->where('role', 'admin')->countAllResults();
         }
 
 
@@ -82,14 +93,16 @@ class AdminController extends BaseController
         $nOpenReports   = $this->reportModel->where('status', 'open')->countAllResults();
 
         return view('Admin/index', [
-            'title'          => 'Administration',
-            'tab'            => $tab,
-            'reports'        => $reports,
-            'closedReports'  => $closedReports,
-            'nOpenReports'   => $nOpenReports,
-            'pendingUsers'   => $pendingUsers,
-            'nPendingUsers'  => $nPendingUsers,
-            'allUsers'       => $allUsers,
+            'title'           => 'Administration',
+            'tab'             => $tab,
+            'reports'         => $reports,
+            'closedReports'   => $closedReports,
+            'nOpenReports'    => $nOpenReports,
+            'pendingUsers'    => $pendingUsers,
+            'nPendingUsers'   => $nPendingUsers,
+            'allUsers'        => $allUsers,
+            'superadminCount' => $superadminCount,
+            'adminCount'      => $adminCount,
         ]);
     }
 
@@ -195,16 +208,38 @@ class AdminController extends BaseController
      */
     public function deleteUser(int $id)
     {
-        if ($response = $this->requireSuperAdmin()) return $response;
+        if ($response = $this->requireAdmin()) return $response;
 
         $target = $this->userModel->find($id);
         if (!$target) {
             return redirect()->to(site_url('admin?tab=admins'))
                 ->with('error', 'Utilisateur introuvable.');
         }
-        if ($target['role'] === 'superadmin') {
+
+        if ($id === (int) session()->get('user_id')) {
             return redirect()->to(site_url('admin?tab=admins'))
-                ->with('error', 'Impossible de supprimer un super-administrateur.');
+                ->with('error', 'Vous ne pouvez pas supprimer votre propre compte.');
+        }
+
+        if (in_array($target['role'], ['admin', 'superadmin'], true) && session()->get('role') !== 'superadmin') {
+            return redirect()->to(site_url('admin?tab=admins'))
+                ->with('error', 'Seul un super-administrateur peut supprimer un administrateur.');
+        }
+
+        if ($target['role'] === 'superadmin') {
+            $superadminCount = $this->userModel->where('status', 'active')->where('role', 'superadmin')->countAllResults();
+            if ($superadminCount <= 1) {
+                return redirect()->to(site_url('admin?tab=admins'))
+                    ->with('error', 'Impossible de supprimer le dernier super-administrateur.');
+            }
+        }
+
+        if ($target['role'] === 'admin') {
+            $adminCount = $this->userModel->where('status', 'active')->where('role', 'admin')->countAllResults();
+            if ($adminCount <= 1) {
+                return redirect()->to(site_url('admin?tab=admins'))
+                    ->with('error', 'Impossible de supprimer le dernier administrateur.');
+            }
         }
 
         // Soft delete, remplit deleted_at

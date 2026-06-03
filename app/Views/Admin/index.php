@@ -6,7 +6,7 @@
 /** @var int    $nOpenReports   Nombre de signalements ouverts */
 /** @var array  $pendingUsers   Liste des utilisateurs en attente de validation */
 /** @var int    $nPendingUsers  Nombre d'inscriptions en attente */
-/** @var array  $allUsers       Liste de tous les utilisateurs (superadmin uniquement) */
+/** @var array  $allUsers       Liste de tous les utilisateurs (admin et superadmin) */
 ?>
 <?= view('partials/head') ?>
 <?= view('partials/header') ?>
@@ -64,8 +64,8 @@
       <?php endif; ?>
     </a>
 
-    <!-- Gestion des admins (superadmin uniquement) -->
-    <?php if (session()->get('role') === 'superadmin'): ?>
+    <!-- Gestion des admins -->
+    <?php if (session()->get('isAdmin')): ?>
       <a href="<?= site_url('admin?tab=admins') ?>"
         class="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold font-display rounded-t-lg transition-colors
                   <?= ($tab === 'admins') ? 'bg-surface border border-b-surface border-action/10 text-ink sm:-mb-px' : 'text-ink/40 hover:text-ink' ?>">
@@ -82,8 +82,8 @@
       <?= view('Admin/registrations_tab', ['pendingUsers' => $pendingUsers]) ?>
     <?php elseif ($tab === 'reports'): ?>
       <?= view('Admin/reports_tab', ['reports' => $reports]) ?>
-    <?php elseif ($tab === 'admins' && session()->get('role') === 'superadmin'): ?>
-      <?= view('Admin/admins_tab', ['allUsers' => $allUsers]) ?>
+    <?php elseif ($tab === 'admins' && session()->get('isAdmin')): ?>
+      <?= view('Admin/admins_tab', ['allUsers' => $allUsers, 'superadminCount' => $superadminCount, 'adminCount' => $adminCount]) ?>
     <?php endif; ?>
   </div>
 </div>
