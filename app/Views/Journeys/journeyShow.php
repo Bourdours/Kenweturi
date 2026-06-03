@@ -22,7 +22,7 @@
     </div>
 
     <!-- Itinéraire -->
-    <article class="bg-surface-card rounded-2xl p-6">
+    <article class="bg-surface-card rounded-2xl p-6 border border-action/10">
         <?php $fmt = new IntlDateFormatter('fr_FR', IntlDateFormatter::FULL, IntlDateFormatter::NONE, null, null, 'EEEE d MMMM'); ?>
         <p class="text-muted text-sm mb-4 capitalize"><?= $fmt->format(strtotime($journey['start_datetime'])) ?></p>
 
@@ -86,7 +86,7 @@
     </article>
 
     <!-- Conducteur -->
-    <article class="bg-surface-card rounded-2xl p-6">
+    <article class="bg-surface-card rounded-2xl p-6 border border-action/10">
         <h2 class="text-muted text-xs font-semibold uppercase tracking-wider mb-4">Conducteur</h2>
         <a href="<?= site_url('users/' . $journey['driver_id']) ?>?back=<?= urlencode(current_url(true)) ?>"
          class="flex items-center gap-4 pt-4 first:pt-0 first:border-t-0">
@@ -125,7 +125,7 @@
     </article>
 
     <!-- Passagers -->
-    <article class="bg-surface-card rounded-2xl p-6">
+    <article class="bg-surface-card rounded-2xl p-6 border border-action/10">
         <h2 class="text-muted text-xs font-semibold uppercase tracking-wider mb-4">Passagers</h2>
 
         <?php if ($isBooked || session('user_id') === $journey['user_id']): ?>
@@ -179,7 +179,7 @@
     </article>
 
     <!-- Réservation -->
-    <article class="bg-surface-card rounded-2xl p-6">
+    <article class="bg-surface-card rounded-2xl p-6 border border-action/10">
         <?php if ($isBooked && $journey['start_datetime'] > date('Y-m-d H:i:s')): ?>
             <form id="form-cancel" action="<?= site_url('dashboard/bookings/' . esc($userBooking['id']) . '/delete') ?>" method="POST">
                 <?= csrf_field() ?>
