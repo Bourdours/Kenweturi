@@ -70,9 +70,6 @@ class AdminController extends BaseController
             $reports       = $this->reportModel->getOpenReports();
             $closedReports = $this->reportModel->getClosedReports();
         } elseif ($tab === 'admins') {
-            if (session()->get('role') !== 'superadmin') {
-                return redirect()->to(site_url('admin'))->with('error', 'Accès refusé.');
-            }
             $allUsers = $this->userModel->where('status', 'active')->findAll();
         }
 
