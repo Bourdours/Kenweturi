@@ -167,9 +167,9 @@ class JourneyController extends BaseController{
         $userBooking = $this->bookingModel
             ->where('journey_id', (int) $id)
             ->where('user_id', session('user_id'))
-            ->where('status', 'accepted')
             ->first();
-        $isBooked = $userBooking !== null;
+        $isBooked = $userBooking !== null && $userBooking['status'] === 'accepted';
+        $isPending = $userBooking !== null && $userBooking['status'] === 'pending';
 
         // ====== Récupération des filtres de réservation
         $availableSeats = $this->request->getGet('seats') ?? 1;
@@ -187,6 +187,7 @@ class JourneyController extends BaseController{
             'boardingCity'   => $boardingCity,
             'passengers'     => $passengers,
             'isBooked'       => $isBooked,
+            'isPending'       => $isPending,
             'userBooking'    => $userBooking,
             'pendingBookings' => $pendingBookings,
         ]);
