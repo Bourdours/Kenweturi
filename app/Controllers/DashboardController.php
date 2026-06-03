@@ -333,6 +333,7 @@ class DashboardController extends BaseController
             'person_avatar'    => $person_avatar,
             'person_is_student' => $person_is_student,
             'person_label'     => $person_label,
+            'isPending' => $booking['status'] === "pending",
         ]);
     }
 
