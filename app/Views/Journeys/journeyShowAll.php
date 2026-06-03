@@ -18,7 +18,7 @@
 
     <div class="flex items-center justify-between">
       <h1 class="text-ink text-2xl font-bold font-display">Chercher un trajet</h1>
-      <a href="<?= esc($back ?? base_url('journeys')) ?>" class="text-ink/50 hover:text-action text-sm flex items-center gap-1.5 transition-colors">
+      <a href="<?= esc($back ?? base_url('journeys')) ?>" class="text-ink/50 hover:text-action text-sm flex items-baseline gap-1 transition-colors">
       </a>
   </div>
     <!-- Formulaire de recherche -->
@@ -30,7 +30,7 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] gap-3 sm:gap-x-2 sm:items-end">
                 <div>
-                    <label for="startAddress" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
+                    <label for="startAddress" class="text-ink/50 text-sm mb-1.5 flex items-baseline gap-1">
                         <i class="fa-solid fa-circle-dot text-sm"></i>Départ
                     </label>
                     <input type="text" id="startAddress" class="address w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30" name="startAddress" value="<?= esc($startAddress ?? '') ?>" placeholder="Ville ou adresse">
@@ -45,7 +45,7 @@
                     </button>
                 </div>
                 <div>
-                    <label for="endAddress" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
+                    <label for="endAddress" class="text-ink/50 text-sm mb-1.5 flex items-baseline gap-1">
                         <i class="fa-solid fa-location-dot text-sm"></i>Arrivée
                     </label>
                     <input type="text" id="endAddress" class="address w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30" name="endAddress" value="<?= esc($endAddress ?? '') ?>" placeholder="Ville ou adresse">
@@ -56,25 +56,25 @@
 
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div>
-                    <label for="date" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
+                    <label for="date" class="text-ink/50 text-sm mb-1.5 flex items-baseline gap-1">
                         <i class="fa-regular fa-calendar text-sm"></i>Date
                     </label>
                     <input type="text" id="date" name="date" value="<?= esc($filterDate ?? '') ?>" readonly placeholder="jj/mm/aaaa" class="w-full bg-paper border border-action/15 rounded-lg text-ink/60 text-sm px-3 py-2.5 outline-none focus:border-action/50 cursor-pointer">
                 </div>
                 <div>
-                    <label for="time" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
+                    <label for="time" class="text-ink/50 text-sm mb-1.5 flex items-baseline gap-1">
                         <i class="fa-regular fa-clock text-sm"></i>À partir de
                     </label>
                     <input type="text" id="time" name="time" value="<?= esc($filterTime ?? '') ?>" readonly placeholder="--:--" class="w-full bg-paper border border-action/15 rounded-lg text-ink/60 text-sm px-3 py-2.5 outline-none focus:border-action/50 cursor-pointer">
                 </div>
                 <div>
-                    <label for="availableSeats" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
+                    <label for="availableSeats" class="text-ink/50 text-sm mb-1.5 flex items-baseline gap-1">
                         <i class="fa-solid fa-user text-sm"></i>Passagers
                     </label>
                     <input type="number" id="availableSeats" name="availableSeats" value="<?= esc($availableSeats ?? '') ?>" min="1" class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50">
                 </div>
                 <div>
-                    <label for="smoking" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
+                    <label for="smoking" class="text-ink/50 text-sm mb-1.5 flex items-baseline gap-1">
                         <i class="fa-solid fa-smoking text-sm"></i>Fumeur
                     </label>
                     <div class="relative">
@@ -117,7 +117,7 @@
                         </div>
                     </div>
                     
-                    <div class="mt-3 pt-3 border-t border-action/10 flex items-center justify-between text-sm text-ink/50">
+                    <div class="mt-3 pt-3 border-t border-action/10 flex items-start justify-between text-sm text-ink/50">
                         <div class="flex items-center gap-4">
                             <?php $initials = strtoupper(substr($journey['driver_firstname'], 0, 1) . substr($journey['driver_lastname'], 0, 1)); ?>
                             <?php if (!empty($journey['driver_avatar'])): ?>
@@ -139,23 +139,14 @@
                             </div>
                         </div>
                         <div class="min-w-[175]">
-                            <span class="flex items-center gap-1.5">
+                            <span class="flex items-baseline gap-1">
                                 <i class="fa-solid fa-user text-xs"></i>
-                                <?= esc($journey['remaining_seats']) ?> place disponible<?= $journey['remaining_seats'] > 1 ? 's' : '' ?>
+                                <span class="tabular-nums"><?= esc($journey['remaining_seats']) ?></span> place disponible<?= $journey['remaining_seats'] > 1 ? 's' : '' ?>
                             </span>
-                            <?php if ($journey['pending_bookings'] > 0): ?>
-                                <span class="flex items-center gap-1.5">
-                                <p>
-                                    <i class="fa-solid fa-download text-xs"></i>
-                                    <?= esc($journey['pending_bookings']) ?> réservation en attente<?= $journey['pending_bookings'] > 1 ? 's' : '' ?>
-                                </p>
-                            <?php else: ?>
-                                <p class="hidden">
-                                    <i class="fa-solid fa-download text-xs"></i>
-                                    <?= esc($journey['pending_bookings']) ?> réservation en attente<?= $journey['pending_bookings'] > 1 ? 's' : '' ?>
-                                </p>
+                            <span class="flex items-baseline gap-1 <?= $journey['pending_bookings'] > 0 ? '' : 'invisible' ?>">
+                                <i class="fa-solid fa-hourglass-half text-xs"></i>
+                                <span class="tabular-nums"><?= esc($journey['pending_bookings']) ?></span> réservation en attente<?= $journey['pending_bookings'] > 1 ? 's' : '' ?>
                             </span>
-                            <?php endif; ?>
                         </div>
                     </div>
                 </a>
