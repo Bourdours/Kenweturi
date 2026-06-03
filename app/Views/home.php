@@ -29,7 +29,7 @@
       <?php if (session()->getFlashdata('success')): ?>
         <div class="bg-success/10 border-b border-r- border-success/20 px-6 py-3 text-success max-w-sm text-sm text-center mx-auto rounded-xl">
 
-          <?= session()->getFlashdata('success') ?>
+          <?= esc(session()->getFlashdata('success')) ?>
         </div>
       <?php endif; ?>
 
