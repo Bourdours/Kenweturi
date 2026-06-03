@@ -48,12 +48,16 @@ class UserController extends BaseController
         $city        = $this->cityModel->find($user['city_id']);
         $memberSince = ucfirst(Time::parse($user['registered_at'], 'Europe/Paris', 'fr_FR')->toLocalizedString('MMMM yyyy'));
 
+        $referer = $this->request->getServer('HTTP_REFERER');
+        $back    = ($referer && str_starts_with($referer, base_url())) ? $referer : null;
+
         return view('profile/show', [
             'user'         => $user,
             'city'         => $city['name'] ?? null,
             'cars'         => $this->carModel->where('user_id', $userId)->findAll(),
             'isOwnProfile' => $isOwnProfile,
             'memberSince'  => $memberSince,
+            'back'         => $back,
         ]);
     }
 
