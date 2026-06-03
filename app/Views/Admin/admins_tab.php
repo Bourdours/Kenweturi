@@ -1,6 +1,12 @@
 <?php
 
-/** @var array $allUsers Liste de tous les utilisateurs */
+/** @var array $allUsers        Liste de tous les utilisateurs */
+/** @var int   $superadminCount Nombre de superadmins actifs */
+/** @var int   $adminCount      Nombre d'admins actifs */
+
+$isSuperAdmin  = session()->get('role') === 'superadmin';
+$currentUserId = (int) session()->get('user_id');
+$displayCount  = count($allUsers);
 ?>
 <div class="flex flex-col gap-0">
 
@@ -15,7 +21,7 @@
                 class="w-full pl-10 pr-4 py-2 text-sm bg-ink/5 border border-action/10 rounded-lg text-ink placeholder:text-ink/30 focus:outline-none focus:border-action/40" />
         </div>
         <span class="text-xs text-ink/40 shrink-0">
-            <span id="userCount"><?= count($allUsers) - count(array_filter($allUsers, fn($u) => $u['role'] === 'superadmin')) ?></span> membre(s)
+            <span id="userCount"><?= $displayCount ?></span> membre(s)
         </span>
     </div>
 
@@ -23,7 +29,21 @@
     <div class="divide-y divide-action/10 overflow-y-auto max-h-[520px]" id="userList">
         <?php $i = 1;
         foreach ($allUsers as $user): ?>
-            <?php if ($user['role'] === 'superadmin') continue; ?>
+            <?php $role = $user['role'] ?? 'user'; ?>
+            <?php
+                $isSelf = ($user['id'] === $currentUserId);
+
+                $canDelete = false;
+                if ($isSelf) {
+                    $canDelete = false;
+                } elseif ($role === 'superadmin') {
+                    $canDelete = $isSuperAdmin && $superadminCount > 1;
+                } elseif ($role === 'admin') {
+                    $canDelete = $isSuperAdmin && $adminCount > 1;
+                } else {
+                    $canDelete = true;
+                }
+            ?>
             <div class="user-row flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-6 py-4"
                 data-name="<?= strtolower(esc($user['firstname']) . ' ' . esc($user['lastname'])) ?>"
                 data-email="<?= strtolower(esc($user['email'])) ?>">
@@ -36,43 +56,66 @@
                     <div>
                         <p class="text-ink text-sm font-semibold">
                             <?= esc($user['firstname']) ?> <?= esc($user['lastname']) ?>
+                            <?php if ($isSelf): ?>
+                                <span class="text-xs font-normal text-ink/30">(vous)</span>
+                            <?php endif; ?>
                         </p>
                         <p class="text-ink/40 text-xs"><?= esc($user['email']) ?></p>
                     </div>
                 </a>
                 <div class="flex items-center gap-2 min-w-[220px] justify-end">
-                    <form action="<?= site_url('admin/users/' . $user['id'] . '/role') ?>" method="post" class="flex items-center gap-2">
-                        <?= csrf_field() ?>
-                        <?php $role = $user['role'] ?? 'user'; ?>
+
+                    <?php if ($role === 'superadmin'): ?>
+                        <!-- Badge superadmin, pas de promotion/rétrogradation -->
+                        <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-action/20 text-action">
+                            <i class="fa-solid fa-crown text-xs mr-1"></i>Superadmin
+                        </span>
+                    <?php elseif ($isSuperAdmin): ?>
+                        <!-- Promotion / rétrogradation (superadmin uniquement) -->
+                        <form action="<?= site_url('admin/users/' . $user['id'] . '/role') ?>" method="post" class="flex items-center gap-2">
+                            <?= csrf_field() ?>
+                            <?php if ($role === 'admin'): ?>
+                                <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-action/10 text-action">
+                                    <i class="fa-solid fa-shield text-xs mr-1"></i>Admin
+                                </span>
+                                <button type="submit" name="role" value="user"
+                                    class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-danger/10 text-danger hover:bg-danger/20 transition-colors">
+                                    <i class="fa-solid fa-arrow-down text-xs mr-1"></i>Rétrograder
+                                </button>
+                            <?php else: ?>
+                                <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-ink/5 text-ink/40">
+                                    <i class="fa-solid fa-user text-xs mr-1"></i>Utilisateur
+                                </span>
+                                <button type="submit" name="role" value="admin"
+                                    class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-action/10 text-action hover:bg-action/20 transition-colors">
+                                    <i class="fa-solid fa-arrow-up text-xs mr-1"></i>Promouvoir
+                                </button>
+                            <?php endif; ?>
+                        </form>
+                    <?php else: ?>
+                        <!-- Badge rôle seul pour les admins -->
                         <?php if ($role === 'admin'): ?>
                             <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-action/10 text-action">
                                 <i class="fa-solid fa-shield text-xs mr-1"></i>Admin
                             </span>
-                            <button type="submit" name="role" value="user"
-                                class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-danger/10 text-danger hover:bg-danger/20 transition-colors">
-                                <i class="fa-solid fa-arrow-down text-xs mr-1"></i>Rétrograder
-                            </button>
                         <?php else: ?>
                             <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-ink/5 text-ink/40">
                                 <i class="fa-solid fa-user text-xs mr-1"></i>Utilisateur
                             </span>
-                            <button type="submit" name="role" value="admin"
-                                class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-action/10 text-action hover:bg-action/20 transition-colors">
-                                <i class="fa-solid fa-arrow-up text-xs mr-1"></i>Promouvoir
-                            </button>
                         <?php endif; ?>
-                    </form>
+                    <?php endif; ?>
 
-                    <!-- Bouton suppression -->
-                    <form action="<?= site_url('admin/users/' . $user['id'] . '/delete') ?>" class="delete-form" method="post">
-                        <?= csrf_field() ?>
-                        <button type="submit"
-                            data-id="<?= $user['id'] ?>"
-                            data-name="<?= esc($user['firstname']) ?> <?= esc($user['lastname']) ?>"
-                            class="delete-btn text-xs font-semibold px-3 py-1.5 rounded-lg bg-danger/10 text-danger hover:bg-danger/20 transition-colors">
-                            <i class="fa-solid fa-trash text-xs"></i>
-                        </button>
-                    </form>
+                    <?php if ($canDelete): ?>
+                        <form action="<?= site_url('admin/users/' . $user['id'] . '/delete') ?>" class="delete-form" method="post">
+                            <?= csrf_field() ?>
+                            <button type="submit"
+                                data-id="<?= $user['id'] ?>"
+                                data-name="<?= esc($user['firstname']) ?> <?= esc($user['lastname']) ?>"
+                                class="delete-btn text-xs font-semibold px-3 py-1.5 rounded-lg bg-danger/10 text-danger hover:bg-danger/20 transition-colors">
+                                <i class="fa-solid fa-trash text-xs"></i>
+                            </button>
+                        </form>
+                    <?php endif; ?>
                 </div>
             </div>
         <?php endforeach; ?>
