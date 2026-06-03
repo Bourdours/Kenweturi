@@ -20,6 +20,7 @@ class MailerExample
         $this->mail->Password   = env('mailer.password');
         $this->mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $this->mail->Port       = (int) env('mailer.port', 587);
+        $this->mail->Timeout    = 10;
         $this->mail->CharSet    = 'UTF-8';
     }
 

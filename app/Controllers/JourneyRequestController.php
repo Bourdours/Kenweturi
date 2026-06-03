@@ -22,9 +22,43 @@ class JourneyRequestController extends BaseController
      */
     public function showAll(): string
     {
+        $filterCityStart = $this->request->getGet('cityStart');
+        $filterCityEnd   = $this->request->getGet('cityEnd');
+        $filterDate      = $this->request->getGet('date');
+
+        $builder = $this->journeyRequestModel
+            ->select('journey_request.*,
+                    u.firstname, u.lastname, u.avatar, u.is_student,
+                    city_start.name as city_start_name,
+                    city_end.name   as city_end_name')
+            ->join('user u',             'u.id = journey_request.user_id')
+            ->join('location loc_start', 'loc_start.id = journey_request.location_start_id')
+            ->join('location loc_end',   'loc_end.id = journey_request.location_end_id')
+            ->join('city city_start',    'city_start.id = loc_start.city_id')
+            ->join('city city_end',      'city_end.id = loc_end.city_id')
+            ->where('journey_request.start_datetime >=', date('Y-m-d H:i:s'))
+            ->orderBy('journey_request.start_datetime', 'ASC');
+
+        if ($filterCityStart) {
+            $builder->like('city_start.name', $filterCityStart);
+        }
+
+        if ($filterCityEnd) {
+            $builder->like('city_end.name', $filterCityEnd);
+        }
+
+        if ($filterDate) {
+            $builder->where('DATE(journey_request.start_datetime)', $filterDate);
+        }
+
+        $journeyRequests = $builder->findAll();
+
         return view('JourneyRequests/journeyRequestShowAll', [
             'title'           => 'Demandes de trajet',
-            'journeyRequests' => $this->journeyRequestModel->findAll()
+            'journeyRequests' => $journeyRequests,
+            'filterCityStart' => $filterCityStart,
+            'filterCityEnd'   => $filterCityEnd,
+            'filterDate'      => $filterDate,
         ]);
     }
 
@@ -52,7 +86,7 @@ class JourneyRequestController extends BaseController
      */
     public function showCreateForm(): string
     {
-        return view('JourneyRequests/journeyRequestAdd', [
+        return view('JourneyRequests/newJourneyRequest', [
             'title' => 'Publier une demande de trajet'
         ]);
     }
