@@ -27,7 +27,7 @@
             <div class="user-row flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-6 py-4"
                 data-name="<?= strtolower(esc($user['firstname']) . ' ' . esc($user['lastname'])) ?>"
                 data-email="<?= strtolower(esc($user['email'])) ?>">
-                <div class="flex items-center gap-3">
+                <a href="<?= site_url('users/' . $user['id']) ?>" class="flex items-center gap-3 hover:opacity-70 transition-opacity">
                     <!-- Numéro -->
                     <span class="text-xs text-ink/30 font-mono w-5 shrink-0"><?= $i++ ?></span>
                     <div class="w-9 h-9 rounded-full bg-action/10 flex items-center justify-center shrink-0">
@@ -39,7 +39,7 @@
                         </p>
                         <p class="text-ink/40 text-xs"><?= esc($user['email']) ?></p>
                     </div>
-                </div>
+                </a>
                 <div class="flex items-center gap-2 min-w-[220px] justify-end">
                     <form action="<?= site_url('admin/users/' . $user['id'] . '/role') ?>" method="post" class="flex items-center gap-2">
                         <?= csrf_field() ?>
