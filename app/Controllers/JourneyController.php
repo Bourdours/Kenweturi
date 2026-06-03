@@ -39,6 +39,14 @@ class JourneyController extends BaseController{
         $this->stageModel = new StageModel();
     }
 
+    /**
+     * Affiche le formulaire de création d'un nouveau trajet.
+     *
+     * Récupère la liste des voitures appartenant à l'utilisateur connecté
+     * pour permettre la sélection d'un véhicule dans le formulaire.
+     *
+     * @return string Vue HTML du formulaire de création de trajet
+     */
     public function showCreateForm()
     {
 
@@ -53,15 +61,19 @@ class JourneyController extends BaseController{
     }
 
     /**
-     * create
-     * 
+     * Traite la soumission du formulaire de création d'un trajet.
+     *
      * Vérifie que l'utilisateur est connecté, valide les données du formulaire,
-     * récupère le tracé via les APIs externes, puis insère le trajet en base.
-     * 
+     * récupère le tracé via les APIs externes (géocodage + routage), puis insère
+     * l'ensemble (track, locations, journey, stages) en base via une transaction.
+     *
      * Les erreurs sont gérées selon trois familles :
-     *  - validation du formulaire HTTP
-     *  - API externe indisponible (géocodage / routage)
-     *  - validation des models / erreur de transaction
+     *  - validation du formulaire HTTP        → redirection avec erreurs de champs
+     *  - API externe indisponible             → redirection avec message générique
+     *  - validation des models / transaction  → redirection avec erreurs du model
+     *
+     * @return RedirectResponse Redirection vers la page du trajet créé ou
+     *                          retour au formulaire avec les erreurs
      */
     public function create()
     {
@@ -110,7 +122,18 @@ class JourneyController extends BaseController{
         return redirect()->to('/journeys/' . $journeyId);
     }
 
-
+    /**
+     * Affiche le détail d'un trajet.
+     *
+     * Charge le trajet, calcule sa date d'arrivée, récupère ses étapes
+     * intermédiaires, ses passagers et les demandes en attente. Vérifie
+     * également si l'utilisateur courant a déjà une réservation acceptée
+     * sur ce trajet pour adapter l'affichage.
+     *
+     * @param  int|string $id Identifiant du trajet à afficher
+     * @return string|RedirectResponse Vue de détail, ou redirection vers la
+     *                                 liste si le trajet n'existe pas
+     */
     public function show($id): string|RedirectResponse
     {
         // ====== Récupération du trajet
@@ -169,136 +192,125 @@ class JourneyController extends BaseController{
         ]);
     }
 
-    public function showAll(): string|RedirectResponse
-    {
-        // --- Récupération des filtres
-        $startAddress   = $this->request->getGet('startAddress');
-        $endAddress     = $this->request->getGet('endAddress');
+/**
+ * Affiche la liste des trajets correspondant aux filtres de recherche.
+ *
+ * Construit la requête SQL avec les filtres non géographiques (date, heure,
+ * places disponibles, fumeur), puis applique un filtrage géographique en PHP
+ * sur le tracé de chaque candidat (proximité départ ET arrivée).
+ * Pagine ensuite le résultat final.
+ *
+ * @return string|RedirectResponse Vue HTML de la liste paginée des trajets
+ */
+public function showAll(): string|RedirectResponse
+{
+    // --- Récupération des filtres
+    $filters = $this->getShowAllFilter();
 
-        $raw      = $this->request->getGet('startLat');
-        $latStart = ($raw !== null && $raw !== '') ? (float) $raw : null;
+    // --- Construction de la requête (filtres NON géographiques uniquement)
+    $db = \Config\Database::connect();
 
-        $raw      = $this->request->getGet('startLng');
-        $lngStart = ($raw !== null && $raw !== '') ? (float) $raw : null;
+    $builder = $db->table('journey')
+        ->select("journey.*,
+            city_start.name as city_start_name,
+            city_end.name   as city_end_name,
+            city_start.name as city_boarding_name,
+            u.firstname     as driver_firstname,
+            u.lastname      as driver_lastname,
+            u.is_student    as driver_is_student,
+            (journey.seats - COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id AND b.status = 'accepted'), 0)) as remaining_seats")
+        ->join('location loc_start', 'loc_start.id = journey.location_start_id')
+        ->join('location loc_end',   'loc_end.id = journey.location_end_id')
+        ->join('city city_start',    'city_start.id = loc_start.city_id')
+        ->join('city city_end',      'city_end.id = loc_end.city_id')
+        ->join('user u',             'u.id = journey.user_id')
+        ->where('journey.canceled_at', null)
+        ->where('u.deleted_at', null)
+        ->orderBy('journey.start_datetime', 'ASC');
 
-        $raw      = $this->request->getGet('endLat');
-        $latEnd   = ($raw !== null && $raw !== '') ? (float) $raw : null;
-
-        $raw      = $this->request->getGet('endLng');
-        $lngEnd   = ($raw !== null && $raw !== '') ? (float) $raw : null;
-
-        $filterDate     = $this->request->getGet('date');
-        $filterTime     = $this->request->getGet('time');
-        $availableSeats = (int) ($this->request->getGet('availableSeats') ?? 1);
-        $smoking        = $this->request->getGet('smoking');
-        $page           = (int) ($this->request->getGet('page') ?? 1);
-
-        // --- Construction de la requête (filtres NON géographiques uniquement)
-        $db = \Config\Database::connect();
-
-        $builder = $db->table('journey')
-            ->select("journey.*,
-                city_start.name as city_start_name,
-                city_end.name   as city_end_name,
-                city_start.name as city_boarding_name,
-                u.firstname     as driver_firstname,
-                u.lastname      as driver_lastname,
-                u.is_student    as driver_is_student,
-                (journey.seats - COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id AND b.status = 'accepted'), 0)) as remaining_seats")
-            ->join('location loc_start', 'loc_start.id = journey.location_start_id')
-            ->join('location loc_end',   'loc_end.id = journey.location_end_id')
-            ->join('city city_start',    'city_start.id = loc_start.city_id')
-            ->join('city city_end',      'city_end.id = loc_end.city_id')
-            ->join('user u',             'u.id = journey.user_id')
-            ->where('journey.canceled_at', null)
-            ->where('u.deleted_at', null)
-            ->orderBy('journey.start_datetime', 'ASC');
-
-        if ($filterDate && $filterTime) {
-            $dateTimeCenter = strtotime($filterDate . ' ' . $filterTime . ':00');
-            $dateTimeFrom   = date('Y-m-d H:i:s', $dateTimeCenter - 1800);
-            $dateTimeTo     = date('Y-m-d H:i:s', $dateTimeCenter + 1800);
-            $builder->where('journey.start_datetime >=', $dateTimeFrom)
-                    ->where('journey.start_datetime <=', $dateTimeTo);
-        } elseif ($filterDate) {
-            $builder->where('DATE(journey.start_datetime)', $filterDate);
-            if ($filterDate === date('Y-m-d')) {
-                $builder->where('journey.start_datetime >=', date('Y-m-d H:i:s'));
-            }
-        } else {
+    if ($filters['filterDate'] && $filters['filterTime']) {
+        $dateTimeCenter = strtotime($filters['filterDate'] . ' ' . $filters['filterTime'] . ':00');
+        $dateTimeFrom   = date('Y-m-d H:i:s', $dateTimeCenter - 1800);
+        $dateTimeTo     = date('Y-m-d H:i:s', $dateTimeCenter + 1800);
+        $builder->where('journey.start_datetime >=', $dateTimeFrom)
+                ->where('journey.start_datetime <=', $dateTimeTo);
+    } elseif ($filters['filterDate']) {
+        $builder->where('DATE(journey.start_datetime)', $filters['filterDate']);
+        if ($filters['filterDate'] === date('Y-m-d')) {
             $builder->where('journey.start_datetime >=', date('Y-m-d H:i:s'));
         }
-
-        if ($availableSeats) {
-            $builder->having("remaining_seats >=", $availableSeats);
-        }
-
-        if ($smoking !== null && $smoking !== '') {
-            $builder->where('journey.smoking', $smoking);
-        }
-
-
-        // --- Récupération de tous les candidats (sans filtre géographique)
-        $candidates = $builder->get()->getResultArray();
-
-        // --- Ajout du nombre de demandes en attente pour chaque trajet
-        $journeyIds = array_column($candidates, 'id');
-        if (!empty($journeyIds)) {
-            $pendingCounts = $db->table('booking')
-                ->select('journey_id, COUNT(*) as pending_bookings')
-                ->where('status', 'pending')
-                ->whereIn('journey_id', $journeyIds)
-                ->groupBy('journey_id')
-                ->get()
-                ->getResultArray();
-
-            $pendingByJourney = array_column($pendingCounts, 'pending_bookings', 'journey_id');
-
-            foreach ($candidates as &$candidate) {
-                $candidate['pending_bookings'] = $pendingByJourney[$candidate['id']] ?? 0;
-            }
-            unset($candidate);
-        }
-
-        // --- Filtrage géographique en PHP (matching sur le tracé)
-        $start = ($latStart !== null && $lngStart !== null) ? ['lat' => $latStart, 'lon' => $lngStart] : null;
-        $end   = ($latEnd   !== null && $lngEnd   !== null) ? ['lat' => $latEnd,   'lon' => $lngEnd]   : null;
-
-        $matchingJourneys = $this->findMatchingJourneys($candidates, $start, $end);
-
-        // --- Pagination en PHP
-        $perPage  = 5;
-        $total    = count($matchingJourneys);
-        $journeys = array_slice($matchingJourneys, ($page - 1) * $perPage, $perPage);
-        $pager    = \Config\Services::pager();
-
-        return view('Journeys/journeyShowAll', [
-            'title'          => 'Rechercher un trajet',
-            'journeys'       => $journeys,
-            'pager'          => $pager,
-            'total'          => $total,
-            'page'           => $page,
-            'perPage'        => $perPage,
-            'startAddress'   => $startAddress,
-            'endAddress'     => $endAddress,
-            'latStart'       => $latStart,
-            'lngStart'       => $lngStart,
-            'latEnd'         => $latEnd,
-            'lngEnd'         => $lngEnd,
-            'filterDate'     => $filterDate,
-            'filterTime'     => $filterTime,
-            'availableSeats' => $availableSeats,
-            'smoking'        => $smoking,
-        ]);
+    } else {
+        $builder->where('journey.start_datetime >=', date('Y-m-d H:i:s'));
     }
 
+    if ($filters['availableSeats']) {
+        $builder->having('remaining_seats >=', $filters['availableSeats']);
+    }
+
+    if ($filters['smoking'] !== null && $filters['smoking'] !== '') {
+        $builder->where('journey.smoking', $filters['smoking']);
+    }
+
+    // --- Récupération de tous les candidats (sans filtre géographique)
+    $candidates = $builder->get()->getResultArray();
+
+    // --- Ajout du nombre de demandes en attente pour chaque trajet
+    $journeyIds = array_column($candidates, 'id');
+    if (!empty($journeyIds)) {
+        $pendingCounts = $db->table('booking')
+            ->select('journey_id, COUNT(*) as pending_bookings')
+            ->where('status', 'pending')
+            ->whereIn('journey_id', $journeyIds)
+            ->groupBy('journey_id')
+            ->get()
+            ->getResultArray();
+
+        $pendingByJourney = array_column($pendingCounts, 'pending_bookings', 'journey_id');
+
+        foreach ($candidates as &$candidate) {
+            $candidate['pending_bookings'] = $pendingByJourney[$candidate['id']] ?? 0;
+        }
+        unset($candidate);
+    }
+
+    // --- Filtrage géographique en PHP (matching sur le tracé)
+    $start = ($filters['latStart'] !== null && $filters['lngStart'] !== null)
+        ? ['lat' => $filters['latStart'], 'lon' => $filters['lngStart']]
+        : null;
+
+    $end = ($filters['latEnd'] !== null && $filters['lngEnd'] !== null)
+        ? ['lat' => $filters['latEnd'], 'lon' => $filters['lngEnd']]
+        : null;
+
+    $matchingJourneys = $this->findMatchingJourneys($candidates, $start, $end);
+
+    // --- Pagination en PHP
+    $perPage  = 5;
+    $total    = count($matchingJourneys);
+    $journeys = array_slice($matchingJourneys, ($filters['page'] - 1) * $perPage, $perPage);
+    $pager    = \Config\Services::pager();
+
+    return view('Journeys/journeyShowAll', [
+        'title'    => 'Rechercher un trajet',
+        'journeys' => $journeys,
+        'pager'    => $pager,
+        'total'    => $total,
+        'perPage'  => $perPage,
+        // Spread du tableau : passe startAddress, endAddress, latStart, etc.
+        ...$filters,
+    ]);
+}
+
     /**
-     * Retourne les règles de validation pour le formulaire de création de trajet.
+     * Retourne les règles de validation du formulaire de création de trajet.
      *
      * La borne max de 'seats' est calculée dynamiquement à partir de la capacité
      * de la voiture sélectionnée (capacité - 1 pour le conducteur). Si la voiture
      * ne peut pas être résolue, on retombe sur une borne par défaut : la règle
      * sur 'car' invalidera le formulaire de toute façon.
+     *
+     * @param  int $maxSeats Nombre maximum de places réservables (défaut : 9)
+     * @return array<string, string> Règles de validation CodeIgniter indexées par champ
      */
     public function getCreateValidationRules(int $maxSeats = 9): array {
 
@@ -315,6 +327,13 @@ class JourneyController extends BaseController{
 
     }
 
+    /**
+     * Retourne les messages d'erreur personnalisés associés aux règles de validation.
+     *
+     * @param  int $maxSeats Nombre maximum de places réservables (défaut : 9),
+     *                       injecté dans le message d'erreur du champ 'seats'
+     * @return array<string, array<string, string>> Messages indexés par champ puis par règle
+     */   
     public function getCreateValidationMessages(int $maxSeats = 9): array {
 
         return [
@@ -359,6 +378,9 @@ class JourneyController extends BaseController{
      * Détermine le nombre maximum de places réservables en fonction de la voiture
      * sélectionnée dans le POST (capacité de la voiture - 1 pour le conducteur).
      *
+     * Si la voiture est invalide, n'appartient pas à l'utilisateur ou n'est pas
+     * trouvée, retourne la valeur par défaut absolue (9).
+     *
      * @return int Nombre maximum de places réservables pour la voiture
      */
     private function getMaxAvailableSeatsFromPostedCar(): int
@@ -385,6 +407,14 @@ class JourneyController extends BaseController{
         return (int) $car['seats'] - 1;
     }
 
+    /**
+     * Récupère et nettoie les adresses (départ, étapes, arrivée) postées dans le formulaire.
+     *
+     * Les étapes intermédiaires sont indexées par 'stage0', 'stage1', etc.
+     * Les clés réservées sont 'start' et 'end'.
+     *
+     * @return array<string, string> Adresses nettoyées indexées par clé
+     */   
     public function getLocationsCreateFormData(): array{
 
         $locations['start'] = $this->sanitizeAddress($this->request->getPost('startAddress'));
@@ -403,6 +433,12 @@ class JourneyController extends BaseController{
 
     }
 
+    /**
+     * Récupère les champs du trajet (hors adresses) postés dans le formulaire.
+     *
+     * @return array{startDate:string, startTime:string, seats:mixed, note:mixed,
+     *               smoking:mixed, car:mixed} Données brutes du POST
+     */   
     public function getJourneyCreateFormData(){
 
         return [
@@ -416,6 +452,12 @@ class JourneyController extends BaseController{
 
     }
 
+    /**
+     * Agrège l'ensemble des données du formulaire de création de trajet.
+     *
+     * @return array{location: array<string,string>, journey: array} Données du formulaire
+     *               structurées en deux sous-tableaux : 'location' et 'journey'
+     */    
     public function getCreateFormData():array{
 
         return [
@@ -425,26 +467,63 @@ class JourneyController extends BaseController{
 
     }
 
-    private function getShowAllFilter(){
-
-        return[
-
-            $startAddress   = $this->request->getGet('startAddress'),
-            $endAddress     = $this->request->getGet('endAddress'),
-            $latStart       = $this->request->getGet('startLat') !== null ? (float) $this->request->getGet('startLat') : null,
-            $lngStart       = $this->request->getGet('startLng') !== null ? (float) $this->request->getGet('startLng') : null,
-            $latEnd         = $this->request->getGet('endLat')   !== null ? (float) $this->request->getGet('endLat')   : null,
-            $lngEnd         = $this->request->getGet('endLng')   !== null ? (float) $this->request->getGet('endLng')   : null,
-            $filterDate     = $this->request->getGet('date'),
-            $filterTime     = $this->request->getGet('time'),
-            $availableSeats = (int) ($this->request->getGet('availableSeats') ?? 1),
-            $smoking        = $this->request->getGet('smoking'),
-            $page           = (int) ($this->request->getGet('page') ?? 1),
-
+    /**
+     * Récupère et normalise les filtres de recherche depuis la query string.
+     *
+     * Les coordonnées géographiques sont converties en float, ou null si
+     * absentes/vides (un paramètre vide comme ?startLat= ne doit pas être
+     * interprété comme la coordonnée 0.0).
+     *
+     * @return array{
+     *     startAddress: ?string,
+     *     endAddress: ?string,
+     *     latStart: ?float,
+     *     lngStart: ?float,
+     *     latEnd: ?float,
+     *     lngEnd: ?float,
+     *     filterDate: ?string,
+     *     filterTime: ?string,
+     *     availableSeats: int,
+     *     smoking: ?string,
+     *     page: int
+     * }
+     */
+    private function getShowAllFilter(): array
+    {
+        return [
+            'startAddress'   => $this->request->getGet('startAddress'),
+            'endAddress'     => $this->request->getGet('endAddress'),
+            'latStart'       => $this->parseFloatOrNull($this->request->getGet('startLat')),
+            'lngStart'       => $this->parseFloatOrNull($this->request->getGet('startLng')),
+            'latEnd'         => $this->parseFloatOrNull($this->request->getGet('endLat')),
+            'lngEnd'         => $this->parseFloatOrNull($this->request->getGet('endLng')),
+            'filterDate'     => $this->request->getGet('date'),
+            'filterTime'     => $this->request->getGet('time'),
+            'availableSeats' => (int) ($this->request->getGet('availableSeats') ?? 1),
+            'smoking'        => $this->request->getGet('smoking'),
+            'page'           => (int) ($this->request->getGet('page') ?? 1),
         ];
-        
     }
 
+    /**
+     * Convertit une valeur de query string en float, ou null si vide/absente.
+     *
+     * @param  mixed $value
+     * @return float|null
+     */
+    private function parseFloatOrNull($value): ?float
+    {
+        return ($value !== null && $value !== '') ? (float) $value : null;
+    }
+
+    /**
+     * Récupère les données de localisation d'une adresse via l'API de la Géoplateforme (IGN/BAN).
+     *
+     * @param  string $adresse Adresse en texte libre (ex : "8 bd du Port 95000 Cergy")
+     * @param  int    $limit   Nombre max de résultats (défaut : 1)
+     * @return array|null      Propriétés de l'adresse (avec latitude/longitude),
+     *                         ou null si rien trouvé ou en cas d'erreur réseau
+     */
     private function sanitizeAddress($value): string{
         
         if (!is_string($value)) {
@@ -501,7 +580,13 @@ class JourneyController extends BaseController{
         return $result;
     }
 
-
+    /**
+     * Récupère les données de localisation d'un ensemble d'adresses.
+     *
+     * @param  array<string,string> $addresses Adresses indexées par clé (start, stage0, ..., end)
+     * @return array|null Données de localisation indexées par les mêmes clés.
+     *                    Une entrée vaut null si l'adresse n'a pas pu être géolocalisée.
+     */
     function getLocationsData(array $addresses):array | null{
 
         $addressesData=[];
@@ -517,9 +602,11 @@ class JourneyController extends BaseController{
     }
 
     /**
-     * Renvoi une route au format geoJson
-     * 
-     * input array : coordinates : tableau de coordonnées au format [[lat,long],[lat,long]....]
+     * Récupère un itinéraire au format GeoJSON via l'API OpenRouteService.
+     *
+     * @param  array<int, array{0: float, 1: float}> $coordinates Tableau de coordonnées
+     *         au format [[lat, long], [lat, long], ...]
+     * @return string|null Réponse GeoJSON brute, ou null en cas d'erreur de l'API
      */
     function getTrack(array $coordinates): ?string{
 
@@ -563,8 +650,15 @@ class JourneyController extends BaseController{
 
     /**
      * Retourne le trajet existant de l'utilisateur sur la même demi-journée
-     * (matin : 00h–12h, après-midi : 12h–24h) que la date/heure fournies,
-     * ou null si aucun.
+     * (matin : 00h–12h, après-midi : 12h–24h) que la date/heure fournies.
+     *
+     * Sert à prévenir la création de doublons par un même conducteur sur
+     * une plage horaire incompatible.
+     *
+     * @param  int    $userId    Identifiant du conducteur
+     * @param  string $startDate Date de départ au format Y-m-d
+     * @param  string $startTime Heure de départ au format H:i
+     * @return array|null Trajet existant sur la demi-journée, ou null si aucun
      */
     private function findExistingJourneyOnHalfDay(int $userId, string $startDate, string $startTime): ?array
     {
@@ -584,16 +678,22 @@ class JourneyController extends BaseController{
 
     /**
      * Récupère les données de localisation de chaque adresse du formulaire.
-     * Lève une exception si une adresse ne peut pas être géolocalisée.
      *
-     * @param array $addresses Tableau d'adresses textuelles indexé par clé (start, stage0, ..., end)
-     * @return array           Tableau des données de localisation indexé par les mêmes clés
-     * @throws ExternalApiException Si l'API ne renvoie rien pour une adresse
+     * Les étapes vides sont ignorées. Pour chaque adresse non vide :
+     *  - une exception est levée si l'API ne renvoie aucune correspondance
+     *  - une erreur de validation est collectée si l'adresse n'a pas de rue
+     *    ni de localité (adresse trop imprécise)
+     *
+     * @param  array<string,string> $addresses Adresses indexées par clé (start, stage0, ..., end)
+     * @return array<string,array>  Données de localisation indexées par les mêmes clés
+     *
+     * @throws ExternalApiException       Si l'API ne renvoie rien pour une adresse
      * @throws AddressValidationException Si une ou plusieurs adresses sont incomplètes
      */
-    private function fetchAllLocationsData(array $addresses): array {
+    function fetchAllLocationsData(array $addresses): array {
 
         $locationsData = [];
+        $errors = [];
 
         foreach ($addresses as $key => $address) {
 
@@ -621,8 +721,9 @@ class JourneyController extends BaseController{
     /**
      * Récupère le tracé GeoJSON reliant l'ensemble des locations via l'API de routage.
      *
-     * @param array $locationsData Données de localisation (avec latitude / longitude)
-     * @return string              Tracé au format GeoJSON
+     * @param  array $locationsData Données de localisation (avec 'latitude' et 'longitude')
+     * @return string               Tracé au format GeoJSON
+     *
      * @throws ExternalApiException Si l'API ne renvoie pas de tracé valide
      */
     private function fetchTrackOrFail(array $locationsData): string
@@ -646,12 +747,14 @@ class JourneyController extends BaseController{
      * Les étapes intermédiaires (stages) sont optionnelles : si le formulaire
      * n'en contient aucune, la boucle d'insertion des stages ne s'exécute pas.
      *
-     * @param int    $userId         Identifiant du conducteur
-     * @param array  $createFormData Données du formulaire (clés 'journey' et 'location')
-     * @param array  $locationsData  Données de localisation renvoyées par l'API de géocodage
-     * @param string $geoJsonTrack   Tracé GeoJSON renvoyé par l'API de routage
-     * @return int                   Identifiant du trajet créé
-     * @throws ModelValidationException Si un model refuse l'insertion
+     * @param  int    $userId         Identifiant du conducteur
+     * @param  array  $createFormData Données du formulaire (clés 'journey' et 'location')
+     * @param  array  $locationsData  Données de localisation renvoyées par l'API de géocodage
+     * @param  string $geoJsonTrack   Tracé GeoJSON renvoyé par l'API de routage
+     * @return int                    Identifiant du trajet créé
+     *
+     * @throws ModelValidationException Si un model refuse l'insertion (track, location,
+     *                                  journey ou stage)
      * @throws \RuntimeException        Si la transaction échoue
      */
     private function persistJourney(int $userId, array $createFormData, array $locationsData, string $geoJsonTrack): int
@@ -725,8 +828,14 @@ class JourneyController extends BaseController{
     /**
      * Construit les entités location prêtes à être insérées en base.
      *
-     * @param array $locationsData Données renvoyées par l'API de géocodage
-     * @return array               Tableau d'entités location
+     * Pour chaque location, la ville est résolue ou créée à la volée via
+     * CityModel::findOrCreateCity().
+     *
+     * @param  array $locationsData Données renvoyées par l'API de géocodage
+     *                              (clés attendues : city, postcode, longitude,
+     *                              latitude, name)
+     * @return array<int, array{longitude:float, latitude:float, address:string,
+     *               note:string, city_id:int}> Entités location prêtes pour l'insert
      */
     private function buildLocationEntities(array $locationsData): array
     {
@@ -749,7 +858,7 @@ class JourneyController extends BaseController{
     /**
      * Construit la date/heure de départ du trajet à partir des champs du formulaire.
      *
-     * @param array $journeyData Données du journey (clés 'startDate' et 'startTime')
+     * @param  array{startDate:string, startTime:string} $journeyData Données du journey
      * @return DateTimeImmutable Date/heure de départ du trajet
      */
     private function buildJourneyStartDateTime(array $journeyData): DateTimeImmutable
@@ -768,10 +877,12 @@ class JourneyController extends BaseController{
      *
      * Cas particulier : si le trajet n'a aucune étape (uniquement start → end),
      * l'API renvoie un seul segment et la fonction retourne un tableau vide.
+     * Le dernier segment (étape finale → arrivée) est exclu du calcul.
      *
-     * @param array  $journeyData  Données du journey (pour la date/heure de départ)
-     * @param string $geoJsonTrack Tracé GeoJSON renvoyé par l'API
-     * @return DateTimeImmutable[] Tableau des heures de départ des étapes (vide si pas d'étape)
+     * @param  array  $journeyData  Données du journey (utilisées pour la date/heure de départ)
+     * @param  string $geoJsonTrack Tracé GeoJSON renvoyé par l'API
+     * @return DateTimeImmutable[]  Heures de départ des étapes (vide si pas d'étape)
+     *
      * @throws ExternalApiException Si le GeoJSON ne contient aucun segment exploitable
      */
     private function computeStageDepartures(array $journeyData, string $geoJsonTrack): array
@@ -801,10 +912,10 @@ class JourneyController extends BaseController{
     }
 
     /**
-     * Calcule l'heure d'arrivée d'un trajet
+     * Calcule l'heure d'arrivée d'un trajet à partir de son tracé et de son heure de départ.
      *
-     * @param int $journeyId ID du journey
-     * @return DateTimeImmutable Heure d'arrivée
+     * @param  int $journeyId Identifiant du trajet
+     * @return DateTimeImmutable Heure d'arrivée estimée
      */
     private function getArrivaleDateTime(int $journeyId): DateTimeImmutable {
     
@@ -824,10 +935,11 @@ class JourneyController extends BaseController{
 
 
     /**
-     * Calcul le temps de trajet d'un geoJson
+     * Calcule la durée totale d'un trajet à partir de son GeoJSON,
+     * en sommant la durée de chacun de ses segments.
      *
-     * @param object $track trajet au format geoJson
-     * @return int Durée du trajet
+     * @param  object|null $track Trajet au format GeoJSON décodé en objet
+     * @return int Durée totale du trajet, en secondes
      */
     private function calculateTrackDuration(?object $track): int {
 
@@ -849,16 +961,16 @@ class JourneyController extends BaseController{
      * Pour chaque trajet : on récupère les points du tracé GeoJSON, on cherche le
      * point le plus proche du départ ; s'il est dans le rayon, on cherche le point
      * le plus proche de l'arrivée PARMI LES POINTS SUIVANTS (pour garantir que le
-     * trajet va bien dans le sens départ -> arrivée).
+     * trajet va bien dans le sens départ → arrivée).
      *
      * Filtres partiels gérés : seul le départ, seule l'arrivée, ou aucun des deux
      * (auquel cas tous les trajets sont retournés).
      *
-     * @param array[]    $journeys      Trajets candidats (doivent contenir 'track_id')
-     * @param array|null $start         Point de départ ['lat' => float, 'lon' => float] ou null
-     * @param array|null $end           Point d'arrivée ['lat' => float, 'lon' => float] ou null
-     * @param float      $maxDistanceKm Rayon de tolérance en km (défaut : 10)
-     * @return array[]   Sous-ensemble des trajets correspondants
+     * @param  array[]    $journeys      Trajets candidats (doivent contenir 'track_id')
+     * @param  array|null $start         Point de départ ['lat' => float, 'lon' => float] ou null
+     * @param  array|null $end           Point d'arrivée ['lat' => float, 'lon' => float] ou null
+     * @param  float      $maxDistanceKm Rayon de tolérance en km (défaut : 10)
+     * @return array[] Sous-ensemble des trajets correspondants
      */
     private function findMatchingJourneys(array $journeys, ?array $start, ?array $end, float $maxDistanceKm = 10): array
     {
@@ -918,8 +1030,12 @@ class JourneyController extends BaseController{
     /**
      * Récupère et normalise les points du tracé d'un trajet.
      *
-     * @param int $trackId Identifiant du tracé
-     * @return array[] Points ['lat' => float, 'lon' => float] ; vide si tracé absent/invalide
+     * Les coordonnées GeoJSON sont au format [longitude, latitude] et sont
+     * normalisées en tableaux associatifs ['lat', 'lon'] pour la suite des calculs.
+     *
+     * @param  int $trackId Identifiant du tracé
+     * @return array<int, array{lat:float, lon:float}> Points du tracé ;
+     *               tableau vide si le tracé est absent ou invalide
      */
     private function getTrackPoints(int $trackId): array
     {
@@ -943,9 +1059,12 @@ class JourneyController extends BaseController{
     /**
      * Renvoie l'indice du point du tracé le plus proche d'une cible.
      *
-     * @param array[] $points    Points du tracé (['lat','lon'])
-     * @param array   $target    Point cible (['lat','lon'])
-     * @param int     $fromIndex Indice de départ de la recherche (contrainte de sens)
+     * La recherche peut être restreinte à partir d'un indice donné, ce qui
+     * permet d'imposer un ordre (par exemple : arrivée après le départ).
+     *
+     * @param  array<int, array{lat:float, lon:float}> $points Points du tracé
+     * @param  array{lat:float, lon:float}             $target Point cible
+     * @param  int                                     $fromIndex Indice de départ de la recherche
      * @return int|null Indice du point le plus proche, ou null si la plage est vide
      */
     private function findClosestPointIndex(array $points, array $target, int $fromIndex = 0): ?int
@@ -966,11 +1085,12 @@ class JourneyController extends BaseController{
     }
 
     /**
-     * Distance en kilomètres entre deux points (formule de Haversine).
+     * Calcule la distance en kilomètres entre deux points géographiques
+     * via la formule de Haversine (Terre supposée sphérique, rayon 6371 km).
      *
-     * @param array $coord1 ['lat' => float, 'lon' => float]
-     * @param array $coord2 ['lat' => float, 'lon' => float]
-     * @return float Distance en km
+     * @param  array{lat:float, lon:float} $coord1 Premier point
+     * @param  array{lat:float, lon:float} $coord2 Second point
+     * @return float Distance entre les deux points, en kilomètres
      */
     private function calculateDistance(array $coord1, array $coord2): float
     {
