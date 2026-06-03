@@ -19,58 +19,17 @@ class AdminController extends BaseController
     }
 
     /**
-     * Vérifie que l'utilisateur connecté est bien un administrateur.
-     * Si ce n'est pas le cas, redirige vers la page d'accueil avec un message d'erreur.
-     *
-     * @return \CodeIgniter\HTTP\RedirectResponse|null  Redirection si non admin, null sinon
+     * Page principale d'administration : affiche l'onglet demandé
+     * (inscriptions en attente, signalements, ou gestion des admins).
      */
-    private function requireAdmin()
-    {
-        $user = $this->userModel->find(session()->get('user_id'));
-
-        if (!$user || !$user['is_admin']) {
-            session()->set('isAdmin', false);
-            session()->set('role', $user['role'] ?? 'user');
-            return redirect()->to(site_url('/'))
-                ->with('error', 'Accès réservé aux administrateurs.');
-        }
-
-        // Resynchronise la session si le rôle a changé depuis la connexion
-        if (session()->get('role') !== $user['role']) {
-            session()->set('role', $user['role']);
-        }
-
-        return null;
-    }
-
-    /**
-     * Vérifie que l'utilisateur connecté est bien un super-administrateur.
-     * Si ce n'est pas le cas, redirige vers la page d'accueil avec un message d'erreur.
-     *
-     * @return \CodeIgniter\HTTP\RedirectResponse|null  Redirection si non superadmin, null sinon
-     */
-    private function requireSuperAdmin()
-    {
-        if (session()->get('role') !== 'superadmin') {
-            return redirect()->to(site_url('/'))
-                ->with('error', 'Accès réservé aux super-administrateurs.');
-        }
-        return null;
-    }
-
     public function index()
     {
-        // Vérifie les droits administrateur avant tout traitement
-        if ($response = $this->requireAdmin()) {
-            return $response;
-        }
-
         // Récupère l'onglet actif depuis l'URL
-        $tab = $this->request->getGet('tab') ?? 'registrations';
-        $reports        = [];
-        $closedReports  = [];
-        $pendingUsers   = [];
-        $allUsers       = [];
+        $tab             = $this->request->getGet('tab') ?? 'registrations';
+        $reports         = [];
+        $closedReports   = [];
+        $pendingUsers    = [];
+        $allUsers        = [];
         $superadminCount = 0;
         $adminCount      = 0;
 
@@ -87,10 +46,9 @@ class AdminController extends BaseController
             $adminCount      = $this->userModel->where('status', 'active')->where('role', 'admin')->countAllResults();
         }
 
-
-        // Compte le nombre total d'inscriptions en attente
-        $nPendingUsers  = $this->userModel->where('status', 'pending')->countAllResults();
-        $nOpenReports   = $this->reportModel->where('status', 'open')->countAllResults();
+        // Compteurs globaux pour les badges/onglets
+        $nPendingUsers = $this->userModel->where('status', 'pending')->countAllResults();
+        $nOpenReports  = $this->reportModel->where('status', 'open')->countAllResults();
 
         return view('Admin/index', [
             'title'           => 'Administration',
@@ -106,31 +64,25 @@ class AdminController extends BaseController
         ]);
     }
 
-
     /**
      * Valide ou rejette l'inscription d'un utilisateur.
      * Met à jour son statut en base de données et lui envoie un email de notification.
      *
      * @param  int  $id  Identifiant de l'utilisateur à traiter
-     * @return \CodeIgniter\HTTP\Response
+     * @return \CodeIgniter\HTTP\RedirectResponse
      */
     public function updateRegistration(int $id)
     {
-        // Vérifie les droits administrateur avant tout traitement
-        if ($response = $this->requireAdmin()) {
-            return $response;
-        }
-
-        // Récupère et valide l'action soumise via le formulaire 
+        // Récupère et valide l'action soumise via le formulaire
         $action = $this->request->getPost('actionAdmin');
-        if (!in_array($action, ['validate', 'reject'], true)) {
+        if (! in_array($action, ['validate', 'reject'], true)) {
             return redirect()->to(site_url('admin?tab=registrations'))
                 ->with('error', 'Action de validation invalide.');
         }
 
         // Vérifie que l'utilisateur ciblé existe bien en base
         $user = $this->userModel->find($id);
-        if (!$user) {
+        if (! $user) {
             return redirect()->to(site_url('admin?tab=registrations'))
                 ->with('error', 'Utilisateur introuvable.');
         }
@@ -140,7 +92,7 @@ class AdminController extends BaseController
         $this->userModel->update($id, ['status' => $newStatus]);
 
         // Prépare le sujet et le template d'email selon l'action
-        $subject = ($action === 'validate') ? 'Votre compte a été validé !' : 'Votre demande d’inscription a été refusée';
+        $subject   = ($action === 'validate') ? 'Votre compte a été validé !' : 'Votre demande d’inscription a été refusée';
         $emailView = ($action === 'validate') ? 'Emails/adminApproved' : 'Emails/adminRejected';
 
         // Envoie l'email de notification à l'utilisateur
@@ -150,7 +102,7 @@ class AdminController extends BaseController
             $subject,
             view($emailView, [
                 'firstname' => $user['firstname'],
-                'lastname'  => $user['lastname']
+                'lastname'  => $user['lastname'],
             ])
         );
 
@@ -161,27 +113,26 @@ class AdminController extends BaseController
 
     /**
      * Modifie le rôle d'un utilisateur.
-     * Seuls les Super-Administrateurs peuvent effectuer cette action.
+     * Réservé aux super-administrateurs (protégé par le filtre superadmin).
      *
      * @param  int  $id  Identifiant de l'utilisateur cible
-     * @return \CodeIgniter\HTTP\Response
+     * @return \CodeIgniter\HTTP\RedirectResponse
      */
     public function updateRole(int $id)
     {
-        if ($response = $this->requireSuperAdmin()) return $response;
-
         $newRole = $this->request->getPost('role');
 
-        if (!in_array($newRole, ['user', 'admin'], true)) {
+        if (! in_array($newRole, ['user', 'admin'], true)) {
             return redirect()->to(site_url('admin?tab=admins'))
                 ->with('error', 'Rôle invalide.');
         }
 
         $target = $this->userModel->find($id);
-        if (!$target) {
+        if (! $target) {
             return redirect()->to(site_url('admin?tab=admins'))
                 ->with('error', 'Utilisateur introuvable.');
         }
+
         if ($target['role'] === 'superadmin') {
             return redirect()->to(site_url('admin?tab=admins'))
                 ->with('error', 'Impossible de modifier un super-administrateur.');
@@ -200,49 +151,62 @@ class AdminController extends BaseController
     }
 
     /**
-     * Supprime un utilisateur (Soft Delete) et annule ses trajets en cours.
-     * Seuls les Super-Administrateurs peuvent effectuer cette action.
+     * Supprime un utilisateur (soft delete) et annule ses trajets en cours.
+     *
+     * Règles d'autorisation :
+     * - Un admin peut supprimer un utilisateur simple, mais pas un admin ni un superadmin.
+     * - Un superadmin peut supprimer n'importe qui sauf un autre superadmin.
+     * - On ne peut pas se supprimer soi-même.
+     * - Le dernier admin actif ne peut pas être supprimé.
+     * - Le dernier superadmin actif ne peut pas être supprimé.
      *
      * @param  int  $id  Identifiant de l'utilisateur à supprimer
-     * @return \CodeIgniter\HTTP\Response
+     * @return \CodeIgniter\HTTP\RedirectResponse
      */
     public function deleteUser(int $id)
     {
-        if ($response = $this->requireAdmin()) return $response;
+        $target      = $this->userModel->find($id);
+        $currentRole = session()->get('role');
 
-        $target = $this->userModel->find($id);
-        if (!$target) {
+        if (! $target) {
             return redirect()->to(site_url('admin?tab=admins'))
                 ->with('error', 'Utilisateur introuvable.');
         }
 
+        // 1. Pas d'auto-suppression
         if ($id === (int) session()->get('user_id')) {
             return redirect()->to(site_url('admin?tab=admins'))
                 ->with('error', 'Vous ne pouvez pas supprimer votre propre compte.');
         }
 
-        if (in_array($target['role'], ['admin', 'superadmin'], true) && session()->get('role') !== 'superadmin') {
+        // 2. Personne ne peut supprimer un super-administrateur
+        if ($target['role'] === 'superadmin') {
+            return redirect()->to(site_url('admin?tab=admins'))
+                ->with('error', 'Impossible de supprimer un super-administrateur.');
+        }
+
+        // 3. Un admin simple ne peut pas supprimer un autre admin
+        //    (seul un superadmin peut supprimer un admin)
+        if ($target['role'] === 'admin' && $currentRole !== 'superadmin') {
             return redirect()->to(site_url('admin?tab=admins'))
                 ->with('error', 'Seul un super-administrateur peut supprimer un administrateur.');
         }
 
-        if ($target['role'] === 'superadmin') {
-            $superadminCount = $this->userModel->where('status', 'active')->where('role', 'superadmin')->countAllResults();
-            if ($superadminCount <= 1) {
-                return redirect()->to(site_url('admin?tab=admins'))
-                    ->with('error', 'Impossible de supprimer le dernier super-administrateur.');
-            }
-        }
-
+        // 4. Garde-fou : on n'autorise pas la suppression du dernier administrateur
+        //    (au moins un admin doit rester en plus du superadmin)
         if ($target['role'] === 'admin') {
-            $adminCount = $this->userModel->where('status', 'active')->where('role', 'admin')->countAllResults();
+            $adminCount = $this->userModel
+                ->where('status', 'active')
+                ->where('role', 'admin')
+                ->countAllResults();
+
             if ($adminCount <= 1) {
                 return redirect()->to(site_url('admin?tab=admins'))
                     ->with('error', 'Impossible de supprimer le dernier administrateur.');
             }
         }
 
-        // Soft delete, remplit deleted_at
+        // Soft delete (remplit deleted_at)
         $this->userModel->delete($id);
 
         // Annulation de tous ses trajets actifs
@@ -252,6 +216,7 @@ class AdminController extends BaseController
             ->set(['canceled_at' => date('Y-m-d H:i:s')])
             ->update();
 
+        // Notification email
         $mailer = new MailerExample();
         $mailer->sendHtml(
             $target['email'],
@@ -266,14 +231,13 @@ class AdminController extends BaseController
             ->with('success', "{$target['firstname']} a été supprimé et ses trajets annulés.");
     }
 
+    /**
+     * Affiche le détail d'un signalement.
+     */
     public function showReport(int $id)
     {
-        if ($response = $this->requireAdmin()) {
-            return $response;
-        }
-
         $report = $this->reportModel->getReportDetail($id);
-        if (!$report) {
+        if (! $report) {
             return redirect()->to(site_url('admin?tab=reports'))
                 ->with('error', 'Signalement introuvable.');
         }
@@ -291,28 +255,23 @@ class AdminController extends BaseController
      * - 'close' : clôture le signalement sans action supplémentaire
      *
      * @param  int  $id  Identifiant du signalement à résoudre
-     * @return \CodeIgniter\HTTP\Response
+     * @return \CodeIgniter\HTTP\RedirectResponse
      */
     public function resolveReport(int $id)
     {
-        // Vérifie les droits administrateur avant tout traitement
-        if ($response = $this->requireAdmin()) {
-            return $response;
-        }
-
         // Récupère l'action choisie et le commentaire administrateur saisi dans le formulaire
         $action  = $this->request->getPost('actionAdmin');
         $comment = trim($this->request->getPost('commentAdmin') ?? '');
 
         // Valide que l'action est autorisée et qu'un commentaire a bien été fourni
-        if (!in_array($action, ['warn', 'ban', 'close'], true) || empty($comment)) {
+        if (! in_array($action, ['warn', 'ban', 'close'], true) || empty($comment)) {
             return redirect()->to(site_url('admin?tab=reports'))
                 ->with('error', 'Action ou commentaire invalide.');
         }
 
         // Récupère le signalement ainsi que les informations du propriétaire du trajet associé
         $report = $this->reportModel->getWithJourneyOwner($id);
-        if (!$report) {
+        if (! $report) {
             return redirect()->to(site_url('admin?tab=reports'))
                 ->with('error', 'Signalement introuvable.');
         }
@@ -342,10 +301,10 @@ class AdminController extends BaseController
         }
 
         $this->reportModel->resolve($id, $action, $comment, session()->get('user_id'));
+
         return redirect()->to(site_url('admin?tab=reports'))
             ->with('success', 'Signalement traité avec succès.');
     }
-
 
     /**
      * Génère le contenu HTML de l'email d'avertissement envoyé à un utilisateur signalé.
