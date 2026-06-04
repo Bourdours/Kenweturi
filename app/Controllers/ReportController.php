@@ -72,6 +72,25 @@ class ReportController extends BaseController
                 ->with('error', 'Vous ne pouvez pas vous signaler vous-même.');
         }
 
+        // Vérifie que l'utilisateur signalé est bien un participant du trajet
+        $driver     = $this->userModel->find((int) $journey['user_id']);
+        $passengers = $this->bookingModel->findPassengersByJourney($journeyId);
+
+        $validIds = [];
+        if ($driver) {
+            $validIds[] = (int) $driver['id'];
+        }
+        foreach ($passengers as $p) {
+            $validIds[] = (int) $p['user_id'];
+        }
+        $validIds = array_diff($validIds, [$reporterId]);
+
+        if (!in_array($reportedUserId, $validIds, true)) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Utilisateur signalé invalide.');
+        }
+
         $data = [
             'title'            => $this->request->getPost('titleReport'),
             'description'      => $this->request->getPost('reasonReport'),

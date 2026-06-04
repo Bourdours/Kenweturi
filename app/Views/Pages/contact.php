@@ -13,7 +13,7 @@
 
   <?php if (session()->getFlashdata('success')): ?>
     <div class="bg-success/10 border border-success/20 rounded-2xl px-6 py-4 text-success text-sm">
-      <?= session()->getFlashdata('success') ?>
+      <?= esc(session()->getFlashdata('success')) ?>
     </div>
   <?php endif; ?>
 

@@ -118,13 +118,18 @@ class CarController extends BaseController
     {
         $carModel = new CarModel();
 
+        $car = $carModel->where('user_id', session()->get('user_id'))->find($id);
+        if (!$car) {
+            return redirect()->to('/dashboard')->with('error', 'Voiture introuvable.');
+        }
+
         $data = [
-            'id'        => $id,
-            'brand'     => $this->request->getPost('brand'),
-            'model'     => $this->request->getPost('model'),
-            'color'     => $this->request->getPost('color'),
-            'seats'     => $this->request->getPost('seats'),
-            'user_id'   => session()->get('user_id'),  // depuis la session
+            'id'      => $id,
+            'brand'   => $this->request->getPost('brand'),
+            'model'   => $this->request->getPost('model'),
+            'color'   => $this->request->getPost('color'),
+            'seats'   => $this->request->getPost('seats'),
+            'user_id' => session()->get('user_id'), // requis par la validation du model (ownership déjà vérifiée ci-dessus)
         ];
 
         if (!$carModel->save($data)) {

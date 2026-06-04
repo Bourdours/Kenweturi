@@ -105,11 +105,11 @@
                                         onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
                                 </div>
                                 <div class="hidden w-6 h-6 rounded-full bg-action-dark text-ink text-xs shrink-0 items-center justify-center font-bold">
-                                    <?= $initials ?>
+                                    <?= esc($initials) ?>
                                 </div>
                             <?php else: ?>
                                 <div class="flex w-6 h-6 rounded-full bg-action-dark text-ink text-xs shrink-0 items-center justify-center font-bold">
-                                    <?= $initials ?>
+                                    <?= esc($initials) ?>
                                 </div>
                             <?php endif ?>
                             <span><?= esc($booking['person_firstname']) ?> <?= esc($booking['person_lastname']) ?></span>

@@ -51,11 +51,11 @@
               onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
           </div>
           <div class="jsAvatarOpen cursor-pointer hidden w-14 h-14 rounded-full bg-action text-ink font-bold text-base shrink-0 items-center justify-center">
-            <?= $initials ?>
+            <?= esc($initials) ?>
           </div>
         <?php else: ?>
           <div class="jsAvatarOpen cursor-pointer flex w-14 h-14 rounded-full bg-action text-ink font-bold text-base shrink-0 items-center justify-center">
-            <?= $initials ?>
+            <?= esc($initials) ?>
           </div>
         <?php endif; ?>
 
