@@ -68,14 +68,14 @@ $oldReported   = (int) old('reportedUserId');
         <?php else: ?>
           <div class="flex flex-col gap-2">
             <?php foreach ($reportableUsers as $u): ?>
-              <label class="flex items-center gap-3 bg-paper border border-action/15 rounded-lg px-4 py-3 cursor-pointer
+              <label class="group flex items-center gap-3 bg-paper border border-action/15 rounded-lg px-4 py-3 cursor-pointer
                             has-[:checked]:border-action/50 has-[:checked]:bg-action/5 transition-colors">
                 <input type="radio" name="reportedUserId" value="<?= esc($u['id']) ?>"
                   class="hidden"
                   <?= $oldReported === (int) $u['id'] ? 'checked' : '' ?>>
                 <span class="w-4 h-4 rounded-full border-2 border-action/30 flex items-center justify-center shrink-0
-                              peer-checked:border-action">
-                  <span class="w-2 h-2 rounded-full bg-action opacity-0 has-[:checked]:opacity-100"></span>
+                              group-has-[:checked]:border-action transition-colors">
+                  <span class="w-2 h-2 rounded-full bg-action opacity-0 group-has-[:checked]:opacity-100 transition-opacity"></span>
                 </span>
                 <div class="flex-1 min-w-0">
                   <span class="text-ink text-sm font-medium"><?= esc($u['firstname']) ?> <?= esc($u['lastname']) ?></span>
