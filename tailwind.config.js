@@ -11,6 +11,9 @@ module.exports = {
   ],
   theme: {
     extend: {
+      screens: {
+        tab: '900px',
+      },
       fontFamily: {
         sans:    ['Plus Jakarta Sans', 'sans-serif'],
         display: ['Space Grotesk', 'sans-serif'],

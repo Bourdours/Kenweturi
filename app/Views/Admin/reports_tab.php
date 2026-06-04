@@ -83,7 +83,7 @@
   <div class="hidden md:block overflow-x-auto">
     <table class="w-full text-left border-collapse text-sm">
       <thead>
-        <tr class="bg-paper border-b border-action/10 text-ink/50 font-semibold">
+        <tr class="border-b border-action/10 text-ink/50 font-semibold">
           <th class="px-6 py-4 font-display">Signalement</th>
           <th class="px-6 py-4 font-display">Signalé par</th>
           <th class="px-6 py-4 font-display">Utilisateur signalé</th>
@@ -213,7 +213,7 @@
     <div class="hidden md:block overflow-x-auto">
       <table class="w-full text-left border-collapse text-sm">
         <thead>
-          <tr class="bg-paper border-b border-action/10 text-ink/40 font-semibold">
+          <tr class="border-b border-action/10 text-ink/40 font-semibold">
             <th class="px-6 py-3 font-display">Signalement</th>
             <th class="px-6 py-3 font-display">Signalé par</th>
             <th class="px-6 py-3 font-display">Utilisateur signalé</th>
