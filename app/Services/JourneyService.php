@@ -415,25 +415,8 @@ class JourneyService
         $journey = $this->journeyModel->findWithDetails($journeyId);
         if (!$journey) return;
 
-        // ====== Récupération de toutes les demandes en attente
-        $requests = $this->journeyRequestModel
-            ->select('journey_request.*,
-                      u.email          as requester_email,
-                      u.firstname      as requester_firstname,
-                      loc_start.latitude  as start_lat,
-                      loc_start.longitude as start_lng,
-                      loc_end.latitude    as end_lat,
-                      loc_end.longitude   as end_lng,
-                      city_start.name  as city_start_name,
-                      city_end.name    as city_end_name')
-            ->join('user u',             'u.id = journey_request.user_id')
-            ->join('location loc_start', 'loc_start.id = journey_request.location_start_id')
-            ->join('location loc_end',   'loc_end.id = journey_request.location_end_id')
-            ->join('city city_start',    'city_start.id = loc_start.city_id')
-            ->join('city city_end',      'city_end.id = loc_end.city_id')
-            ->where('journey_request.user_id !=', $journey['user_id'])
-            ->where('journey_request.start_datetime >=', date('Y-m-d H:i:s'))
-            ->findAll();
+        // ====== Récupération de toutes les demandes en attente (hors conducteur)
+        $requests = $this->journeyRequestModel->findPendingExcludingUser((int) $journey['user_id']);
 
         if (empty($requests)) return;
 
@@ -499,10 +482,10 @@ class JourneyService
         $dayStartDateTime = $journeyStartDate->setTime($startHour, 0, 0);
         $dayEndDateTime   = $dayStartDateTime->modify('+12 hours');
 
-        return $this->journeyModel
-            ->where('user_id', $userId)
-            ->where('start_datetime >=', $dayStartDateTime->format('Y-m-d H:i:s'))
-            ->where('start_datetime <',  $dayEndDateTime->format('Y-m-d H:i:s'))
-            ->first();
+        return $this->journeyModel->findByUserInTimeRange(
+            $userId,
+            $dayStartDateTime->format('Y-m-d H:i:s'),
+            $dayEndDateTime->format('Y-m-d H:i:s'),
+        );
     }
 }

@@ -127,5 +127,41 @@ class BookingModel extends BaseModel
                     ->where('status', 'pending')
                     ->countAllResults();
     }
+
+    /**
+     * Récupère la réservation d'un utilisateur donné sur un trajet donné (s'il en a une).
+     *
+     * @param  int $journeyId Identifiant du trajet
+     * @param  int $userId    Identifiant du passager
+     * @return array|null     Réservation, ou null si l'utilisateur n'a pas réservé ce trajet
+     */
+    public function findUserBooking(int $journeyId, int $userId): ?array
+    {
+        return $this->where('journey_id', $journeyId)
+                    ->where('user_id', $userId)
+                    ->first();
+    }
+
+    /**
+     * Compte le nombre de réservations en attente pour chaque trajet d'une liste.
+     *
+     * @param  int[] $journeyIds Identifiants des trajets à inspecter
+     * @return array<int,int>   Tableau indexé par journey_id, valeur = nombre de demandes 'pending'
+     *                          (les trajets sans demande en attente ne figurent pas dans le tableau)
+     */
+    public function countPendingByJourneys(array $journeyIds): array
+    {
+        if (empty($journeyIds)) {
+            return [];
+        }
+
+        $rows = $this->select('journey_id, COUNT(*) as pending_bookings')
+                    ->where('status', 'pending')
+                    ->whereIn('journey_id', $journeyIds)
+                    ->groupBy('journey_id')
+                    ->findAll();
+
+        return array_column($rows, 'pending_bookings', 'journey_id');
+    }
     
 }
