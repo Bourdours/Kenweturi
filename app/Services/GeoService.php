@@ -2,7 +2,10 @@
 
 namespace App\Services;
 
+use App\Models\JourneyModel;
 use App\Models\TrackModel;
+
+use DateTimeImmutable;
 
 /**
  * Service de géolocalisation.
@@ -14,72 +17,12 @@ use App\Models\TrackModel;
 class GeoService
 {
     protected TrackModel $trackModel;
+    protected JourneyModel $journeyModel;
 
     public function __construct()
     {
         $this->trackModel = new TrackModel();
-    }
-
-    /**
-     * Filtre une liste de trajets candidats en ne gardant que ceux dont le tracé
-     * passe à proximité du départ ET de l'arrivée recherchés.
-     *
-     * Pour chaque trajet : on récupère les points du tracé GeoJSON, on cherche le
-     * point le plus proche du départ ; s'il est dans le rayon, on cherche le point
-     * le plus proche de l'arrivée PARMI LES POINTS SUIVANTS (pour garantir que le
-     * trajet va bien dans le sens départ → arrivée).
-     *
-     * Filtres partiels gérés : seul le départ, seule l'arrivée, ou aucun des deux
-     * (auquel cas tous les trajets sont retournés).
-     *
-     * @param  array[]    $journeys      Trajets candidats (doivent contenir 'track_id')
-     * @param  array|null $start         Point de départ ['lat' => float, 'lon' => float] ou null
-     * @param  array|null $end           Point d'arrivée ['lat' => float, 'lon' => float] ou null
-     * @param  float      $maxDistanceKm Rayon de tolérance en km (défaut : 10)
-     * @return array[]   Sous-ensemble des trajets correspondants
-     */
-    public function findMatchingJourneys(array $journeys, ?array $start, ?array $end, float $maxDistanceKm = 10): array
-    {
-        if ($start === null && $end === null) {
-            return $journeys;
-        }
-
-        $matchingJourneys = [];
-
-        foreach ($journeys as $journey) {
-
-            $points = $this->getTrackPoints((int) $journey['track_id']);
-
-            if (empty($points)) {
-                continue;
-            }
-
-            $startIndex = 0;
-
-            // --- Contrainte sur le départ
-            if ($start !== null) {
-                $startIndex      = $this->findClosestPointIndex($points, $start);
-                $distanceToStart = $this->calculateDistance($start, $points[$startIndex]);
-
-                if ($distanceToStart > $maxDistanceKm) {
-                    continue;
-                }
-            }
-
-            // --- Contrainte sur l'arrivée (après le départ)
-            if ($end !== null) {
-                $endIndex      = $this->findClosestPointIndex($points, $end, $startIndex);
-                $distanceToEnd = $this->calculateDistance($end, $points[$endIndex]);
-
-                if ($distanceToEnd > $maxDistanceKm) {
-                    continue;
-                }
-            }
-
-            $matchingJourneys[] = $journey;
-        }
-
-        return $matchingJourneys;
+        $this->journeyModel = new JourneyModel();
     }
 
     /**
@@ -182,5 +125,47 @@ class GeoService
         $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
 
         return $earthRadiusKm * $c;
+    }
+
+    /**
+     * Calcule l'heure d'arrivée d'un trajet à partir de son tracé et de son heure de départ.
+     *
+     * @param  int $journeyId Identifiant du trajet
+     * @return DateTimeImmutable Heure d'arrivée estimée
+     */
+    public function getArrivaleDateTime(int $journeyId): DateTimeImmutable {
+    
+        $trackId = $this->journeyModel->select(['track_id'])->where([
+            'id'=>$journeyId,
+        ])->first();
+
+        $track = $this->trackModel->where([
+            'id'=>$trackId,
+        ])->first();
+
+        $trackDuration = $this->calculateTrackDuration(json_decode($track['geojson']));
+        $journeyStartDateTime = new DateTimeImmutable($this->journeyModel->select(['start_datetime'])->where(['id'=>$journeyId])->first()['start_datetime']);
+
+        return $journeyStartDateTime->modify('+'.$trackDuration.' seconds');
+    }
+
+
+    /**
+     * Calcule la durée totale d'un trajet à partir de son GeoJSON,
+     * en sommant la durée de chacun de ses segments.
+     *
+     * @param  object|null $track Trajet au format GeoJSON décodé en objet
+     * @return int Durée totale du trajet, en secondes
+     */
+    private function calculateTrackDuration(?object $track): int {
+
+        $duration=0;
+        $segments = $track->features[0]->properties->segments ?? null;
+
+        foreach($segments as $segment){
+            $duration += $segment->duration;
+        }
+
+        return (int) $duration;
     }
 }

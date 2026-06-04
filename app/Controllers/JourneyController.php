@@ -19,7 +19,6 @@ use App\Services\GeoService;
 use App\Exceptions\ExternalApiException;
 use App\Exceptions\ModelValidationException;
 use App\Exceptions\AddressValidationException;
-use DateTimeImmutable;
 
 class JourneyController extends BaseController{
 
@@ -159,9 +158,8 @@ class JourneyController extends BaseController{
             return redirect()->to('/journeys');
         }
 
-
         // ====== Calcul de la date d'arrivée du trajet
-        $journey['end_datetime'] = $this->getArrivaleDateTime($journey['id'])
+        $journey['end_datetime'] = $this->geoService->getArrivaleDateTime($journey['id'])
             ->format('Y-m-d H:i:s');
 
         // ====== Récupération des étapes intermédiaires
@@ -299,7 +297,7 @@ public function showAll(): string|RedirectResponse
         ? ['lat' => $filters['latEnd'], 'lon' => $filters['lngEnd']]
         : null;
 
-    $matchingJourneys = $this->geoService->findMatchingJourneys($candidates, $start, $end);
+    $matchingJourneys = $this->journeyService->findMatchingJourneys($candidates, $start, $end);
 
     // --- Pagination en PHP
     $perPage  = 5;
@@ -548,235 +546,6 @@ public function showAll(): string|RedirectResponse
         }
         return trim(strip_tags($value));
 
-    }
-    
-
-    /**
-     * Retourne le trajet existant de l'utilisateur sur la même demi-journée
-     * (matin : 00h–12h, après-midi : 12h–24h) que la date/heure fournies.
-     *
-     * Sert à prévenir la création de doublons par un même conducteur sur
-     * une plage horaire incompatible.
-     *
-     * @param  int    $userId    Identifiant du conducteur
-     * @param  string $startDate Date de départ au format Y-m-d
-     * @param  string $startTime Heure de départ au format H:i
-     * @return array|null Trajet existant sur la demi-journée, ou null si aucun
-     */
-    private function findExistingJourneyOnHalfDay(int $userId, string $startDate, string $startTime): ?array
-    {
-        $journeyStartDate = new DateTimeImmutable($startDate);
-        $journeyStartTime = new DateTimeImmutable($startTime);
-
-        $startHour        = (int) $journeyStartTime->format('H') < 12 ? 0 : 12;
-        $dayStartDateTime = $journeyStartDate->setTime($startHour, 0, 0);
-        $dayEndDateTime   = $dayStartDateTime->modify('+12 hours');
-
-        return $this->journeyModel
-            ->where('user_id', $userId)
-            ->where('start_datetime >=', $dayStartDateTime->format('Y-m-d H:i:s'))
-            ->where('start_datetime <',  $dayEndDateTime->format('Y-m-d H:i:s'))
-            ->first();
-    }    
-
-    /**
-     * Calcule l'heure d'arrivée d'un trajet à partir de son tracé et de son heure de départ.
-     *
-     * @param  int $journeyId Identifiant du trajet
-     * @return DateTimeImmutable Heure d'arrivée estimée
-     */
-    private function getArrivaleDateTime(int $journeyId): DateTimeImmutable {
-    
-        $trackId = $this->journeyModel->select(['track_id'])->where([
-            'id'=>$journeyId,
-        ])->first();
-
-        $track = $this->trackModel->where([
-            'id'=>$trackId,
-        ])->first();
-
-        $trackDuration = $this->calculateTrackDuration(json_decode($track['geojson']));
-        $journeyStartDateTime = new DateTimeImmutable($this->journeyModel->select(['start_datetime'])->where(['id'=>$journeyId])->first()['start_datetime']);
-
-        return $journeyStartDateTime->modify('+'.$trackDuration.' seconds');
-    }
-
-
-    /**
-     * Calcule la durée totale d'un trajet à partir de son GeoJSON,
-     * en sommant la durée de chacun de ses segments.
-     *
-     * @param  object|null $track Trajet au format GeoJSON décodé en objet
-     * @return int Durée totale du trajet, en secondes
-     */
-    private function calculateTrackDuration(?object $track): int {
-
-        $duration=0;
-        $segments = $track->features[0]->properties->segments ?? null;
-
-        foreach($segments as $segment){
-            $duration += $segment->duration;
-        }
-
-        return (int) $duration;
-    }
-
-
-    /**
-     * Filtre une liste de trajets candidats en ne gardant que ceux dont le tracé
-     * passe à proximité du départ ET de l'arrivée recherchés.
-     *
-     * Pour chaque trajet : on récupère les points du tracé GeoJSON, on cherche le
-     * point le plus proche du départ ; s'il est dans le rayon, on cherche le point
-     * le plus proche de l'arrivée PARMI LES POINTS SUIVANTS (pour garantir que le
-     * trajet va bien dans le sens départ → arrivée).
-     *
-     * Filtres partiels gérés : seul le départ, seule l'arrivée, ou aucun des deux
-     * (auquel cas tous les trajets sont retournés).
-     *
-     * @param  array[]    $journeys      Trajets candidats (doivent contenir 'track_id')
-     * @param  array|null $start         Point de départ ['lat' => float, 'lon' => float] ou null
-     * @param  array|null $end           Point d'arrivée ['lat' => float, 'lon' => float] ou null
-     * @param  float      $maxDistanceKm Rayon de tolérance en km (défaut : 10)
-     * @return array[] Sous-ensemble des trajets correspondants
-     */
-    private function findMatchingJourneys(array $journeys, ?array $start, ?array $end, float $maxDistanceKm = 10): array
-    {
-        // Aucun critère géographique : pas de filtrage.
-        if ($start === null && $end === null) {
-            return $journeys;
-        }
-
-        $matchingJourneys = [];
-
-        foreach ($journeys as $journey) {
-
-            // --- Récupération des points du tracé
-            $points = $this->getTrackPoints((int) $journey['track_id']);
-
-            $trackIsEmpty = empty($points);
-            if ($trackIsEmpty) {
-                continue;
-            }
-
-            // Par défaut, on commence la recherche de l'arrivée au début du tracé.
-            // Si un départ est demandé, ce point de départ sera mis à jour ci-dessous.
-            $startIndex = 0;
-
-            // --- Contrainte sur le départ
-            if ($start !== null) {
-
-                $startIndex          = $this->findClosestPointIndex($points, $start);
-                $distanceToStart     = $this->calculateDistance($start, $points[$startIndex]);
-                $startIsTooFar       = $distanceToStart > $maxDistanceKm;
-
-                if ($startIsTooFar) {
-                    continue;
-                }
-            }
-
-            // --- Contrainte sur l'arrivée
-            // La recherche démarre à $startIndex pour garantir le sens départ -> arrivée.
-            if ($end !== null) {
-
-                $endIndex          = $this->findClosestPointIndex($points, $end, $startIndex);
-                $distanceToEnd     = $this->calculateDistance($end, $points[$endIndex]);
-                $endIsTooFar       = $distanceToEnd > $maxDistanceKm;
-
-                if ($endIsTooFar) {
-                    continue;
-                }
-            }
-
-            // --- Trajet validé : il passe à proximité du départ ET de l'arrivée
-            $matchingJourneys[] = $journey;
-        }
-
-        return $matchingJourneys;
-    }
-
-    /**
-     * Récupère et normalise les points du tracé d'un trajet.
-     *
-     * Les coordonnées GeoJSON sont au format [longitude, latitude] et sont
-     * normalisées en tableaux associatifs ['lat', 'lon'] pour la suite des calculs.
-     *
-     * @param  int $trackId Identifiant du tracé
-     * @return array<int, array{lat:float, lon:float}> Points du tracé ;
-     *               tableau vide si le tracé est absent ou invalide
-     */
-    private function getTrackPoints(int $trackId): array
-    {
-        $track = $this->trackModel->find($trackId);
-        if (empty($track['geojson'])) {
-            return [];
-        }
-
-        $data        = json_decode($track['geojson'], true);
-        $coordinates = $data['features'][0]['geometry']['coordinates'] ?? [];
-
-        $points = [];
-        foreach ($coordinates as $coordinate) {
-            // GeoJSON => [longitude, latitude]
-            $points[] = ['lat' => (float) $coordinate[1], 'lon' => (float) $coordinate[0]];
-        }
-
-        return $points;
-    }
-
-    /**
-     * Renvoie l'indice du point du tracé le plus proche d'une cible.
-     *
-     * La recherche peut être restreinte à partir d'un indice donné, ce qui
-     * permet d'imposer un ordre (par exemple : arrivée après le départ).
-     *
-     * @param  array<int, array{lat:float, lon:float}> $points Points du tracé
-     * @param  array{lat:float, lon:float}             $target Point cible
-     * @param  int                                     $fromIndex Indice de départ de la recherche
-     * @return int|null Indice du point le plus proche, ou null si la plage est vide
-     */
-    private function findClosestPointIndex(array $points, array $target, int $fromIndex = 0): ?int
-    {
-        $closestIndex = null;
-        $minDistance  = INF;
-        $count        = count($points);
-
-        for ($i = $fromIndex; $i < $count; $i++) {
-            $distance = $this->calculateDistance($target, $points[$i]);
-            if ($distance < $minDistance) {
-                $minDistance  = $distance;
-                $closestIndex = $i;
-            }
-        }
-
-        return $closestIndex;
-    }
-
-    /**
-     * Calcule la distance en kilomètres entre deux points géographiques
-     * via la formule de Haversine (Terre supposée sphérique, rayon 6371 km).
-     *
-     * @param  array{lat:float, lon:float} $coord1 Premier point
-     * @param  array{lat:float, lon:float} $coord2 Second point
-     * @return float Distance entre les deux points, en kilomètres
-     */
-    private function calculateDistance(array $coord1, array $coord2): float
-    {
-        $earthRadiusKm = 6371;
-
-        $lat1 = deg2rad($coord1['lat']);
-        $lon1 = deg2rad($coord1['lon']);
-        $lat2 = deg2rad($coord2['lat']);
-        $lon2 = deg2rad($coord2['lon']);
-
-        $dLat = $lat2 - $lat1;
-        $dLon = $lon2 - $lon1;
-
-        $a = sin($dLat / 2) ** 2
-        + cos($lat1) * cos($lat2) * sin($dLon / 2) ** 2;
-        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
-
-        return $earthRadiusKm * $c;
-    }
+    }  
 
 }
