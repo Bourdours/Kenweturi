@@ -26,7 +26,7 @@ $displayCount  = count($allUsers);
     </div>
 
     <!-- Liste des utilisateurs -->
-    <div class="divide-y divide-action/10 overflow-y-auto max-h-[520px]" id="userList">
+    <div class="divide-y divide-action/10 overflow-y-auto max-h-[520px] scrollbar-hover" id="userList">
         <?php $i = 1;
         foreach ($allUsers as $user): ?>
             <?php $role = $user['role'] ?? 'user'; ?>
