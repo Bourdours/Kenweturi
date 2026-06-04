@@ -129,6 +129,59 @@
     </a>
   </div>
 
+  <!-- Séparateur -->
+  <div class="border-t border-action/10"></div>
+
+  <!-- Parcours demande de trajet -->
+  <div class="flex flex-col gap-4">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-action/10 flex items-center justify-center shrink-0">
+        <i class="fa-solid fa-magnifying-glass text-action text-sm"></i>
+      </div>
+      <h2 class="text-ink text-base font-semibold font-display">Pas de trajet disponible ?</h2>
+    </div>
+
+    <p class="text-ink/50 text-xs leading-relaxed">Si vous ne trouvez pas de trajet qui correspond à vos besoins, publiez une demande. Les conducteurs dont le trajet correspond à votre itinéraire en sont automatiquement notifiés.</p>
+
+    <div class="bg-surface rounded-2xl border border-action/10 divide-y divide-action/10">
+
+      <div class="flex items-start gap-5 p-5">
+        <div class="w-8 h-8 rounded-full bg-action flex items-center justify-center shrink-0 mt-0.5">
+          <span class="text-ink text-xs font-bold">1</span>
+        </div>
+        <div class="flex flex-col gap-1">
+          <p class="text-ink text-sm font-semibold">Publiez une demande de trajet</p>
+          <p class="text-ink/60 text-xs leading-relaxed">Indiquez votre départ, votre destination, la date souhaitée et le nombre de places dont vous avez besoin.</p>
+        </div>
+      </div>
+
+      <div class="flex items-start gap-5 p-5">
+        <div class="w-8 h-8 rounded-full bg-action flex items-center justify-center shrink-0 mt-0.5">
+          <span class="text-ink text-xs font-bold">2</span>
+        </div>
+        <div class="flex flex-col gap-1">
+          <p class="text-ink text-sm font-semibold">Les conducteurs compatibles sont notifiés</p>
+          <p class="text-ink/60 text-xs leading-relaxed">Dès qu'un conducteur publie un trajet passant par votre itinéraire, il reçoit un e-mail l'invitant à consulter votre demande.</p>
+        </div>
+      </div>
+
+      <div class="flex items-start gap-5 p-5">
+        <div class="w-8 h-8 rounded-full bg-action flex items-center justify-center shrink-0 mt-0.5">
+          <span class="text-ink text-xs font-bold">3</span>
+        </div>
+        <div class="flex flex-col gap-1">
+          <p class="text-ink text-sm font-semibold">Réservez quand un trajet correspond</p>
+          <p class="text-ink/60 text-xs leading-relaxed">Une fois qu'un conducteur vous convient, réservez directement sa place depuis la liste des trajets.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <a href="<?= site_url('journey-requests/new') ?>" class="self-start bg-action hover:bg-action/90 transition-colors text-ink font-semibold text-sm rounded-xl px-5 py-2.5">
+      Publier une demande
+    </a>
+  </div>
+
   <!-- Points clés -->
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 
@@ -196,6 +249,22 @@
         <p class="text-ink/60 text-xs leading-relaxed mt-3">Kenweturi est ouvert à tous — salariés, apprentis, étudiants — pour des trajets réguliers domicile-travail ou domicile-formation dans la région.</p>
       </details>
 
+      <details class="group p-5 cursor-pointer">
+        <summary class="flex items-center justify-between gap-4 list-none">
+          <p class="text-ink text-sm font-semibold">À quoi sert une demande de trajet ?</p>
+          <i class="fa-solid fa-chevron-down text-ink/30 text-xs transition-transform group-open:rotate-180 shrink-0"></i>
+        </summary>
+        <p class="text-ink/60 text-xs leading-relaxed mt-3">Si aucun trajet ne correspond à vos besoins, vous pouvez publier une demande. Elle est visible par tous les conducteurs et, dès qu'un nouveau trajet compatible est publié, le conducteur en est notifié par e-mail.</p>
+      </details>
+
+      <details class="group p-5 cursor-pointer">
+        <summary class="flex items-center justify-between gap-4 list-none">
+          <p class="text-ink text-sm font-semibold">Comment un conducteur est-il notifié d'une demande ?</p>
+          <i class="fa-solid fa-chevron-down text-ink/30 text-xs transition-transform group-open:rotate-180 shrink-0"></i>
+        </summary>
+        <p class="text-ink/60 text-xs leading-relaxed mt-3">À chaque publication d'un trajet, la plateforme vérifie automatiquement si des demandes existantes correspondent à l'itinéraire. Si c'est le cas, un e-mail est envoyé au conducteur pour lui signaler les demandes compatibles.</p>
+      </details>
+
     </div>
   </div>
 
@@ -206,11 +275,17 @@
       <p class="text-ink/50 text-xs">Rejoignez la communauté Kenweturi et simplifiez vos trajets du quotidien.</p>
     </div>
     <div class="flex flex-col sm:flex-row gap-3 shrink-0">
+      <?php if (!session()->get('isLoggedIn')): ?>
       <a href="<?= site_url('register') ?>" class="bg-action hover:bg-action/90 transition-colors text-ink font-semibold text-sm rounded-xl px-5 py-2.5 text-center">
         Créer un compte
       </a>
+      <?php endif ?>
+
       <a href="<?= site_url('journeys') ?>" class="bg-paper hover:bg-action/10 border border-action/20 transition-colors text-ink/70 font-semibold text-sm rounded-xl px-5 py-2.5 text-center">
         Voir les trajets
+      </a>
+      <a href="<?= site_url('journey-requests') ?>" class="bg-paper hover:bg-action/10 border border-action/20 transition-colors text-ink/70 font-semibold text-sm rounded-xl px-5 py-2.5 text-center">
+        Voir les demandes
       </a>
     </div>
   </div>
