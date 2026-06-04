@@ -17,9 +17,18 @@ class RememberMe implements FilterInterface
         if (!$token) return;
 
         $userModel = new UserModel();
-        $user = $userModel->where('remember_token', hash('sha256', $token))->first();
+        $user = $userModel
+            ->where('remember_token', hash('sha256', $token))
+            ->where('remember_token_expiry >', date('Y-m-d H:i:s'))
+            ->first();
 
         if ($user && !$user['is_banned'] && $user['status'] === 'active') {
+            $newToken = bin2hex(random_bytes(32));
+            $userModel->update($user['id'], [
+                'remember_token'        => hash('sha256', $newToken),
+                'remember_token_expiry' => date('Y-m-d H:i:s', strtotime('+30 days')),
+            ]);
+
             session()->regenerate();
             session()->set([
                 'user_id'    => $user['id'],
@@ -30,6 +39,15 @@ class RememberMe implements FilterInterface
                 'isAdmin'    => (bool) $user['is_admin'],
                 'avatar'     => $user['avatar'] ?? null,
                 'isLoggedIn' => true,
+            ]);
+
+            service('response')->setCookie([
+                'name'     => 'remember_token',
+                'value'    => $newToken,
+                'expire'   => 30 * 24 * 60 * 60,
+                'httponly' => true,
+                'secure'   => (ENVIRONMENT === 'production'),
+                'samesite' => 'Strict',
             ]);
         }
     }
