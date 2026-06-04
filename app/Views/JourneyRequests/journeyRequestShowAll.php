@@ -1,3 +1,9 @@
+<?php
+/** @var array       $journeyRequests */
+/** @var string|null $filterCityStart */
+/** @var string|null $filterCityEnd */
+/** @var string|null $filterDate */
+?>
 <?= view('partials/head', [
     'extraCss' => [
         'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css',
@@ -7,6 +13,8 @@
         'https://cdn.jsdelivr.net/npm/flatpickr',
         'https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js',
         base_url('js/datepicker.js'),
+        base_url('js/autocomplete.js'),
+        base_url('js/requestSearch.js'),
         base_url('js/requestMessage.js'),
     ],
 ]) ?>
@@ -18,7 +26,7 @@
     <div class="flex items-center justify-between">
         <h1 class="text-ink text-2xl font-bold font-display">Demander un trajet</h1>
         <a href="<?= site_url('journey-requests/new') ?>"
-           class="flex items-center gap-2 bg-action hover:bg-action-dark text-ink font-semibold font-display rounded-lg px-4 py-2 text-sm transition-colors">
+           class="flex items-center gap-2 bg-action hover:bg-action-dark text-ink font-semibold font-display rounded-lg px-4 py-1.5 text-sm transition-colors">
             <i class="fa-solid fa-plus text-xs"></i>Publier une demande
         </a>
     </div>
@@ -69,16 +77,23 @@
 
     <!-- Résultats -->
     <?php if (empty($journeyRequests)): ?>
-        <p class="text-center text-muted py-8">Aucune demande de trajet pour l'instant.</p>
+        <div class="text-center py-8 space-y-3">
+            <p class="text-muted">Aucune demande de trajet pour l'instant.</p>
+            <p class="text-muted/60 text-sm">Vous ne trouvez pas de conducteur ?</p>
+            <a href="<?= site_url('journey-requests/new') ?>"
+                class="inline-flex items-center gap-2 text-action hover:text-action-dark text-sm font-medium transition-colors">
+                <i class="fa-solid fa-plus text-xs"></i>Publiez une demande de trajet
+            </a>
+        </div>
     <?php else: ?>
         <div class="space-y-3">
             <?php foreach ($journeyRequests as $request): ?>
-                <div class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors">
+                <div class="bg-surface rounded-2xl p-5 border border-action/10">
 
                     <div class="flex items-center gap-4">
                         <div class="flex flex-col items-center shrink-0">
                             <div class="w-2.5 h-2.5 rounded-full bg-brand"></div>
-                            <div class="w-px h-6 bg-ink/10 my-0.5"></div>
+                            <div class="w-px h-2.5 bg-ink/10 my-0.5"></div>
                             <div class="w-2.5 h-2.5 rounded-full bg-action"></div>
                         </div>
                         <div class="flex-1 min-w-0">
@@ -95,33 +110,35 @@
                         </div>
                     </div>
 
-                    <div class="mt-3 pt-3 border-t border-action/10 flex items-center justify-between text-sm text-ink/50">
-                        <div class="flex items-center gap-2">
+                    <div class="mt-3 pt-3 border-t border-action/10 flex items-start justify-between text-sm text-ink/50">
+                        <div class="flex items-center gap-4">
                             <?php $initials = strtoupper(substr($request['firstname'] ?? '?', 0, 1) . substr($request['lastname'] ?? '?', 0, 1)); ?>
                             <?php if (!empty($request['avatar'])): ?>
-                                <div class="w-7 h-7 rounded-full overflow-hidden shrink-0">
+                                <div class="jsAvatarOpen cursor-pointer w-7 h-7 rounded-full overflow-hidden shrink-0">
                                     <img src="<?= site_url(esc($request['avatar'])) ?>" alt="Avatar"
                                          class="w-full h-full object-cover"
                                          onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
                                 </div>
-                                <div class="hidden w-7 h-7 rounded-full bg-action-dark text-ink font-bold text-xs shrink-0 items-center justify-center">
+                                <div class="jsAvatarOpen cursor-pointer hidden w-7 h-7 rounded-full bg-action-dark text-ink font-bold text-xs shrink-0 items-center justify-center">
                                     <?= $initials ?>
                                 </div>
                             <?php else: ?>
-                                <div class="flex w-7 h-7 rounded-full bg-action-dark text-ink font-bold text-xs shrink-0 items-center justify-center">
+                                <div class="jsAvatarOpen cursor-pointer flex w-7 h-7 rounded-full bg-action-dark text-ink font-bold text-xs shrink-0 items-center justify-center">
                                     <?= $initials ?>
                                 </div>
                             <?php endif ?>
                             <div>
                                 <p class="text-ink font-semibold"><?= esc(($request['firstname'] ?? '') . ' ' . ($request['lastname'] ?? '')) ?></p>
-                                <p class="text-muted text-xs"><?= ($request['is_student'] ?? false) ? 'Étudiant' : 'Formateur' ?></p>
+                                <p class="text-muted text-sm"><?= ($request['is_student'] ?? false) ? 'Étudiant' : 'Formateur' ?></p>
                             </div>
                         </div>
                         <?php if (!empty($request['seats'])): ?>
-                            <span class="flex items-baseline gap-1">
-                                <i class="fa-solid fa-user text-xs"></i>
-                                <?= esc($request['seats']) ?> place demandée<?= $request['seats'] > 1 ? 's' : '' ?>
-                            </span>
+                            <div class="min-w-[175px]">
+                                <span class="flex items-baseline gap-1">
+                                    <i class="fa-solid fa-user text-xs"></i>
+                                    <span class="tabular-nums"><?= esc($request['seats']) ?></span> place demandée<?= $request['seats'] > 1 ? 's' : '' ?>
+                                </span>
+                            </div>
                         <?php endif ?>
                     </div>
 
@@ -134,7 +151,7 @@
                             <p class="hidden mt-2 text-muted text-sm italic">"<?= esc($request['message']) ?>"</p>
                         </div>
                     <?php endif ?>
-
+                </div>
             <?php endforeach ?>
         </div>
     <?php endif ?>
