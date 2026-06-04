@@ -24,8 +24,13 @@ use DateTimeImmutable;
  * Service métier lié aux trajets.
  *
  * Regroupe la logique de haut niveau qui ne relève pas directement
- * d'un controller : détection des demandes compatibles avec un nouveau
- * trajet et envoi des notifications par mail aux demandeurs.
+ * d'un controller : récupération des données API, persistance d'un
+ * trajet complet en transaction, détection des demandes compatibles
+ * avec un nouveau trajet et envoi des notifications.
+ *
+ * Ce service est également responsable des accès BDD liés aux tracés
+ * (Track) et aux trajets (Journey) qui combinent chargement et calcul
+ * géographique : il délègue ensuite les calculs purs à GeoService.
  */
 class JourneyService
 {
@@ -51,7 +56,7 @@ class JourneyService
         $this->cityModel            = new CityModel();
 
         $this->routingService       = new RoutingService();
-        $this->geocodingService       = new GeocodingService();
+        $this->geocodingService     = new GeocodingService();
     }
 
     /**
@@ -68,8 +73,8 @@ class JourneyService
      * @throws ExternalApiException       Si l'API ne renvoie rien pour une adresse
      * @throws AddressValidationException Si une ou plusieurs adresses sont incomplètes
      */
-    function fetchAllLocationsData(array $addresses): array {
-
+    public function fetchAllLocationsData(array $addresses): array
+    {
         $locationsData = [];
         $errors = [];
 
@@ -93,10 +98,7 @@ class JourneyService
         }
 
         return $locationsData;
-        
     }
-
-    
 
     /**
      * Récupère le tracé GeoJSON reliant l'ensemble des locations via l'API de routage.
@@ -119,6 +121,45 @@ class JourneyService
         }
 
         return $geoJsonTrack;
+    }
+
+    /**
+     * Récupère et normalise les points du tracé d'un trajet à partir de son ID.
+     *
+     * Combine l'accès au TrackModel et le parsing GeoJSON délégué à GeoService.
+     *
+     * @param  int $trackId Identifiant du tracé
+     * @return array<int, array{lat:float, lon:float}> Points du tracé ;
+     *               tableau vide si le tracé est absent ou invalide
+     */
+    public function getTrackPoints(int $trackId): array
+    {
+        $track = $this->trackModel->find($trackId);
+        if (empty($track['geojson'])) {
+            return [];
+        }
+
+        return $this->geoService->parseTrackPointsFromGeoJson($track['geojson']);
+    }
+
+    /**
+     * Calcule l'heure d'arrivée d'un trajet à partir de son tracé et de son heure de départ.
+     *
+     * Charge le trajet et son tracé en BDD, puis délègue à GeoService le calcul
+     * pur de la durée à partir du GeoJSON.
+     *
+     * @param  int $journeyId Identifiant du trajet
+     * @return DateTimeImmutable Heure d'arrivée estimée
+     */
+    public function getArrivalDateTime(int $journeyId): DateTimeImmutable
+    {
+        $journey = $this->journeyModel->find($journeyId);
+        $track   = $this->trackModel->find($journey['track_id']);
+
+        $duration             = $this->geoService->calculateTrackDuration($track['geojson']);
+        $journeyStartDateTime = new DateTimeImmutable($journey['start_datetime']);
+
+        return $journeyStartDateTime->modify('+' . $duration . ' seconds');
     }
 
     /**
@@ -321,7 +362,7 @@ class JourneyService
 
         foreach ($journeys as $journey) {
 
-            $points = $this->geoService->getTrackPoints((int) $journey['track_id']);
+            $points = $this->getTrackPoints((int) $journey['track_id']);
 
             if (empty($points)) {
                 continue;
@@ -396,15 +437,8 @@ class JourneyService
 
         if (empty($requests)) return;
 
-        // ====== Parse des points du tracé GeoJSON
-        $data        = json_decode($geoJsonTrack, true);
-        $coordinates = $data['features'][0]['geometry']['coordinates'] ?? [];
-
-        $points = [];
-        foreach ($coordinates as $coord) {
-            $points[] = ['lat' => (float) $coord[1], 'lon' => (float) $coord[0]];
-        }
-
+        // ====== Parse des points du tracé GeoJSON (factorisé dans GeoService)
+        $points = $this->geoService->parseTrackPointsFromGeoJson($geoJsonTrack);
         if (empty($points)) return;
 
         $mailer = new MailerExample();
@@ -470,5 +504,5 @@ class JourneyService
             ->where('start_datetime >=', $dayStartDateTime->format('Y-m-d H:i:s'))
             ->where('start_datetime <',  $dayEndDateTime->format('Y-m-d H:i:s'))
             ->first();
-    }  
+    }
 }
