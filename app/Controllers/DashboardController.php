@@ -346,6 +346,7 @@ class DashboardController extends BaseController
         $userId  = (int) session('user_id');
         $page    = (int) ($this->request->getGet('page') ?? 1);
         $perPage = 10;
+        $filter  = $this->request->getGet('filter');
 
         $builder = $this->db->table('report')
             ->select('report.*, journey.start_datetime,
@@ -356,8 +357,15 @@ class DashboardController extends BaseController
             ->join('location loc_end',   'loc_end.id = journey.location_end_id')
             ->join('city city_start',    'city_start.id = loc_start.city_id')
             ->join('city city_end',      'city_end.id = loc_end.city_id')
-            ->where('report.user_id', $userId)
-            ->orderBy('report.created_at', 'DESC');
+            ->where('report.user_id', $userId);
+
+        if ($filter === 'driver') {
+            $builder->where('report.user_id = journey.user_id', null, false);
+        } elseif ($filter === 'passenger') {
+            $builder->where('report.user_id != journey.user_id', null, false);
+        }
+
+        $builder->orderBy('report.created_at', 'DESC');
 
         $total   = $builder->countAllResults(false);
         $reports = $builder->limit($perPage, ($page - 1) * $perPage)->get()->getResultArray();
@@ -369,6 +377,7 @@ class DashboardController extends BaseController
             'total'   => $total,
             'page'    => $page,
             'perPage' => $perPage,
+            'filter'  => $filter,
         ]);
     }
 

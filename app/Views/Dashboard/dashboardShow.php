@@ -364,7 +364,8 @@
             <i class="fa-solid fa-flag text-brand text-sm"></i>
             Mes signalements
         </h2>
-        <a href="<?= site_url('dashboard/reports') ?>" class="text-brand text-sm font-medium hover:text-action transition-colors">Voir tous</a>
+        <a data-role="driver" href="<?= site_url('dashboard/reports') ?>?filter=driver" class="text-brand text-sm font-medium hover:text-action transition-colors">Voir tous</a>
+        <a data-role="passenger" href="<?= site_url('dashboard/reports') ?>?filter=passenger" class="text-brand text-sm font-medium hover:text-action transition-colors">Voir tous</a>
     </div>
 
 </div>
