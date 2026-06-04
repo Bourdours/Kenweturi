@@ -3,18 +3,20 @@
         'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css',
         base_url('css/flatpickr-theme.css'),
     ],
-    'extraJs'  => [
+    'extraJs' => [
         'https://cdn.jsdelivr.net/npm/flatpickr',
         'https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js',
         base_url('js/datepicker.js'),
+        base_url('js/requestMessage.js'),
     ],
 ]) ?>
+
 <?= view('partials/header') ?>
 
 <div class="max-w-4xl mx-auto py-10 px-6 md:px-8 space-y-6">
 
     <div class="flex items-center justify-between">
-        <h1 class="text-ink text-2xl font-bold font-display">Demander de trajet</h1>
+        <h1 class="text-ink text-2xl font-bold font-display">Demander un trajet</h1>
         <a href="<?= site_url('journey-requests/new') ?>"
            class="flex items-center gap-2 bg-action hover:bg-action-dark text-ink font-semibold font-display rounded-lg px-4 py-2 text-sm transition-colors">
             <i class="fa-solid fa-plus text-xs"></i>Publier une demande
@@ -71,8 +73,7 @@
     <?php else: ?>
         <div class="space-y-3">
             <?php foreach ($journeyRequests as $request): ?>
-                <a href="<?= site_url('journey-requests/' . $request['id']) ?>"
-                   class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors">
+                <div class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors">
 
                     <div class="flex items-center gap-4">
                         <div class="flex flex-col items-center shrink-0">
@@ -125,10 +126,15 @@
                     </div>
 
                     <?php if (!empty($request['message'])): ?>
-                        <p class="mt-3 text-muted text-sm italic truncate">"<?= esc($request['message']) ?>"</p>
+                        <div>
+                            <button onclick="toggleMessage(this)" class="text-action text-xs mt-2 flex items-center gap-1">
+                                <i class="fa-solid fa-chevron-down text-xs transition-transform"></i>
+                                <span>Voir le message</span>
+                            </button>
+                            <p class="hidden mt-2 text-muted text-sm italic">"<?= esc($request['message']) ?>"</p>
+                        </div>
                     <?php endif ?>
 
-                </a>
             <?php endforeach ?>
         </div>
     <?php endif ?>
