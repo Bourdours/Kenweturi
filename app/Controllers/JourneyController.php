@@ -14,7 +14,6 @@ use App\Models\CityModel;
 use App\Models\StageModel;
 
 use App\Services\JourneyService;
-use App\Services\GeoService;
 
 use App\Exceptions\ExternalApiException;
 use App\Exceptions\ModelValidationException;
@@ -29,12 +28,11 @@ class JourneyController extends BaseController{
     protected LocationModel $locationModel;
     protected CityModel $cityModel;
     protected StageModel $stageModel;
-    
+
     protected JourneyService $journeyService;
-    protected GeoService $geoService;
 
     public function __construct(){
-        
+
         $this->trackModel = new TrackModel();
         $this->journeyModel = new JourneyModel();
         $this->carModel = new CarModel();
@@ -42,9 +40,8 @@ class JourneyController extends BaseController{
         $this->locationModel = new LocationModel();
         $this->cityModel = new CityModel();
         $this->stageModel = new StageModel();
-        
+
         $this->journeyService = new JourneyService();
-        $this->geoService = new GeoService();
     }
 
     /**
@@ -71,9 +68,9 @@ class JourneyController extends BaseController{
     /**
      * Traite la soumission du formulaire de création d'un trajet.
      *
-     * Vérifie que l'utilisateur est connecté, valide les données du formulaire,
-     * récupère le tracé via les APIs externes (géocodage + routage), puis insère
-     * l'ensemble (track, locations, journey, stages) en base via une transaction.
+     * Valide les données du formulaire, récupère le tracé via les APIs externes
+     * (géocodage + routage), puis insère l'ensemble (track, locations, journey,
+     * stages) en base via une transaction.
      *
      * Les erreurs sont gérées selon trois familles :
      *  - validation du formulaire HTTP        → redirection avec erreurs de champs
@@ -159,7 +156,7 @@ class JourneyController extends BaseController{
         }
 
         // ====== Calcul de la date d'arrivée du trajet
-        $journey['end_datetime'] = $this->geoService->getArrivaleDateTime($journey['id'])
+        $journey['end_datetime'] = $this->journeyService->getArrivalDateTime($journey['id'])
             ->format('Y-m-d H:i:s');
 
         // ====== Récupération des étapes intermédiaires
@@ -327,7 +324,7 @@ public function showAll(): string|RedirectResponse
      * @param  int $maxSeats Nombre maximum de places réservables (défaut : 9)
      * @return array<string, string> Règles de validation CodeIgniter indexées par champ
      */
-    public function getCreateValidationRules(int $maxSeats = 9): array {
+    private function getCreateValidationRules(int $maxSeats = 9): array {
 
         return [
             'startDate'     => 'required|valid_date',
@@ -348,8 +345,8 @@ public function showAll(): string|RedirectResponse
      * @param  int $maxSeats Nombre maximum de places réservables (défaut : 9),
      *                       injecté dans le message d'erreur du champ 'seats'
      * @return array<string, array<string, string>> Messages indexés par champ puis par règle
-     */   
-    public function getCreateValidationMessages(int $maxSeats = 9): array {
+     */
+    private function getCreateValidationMessages(int $maxSeats = 9): array {
 
         return [
             'startDate'    => [
@@ -400,7 +397,7 @@ public function showAll(): string|RedirectResponse
      */
     private function getMaxAvailableSeatsFromPostedCar(): int
     {
-        
+
         $absoluteMax = 9;
 
         $userId = session('user_id');
@@ -429,8 +426,8 @@ public function showAll(): string|RedirectResponse
      * Les clés réservées sont 'start' et 'end'.
      *
      * @return array<string, string> Adresses nettoyées indexées par clé
-     */   
-    public function getLocationsCreateFormData(): array{
+     */
+    private function getLocationsCreateFormData(): array {
 
         $locations['start'] = $this->sanitizeAddress($this->request->getPost('startAddress'));
 
@@ -453,8 +450,8 @@ public function showAll(): string|RedirectResponse
      *
      * @return array{startDate:string, startTime:string, seats:mixed, note:mixed,
      *               smoking:mixed, car:mixed} Données brutes du POST
-     */   
-    public function getJourneyCreateFormData(){
+     */
+    private function getJourneyCreateFormData(): array {
 
         return [
             'startDate'     => $this->request->getPost('startDate'),
@@ -472,8 +469,8 @@ public function showAll(): string|RedirectResponse
      *
      * @return array{location: array<string,string>, journey: array} Données du formulaire
      *               structurées en deux sous-tableaux : 'location' et 'journey'
-     */    
-    public function getCreateFormData():array{
+     */
+    private function getCreateFormData(): array {
 
         return [
             "location"=>$this->getLocationsCreateFormData(),
@@ -532,20 +529,21 @@ public function showAll(): string|RedirectResponse
     }
 
     /**
-     * Récupère les données de localisation d'une adresse via l'API de la Géoplateforme (IGN/BAN).
+     * Nettoie une valeur d'adresse soumise dans le formulaire.
      *
-     * @param  string $adresse Adresse en texte libre (ex : "8 bd du Port 95000 Cergy")
-     * @param  int    $limit   Nombre max de résultats (défaut : 1)
-     * @return array|null      Propriétés de l'adresse (avec latitude/longitude),
-     *                         ou null si rien trouvé ou en cas d'erreur réseau
+     * Retire les balises HTML et les espaces en début/fin. Renvoie une chaîne
+     * vide si la valeur n'est pas une chaîne.
+     *
+     * @param  mixed $value Valeur brute issue du POST
+     * @return string       Adresse nettoyée (chaîne vide si entrée invalide)
      */
-    private function sanitizeAddress($value): string{
-        
+    private function sanitizeAddress($value): string {
+
         if (!is_string($value)) {
             return '';
         }
         return trim(strip_tags($value));
 
-    }  
+    }
 
 }
