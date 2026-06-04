@@ -95,9 +95,16 @@
     </form>
 
     <!-- Résultats -->
-    <?php if (empty($journeys)) : ?>
-        <p class="text-center text-muted py-8">Aucun trajet trouvé.</p>
-    <?php else : ?>
+    <?php if (empty($journeys)): ?>
+        <div class="text-center py-8 space-y-3">
+            <p class="text-muted">Aucun trajet trouvé.</p>
+            <p class="text-muted/60 text-sm">Vous ne trouvez pas votre bonheur ?</p>
+            <a href="<?= site_url('journey-requests/new') ?>"
+                class="inline-flex items-center gap-2 text-action hover:text-action-dark text-sm font-medium transition-colors">
+                <i class="fa-solid fa-plus text-xs"></i>Publiez une demande de trajet
+            </a>
+        </div>
+    <?php else: ?>
         <div class="space-y-3">
             <?php foreach ($journeys as $journey) : ?>
                 <a href="<?= site_url('/journeys/') ?><?= esc($journey['id']) ?>?seats=<?= esc($availableSeats) ?>&boardingCity=<?= urlencode($journey['city_boarding_name']) ?>&startAddress=<?= urlencode($startAddress ?? '') ?>&startLat=<?= esc($latStart ?? '') ?>&startLng=<?= esc($lngStart ?? '') ?>&endAddress=<?= urlencode($endAddress ?? '') ?>&endLat=<?= esc($latEnd ?? '') ?>&endLng=<?= esc($lngEnd ?? '') ?>&back=<?= urlencode(current_url(true)) ?>" class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors">
