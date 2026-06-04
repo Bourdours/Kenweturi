@@ -57,7 +57,7 @@ class JourneyController extends BaseController{
 
         $userId = session('user_id');
 
-        $userCars = $this->carModel->where(['user_id'=>$userId,])->findAll();
+        $userCars = $this->carModel->findByUser($userId);
 
         return view('Journeys/newJourney', [
             'title' => "Publier un trajet",
@@ -175,10 +175,7 @@ class JourneyController extends BaseController{
         $pendingBookings = $this->bookingModel->countPendingBookings((int) $id);
 
         // ====== Réservation de l'utilisateur courant sur ce trajet (si elle existe)
-        $userBooking = $this->bookingModel
-            ->where('journey_id', (int) $id)
-            ->where('user_id', session('user_id'))
-            ->first();
+        $userBooking = $this->bookingModel->findUserBooking((int) $id, (int) session('user_id'));
         $isBooked = $userBooking !== null && $userBooking['status'] === 'accepted';
         $isPending = $userBooking !== null && $userBooking['status'] === 'pending';
 
@@ -219,65 +216,13 @@ public function showAll(): string|RedirectResponse
     // --- Récupération des filtres
     $filters = $this->getShowAllFilter();
 
-    // --- Construction de la requête (filtres NON géographiques uniquement)
-    $db = \Config\Database::connect();
-
-    $builder = $db->table('journey')
-        ->select("journey.*,
-            city_start.name as city_start_name,
-            city_end.name   as city_end_name,
-            city_start.name as city_boarding_name,
-            u.firstname     as driver_firstname,
-            u.lastname      as driver_lastname,
-            u.is_student    as driver_is_student,
-            (journey.seats - COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id AND b.status = 'accepted'), 0)) as remaining_seats")
-        ->join('location loc_start', 'loc_start.id = journey.location_start_id')
-        ->join('location loc_end',   'loc_end.id = journey.location_end_id')
-        ->join('city city_start',    'city_start.id = loc_start.city_id')
-        ->join('city city_end',      'city_end.id = loc_end.city_id')
-        ->join('user u',             'u.id = journey.user_id')
-        ->where('journey.canceled_at', null)
-        ->where('u.deleted_at', null)
-        ->orderBy('journey.start_datetime', 'ASC');
-
-    if ($filters['filterDate'] && $filters['filterTime']) {
-        $dateTimeCenter = strtotime($filters['filterDate'] . ' ' . $filters['filterTime'] . ':00');
-        $dateTimeFrom   = date('Y-m-d H:i:s', $dateTimeCenter - 1800);
-        $dateTimeTo     = date('Y-m-d H:i:s', $dateTimeCenter + 1800);
-        $builder->where('journey.start_datetime >=', $dateTimeFrom)
-                ->where('journey.start_datetime <=', $dateTimeTo);
-    } elseif ($filters['filterDate']) {
-        $builder->where('DATE(journey.start_datetime)', $filters['filterDate']);
-        if ($filters['filterDate'] === date('Y-m-d')) {
-            $builder->where('journey.start_datetime >=', date('Y-m-d H:i:s'));
-        }
-    } else {
-        $builder->where('journey.start_datetime >=', date('Y-m-d H:i:s'));
-    }
-
-    if ($filters['availableSeats']) {
-        $builder->having('remaining_seats >=', $filters['availableSeats']);
-    }
-
-    if ($filters['smoking'] !== null && $filters['smoking'] !== '') {
-        $builder->where('journey.smoking', $filters['smoking']);
-    }
-
     // --- Récupération de tous les candidats (sans filtre géographique)
-    $candidates = $builder->get()->getResultArray();
+    $candidates = $this->journeyModel->findAllWithFilters($filters);
 
     // --- Ajout du nombre de demandes en attente pour chaque trajet
     $journeyIds = array_column($candidates, 'id');
     if (!empty($journeyIds)) {
-        $pendingCounts = $db->table('booking')
-            ->select('journey_id, COUNT(*) as pending_bookings')
-            ->where('status', 'pending')
-            ->whereIn('journey_id', $journeyIds)
-            ->groupBy('journey_id')
-            ->get()
-            ->getResultArray();
-
-        $pendingByJourney = array_column($pendingCounts, 'pending_bookings', 'journey_id');
+        $pendingByJourney = $this->bookingModel->countPendingByJourneys($journeyIds);
 
         foreach ($candidates as &$candidate) {
             $candidate['pending_bookings'] = $pendingByJourney[$candidate['id']] ?? 0;
@@ -407,10 +352,7 @@ public function showAll(): string|RedirectResponse
             return $absoluteMax;
         }
 
-        $car = $this->carModel->where([
-            'id'      => (int) $carId,
-            'user_id' => $userId,
-        ])->first();
+        $car = $this->carModel->findOwnedByUser((int) $carId, (int) $userId);
 
         if (!$car) {
             return $absoluteMax;
