@@ -16,7 +16,7 @@
 <?php else: ?>
 
     <!-- Vue mobile : cartes empilées -->
-    <div class="flex flex-col divide-y divide-action/10 md:hidden">
+    <div class="flex flex-col divide-y divide-action/10 tab:hidden">
         <?php foreach ($pendingUsers as $user): ?>
             <div class="px-5 py-4 flex flex-col gap-3">
 
@@ -80,46 +80,48 @@
     </div>
 
     <!-- Tableau des inscriptions en attente -->
-    <div class="hidden md:block overflow-x-auto">
+    <div class="hidden tab:block overflow-x-auto scrollbar-hover">
         <table class="w-full text-left border-collapse text-sm">
             <thead>
-                <tr class="bg-paper border-b border-action/10 text-ink/50 font-semibold">
-                    <th class="px-6 py-4 font-display">Utilisateur</th>
-                    <th class="px-6 py-4 font-display">Email</th>
-                    <th class="px-6 py-4 font-display">Ville</th>
-                    <th class="px-6 py-4 font-display">Date d'inscription</th>
-                    <th class="px-6 py-4 font-display text-right">Actions</th>
+                <tr class="border-b border-action/10 text-ink/50 font-semibold">
+                    <th class="px-4 py-3 font-display">Utilisateur</th>
+                    <th class="px-4 py-3 font-display">Email</th>
+                    <th class="px-4 py-3 font-display">Ville</th>
+                    <th class="px-4 py-3 font-display">Date</th>
+                    <th class="px-3 py-3 font-display">Actions</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-action/10">
                 <?php foreach ($pendingUsers as $user): ?>
                     <tr class="hover:bg-paper/30 transition-colors">
                         <!-- Nom complet de l'utilisateur -->
-                        <td class="px-6 py-4 font-medium text-ink whitespace-nowrap">
-                            <?= esc($user['firstname']) ?> <?= esc($user['lastname']) ?>
+                        <td class="px-4 py-3 font-medium text-ink whitespace-nowrap">
+                            <?php $fn = $user['firstname']; $ln = $user['lastname']; $fnTrunc = mb_strlen($fn) > 8; $lnTrunc = mb_strlen($ln) > 10; ?>
+                            <span <?= ($fnTrunc || $lnTrunc) ? 'title="' . esc($fn) . ' ' . esc($ln) . '"' : '' ?>><?= $fnTrunc ? esc(mb_strtoupper(mb_substr($fn, 0, 1))) . '.' : esc($fn) ?> <?= $lnTrunc ? esc(mb_substr($ln, 0, 10)) . '…' : esc($ln) ?></span>
                         </td>
                         <!-- Adresse email -->
-                        <td class="px-6 py-4 text-ink/70 whitespace-nowrap">
-                            <?= esc($user['email']) ?>
+                        <td class="px-4 py-3 text-ink/70 whitespace-nowrap">
+                            <span <?= mb_strlen($user['email']) > 28 ? 'title="' . esc($user['email']) . '"' : '' ?>><?= esc(mb_strlen($user['email']) > 28 ? mb_substr($user['email'], 0, 28) . '…' : $user['email']) ?></span>
                         </td>
                         <!-- Ville ou code postal -->
-                        <td class="px-6 py-4 text-ink/70 whitespace-nowrap">
+                        <td class="px-4 py-3 text-ink/70 whitespace-nowrap">
                             <span class="inline-flex items-center gap-1">
                                 <i class="fa-solid fa-location-dot text-ink/30 text-xs"></i>
-                                <?= esc($user['city_name'] ?? 'Non renseignée') ?>
+                                <?php $city = $user['city_name'] ?? 'Non renseignée'; ?>
+                        <span <?= mb_strlen($city) > 9 ? 'title="' . esc($city) . '"' : '' ?>><?= esc(mb_strlen($city) > 9 ? mb_substr($city, 0, 9) . '…' : $city) ?></span>
                             </span>
                         </td>
 
                         <!-- Date et heure d'inscription -->
-                        <td class="px-6 py-4 text-ink/40 whitespace-nowrap">
+                        <td class="px-4 py-3 text-ink/40 whitespace-nowrap">
                             <?php
                             $date = new DateTime($user['registered_at'], new DateTimeZone('UTC'));
                             $date->setTimezone(new DateTimeZone('Europe/Paris'));
-                            echo $date->format('d/m/Y à H:i');
+                            echo $date->format('d/m/y H:i');
                             ?>
                         </td>
 
-                        <td class="px-6 py-4 whitespace-nowrap text-right">
+                        <td class="px-3 py-3 whitespace-nowrap">
                             <!-- Empêche l'admin de s'auto-valider / s'auto-refuser -->
                             <?php if ((int)$user['id'] !== (int)session()->get('user_id')): ?>
 
