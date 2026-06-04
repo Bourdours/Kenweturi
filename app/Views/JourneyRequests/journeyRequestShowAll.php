@@ -131,10 +131,10 @@
                                 <i class="fa-solid fa-chevron-down text-xs transition-transform"></i>
                                 <span>Voir le message</span>
                             </button>
-                            <p class="hidden mt-2 text-muted text-sm italic">"<?= esc($request['message']) ?>"</p>
+                            <p class="hidden mt-2 text-muted text-sm">"<?= esc($request['message']) ?>"</p>
                         </div>
                     <?php endif ?>
-
+                </div>
             <?php endforeach ?>
         </div>
     <?php endif ?>
