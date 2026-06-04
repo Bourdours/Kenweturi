@@ -61,6 +61,12 @@
         <i class="fa-solid fa-car"></i>
         <span id="car-model-label"></span>
       </button>
+      <?php if ($showRainbowBtn ?? false): ?>
+      <button id="rainbow-road-toggle" class="flex items-center gap-1.5 text-ink/40 hover:text-action transition-colors text-xs" aria-label="Activer/désactiver Rainbow Road">
+        <i class="fa-solid fa-rainbow"></i>
+        <span id="rainbow-road-label"></span>
+      </button>
+      <?php endif; ?>
       <button id="theme-toggle" class="flex items-center gap-1.5 text-ink/40 hover:text-action transition-colors text-xs" aria-label="Changer de thème">
         <i id="theme-icon" class="fa-solid"></i>
         <span id="theme-label"></span>

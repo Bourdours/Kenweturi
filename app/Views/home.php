@@ -17,6 +17,7 @@
     base_url('js/datepicker.js'),
     base_url('js/timepicker.js'),
     base_url('js/swapAddresses.js'),
+    base_url('js/rainbow-road.js'),
   ],
 ]) ?>
 <?= view('partials/header') ?>
@@ -262,4 +263,4 @@
 
 </div>
 
-<?= view('partials/footer') ?>
+<?= view('partials/footer', ['showRainbowBtn' => true]) ?>
