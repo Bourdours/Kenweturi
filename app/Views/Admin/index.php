@@ -70,7 +70,7 @@
         class="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold font-display rounded-t-lg transition-colors
                   <?= ($tab === 'admins') ? 'bg-surface border border-b-surface border-action/10 text-ink sm:-mb-px' : 'text-ink/40 hover:text-ink' ?>">
         <i class="fa-solid fa-user-shield text-xs"></i>
-        Admins
+        Utilisateurs
       </a>
     <?php endif; ?>
 

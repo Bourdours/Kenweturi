@@ -1,6 +1,7 @@
 <?php
 /** @var string $title */
 /** @var array $reports */
+/** @var string|null $filter */
 /** @var int $total */
 /** @var int $page */
 /** @var int $perPage */
@@ -14,6 +15,18 @@
     <!-- En-tête -->
     <div class="flex items-center justify-between gap-4">
         <h1 class="font-display font-bold text-ink text-2xl"><?= esc($title) ?></h1>
+
+        <!-- Filtre pill toggle -->
+        <div class="flex bg-surface border border-action/15 rounded-full p-1 gap-1" role="group" aria-label="Filtre des signalements">
+            <a href="<?= site_url('dashboard/reports') ?>?filter=driver"
+               class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= $filter === 'driver' ? 'bg-action text-ink' : 'text-ink/60 hover:text-ink' ?>">
+                Conducteur
+            </a>
+            <a href="<?= site_url('dashboard/reports') ?>?filter=passenger"
+               class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= $filter === 'passenger' ? 'bg-action text-ink' : 'text-ink/60 hover:text-ink' ?>">
+                Passager
+            </a>
+        </div>
     </div>
 
     <!-- Sous-navigation -->
@@ -26,7 +39,14 @@
 
     <!-- Liste -->
     <?php if (empty($reports)) : ?>
-        <p class="text-center text-muted py-12">Vous n'avez effectué aucun signalement.</p>
+        <?php
+        $emptyMessages = [
+            'driver'    => "Vous n'avez effectué aucun signalement en tant que conducteur.",
+            'passenger' => "Vous n'avez effectué aucun signalement en tant que passager.",
+        ];
+        $emptyMsg = $emptyMessages[$filter] ?? "Vous n'avez effectué aucun signalement.";
+        ?>
+        <p class="text-center text-muted py-12"><?= $emptyMsg ?></p>
     <?php else : ?>
         <div class="space-y-3">
             <?php foreach ($reports as $report) : ?>
