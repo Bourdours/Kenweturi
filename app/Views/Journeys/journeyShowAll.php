@@ -1,3 +1,21 @@
+<?php
+/** @var array       $journeys */
+/** @var string|null $startAddress */
+/** @var string|null $endAddress */
+/** @var string|null $filterDate */
+/** @var string|null $filterTime */
+/** @var string|null $availableSeats */
+/** @var string|null $smoking */
+/** @var string|null $latStart */
+/** @var string|null $lngStart */
+/** @var string|null $latEnd */
+/** @var string|null $lngEnd */
+/** @var object      $pager */
+/** @var int         $page */
+/** @var int         $perPage */
+/** @var int         $total */
+/** @var string|null $back */
+?>
 <?= view('partials/head', [
     'extraCss' => [
         'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css',
@@ -6,7 +24,8 @@
     'extraJs'  => [
         'https://cdn.jsdelivr.net/npm/flatpickr',
         'https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js',
-        base_url('js/autocompletion.js'),
+        base_url('js/autocomplete.js'),
+        base_url('js/journeySearch.js'),
         base_url('js/datepicker.js'),
         base_url('js/timepicker.js'),
         base_url('js/swapAddresses.js'),
@@ -16,11 +35,7 @@
 
 <div class="max-w-4xl mx-auto py-10 px-6 md:px-8 space-y-6">
 
-    <div class="flex items-center justify-between">
-      <h1 class="text-ink text-2xl font-bold font-display">Chercher un trajet</h1>
-      <a href="<?= esc($back ?? base_url('journeys')) ?>" class="text-ink/50 hover:text-action text-sm flex items-baseline gap-1 transition-colors">
-      </a>
-  </div>
+    <h1 class="text-ink text-2xl font-bold font-display">Chercher un trajet</h1>
     <!-- Formulaire de recherche -->
     <form id="addJourneyForm" action="<?= site_url('/journeys') ?>" method="GET">
         <div class="bg-surface rounded-2xl p-5 border border-action/10 space-y-4">
@@ -111,7 +126,7 @@
                     <div class="flex items-center gap-4">
                         <div class="flex flex-col items-center shrink-0">
                             <div class="w-2.5 h-2.5 rounded-full bg-brand"></div>
-                            <div class="w-px h-6 bg-ink/10 my-0.5"></div>
+                            <div class="w-px h-2.5 bg-ink/10 my-0.5"></div>
                             <div class="w-2.5 h-2.5 rounded-full bg-action"></div>
                         </div>
                         <div class="flex-1 min-w-0">

@@ -12,7 +12,8 @@
   'extraJs' => [
     'https://cdn.jsdelivr.net/npm/flatpickr',
     'https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js',
-    base_url('js/autocompletion.js'),
+    base_url('js/autocomplete.js'),
+    base_url('js/journeySearch.js'),
     base_url('js/datepicker.js'),
     base_url('js/timepicker.js'),
     base_url('js/swapAddresses.js'),
