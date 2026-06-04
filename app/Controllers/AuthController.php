@@ -250,9 +250,9 @@ class AuthController extends BaseController
                             'name'     => 'remember_token',
                             'value'    => $token,
                             'expire'   => $expiry,
-                            'httponly' => true, // protection XSS
-                            'secure'   => false, // Passer à true en production (HTTPS)
-                            'samesite' => 'Strict',  // Protection CSRF
+                            'httponly' => true,
+                            'secure'   => (ENVIRONMENT === 'production'),
+                            'samesite' => 'Strict',
                         ]);
                 }
                 // Redirection vers l'accueil avec un message de bienvenue
@@ -283,9 +283,17 @@ class AuthController extends BaseController
             }
         }
 
-        $this->response->deleteCookie('remember_token');
         session()->destroy();
-        return redirect()->to('/login')->with('success', 'Vous avez été déconnecté.');
+        return redirect()->to('/login')
+            ->with('success', 'Vous avez été déconnecté.')
+            ->setCookie([
+                'name'     => 'remember_token',
+                'value'    => '',
+                'expire'   => -1,
+                'httponly' => true,
+                'secure'   => (ENVIRONMENT === 'production'),
+                'samesite' => 'Strict',
+            ]);
     }
 
     /**
@@ -321,9 +329,9 @@ class AuthController extends BaseController
         $token = bin2hex(random_bytes(32));
         $expiry = date('Y-m-d H:i:s', strtotime('+1 hour'));
 
-        // Sauvegarde du token en base
+        // Sauvegarde du token hashé en base (le token brut part uniquement dans l'email)
         $this->userModel->update($user['id'], [
-            'reset_token'        => $token,
+            'reset_token'        => hash('sha256', $token),
             'reset_token_expiry' => $expiry,
         ]);
 
@@ -362,7 +370,7 @@ class AuthController extends BaseController
         }
 
         $user = $this->userModel
-            ->where('reset_token', $token)
+            ->where('reset_token', hash('sha256', $token))
             ->where('reset_token_expiry >', date('Y-m-d H:i:s'))
             ->first();
 
@@ -384,16 +392,32 @@ class AuthController extends BaseController
      */
     public function resetPassword()
     {
-        $token           = $this->request->getPost('token');
-        $password        = $this->request->getPost('password');
-        $confirmPassword = $this->request->getPost('confirmPassword');
+        $token = $this->request->getPost('token');
 
-        if ($password !== $confirmPassword) {
-            return redirect()->back()->with('error', 'Les mots de passe ne correspondent pas.');
+        $rules = [
+            'password'        => 'required|min_length[8]|regex_match[/^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*?_~\-()]).*$/]',
+            'confirmPassword' => 'required|matches[password]',
+        ];
+        $messages = [
+            'password' => [
+                'required'    => 'Le mot de passe est obligatoire.',
+                'min_length'  => 'Le mot de passe doit faire au moins 8 caractères.',
+                'regex_match' => 'Le mot de passe doit contenir au moins : une majuscule, un chiffre et un caractère spécial.',
+            ],
+            'confirmPassword' => [
+                'required' => 'Veuillez confirmer votre mot de passe.',
+                'matches'  => 'La confirmation ne correspond pas au mot de passe saisi.',
+            ],
+        ];
+
+        if (!$this->validate($rules, $messages)) {
+            return redirect()->back()->with('error', implode(' ', $this->validator->getErrors()));
         }
 
+        $password = $this->request->getPost('password');
+
         $user = $this->userModel
-            ->where('reset_token', $token)
+            ->where('reset_token', hash('sha256', $token))
             ->where('reset_token_expiry >', date('Y-m-d H:i:s'))
             ->first();
 
@@ -405,6 +429,7 @@ class AuthController extends BaseController
             'password_hash'      => password_hash($password, PASSWORD_DEFAULT),
             'reset_token'        => null,
             'reset_token_expiry' => null,
+            'remember_token'     => null,
         ]);
 
         $mailer = new MailerExample();

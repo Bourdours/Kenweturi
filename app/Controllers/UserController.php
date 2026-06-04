@@ -181,7 +181,7 @@ class UserController extends BaseController
 
             // Vérification que le mot de passe actuel est correct avant d'autoriser le changement
             if (!password_verify($currentPassword, $user['password_hash'])) {
-                return redirect()->back()->withInput()
+                return redirect()->to(site_url('profile/edit'))->withInput()
                     ->with('errors', ['currentPasswordProfile' => 'Le mot de passe actuel est incorrect.']);
             }
 
@@ -192,6 +192,9 @@ class UserController extends BaseController
 
         // Messages d'erreur personnalisés pour le changement de mot de passe
         $messages = [
+            'emailProfile' => [
+                'is_unique' => 'Cette adresse e-mail ne peut pas être utilisée.',
+            ],
             'newPasswordProfile' => [
                 'required'    => 'Le mot de passe est obligatoire.',
                 'min_length'  => 'Le mot de passe doit faire au moins 8 caractères.',
@@ -213,7 +216,7 @@ class UserController extends BaseController
 
         // Retour au formulaire avec les erreurs si la validation échoue
         if (!$this->validate($rules, $messages)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+            return redirect()->to(site_url('profile/edit'))->withInput()->with('errors', $this->validator->getErrors());
         }
 
         $cityName = trim($this->request->getPost('cityProfile')    ?? '');
@@ -244,7 +247,9 @@ class UserController extends BaseController
                 unlink(FCPATH . $oldAvatar);
             }
 
-            $newName = $avatar->getRandomName();
+            $extMap  = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+            $ext     = $extMap[$avatar->getMimeType()] ?? 'jpg';
+            $newName = bin2hex(random_bytes(16)) . '.' . $ext;
             $avatar->move(FCPATH . 'data/images', $newName);
             $data['avatar'] = 'data/images/' . $newName;
         }

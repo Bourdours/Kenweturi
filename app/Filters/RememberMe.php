@@ -19,14 +19,15 @@ class RememberMe implements FilterInterface
         $userModel = new UserModel();
         $user = $userModel->where('remember_token', hash('sha256', $token))->first();
 
-        if ($user) {
+        if ($user && !$user['is_banned'] && $user['status'] === 'active') {
             session()->regenerate();
             session()->set([
                 'user_id'    => $user['id'],
                 'firstname'  => $user['firstname'],
                 'lastname'   => $user['lastname'],
                 'email'      => $user['email'],
-                'is_admin'   => $user['is_admin'],
+                'role'       => $user['role'],
+                'isAdmin'    => (bool) $user['is_admin'],
                 'avatar'     => $user['avatar'] ?? null,
                 'isLoggedIn' => true,
             ]);

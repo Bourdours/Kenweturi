@@ -126,11 +126,11 @@
                                     onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
                                 </div>
                                 <div class="jsAvatarOpen cursor-pointer hidden w-7 h-7 rounded-full bg-action-dark text-ink font-bold text-xs shrink-0 items-center justify-center">
-                                    <?= $initials ?>
+                                    <?= esc($initials) ?>
                                 </div>
                             <?php else: ?>
                                 <div class="jsAvatarOpen cursor-pointer flex w-7 h-7 rounded-full bg-action-dark text-ink font-bold text-xs shrink-0 items-center justify-center">
-                                    <?= $initials ?>
+                                    <?= esc($initials) ?>
                                 </div>
                             <?php endif; ?>
                             <div>

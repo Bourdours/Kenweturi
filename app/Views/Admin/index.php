@@ -25,7 +25,7 @@
   <?php if (session()->getFlashdata('success')): ?>
     <div class="bg-success/10 border border-success/20 rounded-xl px-5 py-3 text-success text-sm flex items-center gap-2">
       <i class="fa-solid fa-circle-check shrink-0"></i>
-      <?= session()->getFlashdata('success') ?>
+      <?= esc(session()->getFlashdata('success')) ?>
     </div>
   <?php endif; ?>
 
@@ -33,7 +33,7 @@
   <?php if (session()->getFlashdata('error')): ?>
     <div class="bg-danger/10 border border-danger/20 rounded-xl px-5 py-3 text-danger text-sm flex items-center gap-2">
       <i class="fa-solid fa-circle-exclamation shrink-0"></i>
-      <?= session()->getFlashdata('error') ?>
+      <?= esc(session()->getFlashdata('error')) ?>
     </div>
   <?php endif; ?>
 
