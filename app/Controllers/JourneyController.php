@@ -2,16 +2,9 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
-use App\Libraries\MailerExample;
 use CodeIgniter\HTTP\RedirectResponse;
 
-use App\Models\TrackModel;
-use App\Models\JourneyModel;
 use App\Models\CarModel;
-use App\Models\LocationModel;
-use App\Models\BookingModel;
-use App\Models\CityModel;
-use App\Models\StageModel;
 
 use App\Services\JourneyService;
 
@@ -21,25 +14,13 @@ use App\Exceptions\AddressValidationException;
 
 class JourneyController extends BaseController{
 
-    protected TrackModel $trackModel;
-    protected JourneyModel $journeyModel;
     protected CarModel $carModel;
-    protected BookingModel $bookingModel;
-    protected LocationModel $locationModel;
-    protected CityModel $cityModel;
-    protected StageModel $stageModel;
 
     protected JourneyService $journeyService;
 
     public function __construct(){
 
-        $this->trackModel = new TrackModel();
-        $this->journeyModel = new JourneyModel();
         $this->carModel = new CarModel();
-        $this->bookingModel = new BookingModel();
-        $this->locationModel = new LocationModel();
-        $this->cityModel = new CityModel();
-        $this->stageModel = new StageModel();
 
         $this->journeyService = new JourneyService();
     }
@@ -139,10 +120,10 @@ class JourneyController extends BaseController{
     /**
      * Affiche le détail d'un trajet.
      *
-     * Charge le trajet, calcule sa date d'arrivée, récupère ses étapes
-     * intermédiaires, ses passagers et les demandes en attente. Vérifie
-     * également si l'utilisateur courant a déjà une réservation acceptée
-     * sur ce trajet pour adapter l'affichage.
+     * Délègue au JourneyService l'assemblage des données métier du trajet
+     * (étapes, places restantes, passagers, demandes en attente, réservation
+     * de l'utilisateur courant). Le controller ne gère que les paramètres HTTP
+     * (id, session, filtres GET) et la redirection si le trajet n'existe pas.
      *
      * @param  int|string $id Identifiant du trajet à afficher
      * @return string|RedirectResponse Vue de détail, ou redirection vers la
@@ -150,115 +131,59 @@ class JourneyController extends BaseController{
      */
     public function show($id): string|RedirectResponse
     {
-        // ====== Récupération du trajet
-        $journey = $this->journeyModel->findWithDetails((int) $id);
+        $journeyId = (int) $id;
+        $userId    = (int) session('user_id');
 
-        if (!$journey) {
+        $details = $this->journeyService->getJourneyDetails($journeyId, $userId);
+
+        if ($details === null) {
             return redirect()->to('/journeys');
         }
 
-        // ====== Calcul de la date d'arrivée du trajet
-        $journey['end_datetime'] = $this->journeyService->getArrivalDateTime($journey['id'])
-            ->format('Y-m-d H:i:s');
-
-        // ====== Récupération des étapes intermédiaires
-        $stages = $this->stageModel->findByJourney((int) $id);
-
-        // ====== Calcul des places restantes
-        $remainingSeats = $this->bookingModel->countRemainingSeats(
-            (int) $id,
-            (int) $journey['seats'],
-        );
-
-        // ====== Récupération des passagers
-        $passengers = $this->bookingModel->findPassengersByJourney((int) $id);
-
-        // ====== Récupération des reservations en cours pour un trajet
-        $pendingBookings = $this->bookingModel->countPendingBookings((int) $id);
-
-        // ====== Réservation de l'utilisateur courant sur ce trajet (si elle existe)
-        $userBooking = $this->bookingModel->findUserBooking((int) $id, (int) session('user_id'));
-        $isBooked = $userBooking !== null && $userBooking['status'] === 'accepted';
-        $isPending = $userBooking !== null && $userBooking['status'] === 'pending';
-
-        // ====== Récupération des filtres de réservation
-        $availableSeats = $this->request->getGet('seats') ?? 1;
-        $boardingCity   = $this->request->getGet('boardingCity');
-
-        $back = $this->validateBackUrl($this->request->getGet('back'));
-
-        return view('Journeys/journeyShow',[
+        return view('Journeys/journeyShow', [
             'title'          => 'Détail du trajet',
-            'journey'        => $journey,
-            'back'           => $back,
-            'stages'         => $stages,
-            'remainingSeats' => $remainingSeats,
-            'availableSeats' => $availableSeats,
-            'boardingCity'   => $boardingCity,
-            'passengers'     => $passengers,
-            'isBooked'       => $isBooked,
-            'isPending'       => $isPending,
-            'userBooking'    => $userBooking,
-            'pendingBookings' => $pendingBookings,
+            'back'           => $this->validateBackUrl($this->request->getGet('back')),
+            'availableSeats' => $this->request->getGet('seats') ?? 1,
+            'boardingCity'   => $this->request->getGet('boardingCity'),
+            // Spread du tableau : passe journey, stages, passengers, isBooked, etc.
+            ...$details,
         ]);
     }
 
-/**
- * Affiche la liste des trajets correspondant aux filtres de recherche.
- *
- * Construit la requête SQL avec les filtres non géographiques (date, heure,
- * places disponibles, fumeur), puis applique un filtrage géographique en PHP
- * sur le tracé de chaque candidat (proximité départ ET arrivée).
- * Pagine ensuite le résultat final.
- *
- * @return string|RedirectResponse Vue HTML de la liste paginée des trajets
- */
-public function showAll(): string|RedirectResponse
-{
-    // --- Récupération des filtres
-    $filters = $this->getShowAllFilter();
+    /**
+     * Affiche la liste des trajets correspondant aux filtres de recherche.
+     *
+     * Délègue au JourneyService la recherche (chargement des candidats,
+     * enrichissement des demandes en attente, filtrage géographique sur le
+     * tracé). Le controller ne gère que la lecture des filtres HTTP, la
+     * pagination en PHP et le rendu de la vue.
+     *
+     * @return string|RedirectResponse Vue HTML de la liste paginée des trajets
+     */
+    public function showAll(): string|RedirectResponse
+    {
+        // --- Récupération des filtres
+        $filters = $this->getShowAllFilter();
 
-    // --- Récupération de tous les candidats (sans filtre géographique)
-    $candidates = $this->journeyModel->findAllWithFilters($filters);
+        // --- Recherche métier (candidats + matching géographique)
+        $matchingJourneys = $this->journeyService->searchJourneys($filters);
 
-    // --- Ajout du nombre de demandes en attente pour chaque trajet
-    $journeyIds = array_column($candidates, 'id');
-    if (!empty($journeyIds)) {
-        $pendingByJourney = $this->bookingModel->countPendingByJourneys($journeyIds);
+        // --- Pagination en PHP
+        $perPage  = 5;
+        $total    = count($matchingJourneys);
+        $journeys = array_slice($matchingJourneys, ($filters['page'] - 1) * $perPage, $perPage);
+        $pager    = \Config\Services::pager();
 
-        foreach ($candidates as &$candidate) {
-            $candidate['pending_bookings'] = $pendingByJourney[$candidate['id']] ?? 0;
-        }
-        unset($candidate);
+        return view('Journeys/journeyShowAll', [
+            'title'    => 'Rechercher un trajet',
+            'journeys' => $journeys,
+            'pager'    => $pager,
+            'total'    => $total,
+            'perPage'  => $perPage,
+            // Spread du tableau : passe startAddress, endAddress, latStart, etc.
+            ...$filters,
+        ]);
     }
-
-    // --- Filtrage géographique en PHP (matching sur le tracé)
-    $start = ($filters['latStart'] !== null && $filters['lngStart'] !== null)
-        ? ['lat' => $filters['latStart'], 'lon' => $filters['lngStart']]
-        : null;
-
-    $end = ($filters['latEnd'] !== null && $filters['lngEnd'] !== null)
-        ? ['lat' => $filters['latEnd'], 'lon' => $filters['lngEnd']]
-        : null;
-
-    $matchingJourneys = $this->journeyService->findMatchingJourneys($candidates, $start, $end);
-
-    // --- Pagination en PHP
-    $perPage  = 5;
-    $total    = count($matchingJourneys);
-    $journeys = array_slice($matchingJourneys, ($filters['page'] - 1) * $perPage, $perPage);
-    $pager    = \Config\Services::pager();
-
-    return view('Journeys/journeyShowAll', [
-        'title'    => 'Rechercher un trajet',
-        'journeys' => $journeys,
-        'pager'    => $pager,
-        'total'    => $total,
-        'perPage'  => $perPage,
-        // Spread du tableau : passe startAddress, endAddress, latStart, etc.
-        ...$filters,
-    ]);
-}
 
     /**
      * Retourne les règles de validation du formulaire de création de trajet.
