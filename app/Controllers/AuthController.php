@@ -129,7 +129,7 @@ class AuthController extends BaseController
             ]);
         }
 
-        // Récupération des données liées à la ville depuis le formulaireu
+        // Récupération des données liées à la ville depuis le formulaire
         $cityName = $this->request->getPost('cityName');
         $zipCode  = $this->request->getPost('postalCode');
 
@@ -173,7 +173,7 @@ class AuthController extends BaseController
         }
 
         // Notification aux admins
-        $admins = $this->userModel->where('is_admin', 1)->where('status', 'active')->findAll();
+        $admins = $this->userModel->getActiveAdmins();
         $emailBody = view('Emails/newRegistration', [
             'firstname' => $data['firstname'],
             'lastname'  => $data['lastname'],
@@ -208,7 +208,7 @@ class AuthController extends BaseController
         $password = $this->request->getPost('password');
 
         // On cherche l'utilisateur par son email
-        $user = $this->userModel->where('email', $email)->first();
+        $user = $this->userModel->findByEmail($email);
 
         if ($user) {
             //  Vérification du bannissement
@@ -247,11 +247,9 @@ class AuthController extends BaseController
                     // Durée de validité : 30 jours en secondes
                     $expiry = 30 * 24 * 60 * 60;
 
-                    // Sauvegarde du token hashé en base
-                    $this->userModel->update($user['id'], [
-                        'remember_token'        => hash('sha256', $token),
-                        'remember_token_expiry' => date('Y-m-d H:i:s', strtotime('+30 days')),
-                    ]);
+                    // Sauvegarde du token hashé en base (le token brut sert au cookie)
+                    $this->userModel->setRememberToken($user['id'], $token);
+
                     // Redirection avec le cookie sécurisé
                     $redirectUrl = session()->get('redirect_url') ?? '/';
                     session()->remove('redirect_url');
@@ -292,10 +290,7 @@ class AuthController extends BaseController
         if ($userId) {
             $user = $this->userModel->find($userId);
             if ($user && $user['remember_token'] !== null) {
-                $this->userModel->update($userId, [
-                    'remember_token'        => null,
-                    'remember_token_expiry' => null,
-                ]);
+                $this->userModel->clearRememberToken($userId);
             }
         }
 
@@ -339,7 +334,7 @@ class AuthController extends BaseController
 
         $email = $this->request->getPost('email');
 
-        $user = $this->userModel->where('email', $email)->first();
+        $user = $this->userModel->findByEmail($email);
 
         if (!$user || $user['deleted_at'] !== null) {
             return redirect()->back()->withInput()->with('success', 'Si un compte existe avec cet email, vous recevrez un lien de réinitialisation.');
@@ -347,13 +342,9 @@ class AuthController extends BaseController
 
         // Génération du token unique
         $token = bin2hex(random_bytes(32));
-        $expiry = date('Y-m-d H:i:s', strtotime('+1 hour'));
 
         // Sauvegarde du token hashé en base (le token brut part uniquement dans l'email)
-        $this->userModel->update($user['id'], [
-            'reset_token'        => hash('sha256', $token),
-            'reset_token_expiry' => $expiry,
-        ]);
+        $this->userModel->setResetToken($user['id'], $token);
 
         // Envoi de l'email
         $resetLink = base_url('resetPassword?token=' . $token);
@@ -389,10 +380,7 @@ class AuthController extends BaseController
             return redirect()->to('/forgotPassword')->with('error', 'Lien invalide.');
         }
 
-        $user = $this->userModel
-            ->where('reset_token', hash('sha256', $token))
-            ->where('reset_token_expiry >', date('Y-m-d H:i:s'))
-            ->first();
+        $user = $this->userModel->findByValidResetToken($token);
 
         if (!$user) {
             return redirect()->to('/forgotPassword')->with('error', 'Ce lien est invalide ou a expiré.');
@@ -436,22 +424,14 @@ class AuthController extends BaseController
 
         $password = $this->request->getPost('password');
 
-        $user = $this->userModel
-            ->where('reset_token', hash('sha256', $token))
-            ->where('reset_token_expiry >', date('Y-m-d H:i:s'))
-            ->first();
+        $user = $this->userModel->findByValidResetToken($token);
 
         if (!$user) {
             return redirect()->to('/forgotPassword')->with('error', 'Ce lien est invalide ou a expiré.');
         }
 
-        $this->userModel->update($user['id'], [
-            'password_hash'          => password_hash($password, PASSWORD_DEFAULT),
-            'reset_token'            => null,
-            'reset_token_expiry'     => null,
-            'remember_token'         => null,
-            'remember_token_expiry'  => null,
-        ]);
+        // Réinitialise le mot de passe et invalide tous les tokens associés
+        $this->userModel->resetPassword($user['id'], $password);
 
         $mailer = new MailerExample();
         $mailer->sendHtml(
