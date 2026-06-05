@@ -2,31 +2,22 @@
 
 namespace App\Services;
 
-use App\Models\JourneyModel;
-use App\Models\TrackModel;
-
-use DateTimeImmutable;
-
 /**
- * Service de géolocalisation.
+ * Service de calcul géographique.
  *
- * Fournit les outils de calcul géographique utilisés pour le matching
+ * Fournit les outils purement mathématiques utilisés pour le matching
  * des trajets : distance Haversine, point le plus proche sur un tracé,
- * et filtrage d'une liste de trajets par proximité géographique.
+ * parsing d'un tracé GeoJSON et calcul de sa durée totale.
+ *
+ * Ce service ne fait aucun accès base de données : il opère uniquement
+ * sur des structures déjà chargées par le service appelant. Pour les
+ * opérations qui nécessitent de charger un Track ou un Journey,
+ * passer par JourneyService.
  */
 class GeoService
 {
-    protected TrackModel $trackModel;
-    protected JourneyModel $journeyModel;
-
-    public function __construct()
-    {
-        $this->trackModel = new TrackModel();
-        $this->journeyModel = new JourneyModel();
-    }
-
     /**
-     * Vérifie si un tracé GeoJSON (déjà parsé en points) passe à proximité
+     * Vérifie si un tracé (déjà parsé en points) passe à proximité
      * d'un départ ET d'une arrivée donnés, dans le bon ordre.
      *
      * @param  array[] $points        Points du tracé ['lat' => float, 'lon' => float]
@@ -51,20 +42,18 @@ class GeoService
     }
 
     /**
-     * Récupère et normalise les points du tracé d'un trajet.
+     * Parse un tracé GeoJSON et retourne la liste de ses points normalisés.
      *
-     * @param  int $trackId Identifiant du tracé
+     * Point d'entrée unique pour transformer un GeoJSON brut en tableau
+     * de points exploitables par les autres méthodes du service.
+     *
+     * @param  string $geoJson Tracé au format GeoJSON
      * @return array<int, array{lat:float, lon:float}> Points du tracé ;
-     *               tableau vide si le tracé est absent ou invalide
+     *               tableau vide si le GeoJSON est invalide ou sans coordonnées
      */
-    public function getTrackPoints(int $trackId): array
+    public function parseTrackPointsFromGeoJson(string $geoJson): array
     {
-        $track = $this->trackModel->find($trackId);
-        if (empty($track['geojson'])) {
-            return [];
-        }
-
-        $data        = json_decode($track['geojson'], true);
+        $data        = json_decode($geoJson, true);
         $coordinates = $data['features'][0]['geometry']['coordinates'] ?? [];
 
         $points = [];
@@ -128,42 +117,20 @@ class GeoService
     }
 
     /**
-     * Calcule l'heure d'arrivée d'un trajet à partir de son tracé et de son heure de départ.
-     *
-     * @param  int $journeyId Identifiant du trajet
-     * @return DateTimeImmutable Heure d'arrivée estimée
-     */
-    public function getArrivaleDateTime(int $journeyId): DateTimeImmutable {
-    
-        $trackId = $this->journeyModel->select(['track_id'])->where([
-            'id'=>$journeyId,
-        ])->first();
-
-        $track = $this->trackModel->where([
-            'id'=>$trackId,
-        ])->first();
-
-        $trackDuration = $this->calculateTrackDuration(json_decode($track['geojson']));
-        $journeyStartDateTime = new DateTimeImmutable($this->journeyModel->select(['start_datetime'])->where(['id'=>$journeyId])->first()['start_datetime']);
-
-        return $journeyStartDateTime->modify('+'.$trackDuration.' seconds');
-    }
-
-
-    /**
      * Calcule la durée totale d'un trajet à partir de son GeoJSON,
      * en sommant la durée de chacun de ses segments.
      *
-     * @param  object|null $track Trajet au format GeoJSON décodé en objet
-     * @return int Durée totale du trajet, en secondes
+     * @param  string $geoJson Tracé au format GeoJSON
+     * @return int Durée totale du trajet, en secondes (0 si GeoJSON invalide)
      */
-    private function calculateTrackDuration(?object $track): int {
+    public function calculateTrackDuration(string $geoJson): int
+    {
+        $data     = json_decode($geoJson, true);
+        $segments = $data['features'][0]['properties']['segments'] ?? [];
 
-        $duration=0;
-        $segments = $track->features[0]->properties->segments ?? null;
-
-        foreach($segments as $segment){
-            $duration += $segment->duration;
+        $duration = 0;
+        foreach ($segments as $segment) {
+            $duration += $segment['duration'] ?? 0;
         }
 
         return (int) $duration;
