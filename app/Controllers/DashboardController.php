@@ -324,7 +324,7 @@ class DashboardController extends BaseController
 
         return view('Bookings/bookingShow', [
             'title'           => 'Détail de la réservation',
-            'back'            => $this->request->getGet('back'),
+            'back'            => $this->validateBackUrl($this->request->getGet('back')),
             'booking'         => $booking,
             'is_driver'        => $is_driver,
             'passengers'      => $passengers,
