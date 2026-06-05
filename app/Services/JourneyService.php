@@ -10,6 +10,7 @@ use App\Models\TrackModel;
 use App\Models\LocationModel;
 use App\Models\StageModel;
 use App\Models\CityModel;
+use App\Models\CarModel;
 
 use App\Exceptions\ExternalApiException;
 use App\Exceptions\ModelValidationException;
@@ -40,10 +41,13 @@ class JourneyService
     protected LocationModel $locationModel;
     protected StageModel $stageModel;
     protected CityModel $cityModel;
+    protected CarModel $carModel;
     protected GeoService $geoService;
 
     protected RoutingService $routingService;
     protected GeocodingService $geocodingService;
+
+    private const ABSOLUTE_MAX_SEATS = 9;
 
     public function __construct()
     {
@@ -54,6 +58,7 @@ class JourneyService
         $this->locationModel        = new LocationModel();
         $this->stageModel           = new StageModel();
         $this->cityModel            = new CityModel();
+        $this->carModel             = new CarModel();
 
         $this->routingService       = new RoutingService();
         $this->geocodingService     = new GeocodingService();
@@ -268,10 +273,18 @@ class JourneyService
      */
     public function persistJourney(int $userId, array $createFormData, array $locationsData, string $geoJsonTrack): int
     {
+        // ====== La voiture doit appartenir à l'utilisateur
+        $carId = (int) $createFormData['journey']['car'];
+        $car   = $this->carModel->findOwnedByUser($carId, $userId);
+        if ($car === null) {
+            throw new ModelValidationException(['car' => 'Véhicule invalide.']);
+        }
+
         // ====== Préparation des entités hors transaction
         $locationEntities         = $this->buildLocationEntities($locationsData);
         $journeyStartDateTime     = $this->buildJourneyStartDateTime($createFormData['journey']);
         $stagesDeparturesDateTime = $this->computeStageDepartures($createFormData['journey'], $geoJsonTrack);
+
 
         // ====== Insertion dans la base
         $db = \Config\Database::connect();
@@ -459,6 +472,13 @@ class JourneyService
                 ])
             );
         }
+    }
+
+    public function getMaxSeatsForCar(int $carId, int $userId): int
+    {
+        if ($carId <= 0) return self::ABSOLUTE_MAX_SEATS;
+        $car = $this->carModel->findOwnedByUser($carId, $userId);
+        return $car ? (int) $car['seats'] - 1 : self::ABSOLUTE_MAX_SEATS;
     }
 
     /**
