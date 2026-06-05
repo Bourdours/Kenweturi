@@ -182,7 +182,7 @@ class AuthController extends BaseController
         }
 
         // Redirection vers la page de connexion avec un message flash
-        return redirect()->to('/login')->with('success', 'Inscription reçue ! <br> Notre équipe va examiner votre demande et vous recevrez une réponse par email.');
+        return redirect()->to('/login')->with('success', 'Inscription reçue ! Notre équipe va examiner votre demande et vous recevrez une réponse par email.');
     }
 
     /**
@@ -195,6 +195,11 @@ class AuthController extends BaseController
     public function login()
     {
         $session = session();
+
+        $throttler = service('throttler');
+        if ($throttler->check(md5($this->request->getIPAddress() . 'login'), 10, MINUTE) === false) {
+            return redirect()->back()->withInput()->with('error', 'Trop de tentatives de connexion. Veuillez patienter 1 minute avant de réessayer.');
+        }
 
         $email = $this->request->getPost('email');
         $password = $this->request->getPost('password');
@@ -241,7 +246,8 @@ class AuthController extends BaseController
 
                     // Sauvegarde du token hashé en base
                     $this->userModel->update($user['id'], [
-                        'remember_token' => hash('sha256', $token),
+                        'remember_token'        => hash('sha256', $token),
+                        'remember_token_expiry' => date('Y-m-d H:i:s', strtotime('+30 days')),
                     ]);
                     // Redirection avec le cookie sécurisé
                     $redirectUrl = session()->get('redirect_url') ?? '/';
@@ -283,7 +289,10 @@ class AuthController extends BaseController
         if ($userId) {
             $user = $this->userModel->find($userId);
             if ($user && $user['remember_token'] !== null) {
-                $this->userModel->update($userId, ['remember_token' => null]);
+                $this->userModel->update($userId, [
+                    'remember_token'        => null,
+                    'remember_token_expiry' => null,
+                ]);
             }
         }
 
@@ -320,6 +329,10 @@ class AuthController extends BaseController
      */
     public function forgotPassword()
     {
+        $throttler = service('throttler');
+        if ($throttler->check(md5($this->request->getIPAddress() . 'forgotpwd'), 3, MINUTE) === false) {
+            return redirect()->back()->with('success', 'Si un compte existe avec cet email, vous recevrez un lien de réinitialisation.');
+        }
 
         $email = $this->request->getPost('email');
 
@@ -430,10 +443,11 @@ class AuthController extends BaseController
         }
 
         $this->userModel->update($user['id'], [
-            'password_hash'      => password_hash($password, PASSWORD_DEFAULT),
-            'reset_token'        => null,
-            'reset_token_expiry' => null,
-            'remember_token'     => null,
+            'password_hash'          => password_hash($password, PASSWORD_DEFAULT),
+            'reset_token'            => null,
+            'reset_token_expiry'     => null,
+            'remember_token'         => null,
+            'remember_token_expiry'  => null,
         ]);
 
         $mailer = new MailerExample();

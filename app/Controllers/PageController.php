@@ -29,7 +29,7 @@ class PageController extends BaseController
         $rules = [
             'name'    => 'required|min_length[2]|max_length[100]',
             'email'   => 'required|valid_email',
-            'subject' => 'required',
+            'subject' => 'required|max_length[150]',
             'message' => 'required|min_length[10]|max_length[2000]',
         ];
 

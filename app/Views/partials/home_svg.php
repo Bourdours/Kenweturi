@@ -1,10 +1,11 @@
-<svg class="hidden md:block absolute inset-x-0 bottom-0 w-full pointer-events-none"
-  style="top: -70px"
-  viewBox="0 0 100 100"
+<svg id="home-svg" class="hidden md:block absolute inset-x-0 bottom-0 w-full pointer-events-none"
+  style="top: -70px; mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 75%, transparent 97%); -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 75%, transparent 97%)"
+  viewBox="0 0 100 106"
   preserveAspectRatio="none"
   xmlns="http://www.w3.org/2000/svg">
   <path
-    d="M 88 0 C 111 27, 12 35, 12 55 C 12 75, 76 88, 0 100"
+    id="road-body"
+    d="M 88 0 C 111 27, 12 35, 12 55 C 12 75, 76 88, -5 102"
     fill="none"
     stroke="rgb(var(--color-action))"
     stroke-opacity="0.2"
@@ -12,7 +13,8 @@
     stroke-linecap="butt"
     vector-effect="non-scaling-stroke" />
   <path
-    d="M 88 0 C 111 27, 12 35, 12 55 C 12 75, 76 88, 0 100"
+    id="road-center"
+    d="M 88 0 C 111 27, 12 35, 12 55 C 12 75, 76 88, -5 102"
     fill="none"
     stroke="rgb(var(--color-action))"
     stroke-opacity="0.5"
@@ -37,9 +39,48 @@
       25%      { transform: rotate(4deg); }
       75%      { transform: rotate(-4deg); }
     }
+    @keyframes rainbowRoad {
+      0%   { stroke: hsl(0,   100%, 58%); }
+      14%  { stroke: hsl(50,  100%, 55%); }
+      28%  { stroke: hsl(110, 100%, 45%); }
+      42%  { stroke: hsl(175, 100%, 48%); }
+      57%  { stroke: hsl(220, 100%, 62%); }
+      71%  { stroke: hsl(280, 100%, 62%); }
+      85%  { stroke: hsl(330, 100%, 60%); }
+      100% { stroke: hsl(360, 100%, 58%); }
+    }
+    @keyframes rainbowRoadCenter {
+      0%   { stroke: hsl(180, 100%, 82%); }
+      14%  { stroke: hsl(230, 100%, 82%); }
+      28%  { stroke: hsl(280, 100%, 82%); }
+      42%  { stroke: hsl(330, 100%, 82%); }
+      57%  { stroke: hsl(20,  100%, 82%); }
+      71%  { stroke: hsl(70,  100%, 76%); }
+      85%  { stroke: hsl(130, 100%, 72%); }
+      100% { stroke: hsl(180, 100%, 82%); }
+    }
+    @keyframes sparkle {
+      0%, 100% { opacity: 0; r: 0.3; }
+      50%       { opacity: 0.95; r: 0.85; }
+    }
+    html.rainbow-road #road-body {
+      animation: rainbowRoad 3s linear infinite;
+      stroke-opacity: 0.9;
+      filter: url(#road-glow);
+    }
+    html.rainbow-road #road-center {
+      stroke-opacity: 0.95;
+    }
   </style>
 
   <defs>
+    <filter id="road-glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="1.8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
     <symbol id="tree" overflow="visible">
       <rect x="-0.35" y="2" width="0.7" height="1.5" />
       <polygon points="0,-1  -2.5,2  2.5,2" />
@@ -50,7 +91,7 @@
   <?php
   $bez = fn($t, $p0, $p1, $p2, $p3) => (1-$t)**3*$p0 + 3*(1-$t)**2*$t*$p1 + 3*(1-$t)*$t**2*$p2 + $t**3*$p3;
   $sx1 = [88,111,12,12]; $sy1 = [0,27,35,55];
-  $sx2 = [12,12,76,0];   $sy2 = [55,75,88,100];
+  $sx2 = [12,12,76,-5];   $sy2 = [55,75,88,102];
   $cls = ['ta','tb','tc','td','te','tf'];
 
   $samples = [];

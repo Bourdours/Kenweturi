@@ -34,6 +34,7 @@ class UserModel extends BaseModel
         'registered_at',
         'password_hash',
         'remember_token',
+        'remember_token_expiry',
         'is_admin',
         'is_banned',
         'status',
