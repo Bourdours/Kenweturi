@@ -122,26 +122,24 @@ abstract class BaseController extends Controller
     function validateBackUrl(?string $url): string
     {
         $fallback = site_url('journeys');
-
         if (empty($url)) {
             return $fallback;
         }
-
         try {
-            $uri = new URI($url);
+            $uri     = new URI($url);
             $baseUri = new URI(base_url());
 
-            // Même host ET même scheme
             if ($uri->getHost() !== $baseUri->getHost()) {
                 return $fallback;
             }
-
             if (! in_array($uri->getScheme(), ['http', 'https'], true)) {
                 return $fallback;
             }
-
+            if ($uri->getPort() !== $baseUri->getPort()) {
+                return $fallback;
+            }
             return (string) $uri;
-        } catch (HTTPException $e) {
+        } catch (\Throwable $e) {
             return $fallback;
         }
     }
