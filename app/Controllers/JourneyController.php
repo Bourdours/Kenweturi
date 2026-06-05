@@ -85,9 +85,11 @@ class JourneyController extends BaseController{
         $userId = session('user_id');
 
         // ====== Validation des données du formulaire
-        $maxSeats                 = $this->getMaxAvailableSeatsFromPostedCar();
+        $carId                    = (int) $this->request->getPost('car');
+        $maxSeats                 = $this->journeyService->getMaxSeatsForCar($carId, $userId);
         $createValidationRules    = $this->getCreateValidationRules($maxSeats);
         $createValidationMessages = $this->getCreateValidationMessages($maxSeats);
+
         if (!$this->validate($createValidationRules, $createValidationMessages)) {
             return redirect()->back()->withInput()
                 ->with('errors', $this->validator->getErrors());
@@ -329,36 +331,6 @@ public function showAll(): string|RedirectResponse
             ],
         ];
 
-    }
-
-    /**
-     * Détermine le nombre maximum de places réservables en fonction de la voiture
-     * sélectionnée dans le POST (capacité de la voiture - 1 pour le conducteur).
-     *
-     * Si la voiture est invalide, n'appartient pas à l'utilisateur ou n'est pas
-     * trouvée, retourne la valeur par défaut absolue (9).
-     *
-     * @return int Nombre maximum de places réservables pour la voiture
-     */
-    private function getMaxAvailableSeatsFromPostedCar(): int
-    {
-
-        $absoluteMax = 9;
-
-        $userId = session('user_id');
-        $carId  = $this->request->getPost('car');
-
-        if (!is_numeric($carId) || (int) $carId <= 0) {
-            return $absoluteMax;
-        }
-
-        $car = $this->carModel->findOwnedByUser((int) $carId, (int) $userId);
-
-        if (!$car) {
-            return $absoluteMax;
-        }
-
-        return (int) $car['seats'] - 1;
     }
 
     /**
