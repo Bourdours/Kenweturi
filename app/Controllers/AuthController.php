@@ -243,8 +243,10 @@ class AuthController extends BaseController
                     $this->userModel->update($user['id'], [
                         'remember_token' => hash('sha256', $token),
                     ]);
-                    // Redirection avec le cookie sécurisé 
-                    return redirect()->to('/')
+                    // Redirection avec le cookie sécurisé
+                    $redirectUrl = session()->get('redirect_url') ?? '/';
+                    session()->remove('redirect_url');
+                    return redirect()->to($redirectUrl)
                         ->with('success', 'Ravi de vous revoir, ' . $user['firstname'] . ' !')
                         ->setCookie([
                             'name'     => 'remember_token',
@@ -255,8 +257,10 @@ class AuthController extends BaseController
                             'samesite' => 'Strict',
                         ]);
                 }
-                // Redirection vers l'accueil avec un message de bienvenue
-                return redirect()->to('/')->with('success', 'Ravi de vous revoir, ' . $user['firstname'] . ' !');
+                // Redirection vers l'URL d'origine (ou l'accueil par défaut)
+                $redirectUrl = session()->get('redirect_url') ?? '/';
+                session()->remove('redirect_url');
+                return redirect()->to($redirectUrl)->with('success', 'Ravi de vous revoir, ' . $user['firstname'] . ' !');
             } else {
                 // Mauvais mot de passe
                 return redirect()->back()->withInput()->with('error', 'Identifiants invalides.');
