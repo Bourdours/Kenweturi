@@ -51,4 +51,31 @@ class CarModel extends BaseModel
             'less_than_equal_to'  => 'Le nombre de places ne peut pas dépasser 8.',
         ],
     ];
+
+    /**
+     * Récupère toutes les voitures appartenant à un utilisateur.
+     *
+     * @param  int $userId Identifiant du propriétaire
+     * @return array       Liste des voitures de l'utilisateur
+     */
+    public function findByUser(int $userId): array
+    {
+        return $this->where('user_id', $userId)->findAll();
+    }
+
+    /**
+     * Récupère une voiture uniquement si elle appartient à l'utilisateur fourni.
+     * Utile pour vérifier la propriété avant toute action (édition, choix dans un formulaire).
+     *
+     * @param  int $carId  Identifiant de la voiture
+     * @param  int $userId Identifiant du propriétaire attendu
+     * @return array|null  Voiture trouvée, ou null si elle n'existe pas / n'appartient pas à l'utilisateur
+     */
+    public function findOwnedByUser(int $carId, int $userId): ?array
+    {
+        return $this->where('id', $carId)
+                    ->where('user_id', $userId)
+                    ->first();
+    }
+
 }

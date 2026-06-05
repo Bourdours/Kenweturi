@@ -14,7 +14,6 @@ use App\Models\CityModel;
 use App\Models\StageModel;
 
 use App\Services\JourneyService;
-use App\Services\GeoService;
 
 use App\Exceptions\ExternalApiException;
 use App\Exceptions\ModelValidationException;
@@ -29,12 +28,11 @@ class JourneyController extends BaseController{
     protected LocationModel $locationModel;
     protected CityModel $cityModel;
     protected StageModel $stageModel;
-    
+
     protected JourneyService $journeyService;
-    protected GeoService $geoService;
 
     public function __construct(){
-        
+
         $this->trackModel = new TrackModel();
         $this->journeyModel = new JourneyModel();
         $this->carModel = new CarModel();
@@ -42,9 +40,8 @@ class JourneyController extends BaseController{
         $this->locationModel = new LocationModel();
         $this->cityModel = new CityModel();
         $this->stageModel = new StageModel();
-        
+
         $this->journeyService = new JourneyService();
-        $this->geoService = new GeoService();
     }
 
     /**
@@ -60,7 +57,7 @@ class JourneyController extends BaseController{
 
         $userId = session('user_id');
 
-        $userCars = $this->carModel->where(['user_id'=>$userId,])->findAll();
+        $userCars = $this->carModel->findByUser($userId);
 
         return view('Journeys/newJourney', [
             'title' => "Publier un trajet",
@@ -71,9 +68,9 @@ class JourneyController extends BaseController{
     /**
      * Traite la soumission du formulaire de création d'un trajet.
      *
-     * Vérifie que l'utilisateur est connecté, valide les données du formulaire,
-     * récupère le tracé via les APIs externes (géocodage + routage), puis insère
-     * l'ensemble (track, locations, journey, stages) en base via une transaction.
+     * Valide les données du formulaire, récupère le tracé via les APIs externes
+     * (géocodage + routage), puis insère l'ensemble (track, locations, journey,
+     * stages) en base via une transaction.
      *
      * Les erreurs sont gérées selon trois familles :
      *  - validation du formulaire HTTP        → redirection avec erreurs de champs
@@ -159,7 +156,7 @@ class JourneyController extends BaseController{
         }
 
         // ====== Calcul de la date d'arrivée du trajet
-        $journey['end_datetime'] = $this->geoService->getArrivaleDateTime($journey['id'])
+        $journey['end_datetime'] = $this->journeyService->getArrivalDateTime($journey['id'])
             ->format('Y-m-d H:i:s');
 
         // ====== Récupération des étapes intermédiaires
@@ -178,10 +175,7 @@ class JourneyController extends BaseController{
         $pendingBookings = $this->bookingModel->countPendingBookings((int) $id);
 
         // ====== Réservation de l'utilisateur courant sur ce trajet (si elle existe)
-        $userBooking = $this->bookingModel
-            ->where('journey_id', (int) $id)
-            ->where('user_id', session('user_id'))
-            ->first();
+        $userBooking = $this->bookingModel->findUserBooking((int) $id, (int) session('user_id'));
         $isBooked = $userBooking !== null && $userBooking['status'] === 'accepted';
         $isPending = $userBooking !== null && $userBooking['status'] === 'pending';
 
@@ -222,65 +216,13 @@ public function showAll(): string|RedirectResponse
     // --- Récupération des filtres
     $filters = $this->getShowAllFilter();
 
-    // --- Construction de la requête (filtres NON géographiques uniquement)
-    $db = \Config\Database::connect();
-
-    $builder = $db->table('journey')
-        ->select("journey.*,
-            city_start.name as city_start_name,
-            city_end.name   as city_end_name,
-            city_start.name as city_boarding_name,
-            u.firstname     as driver_firstname,
-            u.lastname      as driver_lastname,
-            u.is_student    as driver_is_student,
-            (journey.seats - COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id AND b.status = 'accepted'), 0)) as remaining_seats")
-        ->join('location loc_start', 'loc_start.id = journey.location_start_id')
-        ->join('location loc_end',   'loc_end.id = journey.location_end_id')
-        ->join('city city_start',    'city_start.id = loc_start.city_id')
-        ->join('city city_end',      'city_end.id = loc_end.city_id')
-        ->join('user u',             'u.id = journey.user_id')
-        ->where('journey.canceled_at', null)
-        ->where('u.deleted_at', null)
-        ->orderBy('journey.start_datetime', 'ASC');
-
-    if ($filters['filterDate'] && $filters['filterTime']) {
-        $dateTimeCenter = strtotime($filters['filterDate'] . ' ' . $filters['filterTime'] . ':00');
-        $dateTimeFrom   = date('Y-m-d H:i:s', $dateTimeCenter - 1800);
-        $dateTimeTo     = date('Y-m-d H:i:s', $dateTimeCenter + 1800);
-        $builder->where('journey.start_datetime >=', $dateTimeFrom)
-                ->where('journey.start_datetime <=', $dateTimeTo);
-    } elseif ($filters['filterDate']) {
-        $builder->where('DATE(journey.start_datetime)', $filters['filterDate']);
-        if ($filters['filterDate'] === date('Y-m-d')) {
-            $builder->where('journey.start_datetime >=', date('Y-m-d H:i:s'));
-        }
-    } else {
-        $builder->where('journey.start_datetime >=', date('Y-m-d H:i:s'));
-    }
-
-    if ($filters['availableSeats']) {
-        $builder->having('remaining_seats >=', $filters['availableSeats']);
-    }
-
-    if ($filters['smoking'] !== null && $filters['smoking'] !== '') {
-        $builder->where('journey.smoking', $filters['smoking']);
-    }
-
     // --- Récupération de tous les candidats (sans filtre géographique)
-    $candidates = $builder->get()->getResultArray();
+    $candidates = $this->journeyModel->findAllWithFilters($filters);
 
     // --- Ajout du nombre de demandes en attente pour chaque trajet
     $journeyIds = array_column($candidates, 'id');
     if (!empty($journeyIds)) {
-        $pendingCounts = $db->table('booking')
-            ->select('journey_id, COUNT(*) as pending_bookings')
-            ->where('status', 'pending')
-            ->whereIn('journey_id', $journeyIds)
-            ->groupBy('journey_id')
-            ->get()
-            ->getResultArray();
-
-        $pendingByJourney = array_column($pendingCounts, 'pending_bookings', 'journey_id');
+        $pendingByJourney = $this->bookingModel->countPendingByJourneys($journeyIds);
 
         foreach ($candidates as &$candidate) {
             $candidate['pending_bookings'] = $pendingByJourney[$candidate['id']] ?? 0;
@@ -327,7 +269,7 @@ public function showAll(): string|RedirectResponse
      * @param  int $maxSeats Nombre maximum de places réservables (défaut : 9)
      * @return array<string, string> Règles de validation CodeIgniter indexées par champ
      */
-    public function getCreateValidationRules(int $maxSeats = 9): array {
+    private function getCreateValidationRules(int $maxSeats = 9): array {
 
         return [
             'startDate'     => 'required|valid_date',
@@ -348,8 +290,8 @@ public function showAll(): string|RedirectResponse
      * @param  int $maxSeats Nombre maximum de places réservables (défaut : 9),
      *                       injecté dans le message d'erreur du champ 'seats'
      * @return array<string, array<string, string>> Messages indexés par champ puis par règle
-     */   
-    public function getCreateValidationMessages(int $maxSeats = 9): array {
+     */
+    private function getCreateValidationMessages(int $maxSeats = 9): array {
 
         return [
             'startDate'    => [
@@ -400,7 +342,7 @@ public function showAll(): string|RedirectResponse
      */
     private function getMaxAvailableSeatsFromPostedCar(): int
     {
-        
+
         $absoluteMax = 9;
 
         $userId = session('user_id');
@@ -410,10 +352,7 @@ public function showAll(): string|RedirectResponse
             return $absoluteMax;
         }
 
-        $car = $this->carModel->where([
-            'id'      => (int) $carId,
-            'user_id' => $userId,
-        ])->first();
+        $car = $this->carModel->findOwnedByUser((int) $carId, (int) $userId);
 
         if (!$car) {
             return $absoluteMax;
@@ -429,8 +368,8 @@ public function showAll(): string|RedirectResponse
      * Les clés réservées sont 'start' et 'end'.
      *
      * @return array<string, string> Adresses nettoyées indexées par clé
-     */   
-    public function getLocationsCreateFormData(): array{
+     */
+    private function getLocationsCreateFormData(): array {
 
         $locations['start'] = $this->sanitizeAddress($this->request->getPost('startAddress'));
 
@@ -453,8 +392,8 @@ public function showAll(): string|RedirectResponse
      *
      * @return array{startDate:string, startTime:string, seats:mixed, note:mixed,
      *               smoking:mixed, car:mixed} Données brutes du POST
-     */   
-    public function getJourneyCreateFormData(){
+     */
+    private function getJourneyCreateFormData(): array {
 
         return [
             'startDate'     => $this->request->getPost('startDate'),
@@ -472,8 +411,8 @@ public function showAll(): string|RedirectResponse
      *
      * @return array{location: array<string,string>, journey: array} Données du formulaire
      *               structurées en deux sous-tableaux : 'location' et 'journey'
-     */    
-    public function getCreateFormData():array{
+     */
+    private function getCreateFormData(): array {
 
         return [
             "location"=>$this->getLocationsCreateFormData(),
@@ -532,20 +471,21 @@ public function showAll(): string|RedirectResponse
     }
 
     /**
-     * Récupère les données de localisation d'une adresse via l'API de la Géoplateforme (IGN/BAN).
+     * Nettoie une valeur d'adresse soumise dans le formulaire.
      *
-     * @param  string $adresse Adresse en texte libre (ex : "8 bd du Port 95000 Cergy")
-     * @param  int    $limit   Nombre max de résultats (défaut : 1)
-     * @return array|null      Propriétés de l'adresse (avec latitude/longitude),
-     *                         ou null si rien trouvé ou en cas d'erreur réseau
+     * Retire les balises HTML et les espaces en début/fin. Renvoie une chaîne
+     * vide si la valeur n'est pas une chaîne.
+     *
+     * @param  mixed $value Valeur brute issue du POST
+     * @return string       Adresse nettoyée (chaîne vide si entrée invalide)
      */
-    private function sanitizeAddress($value): string{
-        
+    private function sanitizeAddress($value): string {
+
         if (!is_string($value)) {
             return '';
         }
         return trim(strip_tags($value));
 
-    }  
+    }
 
 }
