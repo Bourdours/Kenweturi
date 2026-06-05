@@ -8,6 +8,7 @@ use App\Libraries\MailerExample;
 use \App\Models\UserModel;
 use \App\Models\CityModel;
 use DateTime;
+use App\Services\GeocodingService;
 
 /**
  * Contrôleur gérant l'authentification (Inscription, Connexion)
@@ -17,11 +18,13 @@ class AuthController extends BaseController
     private UserModel $userModel;
     private CityModel $cityModel;
 
+    protected GeocodingService $geocodingService;
+
     public function __construct()
     {
-
         $this->userModel = new UserModel();
         $this->cityModel = new CityModel();
+        $this->geocodingService = new GeocodingService();
     }
 
     /**
@@ -132,7 +135,7 @@ class AuthController extends BaseController
 
         // Gestion de la table 'cities' (Ville)
 
-        $cityNameChecked = $this->getCheckedCityName($cityName, $zipCode);
+        $cityNameChecked = $this->geocodingService->getCheckedCityName($cityName, $zipCode);
 
         if ($cityNameChecked === null) {
             return redirect()->back()->withInput()->with('errors', [

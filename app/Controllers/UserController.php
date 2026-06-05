@@ -8,17 +8,23 @@ use App\Libraries\MailerExample;
 use CodeIgniter\I18n\Time;
 use App\Models\CarModel;
 
+use CodeIgniter\HTTP\RedirectResponse;
+
+use App\Services\GeocodingService;
+
 class UserController extends BaseController
 {
     private UserModel $userModel;
     private CityModel $cityModel;
     private CarModel $carModel;
+    protected GeocodingService $geocodingService;
 
     public function __construct()
     {
         $this->userModel = new UserModel();
         $this->cityModel = new CityModel();
         $this->carModel  = new CarModel();
+        $this->geocodingService = new GeocodingService();
     }
 
     /**
@@ -222,7 +228,7 @@ class UserController extends BaseController
         $cityName = trim($this->request->getPost('cityProfile')    ?? '');
         $zipcode  = trim($this->request->getPost('zipcodeProfile') ?? '');
 
-        $cityNameChecked = $this->getCheckedCityName($cityName, $zipcode);
+        $cityNameChecked = $this->geocodingService->getCheckedCityName($cityName, $zipcode);
         $data['city_id'] = $this->cityModel->findOrCreateCity($cityNameChecked, $zipcode);
 
         // Hachage du nouveau mot de passe si renseigné
