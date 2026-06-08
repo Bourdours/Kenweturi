@@ -10,6 +10,8 @@ use App\Models\TrackModel;
 use App\Models\LocationModel;
 use App\Models\StageModel;
 use App\Models\CityModel;
+use App\Models\CarModel;
+use App\Models\BookingModel;
 
 use App\Exceptions\ExternalApiException;
 use App\Exceptions\ModelValidationException;
@@ -40,10 +42,14 @@ class JourneyService
     protected LocationModel $locationModel;
     protected StageModel $stageModel;
     protected CityModel $cityModel;
+    protected CarModel $carModel;
+    protected BookingModel $bookingModel;
     protected GeoService $geoService;
 
     protected RoutingService $routingService;
     protected GeocodingService $geocodingService;
+
+    private const ABSOLUTE_MAX_SEATS = 9;
 
     public function __construct()
     {
@@ -54,6 +60,8 @@ class JourneyService
         $this->locationModel        = new LocationModel();
         $this->stageModel           = new StageModel();
         $this->cityModel            = new CityModel();
+        $this->carModel             = new CarModel();
+        $this->bookingModel         = new BookingModel();
 
         $this->routingService       = new RoutingService();
         $this->geocodingService     = new GeocodingService();
@@ -163,6 +171,43 @@ class JourneyService
     }
 
     /**
+     * Assemble l'ensemble des données nécessaires à l'affichage du détail d'un trajet.
+     *
+     * Charge le trajet, calcule sa date d'arrivée, récupère ses étapes
+     * intermédiaires, ses passagers, le nombre de demandes en attente et la
+     * réservation éventuelle de l'utilisateur courant (avec les drapeaux
+     * isBooked / isPending dérivés du statut de cette réservation).
+     *
+     * @param  int $journeyId Identifiant du trajet
+     * @param  int $userId    Identifiant de l'utilisateur courant
+     * @return array|null     Données du trajet prêtes pour la vue, ou null si
+     *                        le trajet n'existe pas
+     */
+    public function getJourneyDetails(int $journeyId, int $userId): ?array
+    {
+        $journey = $this->journeyModel->findWithDetails($journeyId);
+        if (!$journey) {
+            return null;
+        }
+
+        $journey['end_datetime'] = $this->getArrivalDateTime($journey['id'])
+            ->format('Y-m-d H:i:s');
+
+        $userBooking = $this->bookingModel->findUserBooking($journeyId, $userId);
+
+        return [
+            'journey'         => $journey,
+            'stages'          => $this->stageModel->findByJourney($journeyId),
+            'remainingSeats'  => $this->bookingModel->countRemainingSeats($journeyId, (int) $journey['seats']),
+            'passengers'      => $this->bookingModel->findPassengersByJourney($journeyId),
+            'pendingBookings' => $this->bookingModel->countPendingBookings($journeyId),
+            'userBooking'     => $userBooking,
+            'isBooked'        => $userBooking !== null && $userBooking['status'] === 'accepted',
+            'isPending'       => $userBooking !== null && $userBooking['status'] === 'pending',
+        ];
+    }
+
+    /**
      * Construit les entités location prêtes à être insérées en base.
      *
      * Pour chaque location, la ville est résolue ou créée à la volée via
@@ -268,10 +313,18 @@ class JourneyService
      */
     public function persistJourney(int $userId, array $createFormData, array $locationsData, string $geoJsonTrack): int
     {
+        // ====== La voiture doit appartenir à l'utilisateur
+        $carId = (int) $createFormData['journey']['car'];
+        $car   = $this->carModel->findOwnedByUser($carId, $userId);
+        if ($car === null) {
+            throw new ModelValidationException(['car' => 'Véhicule invalide.']);
+        }
+
         // ====== Préparation des entités hors transaction
         $locationEntities         = $this->buildLocationEntities($locationsData);
         $journeyStartDateTime     = $this->buildJourneyStartDateTime($createFormData['journey']);
         $stagesDeparturesDateTime = $this->computeStageDepartures($createFormData['journey'], $geoJsonTrack);
+
 
         // ====== Insertion dans la base
         $db = \Config\Database::connect();
@@ -332,6 +385,59 @@ class JourneyService
         }
 
         return $journeyId;
+    }
+
+    /**
+     * Recherche les trajets correspondant aux filtres fournis.
+     *
+     * Charge tous les candidats (filtres non géographiques) via le model,
+     * enrichit chacun du nombre de demandes en attente, puis applique le
+     * filtrage géographique (proximité départ ET arrivée, dans le bon ordre).
+     *
+     * Le résultat n'est PAS paginé : la pagination reste une préoccupation
+     * de présentation gérée par le controller.
+     *
+     * @param  array $filters Filtres normalisés (voir JourneyController::getShowAllFilter)
+     * @return array[]        Trajets correspondants (non paginés)
+     */
+    public function searchJourneys(array $filters): array
+    {
+        $candidates = $this->journeyModel->findAllWithFilters($filters);
+        $this->attachPendingBookingsCount($candidates);
+
+        $start = ($filters['latStart'] !== null && $filters['lngStart'] !== null)
+            ? ['lat' => $filters['latStart'], 'lon' => $filters['lngStart']]
+            : null;
+
+        $end = ($filters['latEnd'] !== null && $filters['lngEnd'] !== null)
+            ? ['lat' => $filters['latEnd'], 'lon' => $filters['lngEnd']]
+            : null;
+
+        return $this->findMatchingJourneys($candidates, $start, $end);
+    }
+
+    /**
+     * Ajoute à chaque candidat le nombre de demandes de réservation en attente.
+     *
+     * Une seule requête est effectuée pour l'ensemble des trajets
+     * (countPendingByJourneys), puis le résultat est réparti par trajet.
+     *
+     * @param  array[] $candidates Trajets candidats (modifiés par référence)
+     * @return void
+     */
+    private function attachPendingBookingsCount(array &$candidates): void
+    {
+        $journeyIds = array_column($candidates, 'id');
+        if (empty($journeyIds)) {
+            return;
+        }
+
+        $pendingByJourney = $this->bookingModel->countPendingByJourneys($journeyIds);
+
+        foreach ($candidates as &$candidate) {
+            $candidate['pending_bookings'] = $pendingByJourney[$candidate['id']] ?? 0;
+        }
+        unset($candidate);
     }
 
     /**
@@ -459,6 +565,13 @@ class JourneyService
                 ])
             );
         }
+    }
+
+    public function getMaxSeatsForCar(int $carId, int $userId): int
+    {
+        if ($carId <= 0) return self::ABSOLUTE_MAX_SEATS;
+        $car = $this->carModel->findOwnedByUser($carId, $userId);
+        return $car ? (int) $car['seats'] - 1 : self::ABSOLUTE_MAX_SEATS;
     }
 
     /**
