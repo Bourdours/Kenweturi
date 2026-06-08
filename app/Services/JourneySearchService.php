@@ -3,6 +3,9 @@
 namespace App\Services;
 
 use App\Models\TrackModel;
+use App\Models\JourneyModel;
+use App\Models\BookingModel;
+
 use App\Services\GeoService;
 
 /**
@@ -20,12 +23,58 @@ use App\Services\GeoService;
 class JourneySearchService
 {
     protected TrackModel $trackModel;
+    protected JourneyModel $journeyModel;
+    protected BookingModel $bookingModel;
+
     protected GeoService $geoService;
 
     public function __construct()
     {
-        $this->geoService           = new GeoService();
         $this->trackModel           = new TrackModel();
+        $this->journeyModel         = new JourneyModel();
+        $this->bookingModel         = new BookingModel();
+
+        $this->geoService           = new GeoService();
+    }
+
+        public function searchJourneys(array $filters): array
+    {
+        $candidates = $this->journeyModel->findAllWithFilters($filters);
+        $this->attachPendingBookingsCount($candidates);
+
+        $start = ($filters['latStart'] !== null && $filters['lngStart'] !== null)
+            ? ['lat' => $filters['latStart'], 'lon' => $filters['lngStart']]
+            : null;
+
+        $end = ($filters['latEnd'] !== null && $filters['lngEnd'] !== null)
+            ? ['lat' => $filters['latEnd'], 'lon' => $filters['lngEnd']]
+            : null;
+
+        return $this->findMatchingJourneys($candidates, $start, $end);
+    }
+
+    /**
+     * Ajoute à chaque candidat le nombre de demandes de réservation en attente.
+     *
+     * Une seule requête est effectuée pour l'ensemble des trajets
+     * (countPendingByJourneys), puis le résultat est réparti par trajet.
+     *
+     * @param  array[] $candidates Trajets candidats (modifiés par référence)
+     * @return void
+     */
+    private function attachPendingBookingsCount(array &$candidates): void
+    {
+        $journeyIds = array_column($candidates, 'id');
+        if (empty($journeyIds)) {
+            return;
+        }
+
+        $pendingByJourney = $this->bookingModel->countPendingByJourneys($journeyIds);
+
+        foreach ($candidates as &$candidate) {
+            $candidate['pending_bookings'] = $pendingByJourney[$candidate['id']] ?? 0;
+        }
+        unset($candidate);
     }
 
     /**
