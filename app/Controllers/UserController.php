@@ -24,6 +24,7 @@ class UserController extends BaseController
         $this->userModel = new UserModel();
         $this->cityModel = new CityModel();
         $this->carModel  = new CarModel();
+        helper('cookie');
         $this->geocodingService = new GeocodingService();
     }
 
@@ -42,7 +43,7 @@ class UserController extends BaseController
 
 
         if (!$user) {
-            if($isOwnProfile) {
+            if ($isOwnProfile) {
                 session()->destroy();
                 return redirect()->to(site_url('login'))
                     ->with('error', 'Ce compte n\'existe plus.');
@@ -235,6 +236,10 @@ class UserController extends BaseController
         if (!empty($newPassword)) {
             $data['password_hash'] = password_hash($newPassword, PASSWORD_DEFAULT);
 
+            $data['remember_token'] = null;
+            delete_cookie('remember_token');
+            session()->regenerate(true);
+
             // Envoi de la notification par email
             $mailer = new MailerExample();
             $mailer->sendHtml(
@@ -269,7 +274,7 @@ class UserController extends BaseController
             'lastname'  => $data['lastname'],
             'email'     => $data['email'],
         ]);
-        
+
         if (isset($data['avatar'])) {
             session()->set('avatar', $data['avatar']);
         }
