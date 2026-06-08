@@ -7,6 +7,7 @@ use \CodeIgniter\HTTP\RedirectResponse;
 use App\Libraries\MailerExample;
 use \App\Models\UserModel;
 use \App\Models\CityModel;
+use App\Models\RememberTokenModel;
 use DateTime;
 use App\Services\GeocodingService;
 
@@ -235,6 +236,7 @@ class AuthController extends BaseController
                     'isAdmin'  => (bool) $user['is_admin'],
                     'avatar'     => $user['avatar'] ?? null,
                     'isLoggedIn' => true,
+                    'userPassword' => $user['password_hash'],
                 ];
 
                 $session->regenerate();
@@ -248,7 +250,12 @@ class AuthController extends BaseController
                     $expiry = 30 * 24 * 60 * 60;
 
                     // Sauvegarde du token hashé en base (le token brut sert au cookie)
-                    $this->userModel->setRememberToken($user['id'], $token);
+                    $tokenModel = new RememberTokenModel();
+                    $tokenModel->insert([
+                        'user_id'    => $user['id'],
+                        'token'      => hash('sha256', $token),
+                        'expires_at' => date('Y-m-d H:i:s', strtotime('+30 days')),
+                    ]);
 
                     // Redirection avec le cookie sécurisé
                     $redirectUrl = session()->get('redirect_url') ?? '/';
@@ -286,12 +293,11 @@ class AuthController extends BaseController
     public function logout()
     {
         // Suppression du token en base
-        $userId = session()->get('user_id');
-        if ($userId) {
-            $user = $this->userModel->find($userId);
-            if ($user && $user['remember_token'] !== null) {
-                $this->userModel->clearRememberToken($userId);
-            }
+        $tokenModel = new RememberTokenModel();
+        $token = $this->request->getCookie('remember_token');
+
+        if ($token) {
+            $tokenModel->deleteOne($token);
         }
 
         session()->destroy();
@@ -432,6 +438,13 @@ class AuthController extends BaseController
 
         // Réinitialise le mot de passe et invalide tous les tokens associés
         $this->userModel->resetPassword($user['id'], $password);
+
+        if (session()->has('isLoggedIn') && session()->get('user_id') == $user['id']) {
+            session()->set('userPassword', password_hash($password, PASSWORD_DEFAULT));
+        }
+        
+        $tokenModel = new RememberTokenModel();
+        $tokenModel->deleteAll($user['id']);
 
         $mailer = new MailerExample();
         $mailer->sendHtml(
