@@ -172,7 +172,7 @@ class JourneyController extends BaseController{
         $filters = $this->getShowAllFilter();
 
         // --- Recherche métier (candidats + matching géographique)
-        $matchingJourneys = $this->journeyService->searchJourneys($filters);
+        $matchingJourneys = $this->journeySearchService->searchJourneys($filters);
 
         // --- Pagination en PHP
         $perPage  = 5;
