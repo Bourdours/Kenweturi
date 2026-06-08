@@ -7,6 +7,8 @@ use CodeIgniter\HTTP\RedirectResponse;
 use App\Models\CarModel;
 
 use App\Services\JourneyService;
+use App\Services\CreateJourneyService;
+use App\Services\JourneySearchService;
 
 use App\Exceptions\ExternalApiException;
 use App\Exceptions\ModelValidationException;
@@ -17,12 +19,16 @@ class JourneyController extends BaseController{
     protected CarModel $carModel;
 
     protected JourneyService $journeyService;
+    protected CreateJourneyService $createJourneyService;
+    protected JourneySearchService $journeySearchService;
 
     public function __construct(){
 
         $this->carModel = new CarModel();
 
         $this->journeyService = new JourneyService();
+        $this->createJourneyService = new CreateJourneyService();
+        $this->journeySearchService = new JourneySearchService();
     }
 
     /**
@@ -82,11 +88,11 @@ class JourneyController extends BaseController{
         // ====== Traitement métier
         try {
 
-            $locationsData = $this->journeyService->fetchAllLocationsData($createFormData['location']);
-            $geoJsonTrack  = $this->journeyService->fetchTrackOrFail($locationsData);
-            $journeyId     = $this->journeyService->persistJourney($userId, $createFormData, $locationsData, $geoJsonTrack);
+            $locationsData = $this->createJourneyService->fetchAllLocationsData($createFormData['location']);
+            $geoJsonTrack  = $this->createJourneyService->fetchTrackOrFail($locationsData);
+            $journeyId     = $this->createJourneyService->persistJourney($userId, $createFormData, $locationsData, $geoJsonTrack);
 
-            } catch (ExternalApiException $e) {
+        } catch (ExternalApiException $e) {
 
             return redirect()->back()->withInput()
                 ->with('errors', ['api' => 'Service de cartographie indisponible, réessayez plus tard.']);
