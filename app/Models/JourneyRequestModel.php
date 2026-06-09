@@ -23,7 +23,7 @@ class JourneyRequestModel extends BaseModel
     ];
 
     protected $validationRules = [
-        'start_datetime'    => 'required|valid_date',
+        'start_datetime'    => 'required|valid_date[Y-m-d H:i:s]|after_now',
         'seats'             => 'permit_empty|integer|greater_than_equal_to[1]|less_than_equal_to[8]',
         'message'           => 'permit_empty|max_length[2000]',
         'user_id'           => 'required|integer|is_not_unique[user.id]',
