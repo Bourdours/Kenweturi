@@ -10,7 +10,7 @@
 ?>
 <?= view('partials/head') ?>
 <?= view('partials/header') ?>
-<div class="max-w-5xl mx-auto py-10 px-6 md:px-8 flex flex-col gap-6">
+<div class="max-w-5xl mx-auto py-10 px-4 flex flex-col gap-6">
   <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
     <div class="w-10 h-10 rounded-xl bg-action/10 flex items-center justify-center shrink-0">
       <i class="fa-solid fa-shield-halved text-action text-base"></i>

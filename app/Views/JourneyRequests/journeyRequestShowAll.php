@@ -21,7 +21,7 @@
 
 <?= view('partials/header') ?>
 
-<div class="max-w-4xl mx-auto py-10 px-6 md:px-8 space-y-6">
+<div class="max-w-4xl mx-auto py-10 px-4 space-y-6">
 
     <div class="flex items-center justify-between">
         <h1 class="text-ink text-2xl font-bold font-display">Demander un trajet</h1>
