@@ -11,7 +11,7 @@
 <?= view('partials/head', ['extraJs' => [base_url('js/journeyShow.js'), base_url('js/modal.js')]]) ?>
 <?= view('partials/header') ?>
 
-<div class="max-w-4xl mx-auto py-10 px-6 md:px-8 space-y-4">
+<div class="max-w-4xl mx-auto py-10 px-4 space-y-4">
 
     <!-- En-tête -->
     <div class="flex items-center justify-between mb-6">

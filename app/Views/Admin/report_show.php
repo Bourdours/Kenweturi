@@ -6,7 +6,7 @@ $date->setTimezone(new DateTimeZone('Europe/Paris'));
 <?= view('partials/head') ?>
 <?= view('partials/header') ?>
 
-<div class="max-w-3xl mx-auto py-10 px-6 md:px-8 flex flex-col gap-6">
+<div class="max-w-3xl mx-auto py-10 px-4 flex flex-col gap-6">
 
   <div>
     <a href="<?= site_url('admin?tab=reports') ?>"

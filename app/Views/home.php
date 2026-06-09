@@ -27,7 +27,7 @@
 
   <!-- Hero -->
   <section class="bg-gradient-to-b from-paper via-surface to-paper">
-    <div class="max-w-4xl mx-auto px-6 md:px-8 py-16 md:py-24 flex flex-col items-center gap-8 text-center">
+    <div class="max-w-4xl mx-auto px-4 py-16 md:py-24 flex flex-col items-center gap-8 text-center">
       <?php if (session()->getFlashdata('success')): ?>
         <div class="bg-success/10 border-b border-r- border-success/20 px-6 py-3 text-success max-w-sm text-sm text-center mx-auto rounded-xl">
 
@@ -115,7 +115,7 @@
   </section>
 
   <?php if (!empty($nextDriverJourney) || !empty($nextPassengerJourney)): ?>
-    <div class="max-w-4xl mx-auto px-6 md:px-8 pt-8 relative z-10">
+    <div class="max-w-4xl mx-auto px-4 pt-8 relative z-10">
       <div class="grid grid-cols-1 <?= (!empty($nextDriverJourney) && !empty($nextPassengerJourney)) ? 'sm:grid-cols-2' : '' ?> gap-3">
 
         <?php if (!empty($nextDriverJourney)): ?>
@@ -165,7 +165,7 @@
   <?php endif; ?>
 
   <!-- Corps -->
-  <div class="max-w-4xl mx-auto px-6 md:px-8 py-12 md:py-16 flex flex-col gap-10 relative z-10">
+  <div class="max-w-4xl mx-auto px-4 py-12 md:py-16 flex flex-col gap-10 relative z-10">
 
     <!-- Comment ça marche -->
     <div class="flex flex-col gap-6">
