@@ -25,7 +25,6 @@ class UserController extends BaseController
         $this->userModel = new UserModel();
         $this->cityModel = new CityModel();
         $this->carModel  = new CarModel();
-        helper('cookie');
         $this->geocodingService = new GeocodingService();
         helper('cookie');
     }
