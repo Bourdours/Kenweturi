@@ -89,4 +89,36 @@ class JourneyRequestModel extends BaseModel
             ->where('journey_request.start_datetime >=', date('Y-m-d H:i:s'))
             ->findAll();
     }
+
+    /**
+     * Récupère une demande de trajet avec toutes ses informations liées :
+     * adresses et villes de départ/arrivée.
+     *
+     * @param int $id     Identifiant de la demande
+     * @param int $userId Identifiant du user (vérification ownership)
+     * @return array|null Demande enrichie, ou null si introuvable
+     */
+    public function findWithDetails(int $id, int $userId): ?array
+    {
+        return $this->db->table($this->table)
+            ->select('journey_request.*,
+                loc_start.address  as address_start,
+                loc_start.latitude as latitude_start,
+                loc_start.longitude as longitude_start,
+                loc_end.address    as address_end,
+                loc_end.latitude   as latitude_end,
+                loc_end.longitude  as longitude_end,
+                city_start.name    as city_start_name,
+                city_start.zipcode as city_start_zipcode,
+                city_end.name      as city_end_name,
+                city_end.zipcode   as city_end_zipcode')
+            ->join('location loc_start', 'loc_start.id = journey_request.location_start_id')
+            ->join('location loc_end',   'loc_end.id = journey_request.location_end_id')
+            ->join('city city_start',    'city_start.id = loc_start.city_id')
+            ->join('city city_end',      'city_end.id = loc_end.city_id')
+            ->where('journey_request.id', $id)
+            ->where('journey_request.user_id', $userId)
+            ->get()
+            ->getRowArray();
+    }
 }
