@@ -3,7 +3,7 @@
 namespace App\Models;
 
 /**
- * Modèle gérant la table 'users'
+ * Modèle gérant la table 'user'
  * S'occupe de la validation, du hachage des mots de passe et de la gestion des données.
  */
 class UserModel extends BaseModel
@@ -21,6 +21,9 @@ class UserModel extends BaseModel
     protected $dateFormat     = 'datetime';
     protected $deletedField   = 'deleted_at';
 
+    protected $beforeInsert   = ['hashPassword', 'setRegistrationDate'];
+    protected $beforeUpdate   = ['hashPassword'];
+
     // Liste des colonnes que l'on autorise à modifier ou insérer (sécurité)
     protected $allowedFields = [
         'firstname',
@@ -33,8 +36,6 @@ class UserModel extends BaseModel
         'is_student',
         'registered_at',
         'password_hash',
-        'remember_token',
-        'remember_token_expiry',
         'is_admin',
         'is_banned',
         'status',
@@ -74,9 +75,6 @@ class UserModel extends BaseModel
             'in_list'  => 'Le genre sélectionné n\'est pas valide.'
         ],
     ];
-
-    // Fonctions à exécuter automatiquement juste avant l'insertion en base de données
-    protected $beforeInsert = ['hashPassword', 'setRegistrationDate'];
 
     // Hash le mot de passe
     protected function hashPassword(array $data)
@@ -139,45 +137,8 @@ class UserModel extends BaseModel
     public function getActiveAdmins(): array
     {
         return $this->where('is_admin', 1)
-                    ->where('status', 'active')
-                    ->findAll();
-    }
-
-    /**
-     * Enregistre le token « Se souvenir de moi » pour un utilisateur.
-     *
-     * Le token est stocké haché (SHA-256) en base, accompagné de sa date
-     * d'expiration. Le token brut n'est jamais persisté : il reste géré
-     * par le contrôleur pour être déposé dans le cookie.
-     *
-     * @param  int    $userId   Identifiant de l'utilisateur
-     * @param  string $rawToken Token brut (non haché) à enregistrer
-     * @param  int    $days     Durée de validité en jours (30 par défaut)
-     * @return bool             true si la mise à jour a réussi, false sinon
-     */
-    public function setRememberToken(int $userId, string $rawToken, int $days = 30): bool
-    {
-        return $this->update($userId, [
-            'remember_token'        => hash('sha256', $rawToken),
-            'remember_token_expiry' => date('Y-m-d H:i:s', strtotime("+{$days} days")),
-        ]);
-    }
-
-    /**
-     * Supprime le token « Se souvenir de moi » d'un utilisateur.
-     *
-     * Appelé lors de la déconnexion pour invalider la session persistante.
-     * Remet à null le token et sa date d'expiration.
-     *
-     * @param  int  $userId Identifiant de l'utilisateur
-     * @return bool         true si la mise à jour a réussi, false sinon
-     */
-    public function clearRememberToken(int $userId): bool
-    {
-        return $this->update($userId, [
-            'remember_token'        => null,
-            'remember_token_expiry' => null,
-        ]);
+            ->where('status', 'active')
+            ->findAll();
     }
 
     /**
@@ -213,8 +174,8 @@ class UserModel extends BaseModel
     public function findByValidResetToken(string $rawToken)
     {
         return $this->where('reset_token', hash('sha256', $rawToken))
-                    ->where('reset_token_expiry >', date('Y-m-d H:i:s'))
-                    ->first();
+            ->where('reset_token_expiry >', date('Y-m-d H:i:s'))
+            ->first();
     }
 
     /**
@@ -231,11 +192,9 @@ class UserModel extends BaseModel
     public function resetPassword(int $userId, string $rawPassword): bool
     {
         return $this->update($userId, [
-            'password_hash'         => password_hash($rawPassword, PASSWORD_DEFAULT),
+            'password_hash'         => $rawPassword,
             'reset_token'           => null,
             'reset_token_expiry'    => null,
-            'remember_token'        => null,
-            'remember_token_expiry' => null,
         ]);
     }
 }
