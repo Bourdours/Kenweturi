@@ -90,15 +90,22 @@
             <?php foreach ($journeyRequests as $request): ?>
                 <div class="bg-surface rounded-2xl p-5 border border-action/10">
 
-                    <div class="flex items-center gap-4">
-                        <div class="flex flex-col items-center shrink-0">
-                            <div class="w-2.5 h-2.5 rounded-full bg-brand"></div>
-                            <div class="w-px h-2.5 bg-ink/10 my-0.5"></div>
-                            <div class="w-2.5 h-2.5 rounded-full bg-action"></div>
-                        </div>
-                        <div class="flex-1 min-w-0">
+                    <div class="flex items-start gap-4">
+                        <div class="grid grid-cols-[10px_1fr] gap-x-4 flex-1 min-w-0 items-center">
+                            <div class="w-2.5 h-2.5 rounded-full bg-brand justify-self-center"></div>
                             <p class="text-ink font-semibold truncate"><?= esc($request['city_start_name'] ?? '—') ?></p>
+                            <div class="w-px self-stretch bg-ink/10 justify-self-center"></div>
+                            <?php if (!empty($request['address_start']) && strcasecmp($request['address_start'], $request['city_start_name'] ?? '') !== 0): ?>
+                                <p class="text-ink/40 text-xs truncate py-0.5"><?= esc($request['address_start']) ?></p>
+                            <?php else: ?>
+                                <div class="h-2.5"></div>
+                            <?php endif ?>
+                            <div class="w-2.5 h-2.5 rounded-full bg-action justify-self-center"></div>
                             <p class="text-ink font-semibold truncate"><?= esc($request['city_end_name'] ?? '—') ?></p>
+                            <?php if (!empty($request['address_end']) && strcasecmp($request['address_end'], $request['city_end_name'] ?? '') !== 0): ?>
+                                <div></div>
+                                <p class="text-ink/40 text-xs truncate pt-0.5"><?= esc($request['address_end']) ?></p>
+                            <?php endif ?>
                         </div>
                         <div class="text-right shrink-0 space-y-1">
                             <?php if (!empty($request['start_datetime'])): ?>

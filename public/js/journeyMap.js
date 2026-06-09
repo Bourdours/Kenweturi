@@ -1,0 +1,53 @@
+(function () {
+    const el = document.getElementById('journeyMap');
+    if (!el) return;
+
+    const waypoints = JSON.parse(el.dataset.waypoints);
+    if (!waypoints.length) return;
+
+    const style       = getComputedStyle(document.documentElement);
+    const toRgb       = (v) => `rgb(${style.getPropertyValue(v).trim().replace(/\s+/g, ',')})`;
+    const brandColor  = toRgb('--color-brand');
+    const actionColor = toRgb('--color-action');
+
+    const map = L.map(el);
+
+    const isDark  = document.documentElement.classList.contains('dark');
+    const tileUrl = isDark
+        ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+        : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+
+    L.tileLayer(tileUrl, {
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>',
+    }).addTo(map);
+
+    const latlngs = waypoints.map((wp) => [wp.lat, wp.lng]);
+
+    map.fitBounds(L.latLngBounds(latlngs), { padding: [24, 24] });
+
+    if (el.dataset.geojson) {
+        L.geoJSON(JSON.parse(el.dataset.geojson), {
+            style: { color: brandColor, weight: 4, opacity: 0.8 },
+        }).addTo(map);
+    } else {
+        L.polyline(latlngs, { color: brandColor, weight: 4, opacity: 0.8 }).addTo(map);
+    }
+
+    waypoints.forEach((wp, i) => {
+        const isFirst = i === 0;
+        const isLast  = i === waypoints.length - 1;
+        const color   = isFirst ? brandColor : isLast ? actionColor : '#6b7280';
+
+        const icon = L.divIcon({
+            className: '',
+            html: `<div style="width:12px;height:12px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,.35)"></div>`,
+            iconSize:   [12, 12],
+            iconAnchor: [6, 6],
+        });
+
+        L.marker([wp.lat, wp.lng], { icon })
+            .bindPopup(`<strong>${wp.label}</strong>`)
+            .addTo(map);
+    });
+
+})();
