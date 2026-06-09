@@ -238,7 +238,7 @@ class UserController extends BaseController
             $data['password_hash'] = $newPassword;
 
             $tokenModel = new RememberTokenModel();
-            $tokenModel->revokeAll($userId);
+            $tokenModel->deleteAll($userId);
             delete_cookie('remember_token');
             session()->regenerate(true);
 
