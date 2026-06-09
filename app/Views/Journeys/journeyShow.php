@@ -8,7 +8,15 @@
 /** @var bool        $isBooked */
 /** @var array|null  $userBooking */
 ?>
-<?= view('partials/head', ['extraJs' => [base_url('js/journeyShow.js'), base_url('js/modal.js')]]) ?>
+<?= view('partials/head', [
+    'extraCss' => ['https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'],
+    'extraJs'  => [
+        'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+        base_url('js/journeyMap.js'),
+        base_url('js/journeyShow.js'),
+        base_url('js/modal.js'),
+    ],
+]) ?>
 <?= view('partials/header') ?>
 
 <div class="max-w-4xl mx-auto py-10 px-4 space-y-4">
@@ -84,6 +92,16 @@
             Les horaires affichés sont des estimations calculées dans des conditions de trafic normales.
         </p>
     </article>
+
+    <!-- Map du trajet -->
+    <?php
+        $mapWaypoints = array_merge(
+            [['lat' => $journey['lat_start'], 'lng' => $journey['lng_start'], 'label' => $journey['city_start_name']]],
+            array_map(fn($s) => ['lat' => $s['latitude'], 'lng' => $s['longitude'], 'label' => $s['city_name']], $stages),
+            [['lat' => $journey['lat_end'],   'lng' => $journey['lng_end'],   'label' => $journey['city_end_name']]]
+        );
+    ?>
+    <?= view('partials/journeyMap', ['waypoints' => $mapWaypoints, 'geojson' => $journey['track_geojson'] ?? null]) ?>
 
     <!-- Conducteur -->
     <article class="bg-surface-card rounded-2xl p-6 border border-action/10">
