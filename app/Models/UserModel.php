@@ -3,7 +3,7 @@
 namespace App\Models;
 
 /**
- * Modèle gérant la table 'users'
+ * Modèle gérant la table 'user'
  * S'occupe de la validation, du hachage des mots de passe et de la gestion des données.
  */
 class UserModel extends BaseModel
@@ -21,6 +21,9 @@ class UserModel extends BaseModel
     protected $dateFormat     = 'datetime';
     protected $deletedField   = 'deleted_at';
 
+    protected $beforeInsert   = ['hashPassword', 'setRegistrationDate'];
+    protected $beforeUpdate   = ['hashPassword'];
+
     // Liste des colonnes que l'on autorise à modifier ou insérer (sécurité)
     protected $allowedFields = [
         'firstname',
@@ -33,8 +36,6 @@ class UserModel extends BaseModel
         'is_student',
         'registered_at',
         'password_hash',
-        'remember_token',
-        'remember_token_expiry',
         'is_admin',
         'is_banned',
         'status',
@@ -75,9 +76,6 @@ class UserModel extends BaseModel
         ],
     ];
 
-    // Fonctions à exécuter automatiquement juste avant l'insertion en base de données
-    protected $beforeInsert = ['hashPassword', 'setRegistrationDate'];
-
     // Hash le mot de passe
     protected function hashPassword(array $data)
     {
@@ -112,5 +110,91 @@ class UserModel extends BaseModel
             ->where('user.status', 'pending')
             ->get()
             ->getResultArray();
+    }
+
+    /**
+     * Récupère un utilisateur à partir de son adresse email.
+     *
+     * Renvoie le premier enregistrement correspondant. Si le soft delete
+     * est activé sur le Model, les comptes supprimés sont automatiquement exclus.
+     *
+     * @param  string                   $email Adresse email recherchée
+     * @return array|object|null                Utilisateur trouvé, ou null si aucun
+     */
+    public function findByEmail(string $email)
+    {
+        return $this->where('email', $email)->first();
+    }
+
+    /**
+     * Récupère tous les administrateurs actifs.
+     *
+     * Sert notamment à notifier l'équipe lors d'une nouvelle demande
+     * d'inscription. Ne retourne que les comptes dont le statut est « active ».
+     *
+     * @return array Liste des administrateurs actifs (tableau vide si aucun)
+     */
+    public function getActiveAdmins(): array
+    {
+        return $this->where('is_admin', 1)
+            ->where('status', 'active')
+            ->findAll();
+    }
+
+    /**
+     * Enregistre le token de réinitialisation de mot de passe.
+     *
+     * Le token est stocké haché (SHA-256) en base avec sa date d'expiration.
+     * Le token brut n'est jamais persisté : il part uniquement dans l'email
+     * envoyé à l'utilisateur.
+     *
+     * @param  int    $userId   Identifiant de l'utilisateur
+     * @param  string $rawToken Token brut (non haché) à enregistrer
+     * @param  int    $hours    Durée de validité en heures (1 par défaut)
+     * @return bool             true si la mise à jour a réussi, false sinon
+     */
+    public function setResetToken(int $userId, string $rawToken, int $hours = 1): bool
+    {
+        return $this->update($userId, [
+            'reset_token'        => hash('sha256', $rawToken),
+            'reset_token_expiry' => date('Y-m-d H:i:s', strtotime("+{$hours} hour")),
+        ]);
+    }
+
+    /**
+     * Récupère un utilisateur via un token de réinitialisation valide.
+     *
+     * Le token reçu est haché puis comparé à celui stocké en base. Seuls les
+     * tokens non expirés (date d'expiration strictement postérieure à maintenant)
+     * sont acceptés.
+     *
+     * @param  string                   $rawToken Token brut issu du lien email
+     * @return array|object|null                   Utilisateur correspondant, ou null si le token est invalide/expiré
+     */
+    public function findByValidResetToken(string $rawToken)
+    {
+        return $this->where('reset_token', hash('sha256', $rawToken))
+            ->where('reset_token_expiry >', date('Y-m-d H:i:s'))
+            ->first();
+    }
+
+    /**
+     * Réinitialise le mot de passe d'un utilisateur et invalide ses tokens.
+     *
+     * Le nouveau mot de passe est haché via password_hash(). Tous les tokens
+     * (réinitialisation et « Se souvenir de moi ») sont remis à null pour des
+     * raisons de sécurité, forçant une reconnexion sur les autres appareils.
+     *
+     * @param  int    $userId      Identifiant de l'utilisateur
+     * @param  string $rawPassword Nouveau mot de passe en clair (sera haché)
+     * @return bool                true si la mise à jour a réussi, false sinon
+     */
+    public function resetPassword(int $userId, string $rawPassword): bool
+    {
+        return $this->update($userId, [
+            'password_hash'         => $rawPassword,
+            'reset_token'           => null,
+            'reset_token_expiry'    => null,
+        ]);
     }
 }

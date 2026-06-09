@@ -2,88 +2,22 @@
 
 namespace App\Services;
 
-use App\Models\TrackModel;
-
 /**
- * Service de géolocalisation.
+ * Service de calcul géographique.
  *
- * Fournit les outils de calcul géographique utilisés pour le matching
+ * Fournit les outils purement mathématiques utilisés pour le matching
  * des trajets : distance Haversine, point le plus proche sur un tracé,
- * et filtrage d'une liste de trajets par proximité géographique.
+ * parsing d'un tracé GeoJSON et calcul de sa durée totale.
+ *
+ * Ce service ne fait aucun accès base de données : il opère uniquement
+ * sur des structures déjà chargées par le service appelant. Pour les
+ * opérations qui nécessitent de charger un Track ou un Journey,
+ * passer par JourneyService.
  */
 class GeoService
 {
-    protected TrackModel $trackModel;
-
-    public function __construct()
-    {
-        $this->trackModel = new TrackModel();
-    }
-
     /**
-     * Filtre une liste de trajets candidats en ne gardant que ceux dont le tracé
-     * passe à proximité du départ ET de l'arrivée recherchés.
-     *
-     * Pour chaque trajet : on récupère les points du tracé GeoJSON, on cherche le
-     * point le plus proche du départ ; s'il est dans le rayon, on cherche le point
-     * le plus proche de l'arrivée PARMI LES POINTS SUIVANTS (pour garantir que le
-     * trajet va bien dans le sens départ → arrivée).
-     *
-     * Filtres partiels gérés : seul le départ, seule l'arrivée, ou aucun des deux
-     * (auquel cas tous les trajets sont retournés).
-     *
-     * @param  array[]    $journeys      Trajets candidats (doivent contenir 'track_id')
-     * @param  array|null $start         Point de départ ['lat' => float, 'lon' => float] ou null
-     * @param  array|null $end           Point d'arrivée ['lat' => float, 'lon' => float] ou null
-     * @param  float      $maxDistanceKm Rayon de tolérance en km (défaut : 10)
-     * @return array[]   Sous-ensemble des trajets correspondants
-     */
-    public function findMatchingJourneys(array $journeys, ?array $start, ?array $end, float $maxDistanceKm = 10): array
-    {
-        if ($start === null && $end === null) {
-            return $journeys;
-        }
-
-        $matchingJourneys = [];
-
-        foreach ($journeys as $journey) {
-
-            $points = $this->getTrackPoints((int) $journey['track_id']);
-
-            if (empty($points)) {
-                continue;
-            }
-
-            $startIndex = 0;
-
-            // --- Contrainte sur le départ
-            if ($start !== null) {
-                $startIndex      = $this->findClosestPointIndex($points, $start);
-                $distanceToStart = $this->calculateDistance($start, $points[$startIndex]);
-
-                if ($distanceToStart > $maxDistanceKm) {
-                    continue;
-                }
-            }
-
-            // --- Contrainte sur l'arrivée (après le départ)
-            if ($end !== null) {
-                $endIndex      = $this->findClosestPointIndex($points, $end, $startIndex);
-                $distanceToEnd = $this->calculateDistance($end, $points[$endIndex]);
-
-                if ($distanceToEnd > $maxDistanceKm) {
-                    continue;
-                }
-            }
-
-            $matchingJourneys[] = $journey;
-        }
-
-        return $matchingJourneys;
-    }
-
-    /**
-     * Vérifie si un tracé GeoJSON (déjà parsé en points) passe à proximité
+     * Vérifie si un tracé (déjà parsé en points) passe à proximité
      * d'un départ ET d'une arrivée donnés, dans le bon ordre.
      *
      * @param  array[] $points        Points du tracé ['lat' => float, 'lon' => float]
@@ -108,20 +42,18 @@ class GeoService
     }
 
     /**
-     * Récupère et normalise les points du tracé d'un trajet.
+     * Parse un tracé GeoJSON et retourne la liste de ses points normalisés.
      *
-     * @param  int $trackId Identifiant du tracé
+     * Point d'entrée unique pour transformer un GeoJSON brut en tableau
+     * de points exploitables par les autres méthodes du service.
+     *
+     * @param  string $geoJson Tracé au format GeoJSON
      * @return array<int, array{lat:float, lon:float}> Points du tracé ;
-     *               tableau vide si le tracé est absent ou invalide
+     *               tableau vide si le GeoJSON est invalide ou sans coordonnées
      */
-    public function getTrackPoints(int $trackId): array
+    public function parseTrackPointsFromGeoJson(string $geoJson): array
     {
-        $track = $this->trackModel->find($trackId);
-        if (empty($track['geojson'])) {
-            return [];
-        }
-
-        $data        = json_decode($track['geojson'], true);
+        $data        = json_decode($geoJson, true);
         $coordinates = $data['features'][0]['geometry']['coordinates'] ?? [];
 
         $points = [];
@@ -182,5 +114,25 @@ class GeoService
         $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
 
         return $earthRadiusKm * $c;
+    }
+
+    /**
+     * Calcule la durée totale d'un trajet à partir de son GeoJSON,
+     * en sommant la durée de chacun de ses segments.
+     *
+     * @param  string $geoJson Tracé au format GeoJSON
+     * @return int Durée totale du trajet, en secondes (0 si GeoJSON invalide)
+     */
+    public function calculateTrackDuration(string $geoJson): int
+    {
+        $data     = json_decode($geoJson, true);
+        $segments = $data['features'][0]['properties']['segments'] ?? [];
+
+        $duration = 0;
+        foreach ($segments as $segment) {
+            $duration += $segment['duration'] ?? 0;
+        }
+
+        return (int) $duration;
     }
 }

@@ -3,22 +3,31 @@
 namespace App\Controllers;
 
 use App\Models\UserModel;
+use App\Models\RememberTokenModel;
 use App\Models\CityModel;
 use App\Libraries\MailerExample;
 use CodeIgniter\I18n\Time;
 use App\Models\CarModel;
+
+use CodeIgniter\HTTP\RedirectResponse;
+
+use App\Services\GeocodingService;
 
 class UserController extends BaseController
 {
     private UserModel $userModel;
     private CityModel $cityModel;
     private CarModel $carModel;
+    protected GeocodingService $geocodingService;
 
     public function __construct()
     {
         $this->userModel = new UserModel();
         $this->cityModel = new CityModel();
         $this->carModel  = new CarModel();
+        helper('cookie');
+        $this->geocodingService = new GeocodingService();
+        helper('cookie');
     }
 
     /**
@@ -36,7 +45,7 @@ class UserController extends BaseController
 
 
         if (!$user) {
-            if($isOwnProfile) {
+            if ($isOwnProfile) {
                 session()->destroy();
                 return redirect()->to(site_url('login'))
                     ->with('error', 'Ce compte n\'existe plus.');
@@ -222,12 +231,21 @@ class UserController extends BaseController
         $cityName = trim($this->request->getPost('cityProfile')    ?? '');
         $zipcode  = trim($this->request->getPost('zipcodeProfile') ?? '');
 
-        $cityNameChecked = $this->getCheckedCityName($cityName, $zipcode);
+        $cityNameChecked = $this->geocodingService->getCheckedCityName($cityName, $zipcode);
         $data['city_id'] = $this->cityModel->findOrCreateCity($cityNameChecked, $zipcode);
 
         // Hachage du nouveau mot de passe si renseigné
         if (!empty($newPassword)) {
-            $data['password_hash'] = password_hash($newPassword, PASSWORD_DEFAULT);
+            $data['password_hash'] = $newPassword;
+
+            $tokenModel = new RememberTokenModel();
+            $tokenModel->where('user_id', $userId)->delete();
+            delete_cookie('remember_token');
+            session()->regenerate(true);
+
+            $data['remember_token'] = null;
+            delete_cookie('remember_token');
+            session()->regenerate(true);
 
             // Envoi de la notification par email
             $mailer = new MailerExample();
@@ -256,14 +274,16 @@ class UserController extends BaseController
 
         // Mise à jour en base de données
         $this->userModel->skipValidation(true)->update($userId, $data);
+        $updatedUser = $this->userModel->find($userId);
 
         // Synchronisation des données de session avec les nouvelles valeurs
         session()->set([
             'firstname' => $data['firstname'],
             'lastname'  => $data['lastname'],
             'email'     => $data['email'],
+            'userPassword' => $updatedUser['password_hash'],
         ]);
-        
+
         if (isset($data['avatar'])) {
             session()->set('avatar', $data['avatar']);
         }
