@@ -98,7 +98,7 @@ class JourneyModel extends BaseModel
         ]
     ];
 
-/**
+    /**
      * Récupère un trajet avec toutes ses informations liées :
      * adresses et villes de départ/arrivée, conducteur, véhicule.
      *
@@ -135,81 +135,5 @@ class JourneyModel extends BaseModel
             ->where('u.deleted_at', null)
             ->get()
             ->getRowArray();
-    }
-    /**
-     * Récupère tous les trajets correspondant aux filtres non géographiques fournis.
-     *
-     * Filtres pris en compte :
-     *  - filterDate + filterTime : créneau ±30 min autour du datetime
-     *  - filterDate seul         : trajets de la journée (≥ maintenant si c'est aujourd'hui)
-     *  - aucun filtre date       : trajets à partir de maintenant
-     *  - availableSeats          : places restantes minimum
-     *  - smoking                 : '0' ou '1'
-     *
-     * Les trajets annulés et ceux dont le conducteur est supprimé (soft delete)
-     * sont automatiquement exclus.
-     *
-     * @param  array $filters Filtres : filterDate, filterTime, availableSeats, smoking
-     * @return array          Trajets enrichis (villes, conducteur, places restantes)
-     */
-    public function findAllWithFilters(array $filters): array
-    {
-        $builder = $this->db->table($this->table)
-            ->select("journey.*,
-                city_start.name as city_start_name,
-                city_end.name   as city_end_name,
-                city_start.name as city_boarding_name,
-                u.firstname     as driver_firstname,
-                u.lastname      as driver_lastname,
-                u.is_student    as driver_is_student,
-                (journey.seats - COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id AND b.status = 'accepted'), 0)) as remaining_seats")
-            ->join('location loc_start', 'loc_start.id = journey.location_start_id')
-            ->join('location loc_end',   'loc_end.id = journey.location_end_id')
-            ->join('city city_start',    'city_start.id = loc_start.city_id')
-            ->join('city city_end',      'city_end.id = loc_end.city_id')
-            ->join('user u',             'u.id = journey.user_id')
-            ->where('journey.canceled_at', null)
-            ->where('u.deleted_at', null)
-            ->orderBy('journey.start_datetime', 'ASC');
-
-        if (!empty($filters['filterDate']) && !empty($filters['filterTime'])) {
-            $center = strtotime($filters['filterDate'] . ' ' . $filters['filterTime'] . ':00');
-            $builder->where('journey.start_datetime >=', date('Y-m-d H:i:s', $center - 1800))
-                    ->where('journey.start_datetime <=', date('Y-m-d H:i:s', $center + 1800));
-        } elseif (!empty($filters['filterDate'])) {
-            $builder->where('DATE(journey.start_datetime)', $filters['filterDate']);
-            if ($filters['filterDate'] === date('Y-m-d')) {
-                $builder->where('journey.start_datetime >=', date('Y-m-d H:i:s'));
-            }
-        } else {
-            $builder->where('journey.start_datetime >=', date('Y-m-d H:i:s'));
-        }
-
-        if (!empty($filters['availableSeats'])) {
-            $builder->having('remaining_seats >=', $filters['availableSeats']);
-        }
-
-        if (isset($filters['smoking']) && $filters['smoking'] !== null && $filters['smoking'] !== '') {
-            $builder->where('journey.smoking', $filters['smoking']);
-        }
-
-        return $builder->get()->getResultArray();
-    }
-
-    /**
-     * Récupère le premier trajet d'un utilisateur dont le départ tombe dans
-     * un intervalle de temps donné (bornes : `>=` début, `<` fin).
-     *
-     * @param  int    $userId   Identifiant du conducteur
-     * @param  string $fromDateTime Borne basse incluse, format 'Y-m-d H:i:s'
-     * @param  string $toDateTime   Borne haute exclue,   format 'Y-m-d H:i:s'
-     * @return array|null       Trajet trouvé, ou null si aucun
-     */
-    public function findByUserInTimeRange(int $userId, string $fromDateTime, string $toDateTime): ?array
-    {
-        return $this->where('user_id', $userId)
-                    ->where('start_datetime >=', $fromDateTime)
-                    ->where('start_datetime <',  $toDateTime)
-                    ->first();
     }
 }

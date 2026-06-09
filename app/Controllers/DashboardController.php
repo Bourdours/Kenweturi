@@ -5,6 +5,7 @@ use App\Controllers\BaseController;
 use App\Models\JourneyModel;
 use App\Models\BookingModel;
 use App\Models\ReportModel;
+use App\Models\JourneyRequestModel;
 use CodeIgniter\HTTP\RedirectResponse;
 
 class DashboardController extends BaseController
@@ -12,16 +13,18 @@ class DashboardController extends BaseController
     protected JourneyModel $journeyModel;
     protected BookingModel $bookingModel;
     protected ReportModel  $reportModel;
+    protected JourneyRequestModel $journeyRequestModel;
     protected \CodeIgniter\Pager\Pager $pager;
     protected \CodeIgniter\Database\ConnectionInterface $db;
 
     public function __construct()
     {
-        $this->journeyModel = new JourneyModel();
-        $this->bookingModel = new BookingModel();
-        $this->reportModel  = new ReportModel();
-        $this->pager        = \Config\Services::pager();
-        $this->db           = \Config\Database::connect();
+        $this->journeyModel         = new JourneyModel();
+        $this->bookingModel         = new BookingModel();
+        $this->reportModel          = new ReportModel();
+        $this->journeyRequestModel  = new JourneyRequestModel();
+        $this->pager                = \Config\Services::pager();
+        $this->db                   = \Config\Database::connect();
     }
 
     /**
@@ -409,6 +412,60 @@ class DashboardController extends BaseController
             'title'  => 'Détail du signalement',
             'back'   => $this->request->getGet('back'),
             'report' => $report,
+        ]);
+    }
+
+    /**
+     * Liste paginée des demandes de trajet du user.
+     * GET /dashboard/journey-requests
+     */
+    public function showJourneyRequests(): string
+    {
+        $userId  = (int) session('user_id');
+        $page    = (int) ($this->request->getGet('page') ?? 1);
+        $perPage = 10;
+
+        $builder = $this->db->table('journey_request')
+            ->select('journey_request.*,
+                city_start.name as city_start_name,
+                city_end.name   as city_end_name')
+            ->join('location loc_start', 'loc_start.id = journey_request.location_start_id')
+            ->join('location loc_end',   'loc_end.id = journey_request.location_end_id')
+            ->join('city city_start',    'city_start.id = loc_start.city_id')
+            ->join('city city_end',      'city_end.id = loc_end.city_id')
+            ->where('journey_request.user_id', $userId)
+            ->orderBy('journey_request.start_datetime', 'DESC');
+
+        $total           = $builder->countAllResults(false);
+        $journeyRequests = $builder->limit($perPage, ($page - 1) * $perPage)->get()->getResultArray();
+
+        return view('Dashboard/dashboardJourneysRequests', [
+            'title'           => 'Mes demandes de trajet',
+            'journeyRequests' => $journeyRequests,
+            'pager'           => $this->pager,
+            'total'           => $total,
+            'page'            => $page,
+            'perPage'         => $perPage,
+        ]);
+    }
+
+    /**
+     * Détail d'une demande de trajet.
+     * GET /dashboard/journey-requests/:id
+     */
+    public function showJourneyRequest(int $id): string|RedirectResponse
+    {
+        $userId = (int) session('user_id');
+
+        $journeyRequest = $this->journeyRequestModel->findWithDetails($id, $userId);
+
+        if (!$journeyRequest)
+            return redirect()->to('/dashboard')->with('error', 'Demande introuvable.');
+
+        return view('JourneyRequests/journeyRequestShow', [
+            'title'          => 'Détail de la demande',
+            'back'           => $this->request->getGet('back'),
+            'journeyRequest' => $journeyRequest,
         ]);
     }
 }
