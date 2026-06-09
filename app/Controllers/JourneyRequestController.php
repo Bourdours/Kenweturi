@@ -172,10 +172,10 @@ class JourneyRequestController extends BaseController
             return redirect()->to('/journey-requests')->with('error', self::NOT_FOUND);
         }
 
-        return view('JourneyRequests/newJourneyRequest', [
+        return view('JourneyRequests/journeyRequestEdit', [
             'title'          => 'Modifier la demande',
             'journeyRequest' => $journeyRequest,
-            'back'           => $this->request->getGet('back'),
+            'back'           => $this->validateBackUrl($this->request->getGet('back')),
         ]);
     }
 
@@ -292,40 +292,40 @@ class JourneyRequestController extends BaseController
                 'max_length' => 'Le message doit contenir au maximum 2000 caractères.',
             ],
             'startAddress' => [
-                'required'   => 'L\'adresse de départ est obligatoire.',
+                'required'   => 'Veuillez sélectionner une adresse de départ valide.',
                 'max_length' => 'L\'adresse de départ est trop longue.',
             ],
             'endAddress' => [
-                'required'   => 'L\'adresse d\'arrivée est obligatoire.',
+                'required'   => 'Veuillez sélectionner une adresse d\'arrivée valide.',
                 'max_length' => 'L\'adresse d\'arrivée est trop longue.',
             ],
             'startLat' => [
-                'required' => 'Les coordonnées de départ sont manquantes.',
+                'required' => 'Veuillez sélectionner une adresse de départ valide.',
                 'decimal'  => 'Latitude de départ invalide.',
             ],
             'startLng' => [
-                'required' => 'Les coordonnées de départ sont manquantes.',
+                'required' => 'Veuillez sélectionner une adresse de départ valide.',
                 'decimal'  => 'Longitude de départ invalide.',
             ],
             'endLat' => [
-                'required' => 'Les coordonnées d\'arrivée sont manquantes.',
+                'required' => 'Veuillez sélectionner une adresse d\'arrivée valide.',
                 'decimal'  => 'Latitude d\'arrivée invalide.',
             ],
             'endLng' => [
-                'required' => 'Les coordonnées d\'arrivée sont manquantes.',
+                'required' => 'Veuillez sélectionner une adresse d\'arrivée valide.',
                 'decimal'  => 'Longitude d\'arrivée invalide.',
             ],
             'startCity' => [
-                'required' => 'La ville de départ est obligatoire.',
+                'required' => 'Veuillez sélectionner une adresse de départ valide.',
             ],
             'startZipcode' => [
-                'required' => 'Le code postal de départ est obligatoire.',
+                'required' => 'Veuillez sélectionner une adresse de départ valide.',
             ],
             'endCity' => [
-                'required' => 'La ville d\'arrivée est obligatoire.',
+                'required' => 'Veuillez sélectionner une adresse d\'arrivée valide.',
             ],
             'endZipcode' => [
-                'required' => 'Le code postal d\'arrivée est obligatoire.',
+                'required' => 'Veuillez sélectionner une adresse d\'arrivée valide.',
             ],
         ];
     }

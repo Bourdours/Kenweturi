@@ -440,9 +440,10 @@ class AuthController extends BaseController
         $this->userModel->resetPassword($user['id'], $password);
 
         if (session()->has('isLoggedIn') && session()->get('user_id') == $user['id']) {
-            session()->set('userPassword', password_hash($password, PASSWORD_DEFAULT));
+            $updatedUser = $this->userModel->find($user['id']);
+            session()->set('userPassword', $updatedUser['password_hash']);
         }
-        
+
         $tokenModel = new RememberTokenModel();
         $tokenModel->deleteAll($user['id']);
 
