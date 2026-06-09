@@ -1,5 +1,5 @@
 <svg id="home-svg" class="hidden md:block absolute inset-x-0 bottom-0 w-full pointer-events-none"
-  style="top: -70px; mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 75%, transparent 97%); -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 75%, transparent 97%)"
+  style="top: -70px;"
   viewBox="0 0 100 106"
   preserveAspectRatio="none"
   xmlns="http://www.w3.org/2000/svg">
@@ -24,6 +24,25 @@
     vector-effect="non-scaling-stroke"
     style="animation: snake 2s linear infinite" />
   <style>
+    /* md (768px+) : valeurs originales */
+    #home-svg {
+      mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 70%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 70%, transparent 100%);
+    }
+    /* lg (1024px+) : fondu bas plus large */
+    @media (min-width: 1024px) {
+      #home-svg {
+        mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 55%, transparent 100%);
+        -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 55%, transparent 100%);
+      }
+    }
+    /* xl (1280px+) : fondu bas très étalé */
+    @media (min-width: 1280px) {
+      #home-svg {
+        mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 40%, transparent 100%);
+        -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 40%, transparent 100%);
+      }
+    }
     @keyframes snake {
       to { stroke-dashoffset: -56; }
     }
