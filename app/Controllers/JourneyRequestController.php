@@ -61,12 +61,18 @@ class JourneyRequestController extends BaseController
 
         $journeyRequests = $builder->findAll();
 
+        $userId            = (int) session()->get('user_id');
+        $userRequestsCount = $userId
+            ? $this->journeyRequestModel->where('user_id', $userId)->countAllResults()
+            : 0;
+
         return view('JourneyRequests/journeyRequestShowAll', [
-            'title'           => 'Demandes de trajet',
-            'journeyRequests' => $journeyRequests,
-            'filterCityStart' => $filterCityStart,
-            'filterCityEnd'   => $filterCityEnd,
-            'filterDate'      => $filterDate,
+            'title'             => 'Demandes de trajet',
+            'journeyRequests'   => $journeyRequests,
+            'filterCityStart'   => $filterCityStart,
+            'filterCityEnd'     => $filterCityEnd,
+            'filterDate'        => $filterDate,
+            'userRequestsCount' => $userRequestsCount,
         ]);
     }
 
@@ -215,18 +221,26 @@ class JourneyRequestController extends BaseController
             'city_id'   => $endCityId,
         ]);
 
+        $startDate = $this->request->getPost('startDate');
+        $startTime = $this->request->getPost('startTime');
+        [$h, $m]   = explode(':', $startTime);
+        $startDatetime = (new \DateTimeImmutable($startDate))->setTime((int)$h, (int)$m, 0);
+
         $data = [
             'location_start_id' => $startLocationId,
-            'location_end_id' => $endLocationId,
-            'start_datetime' => $this->request->getPost('start_datetime'),
-            'message'        => $this->request->getPost('message'),
+            'location_end_id'   => $endLocationId,
+            'start_datetime'    => $startDatetime->format('Y-m-d H:i:s'),
+            'seats'             => $this->request->getPost('seats') ?: null,
+            'message'           => $this->request->getPost('message'),
         ];
 
         if (!$this->journeyRequestModel->update($id, $data)) {
             return redirect()->back()->withInput()->with('errors', $this->journeyRequestModel->errors());
         }
 
-        return redirect()->to('/journey-requests/' . $id)->with('success', 'Demande modifiée avec succès.');
+        $back = $this->validateBackUrl($this->request->getPost('back'));
+
+        return redirect()->to($back ?: site_url('journey-requests/' . $id))->with('success', 'Demande modifiée avec succès.');
     }
 
     /**
