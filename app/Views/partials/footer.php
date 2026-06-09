@@ -62,7 +62,7 @@
         <span id="car-model-label"></span>
       </button>
       <?php if ($showRainbowBtn ?? false): ?>
-      <button id="rainbow-road-toggle" class="flex items-center gap-1.5 text-ink/40 hover:text-action transition-colors text-xs" aria-label="Activer/désactiver Rainbow Road">
+      <button id="rainbow-road-toggle" class="hidden md:flex items-center gap-1.5 text-ink/40 hover:text-action transition-colors text-xs" aria-label="Activer/désactiver Rainbow Road">
         <i class="fa-solid fa-rainbow"></i>
         <span id="rainbow-road-label"></span>
       </button>
