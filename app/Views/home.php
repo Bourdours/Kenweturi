@@ -27,7 +27,7 @@
 
   <!-- Hero -->
   <section class="bg-gradient-to-b from-paper via-surface to-paper">
-    <div class="max-w-4xl mx-auto px-6 md:px-8 py-16 md:py-24 flex flex-col items-center gap-8 text-center">
+    <div class="max-w-4xl mx-auto px-4 py-16 md:py-24 flex flex-col items-center gap-8 text-center">
       <?php if (session()->getFlashdata('success')): ?>
         <div class="bg-success/10 border-b border-r- border-success/20 px-6 py-3 text-success max-w-sm text-sm text-center mx-auto rounded-xl">
 
@@ -37,10 +37,10 @@
 
       <div class="flex flex-col gap-3">
         <p class="text-action text-xs font-semibold uppercase tracking-widest">Covoiturage régional</p>
-        <h1 class="text-ink text-4xl md:text-5xl font-bold font-display leading-tight">
+        <h1 class="relative z-10 text-ink text-4xl md:text-5xl font-bold font-display leading-tight">
           Partagez la route,<br>simplifiez vos trajets
         </h1>
-        <p class="text-ink/50 text-base md:text-lg max-w-xl mx-auto">
+        <p class="relative z-10 text-ink/50 text-base md:text-lg max-w-xl mx-auto">
           Trouvez ou proposez un covoiturage domicile-travail près de chez vous. Gratuit, simple, local.
         </p>
       </div>
@@ -106,7 +106,7 @@
         </div>
       </form>
 
-      <p class="text-ink/40 text-sm">
+      <p class="relative z-10 text-ink/40 text-sm">
         Vous êtes conducteur ?
         <a href="<?= site_url('journeys/new') ?>" class="text-action hover:underline font-medium">Publiez votre trajet</a>
       </p>
@@ -115,7 +115,7 @@
   </section>
 
   <?php if (!empty($nextDriverJourney) || !empty($nextPassengerJourney)): ?>
-    <div class="max-w-4xl mx-auto px-6 md:px-8 pt-8 relative z-10">
+    <div class="max-w-4xl mx-auto px-4 pt-8 relative z-10">
       <div class="grid grid-cols-1 <?= (!empty($nextDriverJourney) && !empty($nextPassengerJourney)) ? 'sm:grid-cols-2' : '' ?> gap-3">
 
         <?php if (!empty($nextDriverJourney)): ?>
@@ -165,7 +165,7 @@
   <?php endif; ?>
 
   <!-- Corps -->
-  <div class="max-w-4xl mx-auto px-6 md:px-8 py-12 md:py-16 flex flex-col gap-10 relative z-10">
+  <div class="max-w-4xl mx-auto px-4 py-12 md:py-16 flex flex-col gap-10 relative z-10">
 
     <!-- Comment ça marche -->
     <div class="flex flex-col gap-6">

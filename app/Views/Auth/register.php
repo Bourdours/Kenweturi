@@ -1,7 +1,7 @@
 <?= view('partials/head', ['extraJs' => [base_url('js/auth.js')]]) ?>
 <?= view('partials/header') ?>
 
-<div class="max-w-4xl mx-auto py-10 px-6 md:px-8">
+<div class="max-w-4xl mx-auto py-10 px-4">
 
   <p class="text-ink/40 text-base mb-1">
     <i class="fa-solid fa-user-plus mr-2"></i>Créer un compte
