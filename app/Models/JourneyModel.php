@@ -59,15 +59,15 @@ class JourneyModel extends BaseModel
         'start_datetime' => [
             'required'   => 'Veuillez renseigner une date de départ.',
             'valid_date' => 'Veuillez renseigner une date valide.',
-            'after'      => 'La date de départ doit être dans le futur.',
+            'after_now'      => 'La date de départ doit être dans le futur.',
         ],
         'seats' => [
             'required'              => 'Veuillez renseigner le nombre de places.',
-            'greater_than_equal_to' => 'Le trajet doit avoir au moins 2 places.',
+            'greater_than_equal_to[1]' => 'Le trajet doit avoir au moins 1 places.',
             'less_than_equal_to'    => 'Le trajet ne peut pas dépasser 8 places.',
         ],
         'note' => [
-           'less_than_equal_to' => 'Le message doit contenir au maximum 1000 caractères.',
+           'max_length' => 'Le message doit contenir au maximum 1000 caractères.',
         ],
         'smoking' => [
             'required' => 'Veuillez indiquer si le covoiturage est fumeur ou non.',
