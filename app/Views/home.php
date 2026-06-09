@@ -37,10 +37,10 @@
 
       <div class="flex flex-col gap-3">
         <p class="text-action text-xs font-semibold uppercase tracking-widest">Covoiturage régional</p>
-        <h1 class="text-ink text-4xl md:text-5xl font-bold font-display leading-tight">
+        <h1 class="relative z-10 text-ink text-4xl md:text-5xl font-bold font-display leading-tight">
           Partagez la route,<br>simplifiez vos trajets
         </h1>
-        <p class="text-ink/50 text-base md:text-lg max-w-xl mx-auto">
+        <p class="relative z-10 text-ink/50 text-base md:text-lg max-w-xl mx-auto">
           Trouvez ou proposez un covoiturage domicile-travail près de chez vous. Gratuit, simple, local.
         </p>
       </div>
@@ -106,7 +106,7 @@
         </div>
       </form>
 
-      <p class="text-ink/40 text-sm">
+      <p class="relative z-10 text-ink/40 text-sm">
         Vous êtes conducteur ?
         <a href="<?= site_url('journeys/new') ?>" class="text-action hover:underline font-medium">Publiez votre trajet</a>
       </p>
