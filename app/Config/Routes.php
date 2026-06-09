@@ -69,8 +69,10 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('dashboard/journeys',        'DashboardController::showJourneys');
     $routes->get('dashboard/bookings',        'DashboardController::showBookings');
     $routes->get('dashboard/bookings/(:num)', 'DashboardController::showBooking/$1');
-    $routes->get('dashboard/reports',         'DashboardController::showReports');
-    $routes->get('dashboard/reports/(:num)',  'DashboardController::showReport/$1');
+    $routes->get('dashboard/reports',                    'DashboardController::showReports');
+    $routes->get('dashboard/reports/(:num)',             'DashboardController::showReport/$1');
+    $routes->get('dashboard/journey-requests',           'DashboardController::showJourneyRequests');
+    $routes->get('dashboard/journey-requests/(:num)',    'DashboardController::showJourneyRequest/$1');
 
     // Bookings
     $routes->post('dashboard/bookings/(:num)/delete', 'BookingController::delete/$1');

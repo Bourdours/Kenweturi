@@ -25,10 +25,18 @@
 
     <div class="flex items-center justify-between">
         <h1 class="text-ink text-2xl font-bold font-display">Demander un trajet</h1>
-        <a href="<?= site_url('journey-requests/new') ?>"
-           class="flex items-center gap-2 bg-action hover:bg-action-dark text-ink font-semibold font-display rounded-lg px-4 py-1.5 text-sm transition-colors">
-            <i class="fa-solid fa-plus text-xs"></i>Publier une demande
-        </a>
+        <div class="flex items-center gap-2">
+            <?php if (!empty($userRequestsCount)): ?>
+            <a href="<?= site_url('dashboard/journey-requests') ?>"
+               class="flex items-center gap-2 border border-action/20 hover:border-action/50 text-ink/60 hover:text-ink font-medium font-display rounded-lg px-4 py-1.5 text-sm transition-colors">
+                <i class="fa-solid fa-list text-xs"></i>Mes demandes
+            </a>
+            <?php endif ?>
+            <a href="<?= site_url('journey-requests/new') ?>"
+               class="flex items-center gap-2 bg-action hover:bg-action-dark text-ink font-semibold font-display rounded-lg px-4 py-1.5 text-sm transition-colors">
+                <i class="fa-solid fa-plus text-xs"></i>Publier une demande
+            </a>
+        </div>
     </div>
 
     <!-- Formulaire de recherche -->
