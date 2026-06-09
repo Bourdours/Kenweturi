@@ -59,7 +59,7 @@ class JourneyModel extends BaseModel
         'start_datetime' => [
             'required'   => 'Veuillez renseigner une date de départ.',
             'valid_date' => 'Veuillez renseigner une date valide.',
-            'after_now'      => 'La date de départ doit être dans le futur.',
+            'after_now'  => 'La date de départ doit être dans le futur.',
         ],
         'seats' => [
             'required'              => 'Veuillez renseigner le nombre de places.',
