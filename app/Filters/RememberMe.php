@@ -49,6 +49,7 @@ class RememberMe implements FilterInterface
                 'isAdmin'    => (bool) $user['is_admin'],
                 'avatar'     => $user['avatar'] ?? null,
                 'isLoggedIn' => true,
+                'userPassword' => $user['password_hash'],
             ]);
 
             service('response')->setCookie([
