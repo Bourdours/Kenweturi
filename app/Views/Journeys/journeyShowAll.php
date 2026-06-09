@@ -1,5 +1,5 @@
 <?php
-/** @var array       $journeys */
+/** @var array<int,array{id:int,city_boarding_name:string,city_end_name:string,address_start:string,address_end:string,start_datetime:string,remaining_seats:int,pending_bookings:int,driver_firstname:string,driver_lastname:string,driver_avatar:string,driver_is_student:bool,track_geojson:string}> $journeys */
 /** @var string|null $startAddress */
 /** @var string|null $endAddress */
 /** @var string|null $filterDate */
@@ -20,6 +20,7 @@
     'extraCss' => [
         'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css',
         base_url('css/flatpickr-theme.css'),
+        'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
     ],
     'extraJs'  => [
         'https://cdn.jsdelivr.net/npm/flatpickr',
@@ -29,6 +30,8 @@
         base_url('js/datepicker.js'),
         base_url('js/timepicker.js'),
         base_url('js/swapAddresses.js'),
+        'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+        base_url('js/journeyList.js'),
     ],
 ]) ?>
 <?= view('partials/header') ?>
@@ -122,16 +125,32 @@
     <?php else: ?>
         <div class="space-y-3">
             <?php foreach ($journeys as $journey) : ?>
-                <a href="<?= site_url('/journeys/') ?><?= esc($journey['id']) ?>?seats=<?= esc($availableSeats) ?>&boardingCity=<?= urlencode($journey['city_boarding_name']) ?>&startAddress=<?= urlencode($startAddress ?? '') ?>&startLat=<?= esc($latStart ?? '') ?>&startLng=<?= esc($lngStart ?? '') ?>&endAddress=<?= urlencode($endAddress ?? '') ?>&endLat=<?= esc($latEnd ?? '') ?>&endLng=<?= esc($lngEnd ?? '') ?>&back=<?= urlencode(current_url(true)) ?>" class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors">
-                    <div class="flex items-center gap-4">
-                        <div class="flex flex-col items-center shrink-0">
-                            <div class="w-2.5 h-2.5 rounded-full bg-brand"></div>
-                            <div class="w-px h-2.5 bg-ink/10 my-0.5"></div>
-                            <div class="w-2.5 h-2.5 rounded-full bg-action"></div>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-ink font-semibold truncate"><?= esc($journey['city_boarding_name']) ?></p>
+                <a href="<?= site_url('/journeys/') ?><?= esc($journey['id']) ?>?seats=<?= esc($availableSeats) ?>&boardingCity=<?= urlencode($journey['city_boarding_name']) ?>&startAddress=<?= urlencode($startAddress ?? '') ?>&startLat=<?= esc($latStart ?? '') ?>&startLng=<?= esc($lngStart ?? '') ?>&endAddress=<?= urlencode($endAddress ?? '') ?>&endLat=<?= esc($latEnd ?? '') ?>&endLng=<?= esc($lngEnd ?? '') ?>&back=<?= urlencode(current_url(true)) ?>"
+                   class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors"
+                   <?php if (!empty($journey['track_geojson'])): ?>data-geojson="<?= esc($journey['track_geojson'], 'attr') ?>"<?php endif ?>>
+                    <div class="flex items-start gap-4">
+                        <div class="grid grid-cols-[10px_1fr] gap-x-4 flex-1 min-w-0 items-center">
+                            <div class="w-2.5 h-2.5 rounded-full bg-brand justify-self-center"></div>
+                            <div class="flex items-center gap-1.5 min-w-0">
+                                <p class="text-ink font-semibold truncate"><?= esc($journey['city_boarding_name']) ?></p>
+                                <?php if (!empty($journey['track_geojson'])): ?>
+                                <button type="button" class="jsMapToggle shrink-0 text-action/50 hover:text-action transition-colors" aria-label="Aperçu du trajet">
+                                    <i class="fa-solid fa-map text-xs"></i>
+                                </button>
+                                <?php endif ?>
+                            </div>
+                            <div class="w-px self-stretch bg-ink/10 justify-self-center"></div>
+                            <?php if (!empty($journey['address_start'])): ?>
+                                <p class="text-ink/40 text-xs truncate py-0.5"><?= esc($journey['address_start']) ?></p>
+                            <?php else: ?>
+                                <div class="h-2.5"></div>
+                            <?php endif ?>
+                            <div class="w-2.5 h-2.5 rounded-full bg-action justify-self-center"></div>
                             <p class="text-ink font-semibold truncate"><?= esc($journey['city_end_name']) ?></p>
+                            <?php if (!empty($journey['address_end'])): ?>
+                                <div></div>
+                                <p class="text-ink/40 text-xs truncate pt-0.5"><?= esc($journey['address_end']) ?></p>
+                            <?php endif ?>
                         </div>
                         <div class="text-right shrink-0 space-y-1">
                             <p class="text-ink font-bold font-display"><?= esc(date('H:i', strtotime($journey['start_datetime']))) ?></p>
@@ -179,5 +198,8 @@
     <?php endif ?>
 
 </div>
+
+<!-- Conteneur Leaflet partagé pour le hover -->
+<div id="mapTooltip" class="fixed z-[9999] w-[280px] h-[180px] rounded-xl overflow-hidden shadow-lg opacity-0 pointer-events-none transition-opacity duration-150 border border-action/15"></div>
 
 <?= view('partials/footer') ?>
