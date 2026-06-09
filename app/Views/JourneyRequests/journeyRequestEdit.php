@@ -32,8 +32,9 @@
     </div>
   <?php endif; ?>
 
-  <form id="addJourneyRequestForm" action="<?= base_url('/journey-requests/edit') ?>" method="post" class="flex flex-col gap-6">
+  <form id="addJourneyRequestForm" action="<?= site_url('journey-requests/' . $journeyRequest['id'] . '/edit') ?>" method="post" class="flex flex-col gap-6">
     <?= csrf_field() ?>
+    <input type="hidden" name="back" value="<?= esc($back ?? '') ?>">
 
     <!-- Itinéraire -->
     <div class="bg-surface rounded-2xl p-6 border border-action/10">
@@ -53,10 +54,10 @@
             <label for="startAddress" class="text-ink/50 text-xs font-medium mb-1.5 block">Départ</label>
             <input id="startAddress" class="address w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors"
               name="startAddress" type="text" placeholder="Adresse de départ..." value="<?= esc(old('startAddress')) ?? esc($journeyRequest['address_start']) ?>">
-            <input type="hidden" name="startLat" id="startLat" value="<?= esc(old('startLat')) ?>">
-            <input type="hidden" name="startLng" id="startLng" value="<?= esc(old('startLng')) ?>">
-            <input type="hidden" name="startCity" id="startCity" value="<?= esc(old('startCity')) ?>">
-            <input type="hidden" name="startZipcode" id="startZipcode" value="<?= esc(old('startZipcode')) ?>">
+            <input type="hidden" name="startLat" id="startLat" value="<?= esc(old('startLat', $journeyRequest['latitude_start'] ?? '')) ?>">
+            <input type="hidden" name="startLng" id="startLng" value="<?= esc(old('startLng', $journeyRequest['longitude_start'] ?? '')) ?>">
+            <input type="hidden" name="startCity" id="startCity" value="<?= esc(old('startCity', $journeyRequest['city_start_name'] ?? '')) ?>">
+            <input type="hidden" name="startZipcode" id="startZipcode" value="<?= esc(old('startZipcode', $journeyRequest['city_start_zipcode'] ?? '')) ?>">
           </div>
         </div>
 
@@ -69,10 +70,10 @@
             <label for="endAddress" class="text-ink/50 text-xs font-medium mb-1.5 block">Arrivée</label>
             <input id="endAddress" class="address w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors"
               name="endAddress" type="text" placeholder="Adresse d'arrivée..." value="<?= esc(old('endAddress')) ?? esc($journeyRequest['address_end']) ?>">
-            <input type="hidden" name="endLat" id="endLat" value="<?= esc(old('endLat')) ?>">
-            <input type="hidden" name="endLng" id="endLng" value="<?= esc(old('endLng')) ?>">
-            <input type="hidden" name="endCity" id="endCity" value="<?= esc(old('endCity')) ?>">
-            <input type="hidden" name="endZipcode" id="endZipcode" value="<?= esc(old('endZipcode')) ?>">
+            <input type="hidden" name="endLat" id="endLat" value="<?= esc(old('endLat', $journeyRequest['latitude_end'] ?? '')) ?>">
+            <input type="hidden" name="endLng" id="endLng" value="<?= esc(old('endLng', $journeyRequest['longitude_end'] ?? '')) ?>">
+            <input type="hidden" name="endCity" id="endCity" value="<?= esc(old('endCity', $journeyRequest['city_end_name'] ?? '')) ?>">
+            <input type="hidden" name="endZipcode" id="endZipcode" value="<?= esc(old('endZipcode', $journeyRequest['city_end_zipcode'] ?? '')) ?>">
           </div>
         </div>
 
@@ -105,7 +106,7 @@
       </h2>
       <div>
         <label for="seats" class="text-ink/50 text-xs font-medium mb-1.5 block">Nombre de places nécessaires</label>
-        <input id="seats" name="seats" type="number" min="1" max="8" placeholder="Ex: 1" value="<?= esc(old('seats')) ?>"
+        <input id="seats" name="seats" type="number" min="1" max="8" placeholder="Ex: 1" value="<?= esc(old('seats', $journeyRequest['seats'] ?? '')) ?>"
           class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors">
       </div>
     </div>
@@ -118,18 +119,18 @@
       <label for="message" class="text-ink/50 text-xs font-medium mb-1.5 block">Informations complémentaires <span class="text-ink/30 font-normal">(optionnel)</span></label>
       <textarea id="message" name="message" rows="4"
         placeholder="Précisez vos besoins, contraintes horaires..."
-        class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 resize-none transition-colors"><?= esc(old('message')) ?></textarea>
+        class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 resize-none transition-colors"><?= esc(old('message', $journeyRequest['message'] ?? '')) ?></textarea>
     </div>
 
     <!-- Boutons -->
     <div class="flex items-center justify-end gap-3">
-      <a href="<?= site_url('journey-requests') ?>"
+      <a href="<?= esc($back ?? site_url('journey-requests/' . $journeyRequest['id'])) ?>"
         class="flex items-center gap-2 border border-action/20 hover:border-action/50 text-ink/60 hover:text-ink font-medium rounded-lg px-5 py-2.5 text-sm transition-colors">
         Annuler
       </a>
       <button type="submit"
         class="flex items-center gap-2 bg-action hover:bg-action-dark text-ink font-semibold font-display rounded-lg px-5 py-2.5 text-sm transition-colors cursor-pointer">
-        <i class="fa-solid fa-check text-xs"></i>Publier la demande
+        <i class="fa-solid fa-check text-xs"></i>Enregistrer les modifications
       </button>
     </div>
 
