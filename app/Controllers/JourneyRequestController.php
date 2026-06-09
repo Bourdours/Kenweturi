@@ -313,6 +313,18 @@ class JourneyRequestController extends BaseController
                 'required' => 'Les coordonnées d\'arrivée sont manquantes.',
                 'decimal'  => 'Longitude d\'arrivée invalide.',
             ],
+            'startCity' => [
+                'required' => 'La ville de départ est obligatoire.',
+            ],
+            'startZipcode' => [
+                'required' => 'Le code postal de départ est obligatoire.',
+            ],
+            'endCity' => [
+                'required' => 'La ville d\'arrivée est obligatoire.',
+            ],
+            'endZipcode' => [
+                'required' => 'Le code postal d\'arrivée est obligatoire.',
+            ],
         ];
     }
 }
