@@ -4,6 +4,8 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use App\Models\JourneyRequestModel;
+use App\Models\CityModel;
+use App\Models\LocationModel;
 use CodeIgniter\HTTP\RedirectResponse;
 
 class JourneyRequestController extends BaseController
@@ -11,9 +13,13 @@ class JourneyRequestController extends BaseController
     private const NOT_FOUND = 'Demande introuvable.';
 
     protected JourneyRequestModel $journeyRequestModel;
+    protected CityModel $cityModel;
+    protected LocationModel $locationModel;
 
     public function __construct() {
         $this->journeyRequestModel = new JourneyRequestModel();
+        $this->cityModel           = new CityModel();
+        $this->locationModel       = new LocationModel();
     }
 
     /**
@@ -68,7 +74,7 @@ class JourneyRequestController extends BaseController
      */
     public function show(int $id): string|RedirectResponse
     {
-        $journeyRequest = $this->journeyRequestModel->find($id);
+        $journeyRequest = $this->journeyRequestModel->findWithDetails($id, (int) session()->get('user_id'));
 
         if (!$journeyRequest) {
             return redirect()->to('/journey-requests')->with('error', self::NOT_FOUND);
@@ -99,20 +105,10 @@ class JourneyRequestController extends BaseController
     {
         $userId = (int) session()->get('user_id');
 
-        // ====== Validation
-        if (!$this->validate([
-            'startDate'    => 'required|valid_date',
-            'startTime'    => 'required|regex_match[/^([01]\d|2[0-3]):[0-5]\d$/]',
-            'seats'        => 'permit_empty|integer|greater_than[0]|less_than_equal_to[8]',
-            'message'      => 'permit_empty|max_length[2000]',
-            'startAddress' => 'required|string|max_length[255]',
-            'endAddress'   => 'required|string|max_length[255]',
-            'startLat'     => 'required|decimal',
-            'startLng'     => 'required|decimal',
-            'endLat'       => 'required|decimal',
-            'endLng'       => 'required|decimal',
-        ])) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        // ====== Validation des données du formulaire
+        if (!$this->validate($this->getValidationRules(), $this->getValidationMessages())) {
+            return redirect()->back()->withInput()
+                ->with('errors', $this->validator->getErrors());
         }
 
         // ====== Récupération des données POST
@@ -121,15 +117,11 @@ class JourneyRequestController extends BaseController
         [$h, $m]   = explode(':', $startTime);
         $startDatetime = (new \DateTimeImmutable($startDate))->setTime((int)$h, (int)$m, 0);
 
-        // ====== Création des locations (city + location)
-        $cityModel     = new \App\Models\CityModel();
-        $locationModel = new \App\Models\LocationModel();
-
-        $startCityId = $cityModel->findOrCreateCity(
+        $startCityId = $this->cityModel->findOrCreateCity(
             $this->request->getPost('startCity'),
             $this->request->getPost('startZipcode')
         );
-        $startLocationId = $locationModel->insert([
+        $startLocationId = $this->locationModel->insert([
             'latitude'  => (float) $this->request->getPost('startLat'),
             'longitude' => (float) $this->request->getPost('startLng'),
             'address'   => $this->request->getPost('startAddress'),
@@ -137,11 +129,11 @@ class JourneyRequestController extends BaseController
             'city_id'   => $startCityId,
         ]);
 
-        $endCityId = $cityModel->findOrCreateCity(
+        $endCityId = $this->cityModel->findOrCreateCity(
             $this->request->getPost('endCity'),
             $this->request->getPost('endZipcode')
         );
-        $endLocationId = $locationModel->insert([
+        $endLocationId = $this->locationModel->insert([
             'latitude'  => (float) $this->request->getPost('endLat'),
             'longitude' => (float) $this->request->getPost('endLng'),
             'address'   => $this->request->getPost('endAddress'),
@@ -172,15 +164,16 @@ class JourneyRequestController extends BaseController
      */
     public function showEditForm(int $id): string|RedirectResponse
     {
-        $journeyRequest = $this->journeyRequestModel->where('user_id', session()->get('user_id'))->find($id);
+        $journeyRequest = $this->journeyRequestModel->findWithDetails($id, (int) session()->get('user_id'));
 
         if (!$journeyRequest) {
             return redirect()->to('/journey-requests')->with('error', self::NOT_FOUND);
         }
 
-        return view('JourneyRequests/journeyRequestEdit', [
+        return view('JourneyRequests/newJourneyRequest', [
             'title'          => 'Modifier la demande',
-            'journeyRequest' => $journeyRequest
+            'journeyRequest' => $journeyRequest,
+            'back'           => $this->request->getGet('back'),
         ]);
     }
 
@@ -196,9 +189,34 @@ class JourneyRequestController extends BaseController
             return redirect()->to('/journey-requests')->with('error', self::NOT_FOUND);
         }
 
+        $startCityId = $this->cityModel->findOrCreateCity(
+            $this->request->getPost('startCity'),
+            $this->request->getPost('startZipcode')
+        );
+        $startLocationId = $this->locationModel->insert([
+            'latitude'  => (float) $this->request->getPost('startLat'),
+            'longitude' => (float) $this->request->getPost('startLng'),
+            'address'   => $this->request->getPost('startAddress'),
+            'note'      => '',
+            'city_id'   => $startCityId,
+        ]);
+
+        $endCityId = $this->cityModel->findOrCreateCity(
+            $this->request->getPost('endCity'),
+            $this->request->getPost('endZipcode')
+        );
+        $endLocationId = $this->locationModel->insert([
+            'latitude'  => (float) $this->request->getPost('endLat'),
+            'longitude' => (float) $this->request->getPost('endLng'),
+            'address'   => $this->request->getPost('endAddress'),
+            'note'      => '',
+            'city_id'   => $endCityId,
+        ]);
+
         $data = [
+            'location_start_id' => $startLocationId,
+            'location_end_id' => $endLocationId,
             'start_datetime' => $this->request->getPost('start_datetime'),
-            'seats'          => $this->request->getPost('seats'),
             'message'        => $this->request->getPost('message'),
         ];
 
@@ -224,5 +242,89 @@ class JourneyRequestController extends BaseController
         $this->journeyRequestModel->delete($id);
 
         return redirect()->to('/journey-requests')->with('success', 'Demande annulée avec succès.');
+    }
+
+    /**
+     * Retourne les règles de validation du formulaire de demande de trajet.
+     * Utilisées pour la création et la modification.
+     *
+     * @return array
+     */
+    private function getValidationRules(): array
+    {
+        return [
+            'startDate'    => 'required|valid_date',
+            'startTime'    => 'required|regex_match[/^([01]\d|2[0-3]):[0-5]\d$/]',
+            'message'      => 'permit_empty|max_length[2000]',
+            'startAddress' => 'required|max_length[255]',
+            'endAddress'   => 'required|max_length[255]',
+            'startLat'     => 'required|decimal',
+            'startLng'     => 'required|decimal',
+            'endLat'       => 'required|decimal',
+            'endLng'       => 'required|decimal',
+            'startCity'    => 'required|max_length[50]',
+            'startZipcode' => 'required|max_length[10]',
+            'endCity'      => 'required|max_length[50]',
+            'endZipcode'   => 'required|max_length[10]',
+        ];
+    }
+
+    /**
+     * Retourne les messages de validation du formulaire de demande de trajet.
+     * Utilisées pour la création et la modification.
+     *
+     * @return array
+     */
+    private function getValidationMessages(): array
+    {
+        return [
+            'startDate' => [
+                'required'   => 'Veuillez renseigner une date de départ.',
+                'valid_date' => 'Veuillez renseigner une date valide.',
+            ],
+            'startTime' => [
+                'required'    => 'Veuillez renseigner une heure de départ.',
+                'regex_match' => 'Veuillez renseigner une heure valide (HH:MM).',
+            ],
+            'message' => [
+                'max_length' => 'Le message doit contenir au maximum 2000 caractères.',
+            ],
+            'startAddress' => [
+                'required'   => 'L\'adresse de départ est obligatoire.',
+                'max_length' => 'L\'adresse de départ est trop longue.',
+            ],
+            'endAddress' => [
+                'required'   => 'L\'adresse d\'arrivée est obligatoire.',
+                'max_length' => 'L\'adresse d\'arrivée est trop longue.',
+            ],
+            'startLat' => [
+                'required' => 'Les coordonnées de départ sont manquantes.',
+                'decimal'  => 'Latitude de départ invalide.',
+            ],
+            'startLng' => [
+                'required' => 'Les coordonnées de départ sont manquantes.',
+                'decimal'  => 'Longitude de départ invalide.',
+            ],
+            'endLat' => [
+                'required' => 'Les coordonnées d\'arrivée sont manquantes.',
+                'decimal'  => 'Latitude d\'arrivée invalide.',
+            ],
+            'endLng' => [
+                'required' => 'Les coordonnées d\'arrivée sont manquantes.',
+                'decimal'  => 'Longitude d\'arrivée invalide.',
+            ],
+            'startCity' => [
+                'required' => 'La ville de départ est obligatoire.',
+            ],
+            'startZipcode' => [
+                'required' => 'Le code postal de départ est obligatoire.',
+            ],
+            'endCity' => [
+                'required' => 'La ville d\'arrivée est obligatoire.',
+            ],
+            'endZipcode' => [
+                'required' => 'Le code postal d\'arrivée est obligatoire.',
+            ],
+        ];
     }
 }
