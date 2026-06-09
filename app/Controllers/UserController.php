@@ -238,11 +238,7 @@ class UserController extends BaseController
             $data['password_hash'] = $newPassword;
 
             $tokenModel = new RememberTokenModel();
-            $tokenModel->where('user_id', $userId)->delete();
-            delete_cookie('remember_token');
-            session()->regenerate(true);
-
-            $data['remember_token'] = null;
+            $tokenModel->revokeAll($userId);
             delete_cookie('remember_token');
             session()->regenerate(true);
 
@@ -277,15 +273,16 @@ class UserController extends BaseController
 
         // Synchronisation des données de session avec les nouvelles valeurs
         session()->set([
+            'user_id'      => $userId,
             'firstname' => $data['firstname'],
             'lastname'  => $data['lastname'],
             'email'     => $data['email'],
+            'role'         => $updatedUser['role'],
+            'isAdmin'      => (bool) $updatedUser['is_admin'],
+            'avatar'       => $updatedUser['avatar'] ?? null,
+            'isLoggedIn'   => true,
             'userPassword' => $updatedUser['password_hash'],
         ]);
-
-        if (isset($data['avatar'])) {
-            session()->set('avatar', $data['avatar']);
-        }
 
         return redirect()->to(site_url('profile'))->with('success', 'Profil mis à jour avec succès.');
     }
