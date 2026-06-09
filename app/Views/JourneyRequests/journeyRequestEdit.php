@@ -14,7 +14,7 @@
 ]) ?>
 <?= view('partials/header') ?>
 
-<div class="max-w-4xl mx-auto py-10 px-4 flex flex-col gap-6">
+<div class="max-w-4xl mx-auto py-10 px-6 md:px-8 flex flex-col gap-6">
 
   <h1 class="text-ink text-2xl font-bold font-display"><?= esc($title) ?></h1>
 
@@ -32,7 +32,7 @@
     </div>
   <?php endif; ?>
 
-  <form id="addJourneyRequestForm" action="<?= base_url('/journey-requests/new') ?>" method="post" class="flex flex-col gap-6">
+  <form id="addJourneyRequestForm" action="<?= base_url('/journey-requests/edit') ?>" method="post" class="flex flex-col gap-6">
     <?= csrf_field() ?>
 
     <!-- Itinéraire -->
@@ -52,7 +52,7 @@
           <div class="flex-1 pb-4">
             <label for="startAddress" class="text-ink/50 text-xs font-medium mb-1.5 block">Départ</label>
             <input id="startAddress" class="address w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors"
-              name="startAddress" type="text" placeholder="Adresse de départ..." value="<?= esc(old('startAddress'))?>">
+              name="startAddress" type="text" placeholder="Adresse de départ..." value="<?= esc(old('startAddress')) ?? esc($journeyRequest['address_start']) ?>">
             <input type="hidden" name="startLat" id="startLat" value="<?= esc(old('startLat')) ?>">
             <input type="hidden" name="startLng" id="startLng" value="<?= esc(old('startLng')) ?>">
             <input type="hidden" name="startCity" id="startCity" value="<?= esc(old('startCity')) ?>">
@@ -68,7 +68,7 @@
           <div class="flex-1">
             <label for="endAddress" class="text-ink/50 text-xs font-medium mb-1.5 block">Arrivée</label>
             <input id="endAddress" class="address w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors"
-              name="endAddress" type="text" placeholder="Adresse d'arrivée..." value="<?= esc(old('endAddress'))?>">
+              name="endAddress" type="text" placeholder="Adresse d'arrivée..." value="<?= esc(old('endAddress')) ?? esc($journeyRequest['address_end']) ?>">
             <input type="hidden" name="endLat" id="endLat" value="<?= esc(old('endLat')) ?>">
             <input type="hidden" name="endLng" id="endLng" value="<?= esc(old('endLng')) ?>">
             <input type="hidden" name="endCity" id="endCity" value="<?= esc(old('endCity')) ?>">
@@ -87,12 +87,12 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label for="date" class="text-ink/50 text-xs font-medium mb-1.5 block">Date souhaitée</label>
-          <input id="date" name="startDate" type="text" readonly placeholder="jj/mm/aaaa" value="<?= esc(old('startDate'))?>"
+          <input id="date" name="startDate" type="text" readonly placeholder="jj/mm/aaaa" value="<?= esc(old('startDate', isset($journeyRequest) ? date('Y-m-d', strtotime($journeyRequest['start_datetime'])) : '')) ?>"
             class="w-full bg-paper border border-action/15 rounded-lg text-ink/60 text-sm px-3 py-2.5 outline-none focus:border-action/50 cursor-pointer transition-colors">
         </div>
         <div>
           <label for="time" class="text-ink/50 text-xs font-medium mb-1.5 block">Heure souhaitée</label>
-          <input id="time" name="startTime" type="text" readonly placeholder="--:--" value="<?= esc(old('startTime'))?>"
+          <input id="time" name="startTime" type="text" readonly placeholder="--:--" value="<?= esc(old('startTime', isset($journeyRequest) ? date('H:i', strtotime($journeyRequest['start_datetime'])) : '')) ?>"
             class="w-full bg-paper border border-action/15 rounded-lg text-ink/60 text-sm px-3 py-2.5 outline-none focus:border-action/50 cursor-pointer transition-colors">
         </div>
       </div>
