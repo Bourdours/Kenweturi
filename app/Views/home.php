@@ -116,6 +116,19 @@
 
   <?php if (!empty($nextDriverJourney) || !empty($nextPassengerJourney)): ?>
     <div class="max-w-4xl mx-auto px-4 pt-8 relative z-10">
+      <div class="grid grid-cols-1 <?= (!empty($nextDriverJourney) && !empty($nextPassengerJourney)) ? 'sm:grid-cols-2' : '' ?> gap-3 mb-1">
+        <?php if (!empty($nextDriverJourney)): ?>
+          <a href="<?= site_url('dashboard/journeys') ?>?filter=upcoming" class="text-action text-xs font-medium hover:underline flex items-center gap-1 pl-3">
+            Mes trajets conducteur <i class="fa-solid fa-arrow-right text-[10px]"></i>
+          </a>
+        <?php endif; ?>
+        <?php if (!empty($nextPassengerJourney)): ?>
+          <a href="<?= site_url('dashboard/bookings') ?>?filter=upcoming" class="text-action text-xs font-medium hover:underline flex items-center gap-1 pl-3">
+              Mes trajets passager <i class="fa-solid fa-arrow-right text-[10px]"></i>
+          </a>
+        <?php endif; ?>
+      </div>
+
       <div class="grid grid-cols-1 <?= (!empty($nextDriverJourney) && !empty($nextPassengerJourney)) ? 'sm:grid-cols-2' : '' ?> gap-3">
 
         <?php if (!empty($nextDriverJourney)): ?>
