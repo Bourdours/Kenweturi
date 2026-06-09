@@ -23,13 +23,13 @@ class RoutingService
      */
     public function getTrack(array $coordinates): ?string
     {
-        $apiKey = $_ENV['ORS_API_KEY'];
+        $apiKey = $_ENV['ORS_API_KEY'] ?? null;
 
         $coordFields = [];
         foreach ($coordinates as $coordinate) {
             $lat  = $coordinate[0];
             $long = $coordinate[1];
-            $coordFields[] = '[' . $long . ',' . $lat . ']';
+            $coordFields[] = [$long, $lat];
         }
 
         $ch = curl_init(self::ROUTING_API_URL);
@@ -42,7 +42,7 @@ class RoutingService
                 'Authorization: ' . $apiKey,
             ],
             CURLOPT_POST       => true,
-            CURLOPT_POSTFIELDS => '{"coordinates":[' . implode(',', $coordFields) . ']}',
+            CURLOPT_POSTFIELDS => json_encode(['coordinates' => $coordFields]),
         ]);
 
         $response = curl_exec($ch);
