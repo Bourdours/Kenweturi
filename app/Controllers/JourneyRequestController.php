@@ -35,8 +35,10 @@ class JourneyRequestController extends BaseController
         $builder = $this->journeyRequestModel
             ->select('journey_request.*,
                     u.firstname, u.lastname, u.avatar, u.is_student,
-                    city_start.name as city_start_name,
-                    city_end.name   as city_end_name')
+                    loc_start.address as address_start,
+                    loc_end.address   as address_end,
+                    city_start.name   as city_start_name,
+                    city_end.name     as city_end_name')
             ->join('user u',             'u.id = journey_request.user_id')
             ->join('location loc_start', 'loc_start.id = journey_request.location_start_id')
             ->join('location loc_end',   'loc_end.id = journey_request.location_end_id')
