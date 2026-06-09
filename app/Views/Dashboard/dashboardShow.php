@@ -306,6 +306,44 @@
         <?php endif ?>
     </div>
 
+    <!-- Mes demandes de trajet -->
+    <div data-role="passenger">
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="font-display font-bold text-ink text-base flex items-center gap-2">
+                <i class="fa-solid fa-magnifying-glass text-brand text-sm"></i>
+                Mes demandes de trajet
+            </h2>
+            <?php if (!empty($myJourneyRequests)) : ?>
+                <a href="<?= site_url('dashboard/journey-requests') ?>" class="text-brand text-sm font-medium hover:text-action transition-colors">Voir tous</a>
+            <?php endif ?>
+        </div>
+        <?php if (empty($myJourneyRequests)) : ?>
+            <p class="text-center text-muted py-8">Aucune demande de trajet à venir.</p>
+        <?php else : ?>
+            <div class="grid grid-cols-1 gap-3 overflow-y-auto max-h-[19.5rem] pr-2 scrollbar-hover sm:flex sm:flex-row sm:overflow-x-auto sm:overflow-y-hidden sm:max-h-none sm:pr-0 sm:pb-2 sm:snap-x sm:snap-mandatory">
+                <?php foreach ($myJourneyRequests as $request) : ?>
+                    <a href="<?= site_url('dashboard/journey-requests/' . $request['id']) ?>?back=<?= urlencode(current_url(true)) ?>" class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors sm:shrink-0 sm:w-[calc(50%-6px)] sm:snap-start sm:[&:only-child]:w-full">
+                        <div class="flex items-stretch gap-4">
+                            <div class="flex flex-col items-center shrink-0 pt-0.5">
+                                <div class="w-2.5 h-2.5 rounded-full bg-brand shrink-0"></div>
+                                <div class="w-px flex-1 bg-ink/10 my-1"></div>
+                                <div class="w-2.5 h-2.5 rounded-full bg-action shrink-0"></div>
+                            </div>
+                            <div class="flex-1 min-w-0 flex flex-col justify-between gap-2">
+                                <p class="text-ink font-semibold truncate"><?= esc($request['city_start_name']) ?></p>
+                                <p class="text-ink font-semibold truncate"><?= esc($request['city_end_name']) ?></p>
+                            </div>
+                            <div class="text-right shrink-0 space-y-1 self-center">
+                                <p class="text-ink font-bold font-display"><?= esc(date('H:i', strtotime($request['start_datetime']))) ?></p>
+                                <p class="text-ink/40 text-xs"><?= esc(date('d/m', strtotime($request['start_datetime']))) ?></p>
+                            </div>
+                        </div>
+                    </a>
+                <?php endforeach ?>
+            </div>
+        <?php endif ?>
+    </div>
+
     <!-- Trajets passés (passager) -->
     <div data-role="passenger">
         <div class="flex items-center justify-between mb-3">

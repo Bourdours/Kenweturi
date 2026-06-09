@@ -10,6 +10,20 @@
 
     <h1 class="font-display font-bold text-ink text-2xl"><?= esc($title) ?></h1>
 
+    <?php if (session()->has('success')): ?>
+      <div class="bg-green-500/10 border border-green-500/30 rounded-xl p-4 flex gap-3 items-start">
+        <i class="fa-solid fa-circle-check text-green-500 text-base shrink-0 mt-0.5"></i>
+        <p class="text-ink text-sm"><?= esc(session('success')) ?></p>
+      </div>
+    <?php endif; ?>
+
+    <?php if (session()->has('error')): ?>
+      <div class="bg-action/10 border border-action/30 rounded-xl p-4 flex gap-3 items-start">
+        <i class="fa-solid fa-triangle-exclamation text-action text-base shrink-0 mt-0.5"></i>
+        <p class="text-ink text-sm"><?= esc(session('error')) ?></p>
+      </div>
+    <?php endif; ?>
+
     <!-- Sous-navigation -->
     <div class="flex items-center justify-end">
         <a href="<?= esc($back ?? site_url('dashboard/journey-requests')) ?>"
@@ -32,7 +46,9 @@
                 <div class="flex-1 pb-4">
                     <p class="text-ink/50 text-xs font-medium mb-1">Départ</p>
                     <p class="text-ink font-semibold"><?= esc($journeyRequest['city_start_name']) ?></p>
+                    <?php if ($journeyRequest['address_start'] !== $journeyRequest['city_start_name']): ?>
                     <p class="text-ink/50 text-xs"><?= esc($journeyRequest['address_start']) ?></p>
+                    <?php endif ?>
                 </div>
             </div>
             <div class="flex gap-4 items-start">
@@ -42,7 +58,9 @@
                 <div class="flex-1">
                     <p class="text-ink/50 text-xs font-medium mb-1">Arrivée</p>
                     <p class="text-ink font-semibold"><?= esc($journeyRequest['city_end_name']) ?></p>
+                    <?php if ($journeyRequest['address_end'] !== $journeyRequest['city_end_name']): ?>
                     <p class="text-ink/50 text-xs"><?= esc($journeyRequest['address_end']) ?></p>
+                    <?php endif ?>
                 </div>
             </div>
         </div>
@@ -79,7 +97,7 @@
         <form action="<?= site_url('journey-requests/' . $journeyRequest['id'] . '/cancel') ?>" method="post">
             <?= csrf_field() ?>
             <button type="submit"
-                class="flex items-center gap-2 border border-red-300 hover:border-red-500 text-red-400 hover:text-red-600 font-medium rounded-lg px-5 py-2.5 text-sm transition-colors cursor-pointer">
+                class="flex items-center gap-2 bg-danger/10 hover:bg-danger text-danger hover:text-white border border-danger/30 hover:border-danger font-semibold rounded-lg px-5 py-2.5 text-sm transition-colors cursor-pointer">
                 <i class="fa-solid fa-xmark text-xs"></i>Annuler la demande
             </button>
         </form>
