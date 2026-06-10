@@ -10,7 +10,10 @@
     const brandColor  = toRgb('--color-brand');
     const actionColor = toRgb('--color-action');
 
-    const map = L.map(el);
+    const map = L.map(el, { scrollWheelZoom: false });
+
+    el.addEventListener('click', () => map.scrollWheelZoom.enable());
+    el.addEventListener('mouseleave', () => map.scrollWheelZoom.disable());
 
     const isDark  = document.documentElement.classList.contains('dark');
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
