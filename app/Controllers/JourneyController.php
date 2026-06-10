@@ -324,7 +324,6 @@ class JourneyController extends BaseController{
             'endAddress'    => 'required|string|max_length[255]',
             'car'           => 'required|integer|greater_than[0]',
         ];
-
     }
 
     /**
@@ -332,7 +331,7 @@ class JourneyController extends BaseController{
      *
      * @param  int $maxSeats Nombre maximum de places réservables (défaut : 9),
      *                       injecté dans le message d'erreur du champ 'seats'
-     * @return array<string, array<string, string>> Messages indexés par champ puis par règle
+     * @return array<string, string>> Messages indexés par champ puis par règle
      */
     private function getCreateValidationMessages(int $maxSeats = 9): array {
 
