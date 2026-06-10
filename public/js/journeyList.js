@@ -8,9 +8,7 @@
     const toRgb      = (v) => `rgb(${style.getPropertyValue(v).trim().replace(/\s+/g, ',')})`;
     const brandColor = toRgb('--color-brand');
     const isDark     = document.documentElement.classList.contains('dark');
-    const tileUrl    = isDark
-        ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-        : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+    const tileUrl    = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
 
     const isTouch = window.matchMedia('(hover: none)').matches;
 
