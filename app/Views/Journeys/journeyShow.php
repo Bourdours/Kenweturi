@@ -243,7 +243,7 @@
                 </button>
             </form>
         <?php elseif ($remainingSeats > 0) : ?>
-            <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center justify-between mb-4">
                 <div>
                     <p class="text-muted text-sm"><?= $remainingSeats > 1 ? 'Places disponibles' : 'Place disponible' ?></p>
                     <p class="text-ink font-bold font-display text-2xl"><?= esc($remainingSeats) ?></p>
@@ -289,6 +289,16 @@
                 <i class="fa-solid fa-flag text-xs"></i> Signaler un problème
             </a>
         <?php endif ?>
+    </div>
+
+    <!-- bouton annuler -->
+    <div class="deleteAccount w-full">
+        <?php if ($journey['user_id'] === session()->get('user_id') && !$journey['canceled_at']): ?>
+            <a id="btnOpenCancelModal"
+                class="inline-flex items-center gap-2 bg-danger/10 hover:bg-danger text-danger hover:text-white border border-danger/30 hover:border-danger font-semibold rounded-lg px-4 py-2 text-sm transition-colors cursor-pointer">
+                <i class="fa-solid fa-xmark text-xs"></i>Annuler le trajet
+            </a>
+        <?php endif; ?>
     </div>
 
 </div>

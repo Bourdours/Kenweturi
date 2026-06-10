@@ -49,6 +49,8 @@ class JourneyService
     protected RoutingService $routingService;
     protected GeocodingService $geocodingService;
 
+    protected MailerExample $mailer;
+
     private const ABSOLUTE_MAX_SEATS = 9;
 
     public function __construct()
@@ -65,6 +67,8 @@ class JourneyService
 
         $this->routingService       = new RoutingService();
         $this->geocodingService     = new GeocodingService();
+
+        $this->mailer               = new MailerExample();
     }
 
     /**
@@ -167,8 +171,6 @@ class JourneyService
         $points = $this->geoService->parseTrackPointsFromGeoJson($geoJsonTrack);
         if (empty($points)) return;
 
-        $mailer = new MailerExample();
-
         // ====== Matching pour chaque demande
         foreach ($requests as $request) {
 
@@ -237,5 +239,40 @@ class JourneyService
             $dayStartDateTime->format('Y-m-d H:i:s'),
             $dayEndDateTime->format('Y-m-d H:i:s'),
         );
+    }
+
+    /**
+     * Notifie par email les passagers acceptés de l'annulation d'un trajet.
+     *
+     * Récupère toutes les réservations acceptées du trajet et envoie
+     * un email à chaque passager concerné.
+     *
+     * @param  array $journey Données du trajet annulé
+     * @return void
+     */
+    public function notifyCancelledJourney(array $journey): void
+    {
+        $bookings = $this->bookingModel
+            ->select('user.email, user.firstname')
+            ->join('user', 'user.id = booking.user_id')
+            ->where('booking.journey_id', $journey['id'])
+            ->where('booking.status', 'accepted')
+            ->findAll();
+        
+        foreach ($bookings as $booking) {
+            $date = date('d/m/Y', strtotime($journey['start_datetime']))
+                . ' à ' . date('H:i', strtotime($journey['start_datetime']));
+
+            $this->mailer->sendHtml(
+                $booking['email'],
+                'Votre trajet a été annulé',
+                view('Emails/journeyCancelled', [
+                    'firstname' => $booking['firstname'],
+                    'cityStart' => $journey['city_start_name'],
+                    'cityEnd'   => $journey['city_end_name'],
+                    'date'      => $date,
+                ])
+            );
+        }
     }
 }
