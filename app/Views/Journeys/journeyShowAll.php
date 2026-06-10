@@ -52,8 +52,6 @@
                         <i class="fa-solid fa-circle-dot text-sm"></i>Départ
                     </label>
                     <input type="text" id="startAddress" class="address w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30" name="startAddress" value="<?= esc($startAddress ?? '') ?>" placeholder="Ville ou adresse">
-                    <input type="text" class="lng" id="startAddressLng" name="startLng" hidden>
-                    <input type="text" class="lat" id="startAddressLat" name="startLat" hidden>
                 </div>
                 <div class="flex justify-center sm:mb-1">
                     <button type="button" id="swapAddresses"
@@ -67,8 +65,6 @@
                         <i class="fa-solid fa-location-dot text-sm"></i>Arrivée
                     </label>
                     <input type="text" id="endAddress" class="address w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30" name="endAddress" value="<?= esc($endAddress ?? '') ?>" placeholder="Ville ou adresse">
-                    <input type="text" class="lng" id="endAddressLng" name="endLng" hidden>
-                    <input type="text" class="lat" id="endAddressLat" name="endLat" hidden>
                 </div>
             </div>
 
@@ -89,7 +85,7 @@
                     <label for="searchingRadius" class="text-ink/50 text-sm mb-1.5 flex items-baseline gap-1">
                         <i class="fa-solid fa-user text-sm"></i>Rayon en Km
                     </label>
-                    <input type="number" id="searchingRadius" name="searchingRadius" value="<?= esc($searchingRadius ?? '') ?>" placeholder="1" class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50">
+                    <input type="number" step="0.1" min="0.1" id="searchingRadius" name="searchingRadius" value="<?= esc($searchingRadius ?? '') ?>" placeholder="10" class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50">
                 </div>
                 <div>
                     <label for="smoking" class="text-ink/50 text-sm mb-1.5 flex items-baseline gap-1">
