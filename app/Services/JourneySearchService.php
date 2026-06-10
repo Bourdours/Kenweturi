@@ -37,7 +37,7 @@ class JourneySearchService
         $this->geoService           = new GeoService();
     }
 
-        public function searchJourneys(array $filters): array
+        public function searchJourneys(array &$filters): array
     {
         $candidates = $this->journeyModel->findAllWithFilters($filters);
         $this->attachPendingBookingsCount($candidates);
@@ -50,7 +50,10 @@ class JourneySearchService
             ? ['lat' => $filters['latEnd'], 'lon' => $filters['lngEnd']]
             : null;
 
-        return $this->findMatchingJourneys($candidates, $start, $end);
+        
+        $filters['searchingRadius'] = $filters['searchingRadius'] ?? 10; // Pour affiche du filtre par défaut au premier affichage de la page.
+
+        return $this->findMatchingJourneys($candidates, $start, $end, $filters['searchingRadius']);
     }
 
     /**
@@ -95,7 +98,7 @@ class JourneySearchService
      * @param  float      $maxDistanceKm Rayon de tolérance en km (défaut : 10)
      * @return array[]   Sous-ensemble des trajets correspondants
      */
-    public function findMatchingJourneys(array $journeys, ?array $start, ?array $end, float $maxDistanceKm = 10): array
+    public function findMatchingJourneys(array $journeys, ?array $start, ?array $end, float $maxDistanceKm): array
     {
         if ($start === null && $end === null) {
             return $journeys;
