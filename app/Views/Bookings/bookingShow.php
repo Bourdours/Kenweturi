@@ -4,7 +4,14 @@
 
 
 ?>
-<?= view('partials/head', ['extraJs' => [base_url('js/modal.js')]]) ?>
+<?= view('partials/head', [
+    'extraCss' => ['https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'],
+    'extraJs'  => [
+        'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+        base_url('js/journeyMap.js'),
+        base_url('js/modal.js'),
+    ],
+]) ?>
 <?= view('partials/header') ?>
 
 <div class="max-w-4xl mx-auto py-10 px-4 space-y-4">
@@ -58,6 +65,15 @@
 
         </div>
     </article>
+
+    <!-- Map du trajet -->
+    <?php
+        $mapWaypoints = [
+            ['lat' => $booking['lat_pickup'],  'lng' => $booking['lng_pickup'],  'label' => $booking['pickup_city_name']  ?? $booking['city_start_name']],
+            ['lat' => $booking['lat_dropoff'], 'lng' => $booking['lng_dropoff'], 'label' => $booking['dropoff_city_name'] ?? $booking['city_end_name']],
+        ];
+    ?>
+    <?= view('partials/journeyMap', ['waypoints' => $mapWaypoints, 'geojson' => $booking['track_geojson'] ?? null]) ?>
 
     <!-- Conducteur/Passagers -->
     <article class="bg-surface-card rounded-2xl p-6">

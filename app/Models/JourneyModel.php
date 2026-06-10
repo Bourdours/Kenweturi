@@ -59,15 +59,15 @@ class JourneyModel extends BaseModel
         'start_datetime' => [
             'required'   => 'Veuillez renseigner une date de départ.',
             'valid_date' => 'Veuillez renseigner une date valide.',
-            'after'      => 'La date de départ doit être dans le futur.',
+            'after_now'  => 'La date de départ doit être dans le futur.',
         ],
         'seats' => [
             'required'              => 'Veuillez renseigner le nombre de places.',
-            'greater_than_equal_to' => 'Le trajet doit avoir au moins 2 places.',
+            'greater_than_equal_to[1]' => 'Le trajet doit avoir au moins 1 places.',
             'less_than_equal_to'    => 'Le trajet ne peut pas dépasser 8 places.',
         ],
         'note' => [
-           'less_than_equal_to' => 'Le message doit contenir au maximum 1000 caractères.',
+           'max_length' => 'Le message doit contenir au maximum 1000 caractères.',
         ],
         'smoking' => [
             'required' => 'Veuillez indiquer si le covoiturage est fumeur ou non.',
@@ -111,10 +111,15 @@ class JourneyModel extends BaseModel
     {
         return $this->db->table($this->table)
             ->select('journey.*,
-                loc_start.address as address_start,
-                loc_end.address   as address_end,
-                city_start.name   as city_start_name,
-                city_end.name     as city_end_name,
+                loc_start.address   as address_start,
+                loc_end.address     as address_end,
+                loc_start.latitude  as lat_start,
+                loc_start.longitude as lng_start,
+                loc_end.latitude    as lat_end,
+                loc_end.longitude   as lng_end,
+                city_start.name     as city_start_name,
+                city_end.name       as city_end_name,
+                track.geojson       as track_geojson,
                 u.firstname       as driver_firstname,
                 u.lastname        as driver_lastname,
                 u.id              as driver_id,
@@ -131,6 +136,7 @@ class JourneyModel extends BaseModel
             ->join('city city_end',      'city_end.id = loc_end.city_id')
             ->join('user u',             'u.id = journey.user_id')
             ->join('car',                'car.id = journey.car_id', 'left')
+            ->join('track',              'track.id = journey.track_id', 'left')
             ->where('journey.id', $journeyId)
             ->where('u.deleted_at', null)
             ->get()
@@ -156,18 +162,23 @@ class JourneyModel extends BaseModel
     {
         $builder = $this->db->table($this->table)
             ->select("journey.*,
-                city_start.name as city_start_name,
-                city_end.name   as city_end_name,
-                city_start.name as city_boarding_name,
-                u.firstname     as driver_firstname,
-                u.lastname      as driver_lastname,
-                u.is_student    as driver_is_student,
+                loc_start.address as address_start,
+                loc_end.address   as address_end,
+                city_start.name   as city_start_name,
+                city_end.name     as city_end_name,
+                city_start.name   as city_boarding_name,
+                u.firstname       as driver_firstname,
+                u.lastname        as driver_lastname,
+                u.avatar          as driver_avatar,
+                u.is_student      as driver_is_student,
+                track.geojson     as track_geojson,
                 (journey.seats - COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id AND b.status = 'accepted'), 0)) as remaining_seats")
             ->join('location loc_start', 'loc_start.id = journey.location_start_id')
             ->join('location loc_end',   'loc_end.id = journey.location_end_id')
             ->join('city city_start',    'city_start.id = loc_start.city_id')
             ->join('city city_end',      'city_end.id = loc_end.city_id')
             ->join('user u',             'u.id = journey.user_id')
+            ->join('track',              'track.id = journey.track_id', 'left')
             ->where('journey.canceled_at', null)
             ->where('u.deleted_at', null)
             ->having('remaining_seats >=', 1)

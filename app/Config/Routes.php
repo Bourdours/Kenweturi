@@ -69,8 +69,10 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('dashboard/journeys',        'DashboardController::showJourneys');
     $routes->get('dashboard/bookings',        'DashboardController::showBookings');
     $routes->get('dashboard/bookings/(:num)', 'DashboardController::showBooking/$1');
-    $routes->get('dashboard/reports',         'DashboardController::showReports');
-    $routes->get('dashboard/reports/(:num)',  'DashboardController::showReport/$1');
+    $routes->get('dashboard/reports',                    'DashboardController::showReports');
+    $routes->get('dashboard/reports/(:num)',             'DashboardController::showReport/$1');
+    $routes->get('dashboard/journey-requests',           'DashboardController::showJourneyRequests');
+    $routes->get('dashboard/journey-requests/(:num)',    'DashboardController::showJourneyRequest/$1');
 
     // Bookings
     $routes->post('dashboard/bookings/(:num)/delete', 'BookingController::delete/$1');
@@ -79,10 +81,13 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->post('journeys/(:num)/book',             'BookingController::create/$1');
 
     // Journeys
-    $routes->get('journeys',                'JourneyController::showAll');
-    $routes->get('journeys/new',            'JourneyController::showCreateForm');
-    $routes->post('journeys/new',           'JourneyController::create');
-    $routes->get('journeys/(:num)',         'JourneyController::show/$1');
+    $routes->get('journeys',                  'JourneyController::showAll');
+    $routes->get('journeys/new',              'JourneyController::showCreateForm');
+    $routes->post('journeys/new',             'JourneyController::create');
+    $routes->get('journeys/preview',          'JourneyController::showPreview');
+    $routes->post('journeys/preview/confirm', 'JourneyController::confirm');
+    $routes->post('journeys/preview/modify',  'JourneyController::modify');
+    $routes->get('journeys/(:num)',           'JourneyController::show/$1');
     $routes->post('journeys/(:num)/cancel', 'JourneyController::cancel/$1');
     $routes->post('journeys/(:num)/delete', 'JourneyController::delete/$1');
 
