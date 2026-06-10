@@ -103,17 +103,11 @@
                             <div class="w-2.5 h-2.5 rounded-full bg-brand justify-self-center"></div>
                             <p class="text-ink font-semibold truncate"><?= esc($request['city_start_name'] ?? '—') ?></p>
                             <div class="w-px self-stretch bg-ink/10 justify-self-center"></div>
-                            <?php if (!empty($request['address_start']) && strcasecmp($request['address_start'], $request['city_start_name'] ?? '') !== 0): ?>
-                                <p class="text-ink/40 text-xs truncate py-0.5"><?= esc($request['address_start']) ?></p>
-                            <?php else: ?>
-                                <div class="h-2.5"></div>
-                            <?php endif ?>
+                            <p class="text-ink/40 text-xs truncate py-0.5"><?= esc(explode(',', $request['address_start'] ?? '')[0]) ?></p>
                             <div class="w-2.5 h-2.5 rounded-full bg-action justify-self-center"></div>
                             <p class="text-ink font-semibold truncate"><?= esc($request['city_end_name'] ?? '—') ?></p>
-                            <?php if (!empty($request['address_end']) && strcasecmp($request['address_end'], $request['city_end_name'] ?? '') !== 0): ?>
-                                <div></div>
-                                <p class="text-ink/40 text-xs truncate pt-0.5"><?= esc($request['address_end']) ?></p>
-                            <?php endif ?>
+                            <div></div>
+                            <p class="text-ink/40 text-xs truncate pt-0.5"><?= esc(explode(',', $request['address_end'] ?? '')[0]) ?></p>
                         </div>
                         <div class="text-right shrink-0 space-y-1">
                             <?php if (!empty($request['start_datetime'])): ?>

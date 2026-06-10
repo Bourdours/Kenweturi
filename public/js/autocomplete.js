@@ -31,7 +31,16 @@ function loadSuggestions(query, input, list, onSelect) {
     const url = `https://data.geopf.fr/geocodage/completion/?text=${encodeURIComponent(query)}&maximumResponses=5&type=StreetAddress`;
     fetch(url)
         .then(r => { if (!r.ok) throw new Error(`Erreur API : ${r.status}`); return r.json(); })
-        .then(data => displaySuggestions(data.results ?? [], input, list, onSelect))
+        .then(data => {
+            const suggestions = (data.results ?? []).map(s => ({
+                fulltext: s.fulltext,
+                lat:      s.y,
+                lng:      s.x,
+                city:     s.city     ?? '',
+                zipcode:  s.zipcode  ?? '',
+            }));
+            displaySuggestions(suggestions, input, list, onSelect);
+        })
         .catch(() => hideSuggestionsList(list));
 }
 
