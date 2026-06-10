@@ -10,14 +10,13 @@
     const brandColor  = toRgb('--color-brand');
     const actionColor = toRgb('--color-action');
 
-    const map = L.map(el);
+    const map = L.map(el, { scrollWheelZoom: false });
+
+    el.addEventListener('click', () => map.scrollWheelZoom.enable());
+    el.addEventListener('mouseleave', () => map.scrollWheelZoom.disable());
 
     const isDark  = document.documentElement.classList.contains('dark');
-    const tileUrl = isDark
-        ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-        : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-
-    L.tileLayer(tileUrl, {
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
         attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>',
     }).addTo(map);
 
