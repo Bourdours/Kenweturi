@@ -35,8 +35,10 @@ class JourneyRequestController extends BaseController
         $builder = $this->journeyRequestModel
             ->select('journey_request.*,
                     u.firstname, u.lastname, u.avatar, u.is_student,
-                    city_start.name as city_start_name,
-                    city_end.name   as city_end_name')
+                    loc_start.address as address_start,
+                    loc_end.address   as address_end,
+                    city_start.name   as city_start_name,
+                    city_end.name     as city_end_name')
             ->join('user u',             'u.id = journey_request.user_id')
             ->join('location loc_start', 'loc_start.id = journey_request.location_start_id')
             ->join('location loc_end',   'loc_end.id = journey_request.location_end_id')
@@ -59,12 +61,18 @@ class JourneyRequestController extends BaseController
 
         $journeyRequests = $builder->findAll();
 
+        $userId            = (int) session()->get('user_id');
+        $userRequestsCount = $userId
+            ? $this->journeyRequestModel->where('user_id', $userId)->countAllResults()
+            : 0;
+
         return view('JourneyRequests/journeyRequestShowAll', [
-            'title'           => 'Demandes de trajet',
-            'journeyRequests' => $journeyRequests,
-            'filterCityStart' => $filterCityStart,
-            'filterCityEnd'   => $filterCityEnd,
-            'filterDate'      => $filterDate,
+            'title'             => 'Demandes de trajet',
+            'journeyRequests'   => $journeyRequests,
+            'filterCityStart'   => $filterCityStart,
+            'filterCityEnd'     => $filterCityEnd,
+            'filterDate'        => $filterDate,
+            'userRequestsCount' => $userRequestsCount,
         ]);
     }
 
@@ -170,10 +178,10 @@ class JourneyRequestController extends BaseController
             return redirect()->to('/journey-requests')->with('error', self::NOT_FOUND);
         }
 
-        return view('JourneyRequests/newJourneyRequest', [
+        return view('JourneyRequests/journeyRequestEdit', [
             'title'          => 'Modifier la demande',
             'journeyRequest' => $journeyRequest,
-            'back'           => $this->request->getGet('back'),
+            'back'           => $this->validateBackUrl($this->request->getGet('back')),
         ]);
     }
 
@@ -213,18 +221,26 @@ class JourneyRequestController extends BaseController
             'city_id'   => $endCityId,
         ]);
 
+        $startDate = $this->request->getPost('startDate');
+        $startTime = $this->request->getPost('startTime');
+        [$h, $m]   = explode(':', $startTime);
+        $startDatetime = (new \DateTimeImmutable($startDate))->setTime((int)$h, (int)$m, 0);
+
         $data = [
             'location_start_id' => $startLocationId,
-            'location_end_id' => $endLocationId,
-            'start_datetime' => $this->request->getPost('start_datetime'),
-            'message'        => $this->request->getPost('message'),
+            'location_end_id'   => $endLocationId,
+            'start_datetime'    => $startDatetime->format('Y-m-d H:i:s'),
+            'seats'             => $this->request->getPost('seats') ?: null,
+            'message'           => $this->request->getPost('message'),
         ];
 
         if (!$this->journeyRequestModel->update($id, $data)) {
             return redirect()->back()->withInput()->with('errors', $this->journeyRequestModel->errors());
         }
 
-        return redirect()->to('/journey-requests/' . $id)->with('success', 'Demande modifiée avec succès.');
+        $back = $this->validateBackUrl($this->request->getPost('back'));
+
+        return redirect()->to($back ?: site_url('journey-requests/' . $id))->with('success', 'Demande modifiée avec succès.');
     }
 
     /**
@@ -290,40 +306,40 @@ class JourneyRequestController extends BaseController
                 'max_length' => 'Le message doit contenir au maximum 2000 caractères.',
             ],
             'startAddress' => [
-                'required'   => 'L\'adresse de départ est obligatoire.',
+                'required'   => 'Veuillez sélectionner une adresse de départ valide.',
                 'max_length' => 'L\'adresse de départ est trop longue.',
             ],
             'endAddress' => [
-                'required'   => 'L\'adresse d\'arrivée est obligatoire.',
+                'required'   => 'Veuillez sélectionner une adresse d\'arrivée valide.',
                 'max_length' => 'L\'adresse d\'arrivée est trop longue.',
             ],
             'startLat' => [
-                'required' => 'Les coordonnées de départ sont manquantes.',
+                'required' => 'Veuillez sélectionner une adresse de départ valide.',
                 'decimal'  => 'Latitude de départ invalide.',
             ],
             'startLng' => [
-                'required' => 'Les coordonnées de départ sont manquantes.',
+                'required' => 'Veuillez sélectionner une adresse de départ valide.',
                 'decimal'  => 'Longitude de départ invalide.',
             ],
             'endLat' => [
-                'required' => 'Les coordonnées d\'arrivée sont manquantes.',
+                'required' => 'Veuillez sélectionner une adresse d\'arrivée valide.',
                 'decimal'  => 'Latitude d\'arrivée invalide.',
             ],
             'endLng' => [
-                'required' => 'Les coordonnées d\'arrivée sont manquantes.',
+                'required' => 'Veuillez sélectionner une adresse d\'arrivée valide.',
                 'decimal'  => 'Longitude d\'arrivée invalide.',
             ],
             'startCity' => [
-                'required' => 'La ville de départ est obligatoire.',
+                'required' => 'Veuillez sélectionner une adresse de départ valide.',
             ],
             'startZipcode' => [
-                'required' => 'Le code postal de départ est obligatoire.',
+                'required' => 'Veuillez sélectionner une adresse de départ valide.',
             ],
             'endCity' => [
-                'required' => 'La ville d\'arrivée est obligatoire.',
+                'required' => 'Veuillez sélectionner une adresse d\'arrivée valide.',
             ],
             'endZipcode' => [
-                'required' => 'Le code postal d\'arrivée est obligatoire.',
+                'required' => 'Veuillez sélectionner une adresse d\'arrivée valide.',
             ],
         ];
     }

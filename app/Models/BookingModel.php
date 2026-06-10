@@ -68,8 +68,13 @@ class BookingModel extends BaseModel
                 city_end.name as city_end_name,
                 loc_pickup.address as pickup_address,
                 city_pickup.name as pickup_city_name,
+                COALESCE(loc_pickup.latitude,  loc_start.latitude)  as lat_pickup,
+                COALESCE(loc_pickup.longitude, loc_start.longitude) as lng_pickup,
                 loc_dropoff.address as dropoff_address,
                 city_dropoff.name as dropoff_city_name,
+                COALESCE(loc_dropoff.latitude,  loc_end.latitude)  as lat_dropoff,
+                COALESCE(loc_dropoff.longitude, loc_end.longitude) as lng_dropoff,
+                track.geojson as track_geojson,
                 passenger.firstname as passenger_firstname,
                 passenger.lastname as passenger_lastname,
                 passenger.email as passenger_email,
@@ -90,6 +95,7 @@ class BookingModel extends BaseModel
             ->join('city city_pickup',     'city_pickup.id = loc_pickup.city_id', 'left')
             ->join('location loc_dropoff', 'loc_dropoff.id = booking.location_dropoff_id', 'left')
             ->join('city city_dropoff',    'city_dropoff.id = loc_dropoff.city_id', 'left')
+            ->join('track',                'track.id = journey.track_id', 'left')
             ->join('user passenger',       'passenger.id = booking.user_id')
             ->join('user driver',          'driver.id = journey.user_id')
             ->where('booking.id', $id)
