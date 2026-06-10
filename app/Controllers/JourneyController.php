@@ -55,19 +55,14 @@ class JourneyController extends BaseController{
     /**
      * Traite la soumission du formulaire de création d'un trajet.
      *
-     * Valide les données du formulaire, récupère le tracé via les APIs externes
-     * (géocodage + routage), puis insère l'ensemble (track, locations, journey,
-     * stages) en base via une transaction.
+     * Valide les données, géocode les adresses et calcule le tracé via les APIs
+     * externes, puis stocke l'ensemble en session et redirige vers la page de
+     * confirmation. La persistance en base n'a lieu qu'après confirmation.
      *
-     * Les erreurs sont gérées selon trois familles :
-     *  - validation du formulaire HTTP        → redirection avec erreurs de champs
-     *  - API externe indisponible             → redirection avec message générique
-     *  - validation des models / transaction  → redirection avec erreurs du model
-     *
-     * @return RedirectResponse Redirection vers la page du trajet créé ou
+     * @return RedirectResponse Redirection vers la prévisualisation ou
      *                          retour au formulaire avec les erreurs
      */
-    public function create()
+    public function create(): RedirectResponse
     {
         $userId = session('user_id');
 
@@ -84,43 +79,136 @@ class JourneyController extends BaseController{
 
         // ====== Récupération des données du formulaire
         $createFormData = $this->getCreateFormData();
+        $rawPost        = $this->request->getPost();
 
-        // ====== Traitement métier
+        // ====== Géocodage + calcul du tracé (sans persistance)
         try {
-
             $locationsData = $this->createJourneyService->fetchAllLocationsData($createFormData['location']);
             $geoJsonTrack  = $this->createJourneyService->fetchTrackOrFail($locationsData);
-            $journeyId     = $this->createJourneyService->persistJourney($userId, $createFormData, $locationsData, $geoJsonTrack);
-
         } catch (ExternalApiException $e) {
-
             return redirect()->back()->withInput()
                 ->with('errors', ['api' => 'Service de cartographie indisponible, réessayez plus tard.']);
-
-        } catch (ModelValidationException $e) {
-
-            return redirect()->back()->withInput()
-                ->with('errors', $e->getErrors());
-
         } catch (AddressValidationException $e) {
             return redirect()->back()->withInput()
                 ->with('errors', $e->getErrors());
-
         } catch (\Throwable $e) {
-
             return redirect()->back()->withInput()
-                ->with('errors', ['db' => 'Une erreur est survenue lors de l\'enregistrement .']);
-
+                ->with('errors', ['db' => 'Une erreur est survenue.']);
         }
+
+        // ====== Stockage en session pour la page de confirmation
+        session()->set('journey_preview', [
+            'rawPost'        => $rawPost,
+            'createFormData' => $createFormData,
+            'locationsData'  => $locationsData,
+            'geoJsonTrack'   => $geoJsonTrack,
+        ]);
+
+        return redirect()->to('/journeys/preview');
+    }
+
+    /**
+     * Affiche la page de prévisualisation du trajet avant publication.
+     *
+     * Lit les données géocodées stockées en session par create() et les
+     * transforme en un tableau compatible avec la vue de détail, sans aucun
+     * accès à la base de données pour le trajet lui-même.
+     *
+     * @return string|RedirectResponse Vue de prévisualisation ou redirection
+     *                                 vers le formulaire si la session est absente
+     */
+    public function showPreview(): string|RedirectResponse
+    {
+        $preview = session()->get('journey_preview');
+        if (!$preview) {
+            return redirect()->to('/journeys/new');
+        }
+
+        $userId      = (int) session('user_id');
+        $previewData = $this->createJourneyService->buildPreviewData(
+            $userId,
+            $preview['createFormData'],
+            $preview['locationsData'],
+            $preview['geoJsonTrack']
+        );
+
+        return view('Journeys/journeyPreview', [
+            'title' => 'Confirmer le trajet',
+            ...$previewData,
+        ]);
+    }
+
+    /**
+     * Confirme la publication du trajet : persiste les données en session en base.
+     *
+     * Après persistance, vide la session de prévisualisation, déclenche les
+     * notifications de matching, puis redirige vers la page du trajet créé.
+     *
+     * @return RedirectResponse Redirection vers le trajet ou vers le formulaire
+     *                          en cas d'erreur de persistance
+     */
+    public function confirm(): RedirectResponse
+    {
+        $preview = session()->get('journey_preview');
+        if (!$preview) {
+            return redirect()->to('/journeys/new');
+        }
+
+        $userId = (int) session('user_id');
+
+        try {
+            $journeyId = $this->createJourneyService->persistJourney(
+                $userId,
+                $preview['createFormData'],
+                $preview['locationsData'],
+                $preview['geoJsonTrack']
+            );
+        } catch (ExternalApiException $e) {
+            session()->remove('journey_preview');
+            return redirect()->to('/journeys/new')
+                ->with('errors', ['api' => 'Service de cartographie indisponible, réessayez plus tard.']);
+        } catch (ModelValidationException $e) {
+            session()->remove('journey_preview');
+            return redirect()->to('/journeys/new')
+                ->with('errors', $e->getErrors());
+        } catch (\Throwable $e) {
+            session()->remove('journey_preview');
+            return redirect()->to('/journeys/new')
+                ->with('errors', ['db' => 'Une erreur est survenue lors de l\'enregistrement.']);
+        }
+
+        session()->remove('journey_preview');
 
         // ====== Matching avec les demandes de trajet existantes
         try {
-            $this->journeyService->notifyMatchingRequests($journeyId, $geoJsonTrack);
+            $this->journeyService->notifyMatchingRequests($journeyId, $preview['geoJsonTrack']);
         } catch (\Throwable $e) {
             log_message('error', 'notifyMatchingRequests: ' . $e->getMessage());
         }
 
         return redirect()->to('/journeys/' . $journeyId);
+    }
+
+    /**
+     * Redirige vers le formulaire de création avec les données pré-remplies
+     * depuis la session de prévisualisation, pour permettre la modification.
+     *
+     * @return RedirectResponse Redirection vers le formulaire de création
+     */
+    public function modify(): RedirectResponse
+    {
+        $preview = session()->get('journey_preview');
+        if (!$preview) {
+            return redirect()->to('/journeys/new');
+        }
+
+        session()->setFlashdata('_ci_old_input', [
+            'get'  => [],
+            'post' => $preview['rawPost'],
+        ]);
+        session()->remove('journey_preview');
+
+        return redirect()->to('/journeys/new');
     }
 
     /**
