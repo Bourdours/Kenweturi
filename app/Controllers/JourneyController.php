@@ -5,6 +5,7 @@ use App\Controllers\BaseController;
 use CodeIgniter\HTTP\RedirectResponse;
 
 use App\Models\CarModel;
+use App\Models\JourneyModel;
 
 use App\Services\JourneyService;
 use App\Services\CreateJourneyService;
@@ -17,7 +18,7 @@ use App\Exceptions\AddressValidationException;
 class JourneyController extends BaseController{
 
     protected CarModel $carModel;
-
+    protected JourneyModel $journeyModel;
     protected JourneyService $journeyService;
     protected CreateJourneyService $createJourneyService;
     protected JourneySearchService $journeySearchService;
@@ -25,7 +26,7 @@ class JourneyController extends BaseController{
     public function __construct(){
 
         $this->carModel = new CarModel();
-
+        $this->journeyModel = new JourneyModel();
         $this->journeyService = new JourneyService();
         $this->createJourneyService = new CreateJourneyService();
         $this->journeySearchService = new JourneySearchService();
@@ -277,6 +278,27 @@ class JourneyController extends BaseController{
             // Spread du tableau : passe startAddress, endAddress, latStart, etc.
             ...$filters,
         ]);
+    }
+
+    /**
+     * Annule un trajet et notifie les passagers acceptés par email.
+     *
+     * Renseigne le champ canceled_at avec la date courante (soft delete).
+     * Vérifie que le trajet existe et que l'utilisateur connecté en est le driver.
+     *
+     * @param  int $id Identifiant du trajet
+     * @return RedirectResponse Redirection vers le dashboard
+     */
+    public function cancel(int $id): RedirectResponse 
+    {
+        $journey = $this->journeyModel->findWithDetails($id);
+        if (!$journey || $journey['user_id'] !== session()->get('user_id')) {
+            return redirect()->to('journeys')->with('error', 'Accès non autorisé.');
+        }
+
+        $this->journeyModel->update($id, ['canceled_at' => date('Y-m-d H:i:s')]);
+        $this->journeyService->notifyCancelledJourney($journey);
+        return redirect()->to('dashboard/journeys?filter=upcoming')->with('success', 'Trajet annulé.');
     }
 
     /**
