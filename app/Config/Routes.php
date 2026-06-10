@@ -81,10 +81,13 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->post('journeys/(:num)/book',             'BookingController::create/$1');
 
     // Journeys
-    $routes->get('journeys',                'JourneyController::showAll');
-    $routes->get('journeys/new',            'JourneyController::showCreateForm');
-    $routes->post('journeys/new',           'JourneyController::create');
-    $routes->get('journeys/(:num)',         'JourneyController::show/$1');
+    $routes->get('journeys',                  'JourneyController::showAll');
+    $routes->get('journeys/new',              'JourneyController::showCreateForm');
+    $routes->post('journeys/new',             'JourneyController::create');
+    $routes->get('journeys/preview',          'JourneyController::showPreview');
+    $routes->post('journeys/preview/confirm', 'JourneyController::confirm');
+    $routes->post('journeys/preview/modify',  'JourneyController::modify');
+    $routes->get('journeys/(:num)',           'JourneyController::show/$1');
     $routes->post('journeys/(:num)/cancel', 'JourneyController::cancel/$1');
     $routes->post('journeys/(:num)/delete', 'JourneyController::delete/$1');
 

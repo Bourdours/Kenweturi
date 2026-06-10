@@ -7,6 +7,8 @@ use App\Models\TrackModel;
 use App\Models\LocationModel;
 use App\Models\StageModel;
 use App\Models\CityModel;
+use App\Models\CarModel;
+use App\Models\UserModel;
 
 use App\Exceptions\ExternalApiException;
 use App\Exceptions\ModelValidationException;
@@ -25,6 +27,8 @@ class CreateJourneyService
     protected LocationModel $locationModel;
     protected StageModel $stageModel;
     protected CityModel $cityModel;
+    protected CarModel $carModel;
+    protected UserModel $userModel;
 
     protected RoutingService $routingService;
     protected GeocodingService $geocodingService;
@@ -36,6 +40,8 @@ class CreateJourneyService
         $this->locationModel        = new LocationModel();
         $this->stageModel           = new StageModel();
         $this->cityModel            = new CityModel();
+        $this->carModel             = new CarModel();
+        $this->userModel            = new UserModel();
 
         $this->routingService       = new RoutingService();
         $this->geocodingService     = new GeocodingService();
@@ -238,6 +244,82 @@ class CreateJourneyService
             ->setTime($journeyStartHour, $journeyStartMinute, 0);
     }
 
+
+    /**
+     * Construit les données nécessaires à l'affichage de la page de prévisualisation
+     * d'un trajet, avant sa persistance en base.
+     *
+     * @param  int    $userId          Identifiant du conducteur
+     * @param  array  $createFormData  Données du formulaire (clés 'journey' et 'location')
+     * @param  array  $locationsData   Données de géocodage (clés 'start', 'stage0'…, 'end')
+     * @param  string $geoJsonTrack    Tracé GeoJSON renvoyé par l'API de routage
+     * @return array{journey:array, stages:array, remainingSeats:int}
+     */
+    public function buildPreviewData(int $userId, array $createFormData, array $locationsData, string $geoJsonTrack): array
+    {
+        $user = $this->userModel->find($userId);
+        $car  = $this->carModel->find($createFormData['journey']['car']);
+
+        $startDateTime = $this->buildJourneyStartDateTime($createFormData['journey']);
+
+        $geoData       = json_decode($geoJsonTrack, true);
+        $segments      = $geoData['features'][0]['properties']['segments'] ?? [];
+        $totalDuration = (int) array_sum(array_column($segments, 'duration'));
+        $endDateTime   = $startDateTime->modify('+' . $totalDuration . ' seconds');
+
+        $stageDepartures = $this->computeStageDepartures($createFormData['journey'], $geoJsonTrack);
+
+        $locStart = $locationsData['start'];
+        $locEnd   = $locationsData['end'];
+
+        $journey = [
+            'id'               => null,
+            'user_id'          => $userId,
+            'driver_id'        => $userId,
+            'start_datetime'   => $startDateTime->format('Y-m-d H:i:s'),
+            'end_datetime'     => $endDateTime->format('Y-m-d H:i:s'),
+            'seats'            => $createFormData['journey']['seats'],
+            'note'             => $createFormData['journey']['note'],
+            'smoking'          => $createFormData['journey']['smoking'],
+            'city_start_name'  => $locStart['city'],
+            'address_start'    => $locStart['name'],
+            'lat_start'        => $locStart['latitude'],
+            'lng_start'        => $locStart['longitude'],
+            'city_end_name'    => $locEnd['city'],
+            'address_end'      => $locEnd['name'],
+            'lat_end'          => $locEnd['latitude'],
+            'lng_end'          => $locEnd['longitude'],
+            'driver_firstname' => $user['firstname'],
+            'driver_lastname'  => $user['lastname'],
+            'driver_avatar'    => $user['avatar'] ?? null,
+            'driver_is_student' => $user['is_student'] ?? false,
+            'car_brand'        => $car['brand'],
+            'car_model'        => $car['model'],
+            'car_color'        => $car['color'],
+            'track_geojson'    => $geoJsonTrack,
+            'canceled_at'      => null,
+        ];
+
+        $stages     = [];
+        $stageIndex = 0;
+        foreach ($locationsData as $key => $loc) {
+            if (!str_starts_with($key, 'stage')) continue;
+            $stages[] = [
+                'city_name'      => $loc['city'],
+                'address'        => $loc['name'],
+                'latitude'       => $loc['latitude'],
+                'longitude'      => $loc['longitude'],
+                'departure_time' => $stageDepartures[$stageIndex]->format('H:i:s'),
+            ];
+            $stageIndex++;
+        }
+
+        return [
+            'journey'        => $journey,
+            'stages'         => $stages,
+            'remainingSeats' => (int) $createFormData['journey']['seats'],
+        ];
+    }
 
     /**
      * Calcule les heures de départ de chaque étape intermédiaire à partir
