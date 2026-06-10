@@ -105,30 +105,58 @@
 
     <!-- Conducteur -->
     <article class="bg-surface-card rounded-2xl p-6 border border-action/10">
-        <h2 class="text-muted text-xs font-semibold uppercase tracking-wider mb-4">Conducteur</h2>
-        <a href="<?= site_url('users/' . $journey['driver_id']) ?>?back=<?= urlencode(current_url(true)) ?>"
-         class="flex items-center gap-4 pt-4 first:pt-0 first:border-t-0">
-            <div class="flex items-center gap-4">
-                <?php $initials = strtoupper(substr($journey['driver_firstname'], 0, 1) . substr($journey['driver_lastname'], 0, 1)); ?>
-                <?php if (!empty($journey['driver_avatar'])): ?>
-                    <div class="jsAvatarOpen cursor-pointer w-14 h-14 rounded-full overflow-hidden shrink-0">
-                        <img src="<?= site_url(esc($journey['driver_avatar'])) ?>" alt="Avatar de <?= esc($journey['driver_firstname']) ?>" class="w-full h-full object-cover"
-                        onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
+        <div class="flex items-baseline justify-between mb-4">
+            <h2 class="text-muted text-xs font-semibold uppercase tracking-wider">Conducteur</h2>
+            <?php if (!empty($journey['note'])): ?>
+                <span class="hidden sm:block text-muted text-xs font-semibold uppercase tracking-wider">Par rapport au trajet</span>
+            <?php endif ?>
+        </div>
+        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <a href="<?= site_url('users/' . $journey['driver_id']) ?>?back=<?= urlencode(current_url(true)) ?>"
+             class="flex items-center gap-4">
+                <div class="flex items-center gap-4">
+                    <?php $initials = strtoupper(substr($journey['driver_firstname'], 0, 1) . substr($journey['driver_lastname'], 0, 1)); ?>
+                    <?php if (!empty($journey['driver_avatar'])): ?>
+                        <div class="jsAvatarOpen cursor-pointer w-14 h-14 rounded-full overflow-hidden shrink-0">
+                            <img src="<?= site_url(esc($journey['driver_avatar'])) ?>" alt="Avatar de <?= esc($journey['driver_firstname']) ?>" class="w-full h-full object-cover"
+                            onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
+                        </div>
+                        <div class="jsAvatarOpen cursor-pointer hidden w-14 h-14 rounded-full bg-action-dark text-ink font-bold text-base shrink-0 items-center justify-center">
+                            <?= esc($initials) ?>
+                        </div>
+                    <?php else: ?>
+                        <div class="jsAvatarOpen cursor-pointer flex w-14 h-14 rounded-full bg-action-dark text-ink font-bold text-base shrink-0 items-center justify-center">
+                            <?= esc($initials) ?>
+                        </div>
+                    <?php endif; ?>
+                    <div>
+                        <p class="text-ink font-semibold"><?= esc($journey['driver_firstname']) ?> <?= esc($journey['driver_lastname']) ?></p>
+                        <p class="text-muted text-sm"><?= $journey['driver_is_student'] ? 'Étudiant' : 'Formateur' ?></p>
                     </div>
-                    <div class="jsAvatarOpen cursor-pointer hidden w-14 h-14 rounded-full bg-action-dark text-ink font-bold text-base shrink-0 items-center justify-center">
-                        <?= esc($initials) ?>
-                    </div>
-                <?php else: ?>
-                    <div class="jsAvatarOpen cursor-pointer flex w-14 h-14 rounded-full bg-action-dark text-ink font-bold text-base shrink-0 items-center justify-center">
-                        <?= esc($initials) ?>
-                    </div>
-                <?php endif; ?>
-                <div>
-                    <p class="text-ink font-semibold"><?= esc($journey['driver_firstname']) ?> <?= esc($journey['driver_lastname']) ?></p>
-                    <p class="text-muted text-sm"><?= $journey['driver_is_student'] ? 'Étudiant' : 'Formateur' ?></p>
                 </div>
-            </div>
-        </a>
+            </a>
+
+            <?php if (!empty($journey['note'])): ?>
+                <?php $noteLong = mb_strlen($journey['note']) > 120; ?>
+                <div class="flex flex-col gap-1.5">
+                    <span class="sm:hidden text-muted text-xs font-semibold uppercase tracking-wider">Par rapport au trajet</span>
+                    <blockquote class="flex-1 min-w-0 border-l-2 border-action/40 pl-3 text-muted text-sm italic max-w-xs">
+                        <?php if ($noteLong): ?>
+                            <span class="jsNoteShort"><?= nl2br(esc(mb_substr($journey['note'], 0, 120))) ?>…</span>
+                            <span class="jsNoteFull hidden"><?= nl2br(esc($journey['note'])) ?></span>
+                            <button type="button" onclick="
+                                var s=this.previousElementSibling,sh=s.previousElementSibling;
+                                var open=!s.classList.contains('hidden');
+                                s.classList.toggle('hidden',open); sh.classList.toggle('hidden',!open);
+                                this.textContent=open?'Voir plus':'Voir moins';
+                            " class="block mt-1 text-action text-xs hover:underline">Voir plus</button>
+                        <?php else: ?>
+                            <?= nl2br(esc($journey['note'])) ?>
+                        <?php endif ?>
+                    </blockquote>
+                </div>
+            <?php endif ?>
+        </div>
 
         <div class="mt-4 pt-4 border-t border-ink/5 flex flex-wrap gap-3 text-sm text-muted">
             <span class="flex items-center gap-1.5">
