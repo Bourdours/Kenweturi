@@ -348,17 +348,18 @@ class JourneyController extends BaseController{
     private function getShowAllFilter(): array
     {
         return [
-            'startAddress'   => $this->request->getGet('startAddress'),
-            'endAddress'     => $this->request->getGet('endAddress'),
-            'latStart'       => $this->parseFloatOrNull($this->request->getGet('startLat')),
-            'lngStart'       => $this->parseFloatOrNull($this->request->getGet('startLng')),
-            'latEnd'         => $this->parseFloatOrNull($this->request->getGet('endLat')),
-            'lngEnd'         => $this->parseFloatOrNull($this->request->getGet('endLng')),
-            'filterDate'     => $this->request->getGet('date'),
-            'filterTime'     => $this->request->getGet('time'),
-            'availableSeats' => (int) ($this->request->getGet('availableSeats') ?? 1),
-            'smoking'        => $this->request->getGet('smoking'),
-            'page'           => (int) ($this->request->getGet('page') ?? 1),
+            'startAddress'      => $this->request->getGet('startAddress'),
+            'endAddress'        => $this->request->getGet('endAddress'),
+            'searchingRadius'   => $this->request->getGet('searchingRadius'),
+            'latStart'          => $this->parseFloatOrNull($this->request->getGet('startLat')),
+            'lngStart'          => $this->parseFloatOrNull($this->request->getGet('startLng')),
+            'latEnd'            => $this->parseFloatOrNull($this->request->getGet('endLat')),
+            'lngEnd'            => $this->parseFloatOrNull($this->request->getGet('endLng')),
+            'filterDate'        => $this->request->getGet('date'),
+            'filterTime'        => $this->request->getGet('time'),
+            'availableSeats'    => (int) ($this->request->getGet('availableSeats') ?? 1),
+            'smoking'           => $this->request->getGet('smoking'),
+            'page'              => (int) ($this->request->getGet('page') ?? 1),
         ];
     }
 
