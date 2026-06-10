@@ -7,6 +7,7 @@ use App\Models\JourneyModel;
 use App\Models\BookingModel;
 
 use App\Services\GeoService;
+use App\Services\GeocodingService;
 
 /**
  * Service métier lié aux trajets.
@@ -27,6 +28,7 @@ class JourneySearchService
     protected BookingModel $bookingModel;
 
     protected GeoService $geoService;
+    protected GeocodingService $geoCodingService;
 
     public function __construct()
     {
@@ -35,6 +37,7 @@ class JourneySearchService
         $this->bookingModel         = new BookingModel();
 
         $this->geoService           = new GeoService();
+        $this->geoCodingService           = new GeoCodingService();
     }
 
         public function searchJourneys(array &$filters): array
@@ -42,18 +45,17 @@ class JourneySearchService
         $candidates = $this->journeyModel->findAllWithFilters($filters);
         $this->attachPendingBookingsCount($candidates);
 
-        $start = ($filters['latStart'] !== null && $filters['lngStart'] !== null)
-            ? ['lat' => $filters['latStart'], 'lon' => $filters['lngStart']]
-            : null;
+        // --- Convertion des adresses en longitude et latitude
+        $startLocation = !empty($filters['startAddress']) ? $this->geoCodingService->getLocationData($filters['startAddress']) : null;
+        $startCoord = !empty($startLocation['latitude']) || !empty($startLocation['longitude']) ? ['lat'=>$startLocation['latitude'], 'lon'=>$startLocation['longitude']] : null;
 
-        $end = ($filters['latEnd'] !== null && $filters['lngEnd'] !== null)
-            ? ['lat' => $filters['latEnd'], 'lon' => $filters['lngEnd']]
-            : null;
+        $endLocation = !empty($filters['endAddress']) ? $this->geoCodingService->getLocationData($filters['endAddress']) : null;
+        $endCoord = !empty($endLocation['latitude']) || !empty($endLocation['longitude']) ? ['lat'=>$endLocation['latitude'], 'lon'=>$endLocation['longitude']] : null;
 
-        
-        $filters['searchingRadius'] = $filters['searchingRadius'] ?? 10; // Pour affiche du filtre par défaut au premier affichage de la page.
+        $filters['searchingRadius'] = empty($filters['searchingRadius']) ? 10 : $filters['searchingRadius']; // Pour affiche du filtre par défaut au premier affichage de la page.
 
-        return $this->findMatchingJourneys($candidates, $start, $end, $filters['searchingRadius']);
+
+        return $this->findMatchingJourneys($candidates, $startCoord, $endCoord, $filters['searchingRadius']);
     }
 
     /**
