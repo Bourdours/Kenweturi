@@ -170,6 +170,7 @@ class JourneyModel extends BaseModel
             ->join('user u',             'u.id = journey.user_id')
             ->where('journey.canceled_at', null)
             ->where('u.deleted_at', null)
+            ->having('remaining_seats >=', 1)
             ->orderBy('journey.start_datetime', 'ASC');
 
         if (!empty($filters['filterDate']) && !empty($filters['filterTime'])) {
@@ -183,10 +184,6 @@ class JourneyModel extends BaseModel
             }
         } else {
             $builder->where('journey.start_datetime >=', date('Y-m-d H:i:s'));
-        }
-
-        if (!empty($filters['availableSeats'])) {
-            $builder->having('remaining_seats >=', $filters['availableSeats']);
         }
 
         if (isset($filters['smoking']) && $filters['smoking'] !== null && $filters['smoking'] !== '') {
