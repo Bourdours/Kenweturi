@@ -121,7 +121,7 @@
     <?php else: ?>
         <div class="space-y-3">
             <?php foreach ($journeys as $journey) : ?>
-                <a href="<?= site_url('/journeys/') ?><?= esc($journey['id']) ?>?seats=<?= esc($availableSeats) ?>&boardingCity=<?= urlencode($journey['city_boarding_name']) ?>&startAddress=<?= urlencode($startAddress ?? '') ?>&startLat=<?= esc($latStart ?? '') ?>&startLng=<?= esc($lngStart ?? '') ?>&endAddress=<?= urlencode($endAddress ?? '') ?>&endLat=<?= esc($latEnd ?? '') ?>&endLng=<?= esc($lngEnd ?? '') ?>&back=<?= urlencode(current_url(true)) ?>"
+                <a href="<?= site_url('/journeys/') ?><?= esc($journey['id']) ?>?boardingCity=<?= urlencode($journey['city_boarding_name']) ?>&startAddress=<?= urlencode($startAddress ?? '') ?>&startLat=<?= esc($latStart ?? '') ?>&startLng=<?= esc($lngStart ?? '') ?>&endAddress=<?= urlencode($endAddress ?? '') ?>&endLat=<?= esc($latEnd ?? '') ?>&endLng=<?= esc($lngEnd ?? '') ?>&back=<?= urlencode(current_url(true)) ?>"
                    class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors"
                    <?php if (!empty($journey['track_geojson'])): ?>data-geojson="<?= esc($journey['track_geojson'], 'attr') ?>"<?php endif ?>>
                     <div class="flex items-start gap-4">
