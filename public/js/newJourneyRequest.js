@@ -11,7 +11,7 @@ function applySelectedAddress(address, input, list) {
     input.value = address;
     hideSuggestionsList(list);
 
-    const url = `https://data.geopf.fr/geocodage/search?q=${encodeURIComponent(address)}&index=address&limit=1`;
+    const url = `https://data.geopf.fr/geocodage/search?q=${encodeURIComponent(address)}&index=address&type=StreetAddress&limit=1`;
     fetch(url)
         .then(r => { if (!r.ok) throw new Error(`Erreur API : ${r.status}`); return r.json(); })
         .then(data => {
