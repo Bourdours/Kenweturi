@@ -1,6 +1,6 @@
 (function () {
     const HTML = `
-<div id="confirm-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+<div id="confirm-modal" class="fixed inset-0 hidden items-center justify-center p-4" style="z-index:1000">
   <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="confirm-modal-backdrop"></div>
   <div class="relative bg-surface-card rounded-2xl shadow-2xl p-6 w-full max-w-sm">
     <p id="confirm-modal-message" class="text-ink font-semibold text-center mb-6"></p>
