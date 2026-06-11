@@ -51,6 +51,7 @@ class BookingController extends BaseController
         // --- Vérification places restantes
         $bookSeats = $this->bookingModel->selectSum('seat_numbers')
                                         ->where('journey_id', $id)
+                                        ->where('status', 'accepted')
                                         ->get()->getRowArray();
         $remainingSeats = $journey['seats'] - ($bookSeats['seat_numbers'] ?? 0);
 

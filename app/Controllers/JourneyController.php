@@ -300,6 +300,14 @@ class JourneyController extends BaseController{
             return redirect()->to('journeys')->with('error', 'Accès non autorisé.');
         }
 
+        if ($journey['canceled_at']) {
+            return redirect()->to('journeys')->with('error', 'Ce trajet est déjà annulé.');
+        }
+
+        if ($journey['start_datetime'] < date('Y-m-d H:i:s')) {
+            return redirect()->to('journeys')->with('error', 'Impossible d\'annuler un trajet passé.');
+        }
+
         $this->journeyModel->update($id, ['canceled_at' => date('Y-m-d H:i:s')]);
         $this->journeyService->notifyCancelledJourney($journey);
         return redirect()->to('dashboard/journeys?filter=upcoming')->with('success', 'Trajet annulé.');
