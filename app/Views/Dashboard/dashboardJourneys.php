@@ -47,7 +47,12 @@
     <?php else : ?>
         <div class="space-y-3">
             <?php foreach ($journeys as $journey) : ?>
-                <a href="<?= site_url('journeys/' . esc($journey['id'])) ?>?back=<?= urlencode(current_url(true)) ?>" class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors">
+                <?php if ($journey['canceled_at']): ?>
+                    <div class="flex justify-end mb-2">
+                        <span class="text-xs text-danger font-semibold bg-danger/10 px-2 py-0.5 rounded-full">Annulé</span>
+                    </div>
+                <?php endif ?>
+                <a href="<?= site_url('journeys/' . esc($journey['id'])) ?>?back=<?= urlencode(current_url(true)) ?>" class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors <?= $journey['canceled_at'] ? 'opacity-40 pointer-events-none' : '' ?>">
                     <div class="flex items-stretch gap-4">
                         <div class="flex flex-col items-center shrink-0 pt-0.5">
                             <div class="w-2.5 h-2.5 rounded-full bg-brand shrink-0"></div>
