@@ -29,6 +29,12 @@ class AuthFilter implements FilterInterface
             session()->destroy();
             return redirect()->to('/login')->with('error', 'Session expirée.');
         }
+
+        if ($user['is_banned']) {
+            session()->destroy();
+            return redirect()->to('/login')
+                ->with('error', 'Votre compte a été suspendu par l\'équipe de modération.');
+        }
     }
 
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null) {}
