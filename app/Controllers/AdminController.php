@@ -87,6 +87,10 @@ class AdminController extends BaseController
                 ->with('error', 'Utilisateur introuvable.');
         }
 
+        if ($user['role'] !== 'user') {
+            return redirect()->back()->with('error', 'Vous ne pouvez supprimer que les utilisateurs ayant le rôle "Utilisateur"');
+        }
+
         // Détermine le nouveau statut selon l'action choisie
         $newStatus = ($action === 'validate') ? 'active' : 'rejected';
         $this->userModel->update($id, ['status' => $newStatus]);
