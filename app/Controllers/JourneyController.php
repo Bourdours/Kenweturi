@@ -230,9 +230,13 @@ class JourneyController extends BaseController{
         $userId    = (int) session('user_id');
 
         $details = $this->journeyService->getJourneyDetails($journeyId, $userId);
-
+        
         if ($details === null) {
             return redirect()->to('/journeys');
+        }
+
+        if ($details['journey']['canceled_at']) {
+            return redirect()->to('journeys')->with('error', 'Ce trajet a été annulé.');
         }
 
         return view('Journeys/journeyShow', [
