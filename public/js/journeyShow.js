@@ -1,9 +1,9 @@
 (function () {
-    const modal      = document.getElementById('modalBook');
-    const btnOpen    = document.getElementById('btnOpenBookModal');
-    const btnCancel  = document.getElementById('btnCancelBook');
-    const btnConfirm = document.getElementById('btnConfirmBook');
-    const form       = document.getElementById('formBook');
+    const modal      = document.getElementById('modalCancelJourney');
+    const btnOpen    = document.getElementById('btnOpenCancelModal');
+    const btnCancel  = document.getElementById('btnCancelCancelModal');
+    const btnConfirm = document.getElementById('btnConfirmCancelJourney');
+    const form       = document.getElementById('form-cancel-journey');
 
     if (!modal || !btnOpen || !btnCancel || !btnConfirm || !form) return;
 
