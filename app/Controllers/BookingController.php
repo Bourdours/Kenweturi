@@ -170,8 +170,6 @@ class BookingController extends BaseController
 
         }
         catch(\throwable $e){
-            echo $e->getMessage();
-            exit();
             log_message('error', 'Booking accept failed: {message}', ['message' => $e->getMessage()]);
             return redirect()->to('/dashboard')->with('error','Un problème est survenu');
 
