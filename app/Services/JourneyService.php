@@ -128,20 +128,6 @@ class JourneyService
         ];
     }
 
-    /**
-     * Recherche les trajets correspondant aux filtres fournis.
-     *
-     * Charge tous les candidats (filtres non géographiques) via le model,
-     * enrichit chacun du nombre de demandes en attente, puis applique le
-     * filtrage géographique (proximité départ ET arrivée, dans le bon ordre).
-     *
-     * Le résultat n'est PAS paginé : la pagination reste une préoccupation
-     * de présentation gérée par le controller.
-     *
-     * @param  array $filters Filtres normalisés (voir JourneyController::getShowAllFilter)
-     * @return array[]        Trajets correspondants (non paginés)
-     */
-
 
     /**
      * Recherche les demandes de trajet compatibles avec un trajet nouvellement créé
@@ -192,7 +178,7 @@ class JourneyService
             $date = date('d/m/Y', strtotime($journey['start_datetime']))
                   . ' à ' . date('H:i', strtotime($journey['start_datetime']));
 
-            $mailer->sendHtml(
+            $this->mailer->sendHtml(
                 $request['requester_email'],
                 'Un trajet correspond à votre demande !',
                 view('Emails/journeyRequestMatch', [
@@ -274,5 +260,14 @@ class JourneyService
                 ])
             );
         }
+    }
+
+    public function countRemainingSeats(int $journeyId){
+
+        $nbOfSeats = (int) $this->journeyModel->getNumberOfSeats($journeyId);
+        $nbOfAcceptedBook = (int) $this->bookingModel->countByStatus("Accepted",$journeyId);
+
+        return $nbOfSeats - $nbOfAcceptedBook;
+
     }
 }
