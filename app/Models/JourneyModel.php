@@ -172,6 +172,9 @@ class JourneyModel extends BaseModel
                 u.avatar          as driver_avatar,
                 u.is_student      as driver_is_student,
                 track.geojson     as track_geojson,
+                COALESCE((SELECT CONCAT('[', GROUP_CONCAT(JSON_OBJECT('lat', loc_s.latitude, 'lng', loc_s.longitude) SEPARATOR ','), ']')
+                 FROM stage s JOIN location loc_s ON loc_s.id = s.location_id
+                 WHERE s.journey_id = journey.id), '[]') as stages_json,
                 (journey.seats - COALESCE((SELECT SUM(b.seat_numbers) FROM booking b WHERE b.journey_id = journey.id AND b.status = 'accepted'), 0)) as remaining_seats")
             ->join('location loc_start', 'loc_start.id = journey.location_start_id')
             ->join('location loc_end',   'loc_end.id = journey.location_end_id')
