@@ -220,4 +220,20 @@ class JourneyModel extends BaseModel
                     ->where('start_datetime <',  $toDateTime)
                     ->first();
     }
+
+    public function findActive(int $id)
+    {
+        return $this->where('id', $id)
+                    ->where('canceled_at', null)
+                    ->first();
+    }
+
+    public function getNumberOfSeats(int $id) :int {
+
+        $row = $this->select('seats')
+                    ->find($id);
+        
+        return $row === null ? 0 : $row['seats'];
+
+    }
 }

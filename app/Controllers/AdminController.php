@@ -82,9 +82,19 @@ class AdminController extends BaseController
 
         // Vérifie que l'utilisateur ciblé existe bien en base
         $user = $this->userModel->find($id);
-        if (! $user) {
+
+        if (!$user) {
             return redirect()->to(site_url('admin?tab=registrations'))
                 ->with('error', 'Utilisateur introuvable.');
+        }
+
+        if ($user['status'] !== 'pending') {
+            return redirect()->to(site_url('admin?tab=registrations'))
+                ->with('error', 'Action non autorisée.');
+        }
+
+        if ($user['role'] !== 'user') {
+            return redirect()->back()->with('error', 'Vous ne pouvez supprimer que les utilisateurs ayant le rôle "Utilisateur"');
         }
 
         // Détermine le nouveau statut selon l'action choisie
