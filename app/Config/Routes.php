@@ -131,6 +131,7 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
     $routes->post('reports/(:num)/resolve', 'AdminController::resolveReport/$1');
     $routes->post('users/(:num)/validate',  'AdminController::updateRegistration/$1');
     $routes->post('users/(:num)/delete',    'AdminController::deleteUser/$1');
+    $routes->post('users/(:num)/student',   'AdminController::updateStudent/$1');
 });
 
 /* =========================================================
