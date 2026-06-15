@@ -74,7 +74,7 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('dashboard/journey-requests/(:num)',    'DashboardController::showJourneyRequest/$1');
 
     // Bookings
-    $routes->get('dashboard/bookings/(:num)',           'BookingController::showBooking/$1');
+    $routes->get('dashboard/bookings/(:num)',           'BookingController::show/$1');
     $routes->post('dashboard/bookings/(:num)/delete',   'BookingController::delete/$1');
     $routes->post('dashboard/bookings/(:num)/accept',   'BookingController::accept/$1');
     $routes->post('dashboard/bookings/(:num)/reject',   'BookingController::reject/$1');

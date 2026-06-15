@@ -39,7 +39,7 @@ class BookingController extends BaseController
      * Détail d'une réservation.
      * GET /dashboard/bookings/:id
      */
-    public function showBooking(int $id): string|RedirectResponse
+    public function show(int $id): string|RedirectResponse
     {
         $userId = (int) session('user_id');
 
