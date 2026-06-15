@@ -20,7 +20,9 @@ class CarController extends BaseController
      */
     public function showCreateForm()
     {
-        return view('/car/create');
+        return view('Car/create', [
+            'back' => $this->request->getGet('back')
+        ]);
     }
 
     /**
@@ -33,21 +35,34 @@ class CarController extends BaseController
     public function create()
     {
         $carModel = new CarModel();
-
         $data = [
-            'brand'     => $this->request->getPost('brand'),
-            'model'     => $this->request->getPost('model'),
-            'color'     => $this->request->getPost('color'),
-            'seats'     => $this->request->getPost('seats'),
-            'user_id'   => session()->get('user_id'),  // depuis la session
+            'brand'   => $this->request->getPost('brand'),
+            'model'   => $this->request->getPost('model'),
+            'color'   => $this->request->getPost('color'),
+            'seats'   => $this->request->getPost('seats'),
+            'user_id' => session()->get('user_id'),
         ];
 
         if (!$carModel->save($data)) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['success' => false, 'errors' => $carModel->errors()]);
+            }
             return redirect()->back()->withInput()->with('errors', $carModel->errors());
         }
 
-        $id = $carModel->getInsertID(); // récupère l'id de la voiture créée
-        return redirect()->to(site_url('profile/edit'))->with('success', 'Voiture ajoutée avec succès !');
+        $id = $carModel->getInsertID();
+
+        if ($this->request->isAJAX()) {
+            return $this->response->setJSON([
+                'success' => true,
+                'car_id'  => $id,
+                'label'   => $data['brand'] . ' ' . $data['model'] . ' ' . $data['color'],
+                'csrfToken' => csrf_hash(),
+            ]);
+        }
+
+        $back = $this->request->getPost('back') ?? site_url('profile/edit');
+        return redirect()->to($back)->with('success', 'Voiture ajoutée avec succès !');
     }
 
     /** 
