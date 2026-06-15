@@ -118,3 +118,19 @@
 .autocomplete-item:hover {
   background: rgb(var(--color-action) / 0.08);
 }
+
+/* iOS Safari zoome sur tout input < 16px — forcer le minimum */
+@supports (-webkit-touch-callout: none) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="number"],
+  input:not([type]),
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
