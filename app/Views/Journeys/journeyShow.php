@@ -243,7 +243,7 @@
                 </button>
             </form>
         <?php elseif ($remainingSeats > 0) : ?>
-            <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center justify-between mb-2">
                 <div>
                     <p class="text-muted text-sm"><?= $remainingSeats > 1 ? 'Places disponibles' : 'Place disponible' ?></p>
                     <p class="text-ink font-bold font-display text-2xl"><?= esc($remainingSeats) ?></p>
@@ -293,14 +293,33 @@
 
     <!-- bouton annuler -->
     <div class="deleteAccount w-full">
-        <?php if ($journey['user_id'] === session()->get('user_id') && !$journey['canceled_at']): ?>
-            <a id="btnOpenCancelModal"
+        <?php if ($journey['user_id'] === session()->get('user_id') && !$journey['canceled_at'] && $journey['start_datetime'] > date('Y-m-d H:i:s')): ?>
+            <form id="form-cancel-journey" action="<?= site_url('journeys/' . $journey['id'] . '/cancel') ?>" method="POST">
+                <?= csrf_field() ?>
+            </form>
+            <button type="button" id="btnOpenCancelModal"
                 class="inline-flex items-center gap-2 bg-danger/10 hover:bg-danger text-danger hover:text-white border border-danger/30 hover:border-danger font-semibold rounded-lg px-4 py-2 text-sm transition-colors cursor-pointer">
                 <i class="fa-solid fa-xmark text-xs"></i>Annuler le trajet
-            </a>
+            </button>
+
+            <div id="modalCancelJourney" class="hidden fixed inset-0 w-full h-full bg-black/50 items-center justify-center z-[9999]">
+                <div class="bg-surface rounded-2xl p-6 w-[90%] max-w-[400px]">
+                    <h2 class="text-danger font-semibold font-display mb-2">Annuler le trajet</h2>
+                    <p class="text-ink text-sm mb-6">Vous allez annuler ce trajet. Les passagers acceptés seront notifiés par email.<br>Êtes-vous sûr ?</p>
+                    <div class="flex gap-3">
+                        <button type="button" id="btnCancelCancelModal"
+                            class="flex-1 border border-ink/20 text-ink rounded-lg px-4 py-2 text-sm font-semibold">
+                            Retour
+                        </button>
+                        <button type="button" id="btnConfirmCancelJourney"
+                            class="flex-1 bg-danger text-paper rounded-lg px-4 py-2 text-sm font-semibold">
+                            Confirmer
+                        </button>
+                    </div>
+                </div>
+            </div>
         <?php endif; ?>
     </div>
-
 </div>
 </div>
 
