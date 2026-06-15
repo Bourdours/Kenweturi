@@ -197,4 +197,9 @@ class UserModel extends BaseModel
             'reset_token_expiry'    => null,
         ]);
     }
+
+    public function ban(int $userId): bool
+    {
+        return $this->update($userId, ['is_banned' => 1]);
+    }
 }
