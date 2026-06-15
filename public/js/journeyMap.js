@@ -16,8 +16,10 @@
     el.addEventListener('mouseleave', () => map.scrollWheelZoom.disable());
 
     const isDark  = document.documentElement.classList.contains('dark');
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>',
+    L.tileLayer('https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2&STYLE=normal&FORMAT=image%2Fpng&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}', {
+        attribution: '© <a href="https://www.ign.fr/">IGN</a>',
+        minZoom: 2,
+        maxZoom: 18,
     }).addTo(map);
 
     const latlngs = waypoints.map((wp) => [wp.lat, wp.lng]);

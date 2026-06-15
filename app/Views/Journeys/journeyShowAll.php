@@ -130,7 +130,7 @@
             <?php foreach ($journeys as $journey) : ?>
                 <a href="<?= site_url('/journeys/') ?><?= esc($journey['id']) ?>?boardingCity=<?= urlencode($journey['city_boarding_name']) ?>&startAddress=<?= urlencode($startAddress ?? '') ?>&startLat=<?= esc($latStart ?? '') ?>&startLng=<?= esc($lngStart ?? '') ?>&endAddress=<?= urlencode($endAddress ?? '') ?>&endLat=<?= esc($latEnd ?? '') ?>&endLng=<?= esc($lngEnd ?? '') ?>&back=<?= urlencode(current_url(true)) ?>"
                    class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors"
-                   <?php if (!empty($journey['track_geojson'])): ?>data-geojson="<?= esc($journey['track_geojson'], 'attr') ?>"<?php endif ?>>
+                   <?php if (!empty($journey['track_geojson'])): ?>data-geojson="<?= esc($journey['track_geojson'], 'attr') ?>" data-stages="<?= esc($journey['stages_json'] ?? '[]', 'attr') ?>"<?php endif ?>>
                     <div class="flex items-start gap-4">
                         <div class="grid grid-cols-[10px_1fr] gap-x-4 flex-1 min-w-0 items-center">
                             <div class="w-2.5 h-2.5 rounded-full bg-brand justify-self-center"></div>
