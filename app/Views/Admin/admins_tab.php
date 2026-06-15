@@ -31,18 +31,18 @@ $displayCount  = count($allUsers);
         foreach ($allUsers as $user): ?>
             <?php $role = $user['role'] ?? 'user'; ?>
             <?php
-                $isSelf = ($user['id'] === $currentUserId);
+            $isSelf = ($user['id'] === $currentUserId);
 
+            $canDelete = false;
+            if ($isSelf) {
                 $canDelete = false;
-                if ($isSelf) {
-                    $canDelete = false;
-                } elseif ($role === 'superadmin') {
-                    $canDelete = $isSuperAdmin && $superadminCount > 1;
-                } elseif ($role === 'admin') {
-                    $canDelete = $isSuperAdmin && $adminCount > 1;
-                } else {
-                    $canDelete = true;
-                }
+            } elseif ($role === 'superadmin') {
+                $canDelete = $isSuperAdmin && $superadminCount > 1;
+            } elseif ($role === 'admin') {
+                $canDelete = $isSuperAdmin && $adminCount > 1;
+            } else {
+                $canDelete = true;
+            }
             ?>
             <div class="user-row flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-6 py-4"
                 data-name="<?= strtolower(esc($user['firstname']) . ' ' . esc($user['lastname'])) ?>"
@@ -105,6 +105,22 @@ $displayCount  = count($allUsers);
                         <?php endif; ?>
                     <?php endif; ?>
 
+                    <!-- Toggle étudiant / formateur -->
+                    <?php if ($role !== 'superadmin' && !$isSelf): ?>
+                        <form action="<?= site_url('admin/users/' . $user['id'] . '/student') ?>" method="post">
+                            <?= csrf_field() ?>
+                            <input type="hidden" name="is_student" value="<?= $user['is_student'] ? 0 : 1 ?>">
+                            <button type="submit"
+                                class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-ink/5 text-ink/60 hover:bg-ink/10 transition-colors">
+                                <?php if ($user['is_student']): ?>
+                                    <i class="fa-solid fa-graduation-cap text-xs mr-1"></i>Étudiant
+                                <?php else: ?>
+                                    <i class="fa-solid fa-chalkboard-teacher text-xs mr-1"></i>Formateur
+                                <?php endif; ?>
+                            </button>
+                        </form>
+                    <?php endif; ?>
+                    
                     <?php if ($canDelete): ?>
                         <form action="<?= site_url('admin/users/' . $user['id'] . '/delete') ?>" class="delete-form" method="post">
                             <?= csrf_field() ?>

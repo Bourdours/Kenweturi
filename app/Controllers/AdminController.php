@@ -98,8 +98,14 @@ class AdminController extends BaseController
         }
 
         // Détermine le nouveau statut selon l'action choisie
-        $newStatus = ($action === 'validate') ? 'active' : 'rejected';
-        $this->userModel->update($id, ['status' => $newStatus]);
+        $newStatus  = ($action === 'validate') ? 'active' : 'rejected';
+        $updateData = ['status' => $newStatus];
+
+        if ($action === 'validate') {
+            $updateData['is_student'] = (int) $this->request->getPost('is_student');
+        }
+
+        $this->userModel->update($id, $updateData);
 
         // Prépare le sujet et le template d'email selon l'action
         $subject   = ($action === 'validate') ? 'Votre compte a été validé !' : 'Votre demande d’inscription a été refusée';
@@ -159,7 +165,34 @@ class AdminController extends BaseController
 
         return redirect()->to(site_url('admin?tab=admins'))->with('success', $message);
     }
+    /**
+     * Modifie le statut étudiant/formateur d'un utilisateur.
+     *
+     * @param  int  $id  Identifiant de l'utilisateur cible
+     * @return \CodeIgniter\HTTP\RedirectResponse
+     */
+    public function updateStudent(int $id)
+    {
+        $isStudent = (int) $this->request->getPost('is_student');
 
+        if (! in_array($isStudent, [0, 1], true)) {
+            return redirect()->to(site_url('admin?tab=admins'))
+                ->with('error', 'Valeur invalide.');
+        }
+
+        $target = $this->userModel->find($id);
+        if (! $target) {
+            return redirect()->to(site_url('admin?tab=admins'))
+                ->with('error', 'Utilisateur introuvable.');
+        }
+
+        $this->userModel->update($id, ['is_student' => $isStudent]);
+
+        $label = $isStudent ? 'étudiant' : 'formateur';
+        return redirect()->to(site_url('admin?tab=admins'))
+            ->with('success', "{$target['firstname']} est maintenant {$label}.");
+    }
+    
     /**
      * Supprime un utilisateur (soft delete) et annule ses trajets en cours.
      *
