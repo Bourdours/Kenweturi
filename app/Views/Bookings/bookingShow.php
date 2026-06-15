@@ -23,7 +23,12 @@
             <i class="fa-solid fa-arrow-left text-xs"></i>Retour
         </a>
     </div>
-    
+    <?php if (session()->getFlashdata('success')): ?>
+        <div class="bg-success/10 border border-success/20 rounded-xl px-5 py-3 text-success text-sm flex items-center gap-2">
+        <i class="fa-solid fa-circle-check shrink-0"></i>
+        <?= esc(session()->getFlashdata('success')) ?>
+        </div>
+    <?php endif; ?>
     <?php if (session()->getFlashdata('error')): ?>
       <div class="bg-action/10 border border-action/30 rounded-xl p-3 mb-4 flex gap-2.5 items-center">
         <i class="fa-solid fa-triangle-exclamation text-action text-sm shrink-0"></i>
