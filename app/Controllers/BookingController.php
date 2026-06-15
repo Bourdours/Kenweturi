@@ -74,6 +74,7 @@ class BookingController extends BaseController
             'person_is_student' => $person_is_student,
             'person_label'      => $person_label,
             'isPending'         => $booking['status'] === "pending",
+            'isAccepted'        => $booking['status'] === "accepted",
             'isFull'            => $remainingSeats == 0,
         ]);
     }
