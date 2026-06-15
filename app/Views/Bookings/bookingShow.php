@@ -120,12 +120,18 @@
     <?php if ($is_driver || strtotime($booking['start_datetime']) > time()): ?>
         <article class="bg-surface-card rounded-2xl p-6">
             <?php if ($is_driver): ?>
+                <?php if(!$isFull): ?>
                 <form action="<?= site_url('dashboard/bookings/' . $booking['id'] . '/accept') ?>" method="post" class="mb-3">
                     <?= csrf_field() ?>
                     <button type="submit" class="w-full bg-action text-ink font-bold font-display rounded-full py-3 hover:bg-action-dark transition-colors">
                         Accepter la réservation
                     </button>
                 </form>
+                <?php else : ?>
+                    <div class="text-center mb-3">
+                        <p class="text-muted text-sm">Ce trajet est complet</p>
+                    </div>
+                <?php endif ?>
                 <form id="form-confirm" action="<?= site_url('dashboard/bookings/' . $booking['id'] . '/reject') ?>" method="post">
                     <?= csrf_field() ?>
                     <button type="button" onclick="openConfirmModal('Refuser cette réservation ?', 'form-confirm')"
