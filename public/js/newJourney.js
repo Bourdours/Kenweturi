@@ -576,3 +576,125 @@ function renumberStages(container) {
         label.innerHTML = `Étape ${index + 2} <span class="text-ink/30 font-normal">(optionnel)</span>`;
     });
 }
+
+const addCarBtn = document.querySelector('#addCarBtn');
+
+if (addCarBtn) {
+    document.querySelectorAll('.js-car-input').forEach(input => {
+        input.addEventListener('keydown', e => {
+            if (e.key === 'Enter') { e.preventDefault(); addCarBtn.click(); }
+        });
+    });
+
+    addCarBtn.addEventListener('click', async function () {
+        const brand  = document.querySelector('#vehicleBrand').value.trim();
+        const model  = document.querySelector('#vehicleModel').value.trim();
+        const color  = document.querySelector('#vehicleColor').value.trim();
+        const seats  = document.querySelector('#vehicleSeats').value.trim();
+        const carError = document.querySelector('#carError');
+
+        if (!brand || !model || !color || !seats || isNaN(seats) || seats < 1 || seats > 9) {
+            carError.classList.remove('hidden');
+            return;
+        }
+        carError.classList.add('hidden');
+
+        const formData = new FormData();
+        formData.append(addCarBtn.dataset.csrfName, addCarBtn.dataset.csrfValue);
+        formData.append('brand', brand);
+        formData.append('model', model);
+        formData.append('color', color);
+        formData.append('seats', seats);
+
+        const response = await fetch(addCarBtn.dataset.action, {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            body: formData,
+        });
+
+        const data = await response.json();
+
+        if (data.csrfToken) {
+            addCarBtn.dataset.csrfValue = data.csrfToken;
+        }
+
+        if (data.success) {
+            const list = document.querySelector('#carDropdownList');
+            const li   = document.createElement('li');
+            li.className     = 'autocomplete-item';
+            li.dataset.value = data.car_id;
+            li.textContent   = data.label;
+            list.appendChild(li);
+
+            // Sélectionner directement la nouvelle voiture
+            selectCar(li, carLabel, carHidden, carList, carArrow);
+
+            document.querySelector('#addCarForm').classList.add('hidden');
+            document.querySelector('#btnToggleAddCar').innerHTML =
+                '<i class="fa-solid fa-plus text-xs"></i> Ajouter une voiture';
+
+            document.querySelector('#vehicleBrand').value = '';
+            document.querySelector('#vehicleModel').value = '';
+            document.querySelector('#vehicleColor').value = '';
+            document.querySelector('#vehicleSeats').value = '';
+        }
+    });
+}
+
+const btnToggleAddCar = document.querySelector('#btnToggleAddCar');
+const addCarForm      = document.querySelector('#addCarForm');
+
+if (btnToggleAddCar && addCarForm) {
+    btnToggleAddCar.addEventListener('click', () => {
+        const isHidden = addCarForm.classList.contains('hidden');
+        addCarForm.classList.toggle('hidden', !isHidden);
+        btnToggleAddCar.innerHTML = isHidden
+            ? '<i class="fa-solid fa-xmark text-xs"></i> Annuler'
+            : '<i class="fa-solid fa-plus text-xs"></i> Ajouter une voiture';
+    });
+}
+
+// Autocomplete marques voiture
+const CAR_BRANDS = [
+  'Alfa Romeo', 'Aston Martin', 'Audi', 'Bentley', 'BMW', 'Bugatti',
+  'Cadillac', 'Chevrolet', 'Chrysler', 'Citroën', 'Cupra', 'Dacia',
+  'Dodge', 'DS Automobiles', 'Ferrari', 'Fiat', 'Ford', 'Genesis',
+  'Honda', 'Hummer', 'Hyundai', 'Infiniti', 'Isuzu', 'Jaguar', 'Jeep',
+  'Kia', 'Lamborghini', 'Lancia', 'Land Rover', 'Lexus', 'Lincoln',
+  'Lotus', 'Maserati', 'Maybach', 'Mazda', 'McLaren', 'Mercedes-Benz',
+  'MG', 'Mini', 'Mitsubishi', 'Morgan', 'Nissan', 'Oldsmobile', 'Opel',
+  'Peugeot', 'Pontiac', 'Porsche', 'Ram', 'Renault', 'Rolls-Royce',
+  'Rover', 'Saab', 'Seat', 'Skoda', 'Smart', 'Subaru', 'Suzuki',
+  'Tesla', 'Toyota', 'Triumph', 'Volkswagen', 'Volvo',
+  'BYD', 'Nio', 'Xpeng', 'Lynk & Co', 'Ora', 'Aiways', 'Omoda',
+  'Alpine', 'Ligier', 'Microcar', 'Aixam'
+];
+
+const brandInput           = document.querySelector('#vehicleBrand');
+const brandSuggestionsJourney = document.querySelector('#brandSuggestions');
+
+if (brandInput && brandSuggestionsJourney) {
+    brandInput.addEventListener('input', function () {
+        const value = this.value.trim().toLowerCase();
+        brandSuggestionsJourney.innerHTML = '';
+        if (value.length < 1) { brandSuggestionsJourney.classList.add('hidden'); return; }
+        const filtered = CAR_BRANDS.filter(b => b.toLowerCase().includes(value));
+        if (filtered.length > 0) {
+            filtered.forEach(brand => {
+                const li = document.createElement('li');
+                li.textContent = brand;
+                li.className = 'px-3 py-2 text-sm text-ink hover:bg-action/10 cursor-pointer transition-colors';
+                li.addEventListener('click', () => { brandInput.value = brand; brandSuggestionsJourney.classList.add('hidden'); });
+                brandSuggestionsJourney.appendChild(li);
+            });
+            brandSuggestionsJourney.classList.remove('hidden');
+        } else {
+            brandSuggestionsJourney.classList.add('hidden');
+        }
+    });
+    document.addEventListener('click', e => {
+        if (e.target !== brandInput && e.target !== brandSuggestionsJourney) {
+            brandSuggestionsJourney.classList.add('hidden');
+        }
+    });
+}
