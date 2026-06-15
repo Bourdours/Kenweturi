@@ -146,7 +146,7 @@ class BookingController extends BaseController
 
             $this->bookingService->accept($bookingId,$driverId);
             $this->bookingService->confirmToPassenger($bookingId,$driverId);
-            return redirect()->to('/dashboard/bookings' . $bookingId)->with('success', 'Réservation acceptée.');
+            return redirect()->to('/dashboard/bookings/' . $bookingId)->with('success', 'Réservation acceptée.');
 
 
         }catch(BookingNotFoundException) {
