@@ -59,13 +59,6 @@ class BookingController extends BaseController
 
         // --- Vérification places restantes
         $remainingSeats = $this->bookingModel->countRemainingSeats($id,$journey['seats']);
-        $bookSeats = $this->bookingModel->selectSum('seat_numbers')
-                                        ->where('journey_id', $id)
-                                        ->where('status', 'accepted')
-                                        ->get()->getRowArray();
-        $remainingSeats = $journey['seats'] - ($bookSeats['seat_numbers'] ?? 0);
-
-        $seatsRequested = max(1, (int) ($this->request->getPost('seat_numbers') ?? 1));
 
         if ($remainingSeats == 0)
             return redirect()->to('/journeys/' . $id)
@@ -153,7 +146,7 @@ class BookingController extends BaseController
 
             $this->bookingService->accept($bookingId,$driverId);
             $this->bookingService->confirmToPassenger($bookingId,$driverId);
-            return redirect()->to('/dashboard/bookings' . $bookingId)->with('success', 'Réservation acceptée.');
+            return redirect()->to('/dashboard/bookings/' . $bookingId)->with('success', 'Réservation acceptée.');
 
 
         }catch(BookingNotFoundException) {
