@@ -163,7 +163,7 @@ class AuthController extends BaseController
             'email'         => $this->request->getPost('email'),
             'gender'        => $this->request->getPost('gender'),
             'birth_date'    => $this->request->getPost('birthDate'),
-            'is_student'    => $this->request->getPost('isStudent') === 'on' ? 1 : 0,
+            'is_student'    => 1,
             'password_hash' => $this->request->getPost('password'),
             'city_id'       => $cityId,
         ];

@@ -13,7 +13,7 @@ if (dateInput) {
         dateFormat: 'Y-m-d',
         altInput: true,
         altFormat: 'd/m/Y',
-        disableMobile: true,
+        disableMobile: !('ontouchstart' in window || navigator.maxTouchPoints > 0),
         defaultDate: dateInput.value || new Date(),
     });
 }

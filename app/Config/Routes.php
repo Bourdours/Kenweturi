@@ -72,6 +72,7 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('dashboard/reports/(:num)',             'DashboardController::showReport/$1');
     $routes->get('dashboard/journey-requests',           'DashboardController::showJourneyRequests');
     $routes->get('dashboard/journey-requests/(:num)',    'DashboardController::showJourneyRequest/$1');
+    $routes->get('dashboard/car/new',                    'CarController::showCreateForm');
 
     // Bookings
     $routes->get('dashboard/bookings/(:num)',           'BookingController::show/$1');
@@ -119,6 +120,7 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('car/(:num)/edit',    'CarController::showEditForm/$1');
     $routes->post('car/(:num)/update', 'CarController::update/$1');
     $routes->post('car/(:num)/delete', 'CarController::delete/$1');
+
 });
 
 
@@ -131,6 +133,7 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
     $routes->post('reports/(:num)/resolve', 'AdminController::resolveReport/$1');
     $routes->post('users/(:num)/validate',  'AdminController::updateRegistration/$1');
     $routes->post('users/(:num)/delete',    'AdminController::deleteUser/$1');
+    $routes->post('users/(:num)/student',   'AdminController::updateStudent/$1');
 });
 
 /* =========================================================
