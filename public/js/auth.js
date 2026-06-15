@@ -57,6 +57,14 @@ if (pwInput) {
   });
 }
 
+const birthDate = document.getElementById('birthDate');
+const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+if (birthDate && !birthDate.value && isTouchDevice) {
+  birthDate.type = 'text';
+  birthDate.addEventListener('pointerdown', function () { if (this.type === 'text') this.type = 'date'; });
+  birthDate.addEventListener('blur',        function () { if (!this.value) this.type = 'text'; });
+}
+
 function togglePassword(id, btn) {
   const input = document.getElementById(id);
   const icon = btn.querySelector('i');

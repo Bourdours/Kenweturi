@@ -1,5 +1,15 @@
 /* ─── Flatpickr – thème Kenweturi ─────────────────────────── */
 
+.flatpickr-wrapper {
+  display: block;
+  width: 100%;
+}
+
+.flatpickr-mobile {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
 .flatpickr-calendar {
     background: rgb(var(--color-paper));
     border: 1px solid rgb(var(--color-action) / 0.15);
@@ -28,13 +38,27 @@
 }
 .flatpickr-current-month .flatpickr-monthDropdown-months {
     text-transform: capitalize;
+    background: rgb(var(--color-surface));
+    color: rgb(var(--color-ink));
+    border-radius: 0.375rem;
+    padding: 2px 6px;
+    cursor: pointer;
+    outline: none;
+    color-scheme: light;
 }
 .flatpickr-monthDropdown-month {
     text-transform: capitalize;
+    background-color: rgb(var(--color-surface));
+    color: rgb(var(--color-ink));
+}
+.flatpickr-monthDropdown-month:hover,
+.flatpickr-monthDropdown-month:checked {
+    background-color: rgb(var(--color-action));
+    color: rgb(var(--color-paper));
 }
 .flatpickr-current-month .flatpickr-monthDropdown-months:hover,
 .flatpickr-current-month input.cur-year:hover {
-    background: transparent;
+    background: rgb(var(--color-action) / 0.1);
 }
 
 /* Flèches nav */
@@ -104,6 +128,64 @@
     background: transparent;
 }
 
+/* ─── Sélecteur d'heure ──────────────────────────────────── */
+
+.flatpickr-time {
+    background: rgb(var(--color-paper));
+    border-top: 1px solid rgb(var(--color-action) / 0.1);
+    border-radius: 0 0 0.75rem 0.75rem;
+}
+
+.flatpickr-time .numInputWrapper {
+    flex: 1;
+    border: none;
+}
+
+.flatpickr-time .numInputWrapper:hover {
+    background: rgb(var(--color-action) / 0.06);
+}
+
+.flatpickr-time input.numInput {
+    background: transparent;
+    color: rgb(var(--color-ink));
+    border: none;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.flatpickr-time input.numInput:focus {
+    background: rgb(var(--color-action) / 0.08);
+    color: rgb(var(--color-action));
+    outline: none;
+}
+
+.flatpickr-time .flatpickr-time-separator {
+    color: rgb(var(--color-ink) / 0.4);
+    font-weight: 600;
+}
+
+.flatpickr-time .numInputWrapper span.arrowUp,
+.flatpickr-time .numInputWrapper span.arrowDown {
+    border-color: transparent;
+}
+
+.flatpickr-time .numInputWrapper span.arrowUp::after {
+    border-bottom-color: rgb(var(--color-ink) / 0.3);
+}
+
+.flatpickr-time .numInputWrapper span.arrowDown::after {
+    border-top-color: rgb(var(--color-ink) / 0.3);
+}
+
+.flatpickr-time .numInputWrapper span.arrowUp:hover::after {
+    border-bottom-color: rgb(var(--color-action));
+}
+
+.flatpickr-time .numInputWrapper span.arrowDown:hover::after {
+    border-top-color: rgb(var(--color-action));
+}
+
 /* ─── Thème sombre ────────────────────────────────────────── */
 
 .dark .flatpickr-calendar {
@@ -124,5 +206,26 @@
 .dark .flatpickr-day.today { border-color: rgb(var(--color-action) / 0.6); }
 .dark .flatpickr-day.prevMonthDay,
 .dark .flatpickr-day.nextMonthDay { color: rgb(var(--color-ink) / 0.25); }
-.dark .flatpickr-current-month .flatpickr-monthDropdown-months,
+.dark .flatpickr-current-month .flatpickr-monthDropdown-months {
+    color: rgb(var(--color-ink));
+    background: rgb(var(--color-surface));
+    color-scheme: dark;
+}
 .dark .flatpickr-current-month input.cur-year { color: rgb(var(--color-ink)); }
+.dark .flatpickr-monthDropdown-month {
+    background-color: rgb(var(--color-surface));
+    color: rgb(var(--color-ink));
+}
+.dark .flatpickr-monthDropdown-month:hover,
+.dark .flatpickr-monthDropdown-month:checked {
+    background-color: rgb(var(--color-action));
+    color: rgb(var(--color-paper));
+}
+
+.dark .flatpickr-time {
+    background: rgb(var(--color-paper));
+    border-top-color: rgb(var(--color-action) / 0.15);
+}
+.dark .flatpickr-time .numInputWrapper:hover { background: rgb(var(--color-action) / 0.1); }
+.dark .flatpickr-time input.numInput { color: rgb(var(--color-ink)); }
+.dark .flatpickr-time input.numInput:focus { background: rgb(var(--color-action) / 0.12); color: rgb(var(--color-action)); }
