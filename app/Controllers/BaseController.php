@@ -52,28 +52,29 @@ abstract class BaseController extends Controller
      * @param string|null $url URL de retour à valider
      * @return string URL validée si conforme, URL de repli (page journeys) sinon
      */
-    function validateBackUrl(?string $url): string
+    function validateBackUrl(?string $url): ?string
     {
-        $fallback = site_url('journeys');
         if (empty($url)) {
-            return $fallback;
+            return null;
         }
+
         try {
             $uri     = new URI($url);
             $baseUri = new URI(base_url());
 
             if ($uri->getHost() !== $baseUri->getHost()) {
-                return $fallback;
+                return null;
             }
             if (! in_array($uri->getScheme(), ['http', 'https'], true)) {
-                return $fallback;
+                return null;
             }
             if ($uri->getPort() !== $baseUri->getPort()) {
-                return $fallback;
+                return null;
             }
+
             return (string) $uri;
         } catch (\Throwable $e) {
-            return $fallback;
+            return null;
         }
     }
 }
