@@ -27,93 +27,132 @@
 
   <!-- Hero -->
   <section class="bg-gradient-to-b from-paper via-surface to-paper">
-    <div class="max-w-4xl mx-auto px-4 py-16 md:py-24 flex flex-col items-center gap-8 text-center">
-      <?php if (session()->getFlashdata('success')): ?>
-        <div class="bg-success/10 border-b border-r- border-success/20 px-6 py-3 text-success max-w-sm text-sm text-center mx-auto rounded-xl">
+    <?php if (session()->get('isLoggedIn')): ?>
+      <!-- Hero connecté : formulaire de recherche -->
+      <div class="max-w-4xl mx-auto px-4 py-16 md:py-24 flex flex-col items-center gap-8 text-center">
+        <?php if (session()->getFlashdata('success')): ?>
+          <div class="bg-success/10 border-b border-r- border-success/20 px-6 py-3 text-success max-w-sm text-sm text-center mx-auto rounded-xl">
+            <?= esc(session()->getFlashdata('success')) ?>
+          </div>
+        <?php endif; ?>
 
-          <?= esc(session()->getFlashdata('success')) ?>
+        <div class="flex flex-col gap-3">
+          <p class="text-action text-xs font-semibold uppercase tracking-widest">Covoiturage régional</p>
+          <h1 class="relative z-10 text-ink text-4xl md:text-5xl font-bold font-display leading-tight">
+            Partagez la route,<br>simplifiez vos trajets
+          </h1>
+          <p class="relative z-10 text-ink/50 text-base md:text-lg max-w-xl mx-auto">
+            Trouvez ou proposez un covoiturage domicile-travail près de chez vous. Gratuit, simple, local.
+          </p>
         </div>
-      <?php endif; ?>
 
-      <div class="flex flex-col gap-3">
-        <p class="text-action text-xs font-semibold uppercase tracking-widest">Covoiturage régional</p>
-        <h1 class="relative z-10 text-ink text-4xl md:text-5xl font-bold font-display leading-tight">
-          Partagez la route,<br>simplifiez vos trajets
-        </h1>
-        <p class="relative z-10 text-ink/50 text-base md:text-lg max-w-xl mx-auto">
-          Trouvez ou proposez un covoiturage domicile-travail près de chez vous. Gratuit, simple, local.
+        <!-- Formulaire de recherche -->
+        <form id="addJourneyForm" action="<?= site_url('journeys') ?>" method="GET" class="w-full max-w-2xl">
+          <div class="relative z-10 bg-paper rounded-2xl p-5 border border-action/10 shadow-sm space-y-4 text-left">
+
+            <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] gap-3 sm:gap-x-2 sm:items-end">
+              <div>
+                <label for="startAddress" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
+                  <i class="fa-solid fa-circle-dot text-sm"></i>Départ
+                </label>
+                <input type="text" id="startAddress" name="startAddress"
+                  class="address w-full bg-surface border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30"
+                  placeholder="Ville ou adresse">
+                <input type="text" class="lng" id="startAddressLng" name="startLng" hidden>
+                <input type="text" class="lat" id="startAddressLat" name="startLat" hidden>
+              </div>
+              <div class="flex justify-center sm:mb-1">
+                <button type="button" id="swapAddresses"
+                  class="w-8 h-8 flex items-center justify-center bg-surface border border-action/20 rounded-full text-ink/50 hover:text-action hover:border-action/40 transition-colors cursor-pointer"
+                  title="Inverser départ et arrivée">
+                  <i class="fa-solid fa-right-left rotate-90 sm:rotate-0 text-xs"></i>
+                </button>
+              </div>
+              <div>
+                <label for="endAddress" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
+                  <i class="fa-solid fa-location-dot text-sm"></i>Arrivée
+                </label>
+                <input type="text" id="endAddress" name="endAddress"
+                  class="address w-full bg-surface border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30"
+                  placeholder="Ville ou adresse">
+                <input type="text" class="lng" id="endAddressLng" name="endLng" hidden>
+                <input type="text" class="lat" id="endAddressLat" name="endLat" hidden>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] gap-3 sm:gap-x-2 sm:items-end">
+              <div>
+                <label for="date" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
+                  <i class="fa-regular fa-calendar text-sm"></i>Date
+                </label>
+                <input type="text" id="date" name="date" readonly
+                  placeholder="jj/mm/aaaa"
+                  class="w-full bg-surface border border-action/15 rounded-lg text-ink/60 text-sm px-3 py-2.5 outline-none focus:border-action/50 cursor-pointer">
+              </div>
+              <div class="hidden sm:flex justify-center sm:mb-1">
+                <div class="w-8"></div>
+              </div>
+              <div>
+                <label for="time" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
+                  <i class="fa-regular fa-clock text-sm"></i>À partir de
+                </label>
+                <input type="text" id="time" name="time" readonly placeholder="--:--"
+                  class="w-full bg-surface border border-action/15 rounded-lg text-ink/60 text-sm px-3 py-2.5 outline-none focus:border-action/50 cursor-pointer">
+              </div>
+            </div>
+
+            <button type="submit"
+              class="w-full bg-action hover:bg-action-dark text-ink font-semibold font-display rounded-lg py-3 transition-colors cursor-pointer text-base">
+              <i class="fa-solid fa-magnifying-glass mr-2"></i>Rechercher un trajet
+            </button>
+
+          </div>
+        </form>
+
+        <p class="relative z-10 text-ink/40 text-sm">
+          Vous êtes conducteur ?
+          <a href="<?= site_url('journeys/new') ?>" class="text-action hover:underline font-medium">Publiez votre trajet</a>
         </p>
       </div>
 
-      <!-- Formulaire de recherche -->
-      <form id="addJourneyForm" action="<?= site_url('journeys') ?>" method="GET" class="w-full max-w-2xl">
-        <div class="relative z-10 bg-paper rounded-2xl p-5 border border-action/10 shadow-sm space-y-4 text-left">
-
-          <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] gap-3 sm:gap-x-2 sm:items-end">
-            <div>
-              <label for="startAddress" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
-                <i class="fa-solid fa-circle-dot text-sm"></i>Départ
-              </label>
-              <input type="text" id="startAddress" name="startAddress"
-                class="address w-full bg-surface border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30"
-                placeholder="Ville ou adresse">
-              <input type="text" class="lng" id="startAddressLng" name="startLng" hidden>
-              <input type="text" class="lat" id="startAddressLat" name="startLat" hidden>
-            </div>
-            <div class="flex justify-center sm:mb-1">
-              <button type="button" id="swapAddresses"
-                class="w-8 h-8 flex items-center justify-center bg-surface border border-action/20 rounded-full text-ink/50 hover:text-action hover:border-action/40 transition-colors cursor-pointer"
-                title="Inverser départ et arrivée">
-                <i class="fa-solid fa-right-left rotate-90 sm:rotate-0 text-xs"></i>
-              </button>
-            </div>
-            <div>
-              <label for="endAddress" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
-                <i class="fa-solid fa-location-dot text-sm"></i>Arrivée
-              </label>
-              <input type="text" id="endAddress" name="endAddress"
-                class="address w-full bg-surface border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30"
-                placeholder="Ville ou adresse">
-              <input type="text" class="lng" id="endAddressLng" name="endLng" hidden>
-              <input type="text" class="lat" id="endAddressLat" name="endLat" hidden>
-            </div>
+    <?php else: ?>
+      <!-- Hero non connecté : invitation à rejoindre -->
+      <div class="max-w-4xl mx-auto px-4 py-16 md:py-24 flex flex-col items-center gap-10 text-center">
+        <?php if (session()->getFlashdata('success')): ?>
+          <div class="bg-success/10 border border-success/20 px-6 py-3 text-success max-w-sm text-sm text-center mx-auto rounded-xl">
+            <?= esc(session()->getFlashdata('success')) ?>
           </div>
+        <?php endif; ?>
 
-          <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] gap-3 sm:gap-x-2 sm:items-end">
-            <div>
-              <label for="date" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
-                <i class="fa-regular fa-calendar text-sm"></i>Date
-              </label>
-              <input type="text" id="date" name="date" readonly
-                placeholder="jj/mm/aaaa"
-                class="w-full bg-surface border border-action/15 rounded-lg text-ink/60 text-sm px-3 py-2.5 outline-none focus:border-action/50 cursor-pointer">
-            </div>
-            <div class="hidden sm:flex justify-center sm:mb-1">
-              <div class="w-8"></div>
-            </div>
-            <div>
-              <label for="time" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
-                <i class="fa-regular fa-clock text-sm"></i>À partir de
-              </label>
-              <input type="text" id="time" name="time" readonly placeholder="--:--"
-                class="w-full bg-surface border border-action/15 rounded-lg text-ink/60 text-sm px-3 py-2.5 outline-none focus:border-action/50 cursor-pointer">
-            </div>
-          </div>
-
-          <button type="submit"
-            class="w-full bg-action hover:bg-action-dark text-ink font-semibold font-display rounded-lg py-3 transition-colors cursor-pointer text-base">
-            <i class="fa-solid fa-magnifying-glass mr-2"></i>Rechercher un trajet
-          </button>
-
+        <div class="flex flex-col gap-4 max-w-2xl">
+          <p class="text-action text-xs font-semibold uppercase tracking-widest">Covoiturage régional</p>
+          <h1 class="relative z-10 text-ink text-4xl md:text-6xl font-bold font-display leading-tight">
+            Partagez la route,<br>simplifiez vos trajets
+          </h1>
+          <p class="relative z-10 text-ink/50 text-base md:text-lg max-w-xl mx-auto">
+            Rejoignez la communauté Kenweturi et trouvez ou proposez un covoiturage domicile-travail près de chez vous. <br> Gratuit, simple, local.
+          </p>
         </div>
-      </form>
 
-      <p class="relative z-10 text-ink/40 text-sm">
-        Vous êtes conducteur ?
-        <a href="<?= site_url('journeys/new') ?>" class="text-action hover:underline font-medium">Publiez votre trajet</a>
-      </p>
+        <div class="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+          <a href="<?= site_url('register') ?>"
+            class="group relative inline-flex justify-center items-center gap-2.5 w-full sm:w-auto bg-action hover:bg-action-dark text-ink font-semibold font-display text-base rounded-2xl px-8 py-4 shadow-lg shadow-action/25 hover:shadow-xl hover:shadow-action/30 hover:-translate-y-0.5 transition-all duration-200">
+            Créer un compte gratuitement
+            <i class="fa-solid fa-arrow-right text-sm transition-transform duration-200 group-hover:translate-x-1"></i>
+          </a>
+          <a href="<?= site_url('login') ?>"
+            class="inline-flex justify-center items-center gap-2.5 w-full sm:w-auto bg-paper/80 hover:bg-paper border border-action/20 hover:border-action/40 text-ink/70 hover:text-ink font-semibold text-base rounded-2xl px-8 py-4 backdrop-blur-sm transition-all duration-200">
+            <i class="fa-regular fa-circle-user text-base"></i>
+            Se connecter
+          </a>
+        </div>
 
-    </div>
+        <p class="relative z-10 text-ink/30 text-sm">
+          Curieux ?
+          <a href="<?= site_url('comment-ca-marche') ?>" class="text-action/70 hover:text-action hover:underline font-medium transition-colors">Découvrez comment ça marche</a>
+        </p>
+      </div>
+    <?php endif; ?>
   </section>
 
   <?php if (!empty($nextDriverJourney) || !empty($nextPassengerJourney)): ?>

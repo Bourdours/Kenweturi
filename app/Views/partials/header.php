@@ -51,9 +51,11 @@ $initials = session()->get('isLoggedIn')
 
       <!-- Nav desktop -->
       <nav class="hidden lg:flex absolute left-1/2 -translate-x-1/2 items-center gap-8">
-        <a href="<?= site_url('journeys') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Chercher un trajet</a>
-        <a href="<?= site_url('journeys/new') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Publier un trajet</a>
-        <a href="<?= site_url('journey-requests') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Demander un trajet</a>
+        <?php if (session()->get('isLoggedIn')): ?>
+          <a href="<?= site_url('journeys') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Chercher un trajet</a>
+          <a href="<?= site_url('journeys/new') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Publier un trajet</a>
+          <a href="<?= site_url('journey-requests') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Demander un trajet</a>
+        <?php endif; ?>
         <a href="<?= site_url('comment-ca-marche') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Comment ça marche</a>
       </nav>
 
@@ -150,9 +152,11 @@ $initials = session()->get('isLoggedIn')
       <?php endif; ?>
 
       <nav class="flex flex-col gap-3 pt-4">
-        <a href="<?= site_url('journeys') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Chercher un trajet</a>
-        <a href="<?= site_url('journeys/new') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Publier un trajet</a>
-        <a href="<?= site_url('journey-requests') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Demander un trajet</a>
+        <?php if (session()->get('isLoggedIn')): ?>
+          <a href="<?= site_url('journeys') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Chercher un trajet</a>
+          <a href="<?= site_url('journeys/new') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Publier un trajet</a>
+          <a href="<?= site_url('journey-requests') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Demander un trajet</a>
+        <?php endif; ?>
         <a href="<?= site_url('comment-ca-marche') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Comment ça marche</a>
         <?php if (session()->get('isLoggedIn')): ?>
           <div class="flex flex-col gap-2 pt-4 border-t border-action/10 mt-4">
