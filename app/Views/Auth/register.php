@@ -67,12 +67,12 @@
               class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30" />
           </div>
 
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label for="gender" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
-                <i class="fa-solid fa-venus-mars text-sm"></i>Genre
+          <div class="grid grid-cols-2 gap-3 items-end">
+            <div class="self-stretch flex flex-col">
+              <label for="gender" class="text-ink/50 text-sm mb-1.5 flex items-start gap-1">
+                <i class="fa-solid fa-venus-mars text-sm mt-0.5"></i>Genre
               </label>
-              <div class="relative">
+              <div class="relative mt-auto">
                 <select name="gender" id="gender" required
                   class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none appearance-none cursor-pointer focus:border-action/50">
                   <option value="Homme" <?= old('gender') == 'Homme' ? 'selected' : '' ?>>Homme</option>
@@ -82,13 +82,14 @@
                 <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-ink/30 text-sm pointer-events-none"></i>
               </div>
             </div>
-            <div>
-              <label for="birthDate" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
-                <i class="fa-regular fa-calendar text-sm"></i>Date de naissance
+            <div class="self-stretch flex flex-col">
+              <label for="birthDate" class="text-ink/50 text-sm mb-1.5 flex items-start gap-1">
+                <i class="fa-regular fa-calendar text-sm mt-0.5"></i>Date de naissance
               </label>
               <input type="date" name="birthDate" id="birthDate"
                 max="<?= date('Y-m-d') ?>" value="<?= old('birthDate') ?>"
-                class="w-full bg-paper border border-action/15 rounded-lg text-ink/60 text-sm px-3 py-2.5 outline-none focus:border-action/50" />
+                placeholder="jj/mm/aaaa"
+                class="w-full bg-paper border border-action/15 rounded-lg text-ink/60 text-sm px-3 py-2.5 outline-none focus:border-action/50 mt-auto appearance-none placeholder:text-ink/30" />
             </div>
           </div>
         </div>

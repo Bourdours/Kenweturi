@@ -79,7 +79,7 @@
             </div>
           </div>
 
-          <div class="grid grid-cols-[1fr_auto_1fr] gap-3 sm:gap-x-2">
+          <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] gap-3 sm:gap-x-2 sm:items-end">
             <div>
               <label for="date" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
                 <i class="fa-regular fa-calendar text-sm"></i>Date
@@ -88,7 +88,9 @@
                 placeholder="jj/mm/aaaa"
                 class="w-full bg-surface border border-action/15 rounded-lg text-ink/60 text-sm px-3 py-2.5 outline-none focus:border-action/50 cursor-pointer">
             </div>
-            <div class="w-8"></div>
+            <div class="hidden sm:flex justify-center sm:mb-1">
+              <div class="w-8"></div>
+            </div>
             <div>
               <label for="time" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
                 <i class="fa-regular fa-clock text-sm"></i>À partir de
