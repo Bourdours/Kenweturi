@@ -307,7 +307,7 @@ class DashboardController extends BaseController
 
         return view('Dashboard/dashboardBookings', [
             'title'    => $title,
-            'back'     => $this->request->getGet('back'),
+            'back'     => $this->validateBackUrl($this->request->getGet('back')),
             'bookings' => $bookings,
             'pager'    => $this->pager,
             'total'    => $total,
@@ -425,7 +425,7 @@ class DashboardController extends BaseController
 
         return view('Dashboard/dashboardReportShow', [
             'title'  => 'Détail du signalement',
-            'back'   => $this->request->getGet('back'),
+            'back'   => $this->validateBackUrl($this->request->getGet('back')),
             'report' => $report,
         ]);
     }
