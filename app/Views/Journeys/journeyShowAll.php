@@ -91,13 +91,20 @@
                     <label for="smoking" class="text-ink/50 text-sm mb-1.5 flex items-baseline gap-1">
                         <i class="fa-solid fa-smoking text-sm"></i>Fumeur
                     </label>
-                    <div class="relative">
-                        <select id="smoking" name="smoking" class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none appearance-none cursor-pointer focus:border-action/50">
-                            <option value="">Indifférent</option>
-                            <option value="0" <?= ($smoking ?? '') === '0' ? 'selected' : '' ?>>Non-fumeur</option>
-                            <option value="1" <?= ($smoking ?? '') === '1' ? 'selected' : '' ?>>Fumeur</option>
-                        </select>
-                        <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-ink/30 text-sm pointer-events-none"></i>
+                    <div class="relative" id="smokingDropdownWrapper">
+                        <button type="button" id="smokingDropdownBtn"
+                            class="w-full bg-paper border border-action/15 rounded-lg text-sm px-3 py-2.5 outline-none focus:border-action/50 transition-colors cursor-pointer text-left flex items-center justify-between">
+                            <span id="smokingDropdownLabel" class="text-ink">
+                                <?= [''=>'Indifférent','0'=>'Non-fumeur','1'=>'Fumeur'][$smoking ?? ''] ?? 'Indifférent' ?>
+                            </span>
+                            <i id="smokingDropdownArrow" class="fa-solid fa-chevron-down text-xs text-ink/30 transition-transform"></i>
+                        </button>
+                        <input type="hidden" name="smoking" id="smokingHidden" value="<?= esc($smoking ?? '') ?>">
+                        <ul class="autocomplete-dropdown" id="smokingDropdownList">
+                            <li class="autocomplete-item" data-value="">Indifférent</li>
+                            <li class="autocomplete-item" data-value="0">Non-fumeur</li>
+                            <li class="autocomplete-item" data-value="1">Fumeur</li>
+                        </ul>
                     </div>
                 </div>
             </div>
