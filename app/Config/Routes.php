@@ -65,10 +65,9 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('logout', 'AuthController::logout');
 
     // Dashboard
-    $routes->get('dashboard',                            'DashboardController::show');
-    $routes->get('dashboard/journeys',                   'DashboardController::showJourneys');
-    $routes->get('dashboard/bookings',                   'DashboardController::showBookings');
-    $routes->get('dashboard/bookings/(:num)',            'DashboardController::showBooking/$1');
+    $routes->get('dashboard',                 'DashboardController::show');
+    $routes->get('dashboard/journeys',        'DashboardController::showJourneys');
+    $routes->get('dashboard/bookings',        'DashboardController::showBookings');
     $routes->get('dashboard/reports',                    'DashboardController::showReports');
     $routes->get('dashboard/reports/(:num)',             'DashboardController::showReport/$1');
     $routes->get('dashboard/journey-requests',           'DashboardController::showJourneyRequests');
@@ -76,10 +75,11 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('dashboard/car/new',                    'CarController::showCreateForm');
 
     // Bookings
-    $routes->post('dashboard/bookings/(:num)/delete', 'BookingController::delete/$1');
-    $routes->post('dashboard/bookings/(:num)/accept', 'BookingController::accept/$1');
-    $routes->post('dashboard/bookings/(:num)/reject', 'BookingController::reject/$1');
-    $routes->post('journeys/(:num)/book',             'BookingController::create/$1');
+    $routes->get('dashboard/bookings/(:num)',           'BookingController::show/$1');
+    $routes->post('dashboard/bookings/(:num)/delete',   'BookingController::delete/$1');
+    $routes->post('dashboard/bookings/(:num)/accept',   'BookingController::accept/$1');
+    $routes->post('dashboard/bookings/(:num)/reject',   'BookingController::reject/$1');
+    $routes->post('journeys/(:num)/book',               'BookingController::create/$1');
 
     // Journeys
     $routes->get('journeys',                  'JourneyController::showAll');
@@ -133,6 +133,7 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
     $routes->post('reports/(:num)/resolve', 'AdminController::resolveReport/$1');
     $routes->post('users/(:num)/validate',  'AdminController::updateRegistration/$1');
     $routes->post('users/(:num)/delete',    'AdminController::deleteUser/$1');
+    $routes->post('users/(:num)/student',   'AdminController::updateStudent/$1');
 });
 
 /* =========================================================

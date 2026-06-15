@@ -318,44 +318,6 @@ class DashboardController extends BaseController
     }
 
     /**
-     * Détail d'une réservation.
-     * GET /dashboard/bookings/:id
-     */
-    public function showBooking(int $id): string|RedirectResponse
-    {
-        $userId = (int) session('user_id');
-
-        $booking = $this->bookingModel->findWithDetails($id, $userId);
-
-        if (!$booking)
-            return redirect()->to('/dashboard/bookings')->with('error', 'Réservation introuvable.');
-
-        $passengers = $this->bookingModel->findPassengersByJourney((int) $booking['journey_id']);
-
-        $is_driver = (int) $booking['driver_id'] === $userId;
-
-        $person_firstname  = $is_driver ? $booking['passenger_firstname']  : $booking['driver_firstname'];
-        $person_lastname   = $is_driver ? $booking['passenger_lastname']   : $booking['driver_lastname'];
-        $person_avatar     = $is_driver ? $booking['passenger_avatar']     : $booking['driver_avatar'];
-        $person_is_student  = $is_driver ? $booking['passenger_is_student'] : $booking['driver_is_student'];
-        $person_label      = $is_driver ? 'Passager' : 'Conducteur';
-
-        return view('Bookings/bookingShow', [
-            'title'           => 'Détail de la réservation',
-            'back'            => $this->validateBackUrl($this->request->getGet('back')),
-            'booking'         => $booking,
-            'is_driver'        => $is_driver,
-            'passengers'      => $passengers,
-            'person_firstname' => $person_firstname,
-            'person_lastname'  => $person_lastname,
-            'person_avatar'    => $person_avatar,
-            'person_is_student' => $person_is_student,
-            'person_label'     => $person_label,
-            'isPending' => $booking['status'] === "pending",
-        ]);
-    }
-
-    /**
      * Liste paginée des signalements effectués par le user.
      * GET /dashboard/reports
      */
