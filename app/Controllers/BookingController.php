@@ -35,6 +35,49 @@ class BookingController extends BaseController
         $this->bookingService = new BookingService();
     }
 
+    /**
+     * Détail d'une réservation.
+     * GET /dashboard/bookings/:id
+     */
+    public function show(int $id): string|RedirectResponse
+    {
+        $userId = (int) session('user_id');
+
+        $booking = $this->bookingModel->findWithDetails($id, $userId);
+
+        $journey = $this->journeyModel->find($booking['journey_id']);
+
+        $remainingSeats = $this->bookingModel->countRemainingSeats($journey['id'],$journey['seats']);
+
+        if (!$booking)
+            return redirect()->to('/dashboard/bookings')->with('error', 'Réservation introuvable.');
+
+        $passengers = $this->bookingModel->findPassengersByJourney((int) $booking['journey_id']);
+
+        $is_driver = (int) $booking['driver_id'] === $userId;
+
+        $person_firstname  = $is_driver ? $booking['passenger_firstname']  : $booking['driver_firstname'];
+        $person_lastname   = $is_driver ? $booking['passenger_lastname']   : $booking['driver_lastname'];
+        $person_avatar     = $is_driver ? $booking['passenger_avatar']     : $booking['driver_avatar'];
+        $person_is_student = $is_driver ? $booking['passenger_is_student'] : $booking['driver_is_student'];
+        $person_label      = $is_driver ? 'Passager' : 'Conducteur';
+
+        return view('Bookings/bookingShow', [
+            'title'             => 'Détail de la réservation',
+            'back'              => $this->validateBackUrl($this->request->getGet('back')),
+            'booking'           => $booking,
+            'is_driver'         => $is_driver,
+            'passengers'        => $passengers,
+            'person_firstname'  => $person_firstname,
+            'person_lastname'   => $person_lastname,
+            'person_avatar'     => $person_avatar,
+            'person_is_student' => $person_is_student,
+            'person_label'      => $person_label,
+            'isPending'         => $booking['status'] === "pending",
+            'isFull'            => $remainingSeats == 0,
+        ]);
+    }
+
     public function create(int $id): RedirectResponse{
 
         $userId = session('user_id');
@@ -58,7 +101,7 @@ class BookingController extends BaseController
                 ->with('errors', ['booking' => 'Vous avez déjà réservé ce trajet.']);
 
         // --- Vérification places restantes
-        $remainingSeats = $this->bookingModel->countRemainingSeats($id,$journey['seats']);
+        $remainingSeats = $this->bookingModel->countRemainingSeats($journey['id'],$journey['seats']);
 
         if ($remainingSeats == 0)
             return redirect()->to('/journeys/' . $id)
@@ -155,6 +198,7 @@ class BookingController extends BaseController
                 ->with('error', 'Cette réservation est introuvable');
 
         }catch(BookingNotAssignedToDriverException) {
+
             return redirect()->to('/dashboard/bookings')
                 ->with('error', 'Vous n\'êtes pas le conducteur du trajet de cette réservation');
 
@@ -170,6 +214,7 @@ class BookingController extends BaseController
 
         }
         catch(\throwable $e){
+            
             log_message('error', 'Booking accept failed: {message}', ['message' => $e->getMessage()]);
             return redirect()->to('/dashboard')->with('error','Un problème est survenu');
 
