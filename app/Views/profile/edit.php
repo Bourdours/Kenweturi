@@ -147,7 +147,7 @@
     </div>
 
     <!-- Véhicules -->
-    <div class="bg-surface rounded-2xl p-6 border border-action/10">
+    <div id="vehicles"  class="bg-surface rounded-2xl p-6 border border-action/10 scroll-mt-28">
       <h2 class="text-ink text-base font-semibold font-display mb-5 flex items-center gap-2">
         <i class="fa-solid fa-car text-action text-sm"></i>Mes véhicules
       </h2>
