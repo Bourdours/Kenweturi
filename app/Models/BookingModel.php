@@ -169,5 +169,13 @@ class BookingModel extends BaseModel
 
         return array_column($rows, 'pending_bookings', 'journey_id');
     }
+
+    public function countByStatus(string $label,int $journeyId):int{
+
+        return $this->where('journey_id',$journeyId)
+                ->where('status',$label)
+                ->countAllResults();
+
+    }
     
 }
