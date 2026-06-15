@@ -121,8 +121,8 @@
     </div>
 
     <p class="text-center text-xs text-ink/40">
-      Pas encore de compte ?
-      <a href="<?= site_url('register') ?>" class="text-action font-medium hover:text-action-dark transition-colors">Créer un compte gratuit</a>
+      Pas encore de compte ? <br>
+      <a href="<?= site_url('register') ?>" class="text-action font-medium hover:text-action-dark transition-colors">Créer un compte gratuitement</a>
     </p>
 
   </div>
