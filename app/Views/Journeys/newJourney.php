@@ -180,10 +180,10 @@
             <h2 class="text-ink text-base font-semibold font-display flex items-center gap-2">
                 <i class="fa-solid fa-car text-action text-sm"></i>Voiture
             </h2>
-            <button type="button" id="btnToggleAddCar"
-                class="text-action text-xs hover:underline inline-flex items-center gap-1">
-                <i class="fa-solid fa-plus text-xs"></i> Ajouter une voiture
-            </button>
+          <a href="<?= base_url('profile/edit') ?>#vehicles"
+            class="text-action text-xs hover:underline inline-flex items-center gap-1">
+              <i class="fa-solid fa-plus text-xs"></i> Ajouter une voiture
+          </a>
         </div>
 
         <label class="text-ink/50 text-xs font-medium mb-1.5 block">Quelle voiture allez-vous conduire ?</label>
