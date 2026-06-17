@@ -180,10 +180,10 @@
             <h2 class="text-ink text-base font-semibold font-display flex items-center gap-2">
                 <i class="fa-solid fa-car text-action text-sm"></i>Voiture
             </h2>
-            <button type="button" id="btnToggleAddCar"
-                class="text-action text-xs hover:underline inline-flex items-center gap-1">
-                <i class="fa-solid fa-plus text-xs"></i> Ajouter une voiture
-            </button>
+          <a href="<?= site_url('profile/edit') ?>?back=<?= urlencode(current_url()) ?>#vehicles"
+            class="text-action text-xs hover:underline inline-flex items-center gap-1">
+              <i class="fa-solid fa-plus text-xs"></i> Ajouter une voiture
+          </a>
         </div>
 
         <label class="text-ink/50 text-xs font-medium mb-1.5 block">Quelle voiture allez-vous conduire ?</label>
@@ -203,49 +203,6 @@
                     <?php endforeach; ?>
                 <?php endif; ?>
             </ul>
-        </div>
-
-        <!-- Mini formulaire ajout voiture -->
-        <div id="addCarForm" class="hidden mt-4 border-t border-action/10 pt-4 flex flex-col gap-3">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                    <label for="vehicleBrand" class="text-ink/50 text-xs font-medium mb-1.5 block">Marque</label>
-                    <div class="relative w-full">
-                        <input type="text" id="vehicleBrand" data-name="brand"
-                            placeholder="Ex: Renault" autocomplete="off"
-                            class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors js-car-input">
-                        <ul id="brandSuggestions" class="absolute left-0 top-full z-50 w-full bg-paper border border-action/15 rounded-b-lg shadow-lg max-h-48 overflow-y-auto hidden flex flex-col pointer-events-auto"></ul>
-                    </div>
-                </div>
-                <div>
-                    <label for="vehicleModel" class="text-ink/50 text-xs font-medium mb-1.5 block">Modèle</label>
-                    <input type="text" id="vehicleModel" data-name="model"
-                        placeholder="Ex: Clio"
-                        class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors js-car-input">
-                </div>
-                <div>
-                    <label for="vehicleColor" class="text-ink/50 text-xs font-medium mb-1.5 block">Couleur</label>
-                    <input type="text" id="vehicleColor" data-name="color"
-                        placeholder="Ex: Bleu"
-                        class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors js-car-input">
-                </div>
-                <div>
-                    <label for="vehicleSeats" class="text-ink/50 text-xs font-medium mb-1.5 block">Nombre de places</label>
-                    <input type="number" id="vehicleSeats" data-name="seats" min="1" max="9"
-                        placeholder="Ex: 5"
-                        class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors js-car-input">
-                </div>
-            </div>
-            <p id="carError" class="text-action text-xs hidden mt-1">Veuillez remplir tous les champs. Le nombre de places doit être entre 1 et 9.</p>
-            <div class="flex justify-end">
-                <button type="button" id="addCarBtn"
-                    data-action="<?= site_url('car/create') ?>"
-                    data-csrf-name="<?= csrf_token() ?>"
-                    data-csrf-value="<?= csrf_hash() ?>"
-                    class="flex items-center gap-2 bg-action/10 hover:bg-action/20 text-action font-semibold text-sm rounded-lg px-4 py-2 transition-colors cursor-pointer">
-                    <i class="fa-solid fa-plus text-xs"></i>Ajouter
-                </button>
-            </div>
         </div>
     </div>
 

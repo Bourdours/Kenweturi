@@ -146,6 +146,8 @@
         class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 resize-none transition-colors"><?= esc($user['biography'] ?? '') ?></textarea>
     </div>
 
+  </form>
+
     <!-- Véhicules -->
     <div id="vehicles"  class="bg-surface rounded-2xl p-6 border border-action/10 scroll-mt-28">
       <h2 class="text-ink text-base font-semibold font-display mb-5 flex items-center gap-2">
@@ -184,55 +186,56 @@
       <?php endif; ?>
 
       <p class="text-ink/50 text-xs font-medium mb-3">Ajouter un véhicule</p>
-      <div id="carFieldsContainer" class="flex flex-col gap-3">
+      <form action="<?= site_url('car/create') ?>" method="post" id="carFieldsContainer" class="flex flex-col gap-3">
+        <?= csrf_field() ?>
+        <input type="hidden" name="back" value="<?= esc(request()->getGet('back') ?? '') ?>">
+
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label for="vehicleBrand" class="text-ink/50 text-xs font-medium mb-1.5 block">Marque</label>
             <div class="relative w-full">
-              <input type="text" id="vehicleBrand" data-name="brand"
+              <input type="text" id="vehicleBrand" name="brand"
                 placeholder="Ex: Renault"
-                autocomplete="off"
+                autocomplete="off" required
                 class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors js-car-input">
-
               <ul id="brandSuggestions" class="absolute left-0 top-full z-50 w-full bg-paper border border-action/15 rounded-b-lg shadow-lg max-h-48 overflow-y-auto hidden flex flex-col pointer-events-auto"></ul>
             </div>
           </div>
           <div>
             <label for="vehicleModel" class="text-ink/50 text-xs font-medium mb-1.5 block">Modèle</label>
-            <input type="text" id="vehicleModel" data-name="model"
-              placeholder="Ex: Clio"
+            <input type="text" id="vehicleModel" name="model"
+              placeholder="Ex: Clio" required
               class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors js-car-input">
           </div>
         </div>
+
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label for="vehicleColor" class="text-ink/50 text-xs font-medium mb-1.5 block">Couleur</label>
-            <input type="text" id="vehicleColor" data-name="color"
-              placeholder="Ex: Bleu"
+            <input type="text" id="vehicleColor" name="color"
+              placeholder="Ex: Bleu" required
               class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors js-car-input">
           </div>
           <div>
             <label for="vehicleSeats" class="text-ink/50 text-xs font-medium mb-1.5 block">Nombre de places</label>
-            <input type="number" id="vehicleSeats" data-name="seats" min="1" max="9"
-              placeholder="Ex: 5"
+            <input type="number" id="vehicleSeats" name="seats" min="1" max="9"
+              placeholder="Ex: 5" required
               class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors js-car-input">
           </div>
         </div>
 
-        <p id="carError" class="text-action text-xs hidden mt-1">Veuillez remplir tous les champs. Le nombre de places doit être entre 1 et 9.</p>
-
-        <div class="flex justify-end">
-          <button type="button" id="addCarBtn"
-            data-action="<?= site_url('car/create') ?>"
-            data-csrf-name="<?= csrf_token() ?>"
-            data-csrf-value="<?= csrf_hash() ?>"
+        <div class="flex justify-end pt-4">
+          <button type="submit"
             class="flex items-center gap-2 bg-action/10 hover:bg-action/20 text-action font-semibold text-sm rounded-lg px-4 py-2 transition-colors cursor-pointer">
             <i class="fa-solid fa-plus text-xs"></i>Ajouter
           </button>
         </div>
-      </div>
+      </form>
 
     </div>
+
+    <form action="<?= site_url('profile/update') ?>" method="post" enctype="multipart/form-data" class="flex flex-col gap-6">
+      <?= csrf_field() ?>
 
     <!-- Mot de passe -->
     <div class="bg-surface rounded-2xl p-6 border border-action/10">
