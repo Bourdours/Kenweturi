@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Libraries\MailerExample;
 
 use App\Services\BookingService;
+use App\Services\JourneyService;
 
 use App\Models\BookingModel;
 use App\Models\JourneyModel;
@@ -26,6 +27,7 @@ class BookingController extends BaseController
     protected JourneyModel $journeyModel;
 
     protected BookingService $bookingService;
+    protected JourneyService $journeyService;
 
     public function __construct()
     {
@@ -33,6 +35,7 @@ class BookingController extends BaseController
         $this->journeyModel = new JourneyModel();
 
         $this->bookingService = new BookingService();
+        $this->journeyService = new JourneyService();
     }
 
     /**
@@ -43,40 +46,20 @@ class BookingController extends BaseController
     {
         $userId = (int) session('user_id');
 
-        $booking = $this->bookingModel->findWithDetails($id, $userId);
+        try {
+            $data = $this->bookingService->getDetails($id, $userId);
+        } catch (BookingNotFoundException) {
+            return redirect()->to('/dashboard/bookings')
+                ->with('error', 'Réservation introuvable.');
+        } catch (\Throwable $e) {
+            log_message('error', 'Booking show failed: {message}', ['message' => $e->getMessage()]);
+            return redirect()->to('/dashboard')->with('error', 'Un problème est survenu');
+        }
 
-        $journey = $this->journeyModel->find($booking['journey_id']);
-
-        $remainingSeats = $this->bookingModel->countRemainingSeats($journey['id'],$journey['seats']);
-
-        if (!$booking)
-            return redirect()->to('/dashboard/bookings')->with('error', 'Réservation introuvable.');
-
-        $passengers = $this->bookingModel->findPassengersByJourney((int) $booking['journey_id']);
-
-        $is_driver = (int) $booking['driver_id'] === $userId;
-
-        $person_firstname  = $is_driver ? $booking['passenger_firstname']  : $booking['driver_firstname'];
-        $person_lastname   = $is_driver ? $booking['passenger_lastname']   : $booking['driver_lastname'];
-        $person_avatar     = $is_driver ? $booking['passenger_avatar']     : $booking['driver_avatar'];
-        $person_is_student = $is_driver ? $booking['passenger_is_student'] : $booking['driver_is_student'];
-        $person_label      = $is_driver ? 'Passager' : 'Conducteur';
-
-        return view('Bookings/bookingShow', [
-            'title'             => 'Détail de la réservation',
-            'back'              => $this->validateBackUrl($this->request->getGet('back')),
-            'booking'           => $booking,
-            'is_driver'         => $is_driver,
-            'passengers'        => $passengers,
-            'person_firstname'  => $person_firstname,
-            'person_lastname'   => $person_lastname,
-            'person_avatar'     => $person_avatar,
-            'person_is_student' => $person_is_student,
-            'person_label'      => $person_label,
-            'isPending'         => $booking['status'] === "pending",
-            'isAccepted'        => $booking['status'] === "accepted",
-            'isFull'            => $remainingSeats == 0,
-        ]);
+        return view('Bookings/bookingShow', array_merge([
+            'title' => 'Détail de la réservation',
+            'back'  => $this->validateBackUrl($this->request->getGet('back')),
+        ], $data));
     }
 
     public function create(int $id): RedirectResponse{
@@ -102,7 +85,7 @@ class BookingController extends BaseController
                 ->with('errors', ['booking' => 'Vous avez déjà réservé ce trajet.']);
 
         // --- Vérification places restantes
-        $remainingSeats = $this->bookingModel->countRemainingSeats($journey['id'],$journey['seats']);
+        $remainingSeats = $this->journeyService->countRemainingSeats($journey['id']);
 
         if ($remainingSeats == 0)
             return redirect()->to('/journeys/' . $id)
@@ -189,9 +172,6 @@ class BookingController extends BaseController
         try{
 
             $this->bookingService->accept($bookingId,$driverId);
-            $this->bookingService->confirmToPassenger($bookingId,$driverId);
-            return redirect()->to('/dashboard/bookings/' . $bookingId)->with('success', 'Réservation acceptée.');
-
 
         }catch(BookingNotFoundException) {
 
@@ -214,12 +194,24 @@ class BookingController extends BaseController
                 ->with('error', 'Cette réservation a déjà été acceptée');
 
         }
-        catch(\throwable $e){
+        catch(\Throwable $e){
             
             log_message('error', 'Booking accept failed: {message}', ['message' => $e->getMessage()]);
             return redirect()->to('/dashboard')->with('error','Un problème est survenu');
 
         }
+
+        try {
+
+            $this->bookingService->confirmToPassenger($bookingId, $driverId);
+
+        }catch (\Throwable $e) {
+
+            log_message('error', 'Booking confirmation mail failed: {message}', ['message' => $e->getMessage()]);
+
+        }
+
+        return redirect()->to('/dashboard/bookings/' . $bookingId)->with('success', 'Réservation acceptée.');
 
     }
 
