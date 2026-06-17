@@ -1,12 +1,13 @@
 # Kenweturi
 
-Application web développée avec **CodeIgniter 4**.
+Application de covoiturage web développée avec **CodeIgniter 4**, destinée aux étudiants et formateurs.
 
 ## Prérequis
 
 - PHP 8.2 ou supérieur
 - Composer
-- Extensions PHP : `intl`, `mbstring`, `json`, `mysqlnd`, `libcurl`
+- Node.js / npm
+- Extensions PHP : `intl`, `mbstring`, `json`, `mysqlnd`, `curl`
 
 ## Installation
 
@@ -14,6 +15,7 @@ Application web développée avec **CodeIgniter 4**.
 git clone https://github.com/Bourdours/Kenweturi.git
 cd Kenweturi
 composer install
+npm install
 ```
 
 ## Configuration
@@ -29,7 +31,7 @@ Ouvre `.env` et configure :
 - **App** : `app.baseURL`
 - **Base de données** : host, nom, identifiants
 - **Mailer** : identifiants SMTP (voir section ci-dessous)
-- **Pusher** : clés de l'app (voir section ci-dessous)
+- **Site** : email de contact et URL publique
 
 ## Dépendances installées
 
@@ -52,19 +54,13 @@ mailer.fromName = Kenweturi
 
 > Pour Gmail, génère un [mot de passe d'application](https://support.google.com/mail/answer/185833) plutôt que d'utiliser ton mot de passe principal.
 
-### Pusher
+### Site
 
-Utilisé pour les événements en temps réel (WebSockets).
-
-Fichier d'exemple : `app/Libraries/PusherExample.php`
-
-Crée une app sur [dashboard.pusher.com](https://dashboard.pusher.com), puis récupère les clés dans **App Settings > App Keys** et configure `.env` :
+Variables publiques affichées dans les pages légales :
 
 ```
-pusher.appKey    = xxxxxxxxxxxxxxxxxxxxxxxx
-pusher.appSecret = xxxxxxxxxxxxxxxxxxxxxxxx
-pusher.appId     = 000000
-pusher.cluster   = eu
+site.contactEmail = contact@example.com
+site.siteUrl      = kenweturi.fr
 ```
 
 ### Tailwind CSS
@@ -78,7 +74,6 @@ Aucune variable `.env` requise. Le CSS généré est servi depuis `public/css/ta
 Commandes disponibles :
 
 ```bash
-npm install        # installe les dépendances npm (première fois)
 npm run dev        # rebuild automatique pendant le développement
 npm run build      # build minifié pour la production
 ```
@@ -88,6 +83,19 @@ Inclure le CSS dans chaque vue :
 ```html
 <link rel="stylesheet" href="/css/tailwind.css">
 ```
+
+### Leaflet
+
+Utilisé pour l'affichage des cartes interactives (trajets, aperçus, réservations).
+
+Chargé via CDN, aucune installation requise :
+
+```html
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+```
+
+Les tuiles cartographiques proviennent de l'IGN Géoportail (`data.geopf.fr`), sans clé API, avec les labels en français.
 
 ## Base de données
 
