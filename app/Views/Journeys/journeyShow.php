@@ -225,61 +225,68 @@
     </article>
 
     <!-- Réservation -->
-    <article class="bg-surface-card rounded-2xl p-6 border border-action/10">
-        <?php if ($isBooked && $journey['start_datetime'] > date('Y-m-d H:i:s')): ?>
-            <form id="form-cancel" action="<?= site_url('dashboard/bookings/' . esc($userBooking['id']) . '/delete') ?>" method="POST">
-                <?= csrf_field() ?>
-                <button type="button" onclick="openConfirmModal('Annuler cette réservation ?', 'form-cancel')"
-                    class="w-full border border-danger text-danger font-bold font-display rounded-full py-3 hover:bg-danger hover:text-paper transition-colors">
-                    Annuler ma réservation
-                </button>
-            </form>
-        <?php elseif ($isPending && $journey['start_datetime'] > date('Y-m-d H:i:s')): ?>
-            <form id="form-cancel" action="<?= site_url('dashboard/bookings/' . esc($userBooking['id']) . '/delete') ?>" method="POST">
-                <?= csrf_field() ?>
-                <button type="button" onclick="openConfirmModal('Annuler cette demande de réservation ?', 'form-cancel')"
-                    class="w-full border border-danger text-danger font-bold font-display rounded-full py-3 hover:bg-danger hover:text-paper transition-colors">
-                    Annuler cette demande de réservation
-                </button>
-            </form>
-        <?php elseif ($remainingSeats > 0) : ?>
-            <div class="flex items-center justify-between mb-2">
-                <div>
-                    <p class="text-muted text-sm"><?= $remainingSeats > 1 ? 'Places disponibles' : 'Place disponible' ?></p>
-                    <p class="text-ink font-bold font-display text-2xl"><?= esc($remainingSeats) ?></p>
-                </div>
-            </div>
-            <?php if (session('user_id') != $journey['user_id']): ?>
-                <form action="<?= site_url('journeys/' . esc($journey['id']) . '/book') ?>" method="POST" id="formBook">
-                    <?= csrf_field() ?>
-                    <button type="button" id="btnOpenBookModal"
-                        class="w-full bg-action text-ink font-bold font-display rounded-full py-3 hover:bg-action-dark transition-colors">
-                        Réserver <?= $availableSeats > 1 ? $availableSeats . ' places' : '1 place' ?>
-                    </button>
-                </form>
+<?php $isFuture = $journey['start_datetime'] > date('Y-m-d H:i:s'); ?>
 
-                <!-- Modal confirmation réservation -->
-                <div id="modalBook" class="hidden fixed inset-0 w-full h-full bg-black/50 items-center justify-center z-[9999]">
-                    <div class="bg-surface rounded-2xl p-6 w-[90%] max-w-[400px]">
-                        <h2 class="text-action font-semibold font-display mb-2">Confirmer la réservation</h2>
-                        <p class="text-ink text-sm mb-6">Vous allez réserver <?= $availableSeats > 1 ? $availableSeats . ' places' : '1 place' ?> sur ce trajet.<br> Êtes-vous sûr ?</p>
-                        <div class="flex gap-3">
-                            <button type="button" id="btnCancelBook"
-                                class="flex-1 border border-ink/20 text-ink rounded-lg px-4 py-2 text-sm font-semibold">
-                                Annuler
-                            </button>
-                            <button type="button" id="btnConfirmBook"
-                                class="flex-1 bg-action text-paper rounded-lg px-4 py-2 text-sm font-semibold">
-                                Confirmer
-                            </button>
-                        </div>
+<article class="bg-surface-card rounded-2xl p-6 border border-action/10">
+    <?php if ($isBooked && $isFuture): ?>
+        <form id="form-cancel" action="<?= site_url('dashboard/bookings/' . esc($userBooking['id']) . '/delete') ?>" method="POST">
+            <?= csrf_field() ?>
+            <button type="button" onclick="openConfirmModal('Annuler cette réservation ?', 'form-cancel')"
+                class="w-full border border-danger text-danger font-bold font-display rounded-full py-3 hover:bg-danger hover:text-paper transition-colors">
+                Annuler ma réservation
+            </button>
+        </form>
+
+    <?php elseif ($isPending && $isFuture): ?>
+        <form id="form-cancel" action="<?= site_url('dashboard/bookings/' . esc($userBooking['id']) . '/delete') ?>" method="POST">
+            <?= csrf_field() ?>
+            <button type="button" onclick="openConfirmModal('Annuler cette demande de réservation ?', 'form-cancel')"
+                class="w-full border border-danger text-danger font-bold font-display rounded-full py-3 hover:bg-danger hover:text-paper transition-colors">
+                Annuler cette demande de réservation
+            </button>
+        </form>
+
+    <?php elseif (!$isFuture): ?>
+        <p class="text-center text-muted font-semibold py-2">Trajet terminé</p>
+
+    <?php elseif ($remainingSeats > 0): ?>
+        <div class="flex items-center justify-between mb-2">
+            <div>
+                <p class="text-muted text-sm"><?= $remainingSeats > 1 ? 'Places disponibles' : 'Place disponible' ?></p>
+                <p class="text-ink font-bold font-display text-2xl"><?= esc($remainingSeats) ?></p>
+            </div>
+        </div>
+        <?php if (session('user_id') != $journey['user_id']): ?>
+            <form action="<?= site_url('journeys/' . esc($journey['id']) . '/book') ?>" method="POST" id="formBook">
+                <?= csrf_field() ?>
+                <button type="button" id="btnOpenBookModal"
+                    class="w-full bg-action text-ink font-bold font-display rounded-full py-3 hover:bg-action-dark transition-colors">
+                    Réserver <?= $availableSeats > 1 ? $availableSeats . ' places' : '1 place' ?>
+                </button>
+            </form>
+            <!-- Modal confirmation réservation -->
+            <div id="modalBook" class="hidden fixed inset-0 w-full h-full bg-black/50 items-center justify-center z-[9999]">
+                <div class="bg-surface rounded-2xl p-6 w-[90%] max-w-[400px]">
+                    <h2 class="text-action font-semibold font-display mb-2">Confirmer la réservation</h2>
+                    <p class="text-ink text-sm mb-6">Vous allez réserver <?= $availableSeats > 1 ? $availableSeats . ' places' : '1 place' ?> sur ce trajet.<br> Êtes-vous sûr ?</p>
+                    <div class="flex gap-3">
+                        <button type="button" id="btnCancelBook"
+                            class="flex-1 border border-ink/20 text-ink rounded-lg px-4 py-2 text-sm font-semibold">
+                            Annuler
+                        </button>
+                        <button type="button" id="btnConfirmBook"
+                            class="flex-1 bg-action text-paper rounded-lg px-4 py-2 text-sm font-semibold">
+                            Confirmer
+                        </button>
                     </div>
                 </div>
-            <?php endif ?>
-        <?php else : ?>
-            <p class="text-center text-muted font-semibold py-2">Trajet complet</p>
+            </div>
         <?php endif ?>
-    </article>
+
+    <?php else: ?>
+        <p class="text-center text-muted font-semibold py-2">Trajet complet</p>
+    <?php endif ?>
+</article>
     
     <!-- bouton signaler -->
     <div class="deleteAccount w-full">
