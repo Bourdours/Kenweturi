@@ -35,10 +35,11 @@ class BookingService
     public function accept(int $bookingId,int $driverId):void{
 
         $booking = $this->bookingModel->find($bookingId);
-        $journey = $this->journeyModel->find($booking['journey_id']);
-
         if($booking === null)                   throw new BookingNotFoundException();
+
+        $journey = $this->journeyModel->find($booking['journey_id']);
         if($journey['user_id'] != $driverId)    throw new BookingNotAssignedToDriverException();
+
         if($booking['status'] === 'accepted')   throw new BookingAlreadyAcceptedException();
 
         $nbOfRemainingSeats = $this->journeyService->countRemainingSeats($journey['id']);
@@ -51,7 +52,6 @@ class BookingService
     public function rejectAllPending(int $journeyId){
 
         $bookings = $this->bookingModel->where('journey_id',$journeyId)->where('status','pending')->findAll();
-
 
         foreach($bookings as $booking){
 
@@ -81,6 +81,33 @@ class BookingService
             ])
         );
 
+    }
+
+    public function getDetails(int $id, int $userId): array
+    {
+        $booking = $this->bookingModel->findWithDetails($id, $userId);
+        if ($booking === null) {
+            throw new BookingNotFoundException();
+        }
+
+        $journey        = $this->journeyModel->find($booking['journey_id']);
+        $remainingSeats = $this->bookingModel->countRemainingSeats($journey['id'], $journey['seats']);
+        $passengers     = $this->bookingModel->findPassengersByJourney((int) $booking['journey_id']);
+        $isDriver       = (int) $booking['driver_id'] === $userId;
+
+        return [
+            'booking'           => $booking,
+            'is_driver'         => $isDriver,
+            'passengers'        => $passengers,
+            'person_firstname'  => $isDriver ? $booking['passenger_firstname']  : $booking['driver_firstname'],
+            'person_lastname'   => $isDriver ? $booking['passenger_lastname']   : $booking['driver_lastname'],
+            'person_avatar'     => $isDriver ? $booking['passenger_avatar']     : $booking['driver_avatar'],
+            'person_is_student' => $isDriver ? $booking['passenger_is_student'] : $booking['driver_is_student'],
+            'person_label'      => $isDriver ? 'Passager' : 'Conducteur',
+            'isAccepted'        => $booking['status'] === 'accepted',
+            'isPending'         => $booking['status'] === 'pending',
+            'isFull'            => $remainingSeats <= 0,
+        ];
     }
     
 }
