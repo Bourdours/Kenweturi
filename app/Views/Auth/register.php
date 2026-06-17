@@ -1,7 +1,7 @@
 <?= view('partials/head', ['extraJs' => [base_url('js/auth.js')]]) ?>
 <?= view('partials/header') ?>
 
-<div class="max-w-4xl mx-auto py-10 px-4">
+<div class="max-w-4xl mx-auto py-10 px-6">
 
   <p class="text-ink/40 text-base mb-1">
     <i class="fa-solid fa-user-plus mr-2"></i>Créer un compte
@@ -27,12 +27,8 @@
   <form action="<?= base_url('/register') ?>" method="post">
     <?= csrf_field() ?>
 
-    <div class="relative lg:static pl-5 lg:pl-0">
-      <!-- Grande route verticale mobile -->
-      <div class="lg:hidden absolute left-0 top-0 bottom-0 border-l-2 border-dashed border-action/40"></div>
-
+    <div class="relative lg:static">
       <div class="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-5 lg:gap-0">
-
         <!-- Bloc Identité -->
         <div class="bg-surface rounded-2xl p-5 border border-action/10 lg:col-start-1 lg:row-start-1">
           <p class="text-sm font-medium text-ink/50 mb-3 flex items-center gap-1.5">
@@ -95,7 +91,7 @@
         </div>
 
         <!-- Séparateur gauche (horizontal) -->
-        <div class="py-3 lg:col-start-1 lg:row-start-2">
+        <div class="hidden lg:block py-3 lg:col-start-1 lg:row-start-2">
           <div class="border-t-2 border-dashed border-action/35"></div>
         </div>
 
@@ -133,9 +129,6 @@
             </p>
           </div>
         </div>
-
-        <!-- Séparateur mobile entre les deux sections -->
-        <div class="lg:hidden border-t-2 border-dashed border-action/35"></div>
 
         <!-- Séparateur vertical (desktop, col centrale sur 3 lignes) -->
         <div class="hidden lg:flex justify-center items-stretch w-10 lg:col-start-2 lg:row-start-1 lg:row-end-4">
@@ -208,7 +201,7 @@
         </div>
 
         <!-- Séparateur droit (horizontal) -->
-        <div class="py-3 lg:col-start-3 lg:row-start-2">
+        <div class="hidden lg:block py-3 lg:col-start-3 lg:row-start-2">
           <div class="border-t-2 border-dashed border-action/35"></div>
         </div>
 
