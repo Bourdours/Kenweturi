@@ -132,6 +132,32 @@
                     <div class="text-center mb-3">
                         <p class="text-muted text-sm">Ce trajet est complet</p>
                     </div>
+
+                    <form id="form-confirm" action="<?= site_url('dashboard/bookings/' . $booking['id'] . '/reject') ?>" method="post">
+                        <?= csrf_field() ?>
+                        <button type="button" onclick="openConfirmModal('Refuser cette réservation ?', 'form-confirm')"
+                                class="w-full border border-danger text-danger font-bold font-display rounded-full py-3 hover:bg-danger hover:text-paper transition-colors">
+                            Refuser la réservation
+                        </button>
+                    </form>
+
+                <?php elseif($isPending) : ?>
+
+                    <form action="<?= site_url('dashboard/bookings/' . $booking['id'] . '/accept') ?>" method="post" class="mb-3">
+                        <?= csrf_field() ?>
+                        <button type="submit" class="w-full bg-action text-ink font-bold font-display rounded-full py-3 hover:bg-action-dark transition-colors">
+                            Accepter la réservation
+                        </button>
+                    </form>
+
+                    <form id="form-confirm" action="<?= site_url('dashboard/bookings/' . $booking['id'] . '/reject') ?>" method="post">
+                        <?= csrf_field() ?>
+                        <button type="button" onclick="openConfirmModal('Refuser cette réservation ?', 'form-confirm')"
+                                class="w-full border border-danger text-danger font-bold font-display rounded-full py-3 hover:bg-danger hover:text-paper transition-colors">
+                            Refuser la réservation
+                        </button>
+                    </form>
+
                 <?php endif ?>
                 <?php if($isPending): ?>
                     <form id="form-confirm" action="<?= site_url('dashboard/bookings/' . $booking['id'] . '/reject') ?>" method="post">
@@ -158,7 +184,9 @@
                         Annuler ma demande de réservation
                     </button>
                 </form>
-            <?php else: ?>
+                
+                <?php elseif($isAccepted) : ?>
+
                 <form id="form-confirm" action="<?= site_url('dashboard/bookings/' . $booking['id'] . '/delete') ?>" method="post">
                     <?= csrf_field() ?>
                     <button type="button" onclick="openConfirmModal('Annuler cette réservation ?', 'form-confirm')"
@@ -166,7 +194,14 @@
                         Annuler ma réservation
                     </button>
                 </form>
+                <?php else : ?>
+                    <div class="text-center mb-3">
+                        <p class="text-muted text-sm">Votre demande de réservation n'a pas été retenue par le conducteur</p>
+                    </div>                    
+                <?php endif ?>
+
             <?php endif ?>
+
         </article>
     <?php else: ?>
         <article class="bg-surface-card rounded-2xl p-6">
