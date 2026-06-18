@@ -23,6 +23,13 @@
         cancelSelectedBtn.disabled = checked.length === 0;
         cancelSelectedBtn.classList.toggle('opacity-40', checked.length === 0);
         cancelSelectedBtn.classList.toggle('cursor-not-allowed', checked.length === 0);
+        journeyList.querySelectorAll('.journey-card').forEach((card) => {
+            const cb = card.querySelector('input[type="checkbox"]');
+            if (cb) {
+                card.classList.toggle('ring-2', cb.checked);
+                card.classList.toggle('ring-action/40', cb.checked);
+            }
+        });
     }
 
     function enterSelectionMode() {
