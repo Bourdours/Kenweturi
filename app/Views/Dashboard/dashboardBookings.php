@@ -40,10 +40,15 @@
                 </a>
             </div>
         <?php else: ?>
-            <div class="flex bg-surface border border-action/15 rounded-full p-1" role="group" aria-label="Filtre des réservations">
-                <span class="px-4 py-1.5 rounded-full text-sm font-medium bg-action text-ink">
-                    Reçues
-                </span>
+            <div class="flex bg-surface border border-action/15 rounded-full p-1 gap-1" role="group" aria-label="Filtre des réservations reçues">
+                <a href="<?= site_url('dashboard/bookings') ?>"
+                   class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= $filter !== 'received-past' ? 'bg-action text-ink' : 'text-ink/60 hover:text-ink' ?>">
+                    À&nbsp;venir
+                </a>
+                <a href="<?= site_url('dashboard/bookings') ?>?filter=received-past"
+                   class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= $filter === 'received-past' ? 'bg-action text-ink' : 'text-ink/60 hover:text-ink' ?>">
+                    Passées
+                </a>
             </div>
         <?php endif ?>
     </div>
