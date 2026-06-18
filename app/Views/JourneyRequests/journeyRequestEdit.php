@@ -86,8 +86,8 @@
 
       <!-- Rayon -->
       <?php
-        $initRadius = (float) old('radius_km', $journeyRequest['radius_km'] ?? 10);
-        $presets    = [5, 10];
+        $initRadius = (float) old('radius_km', $journeyRequest['radius_km'] ?? 1);
+        $presets    = [1, 5, 10];
         $isCustom   = !in_array($initRadius, $presets);
       ?>
       <div class="mt-5 pt-5 border-t border-action/10">
@@ -95,7 +95,7 @@
         <div class="flex gap-2 flex-wrap items-center">
           <?php foreach ($presets as $km): ?>
             <button type="button" data-radius="<?= $km ?>"
-              class="radius-pill border rounded-lg px-4 py-2 text-sm font-medium transition-colors <?= !$isCustom && $initRadius === $km ? 'bg-action text-ink border-action' : 'border-action/20 text-ink/50 hover:border-action/50 hover:text-ink' ?>">
+              class="radius-pill border rounded-lg px-4 py-2 text-sm font-medium transition-colors <?= !$isCustom && $initRadius == $km ? 'bg-action text-ink border-action' : 'border-action/20 text-ink/50 hover:border-action/50 hover:text-ink' ?>">
               <?= $km ?> km
             </button>
           <?php endforeach ?>
