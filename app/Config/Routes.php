@@ -33,6 +33,9 @@ $routes->get('contact',           'PageController::contact');
 $routes->post('contact',          'PageController::sendContact');
 
 
+// Confirmation d'adresse email (accessible à tous : l'utilisateur n'est pas encore connecté)
+$routes->get('verifyEmail', 'AuthController::verifyEmail');
+
 /* =========================================================
  *  ROUTES INVITÉS (interdites aux utilisateurs connectés)
  * ========================================================= */

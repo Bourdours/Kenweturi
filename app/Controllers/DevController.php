@@ -17,7 +17,7 @@ class DevController extends BaseController
             'accountBanned', 'accountDeleted', 'adminApproved', 'adminDeletedAccount',
             'adminNewReport', 'adminRejected', 'adminWarn', 'bookingAccepted',
             'bookingCancelled', 'bookingRejected', 'bookingRequest', 'contact',
-            'newRegistration', 'passwordChanged', 'resetPassword',
+            'emailVerification', 'newRegistration', 'passwordChanged', 'resetPassword',
         ];
 
         if (!in_array($template, $allowed, true)) {
@@ -30,6 +30,7 @@ class DevController extends BaseController
             'date'       => date('d/m/Y'),
             'support'    => 'support@kenweturi.fr',
             'resetLink'  => site_url('reset-password/fake-token-preview'),
+            'verifyLink' => site_url('verifyEmail?token=fake-token-preview'),
             'name'       => 'Jean Dupont',
             'email'      => 'jean.dupont@example.com',
             'subject'    => 'Question sur une réservation',
