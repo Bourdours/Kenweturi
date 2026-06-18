@@ -154,6 +154,7 @@ class JourneyRequestController extends BaseController
         $data = [
             'start_datetime'    => $startDatetime->format('Y-m-d H:i:s'),
             'seats'             => $this->request->getPost('seats') ?: null,
+            'radius_km'         => (float) ($this->request->getPost('radius_km') ?: 10),
             'message'           => $this->request->getPost('message') ?: null,
             'user_id'           => $userId,
             'location_start_id' => $startLocationId,
@@ -232,6 +233,7 @@ class JourneyRequestController extends BaseController
             'location_end_id'   => $endLocationId,
             'start_datetime'    => $startDatetime->format('Y-m-d H:i:s'),
             'seats'             => $this->request->getPost('seats') ?: null,
+            'radius_km'         => (float) ($this->request->getPost('radius_km') ?: 10),
             'message'           => $this->request->getPost('message'),
         ];
 

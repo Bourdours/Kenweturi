@@ -1,3 +1,8 @@
+<?php
+/** @var string     $title */
+/** @var array      $journeyRequest */
+/** @var string|null $back */
+?>
 <?= view('partials/head', [
   'extraCss' => [
     'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css',
@@ -78,6 +83,68 @@
         </div>
 
       </div>
+
+      <!-- Rayon -->
+      <?php
+        $initRadius = (float) old('radius_km', $journeyRequest['radius_km'] ?? 10);
+        $presets    = [5, 10];
+        $isCustom   = !in_array($initRadius, $presets);
+      ?>
+      <div class="mt-5 pt-5 border-t border-action/10">
+        <label class="text-ink/50 text-xs font-medium mb-2 block">Rayon de recherche autour de mes adresses</label>
+        <div class="flex gap-2 flex-wrap items-center">
+          <?php foreach ($presets as $km): ?>
+            <button type="button" data-radius="<?= $km ?>"
+              class="radius-pill border rounded-lg px-4 py-2 text-sm font-medium transition-colors <?= !$isCustom && $initRadius === $km ? 'bg-action text-ink border-action' : 'border-action/20 text-ink/50 hover:border-action/50 hover:text-ink' ?>">
+              <?= $km ?> km
+            </button>
+          <?php endforeach ?>
+          <div class="radius-custom-pill flex items-center border rounded-lg px-3 py-2 gap-1 transition-colors <?= $isCustom ? 'bg-action border-action' : 'border-action/20 hover:border-action/50' ?>">
+            <input type="number" id="customRadiusInput" min="0.1" max="200" step="0.1" placeholder="—"
+              value="<?= $isCustom ? $initRadius : '' ?>"
+              class="w-10 bg-transparent text-sm font-medium outline-none placeholder:text-ink/30 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none <?= $isCustom ? 'text-ink' : 'text-ink/50' ?>">
+            <span class="text-sm font-medium transition-colors <?= $isCustom ? 'text-ink' : 'text-ink/50' ?>">km</span>
+          </div>
+          <input type="hidden" name="radius_km" id="radiusKmInput" value="<?= esc($initRadius) ?>">
+        </div>
+        <p class="mt-2 text-ink/30 text-xs">Astuce : 0.5 = 500 m, 0.1 = 100 m</p>
+      </div>
+      <script>
+      (function() {
+        const pills  = document.querySelectorAll('.radius-pill');
+        const cpill  = document.querySelector('.radius-custom-pill');
+        const cinput = document.getElementById('customRadiusInput');
+        const hidden = document.getElementById('radiusKmInput');
+        const on     = ['bg-action', 'text-ink', 'border-action'];
+        const off    = ['border-action/20', 'text-ink/50'];
+
+        function activatePreset(btn) {
+          pills.forEach(p => { p.classList.remove(...on); p.classList.add(...off); });
+          btn.classList.add(...on); btn.classList.remove(...off);
+          cpill.classList.remove(...on); cpill.classList.add('border-action/20');
+          cinput.classList.remove('text-ink'); cinput.classList.add('text-ink/50');
+          cinput.value = '';
+        }
+
+        function activateCustom() {
+          pills.forEach(p => { p.classList.remove(...on); p.classList.add(...off); });
+          cpill.classList.add(...on); cpill.classList.remove('border-action/20');
+          cinput.classList.add('text-ink'); cinput.classList.remove('text-ink/50');
+        }
+
+        pills.forEach(p => p.addEventListener('click', () => {
+          activatePreset(p);
+          hidden.value = p.dataset.radius;
+        }));
+
+        cinput.addEventListener('focus', activateCustom);
+        cinput.addEventListener('input', () => {
+          activateCustom();
+          if (cinput.value) hidden.value = cinput.value;
+        });
+      })();
+      </script>
+
     </div>
 
     <!-- Date & heure -->
