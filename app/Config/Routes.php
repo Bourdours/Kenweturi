@@ -65,14 +65,15 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('logout', 'AuthController::logout');
 
     // Dashboard
-    $routes->get('dashboard',                 'DashboardController::show');
-    $routes->get('dashboard/journeys',        'DashboardController::showJourneys');
-    $routes->get('dashboard/bookings',        'DashboardController::showBookings');
+    $routes->get('dashboard',                            'DashboardController::show');
+    $routes->get('dashboard/journeys',                   'DashboardController::showJourneys');
+    $routes->get('dashboard/bookings',                   'DashboardController::showBookings');
     $routes->get('dashboard/reports',                    'DashboardController::showReports');
     $routes->get('dashboard/reports/(:num)',             'DashboardController::showReport/$1');
     $routes->get('dashboard/journey-requests',           'DashboardController::showJourneyRequests');
     $routes->get('dashboard/journey-requests/(:num)',    'DashboardController::showJourneyRequest/$1');
     $routes->get('dashboard/car/new',                    'CarController::showCreateForm');
+    $routes->post('dashboard/journeys/cancel-bulk',      'JourneyController::cancelBulk');
 
     // Bookings
     $routes->get('dashboard/bookings/(:num)',           'BookingController::show/$1');
