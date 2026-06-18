@@ -15,16 +15,17 @@ class JourneyRequestModel extends BaseModel
     protected $allowedFields = [
         'start_datetime',
         'seats',
+        'radius_km',
         'message',
         'user_id',
         'location_start_id',
-        'location_end_id'
-
+        'location_end_id',
     ];
 
     protected $validationRules = [
         'start_datetime'    => 'required|valid_date[Y-m-d H:i:s]|after_now',
         'seats'             => 'permit_empty|integer|greater_than_equal_to[1]|less_than_equal_to[8]',
+        'radius_km'         => 'permit_empty|numeric|greater_than_equal_to[0.1]|less_than_equal_to[200]',
         'message'           => 'permit_empty|max_length[2000]',
         'user_id'           => 'required|integer|is_not_unique[user.id]',
         'location_start_id' => 'required|integer|is_not_unique[location.id]',

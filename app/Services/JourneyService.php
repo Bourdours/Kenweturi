@@ -164,7 +164,7 @@ class JourneyService
             $start = ['lat' => (float) $request['start_lat'], 'lon' => (float) $request['start_lng']];
             $end   = ['lat' => (float) $request['end_lat'],   'lon' => (float) $request['end_lng']];
 
-            if (!$this->geoService->matchesTrackPoints($points, $start, $end)) {
+            if (!$this->geoService->matchesTrackPoints($points, $start, $end, (float) ($request['radius_km'] ?? 10))) {
                 continue;
             }
 
@@ -226,7 +226,7 @@ class JourneyService
             $points = $this->geoService->parseTrackPointsFromGeoJson($journey['track_geojson']);
             if (empty($points)) continue;
 
-            if (!$this->geoService->matchesTrackPoints($points, $start, $end)) continue;
+            if (!$this->geoService->matchesTrackPoints($points, $start, $end, (float) ($request['radius_km'] ?? 10))) continue;
 
             if (!empty($request['start_datetime'])) {
                 $diff = abs(strtotime($journey['start_datetime']) - strtotime($request['start_datetime']));
