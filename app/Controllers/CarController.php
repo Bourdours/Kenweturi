@@ -54,40 +54,6 @@ class CarController extends BaseController
         return redirect()->to($back)->with('success', 'Voiture ajoutée avec succès !');
     }
 
-    // /** 
-    //  * 
-    //  * Affiche une voitures d'un utilisateur.
-    //  * 
-    //  * @return string
-    //  */
-    // public function show(int $id): string|RedirectResponse
-    // {
-    //     $carModel = new CarModel();
-    //     $car = $carModel->where('user_id', session()->get('user_id'))->find($id);
-    //     if (!$car) {
-    //         return redirect()->to('/dashboard')->with('error', 'Voiture introuvable.');
-    //     }
-    //     return view('car/show', ['car' => $car]);
-    // }
-
-    // /** 
-    //  * 
-    //  * Affiche la liste des voitures d'un utilisateur.
-    //  * 
-    //  * @return string
-    //  */
-    // public function showAll()
-    // {
-    //     $carModel = new CarModel();
-
-    //     $data = [
-    //         'cars' => $carModel->where('user_id', session()->get('user_id'))->findAll()
-    //     ];
-
-    //     return view('/cars/get', $data);
-    // }
-
-
     /** 
      * 
      * Modifie la voiture d'un utilisateur.
