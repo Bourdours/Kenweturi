@@ -59,7 +59,7 @@ class UserController extends BaseController
         $referer = $this->request->getServer('HTTP_REFERER');
         $back    = ($referer && str_starts_with($referer, base_url())) ? $referer : null;
 
-        return view('profile/show', [
+        return view('Profile/show', [
             'user'         => $user,
             'city'         => $city['name'] ?? null,
             'cars'         => $this->carModel->where('user_id', $userId)->findAll(),
@@ -89,7 +89,7 @@ class UserController extends BaseController
 
         $city   = $this->cityModel->find($user['city_id']);
 
-        return view('profile/edit', [
+        return view('Profile/edit', [
             'title'        => 'Modifier mon profil',
             'user'         => $user,
             'city'         => $city['name'] ?? null,
