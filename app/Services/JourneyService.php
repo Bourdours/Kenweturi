@@ -192,6 +192,64 @@ class JourneyService
         }
     }
 
+    /**
+     * Recherche les trajets existants compatibles avec une demande de trajet
+     * (typiquement après modification) et envoie un email au demandeur pour chaque match.
+     *
+     * Symétrique de notifyMatchingRequests : ici on fixe la demande et on itère
+     * sur les trajets actifs pour trouver ceux dont le tracé passe à moins de 10 km
+     * du départ et de l'arrivée de la demande, dans la bonne direction, et dans
+     * un créneau de ±30 minutes.
+     *
+     * @param  int $requestId     Identifiant de la demande mise à jour
+     * @param  int $requestUserId Identifiant du demandeur (exclu des trajets à matcher)
+     * @return void
+     */
+    public function notifyMatchingJourneys(int $requestId, int $requestUserId): void
+    {
+        $request = $this->journeyRequestModel->findWithCoordinatesById($requestId);
+        if (!$request) return;
+
+        $journeys = array_filter(
+            $this->journeyModel->findAllWithFilters([]),
+            fn($j) => (int) $j['user_id'] !== $requestUserId
+        );
+
+        if (empty($journeys)) return;
+
+        $start = ['lat' => (float) $request['start_lat'], 'lon' => (float) $request['start_lng']];
+        $end   = ['lat' => (float) $request['end_lat'],   'lon' => (float) $request['end_lng']];
+
+        foreach ($journeys as $journey) {
+            if (empty($journey['track_geojson'])) continue;
+
+            $points = $this->geoService->parseTrackPointsFromGeoJson($journey['track_geojson']);
+            if (empty($points)) continue;
+
+            if (!$this->geoService->matchesTrackPoints($points, $start, $end)) continue;
+
+            if (!empty($request['start_datetime'])) {
+                $diff = abs(strtotime($journey['start_datetime']) - strtotime($request['start_datetime']));
+                if ($diff > 1800) continue;
+            }
+
+            $date = date('d/m/Y', strtotime($journey['start_datetime']))
+                  . ' à ' . date('H:i', strtotime($journey['start_datetime']));
+
+            $this->mailer->sendHtml(
+                $request['requester_email'],
+                'Un trajet correspond à votre demande !',
+                view('Emails/journeyRequestMatch', [
+                    'firstname'  => $request['requester_firstname'],
+                    'cityStart'  => $request['city_start_name'],
+                    'cityEnd'    => $request['city_end_name'],
+                    'date'       => $date,
+                    'journeyUrl' => site_url('journeys/' . $journey['id']),
+                ])
+            );
+        }
+    }
+
     public function getMaxSeatsForCar(int $carId, int $userId): int
     {
         if ($carId <= 0) return self::ABSOLUTE_MAX_SEATS;

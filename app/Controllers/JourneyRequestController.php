@@ -6,6 +6,7 @@ use App\Controllers\BaseController;
 use App\Models\JourneyRequestModel;
 use App\Models\CityModel;
 use App\Models\LocationModel;
+use App\Services\JourneyService;
 use CodeIgniter\HTTP\RedirectResponse;
 
 class JourneyRequestController extends BaseController
@@ -237,6 +238,8 @@ class JourneyRequestController extends BaseController
         if (!$this->journeyRequestModel->update($id, $data)) {
             return redirect()->back()->withInput()->with('errors', $this->journeyRequestModel->errors());
         }
+
+        (new JourneyService())->notifyMatchingJourneys($id, $userId);
 
         $back = $this->validateBackUrl($this->request->getPost('back'));
 

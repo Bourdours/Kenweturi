@@ -251,6 +251,22 @@ class UserController extends BaseController
             );
         }
 
+        // Envoi des emails de notification si l'adresse e-mail a changé
+        $newEmail = $data['email'];
+        if ($newEmail !== $user['email']) {
+            $mailer = new MailerExample();
+            $mailer->sendHtml(
+                $user['email'],
+                'Votre adresse e-mail a été modifiée',
+                $this->emailChangedOldEmail($user['firstname'], $user['lastname'], $newEmail)
+            );
+            $mailer->sendHtml(
+                $newEmail,
+                'Nouvelle adresse e-mail enregistrée',
+                $this->emailChangedNewEmail($user['firstname'], $user['lastname'])
+            );
+        }
+
         // Gestion de l'upload de l'avatar
         $avatar = $this->request->getFile('avatarProfile');
         if ($avatar && $avatar->isValid() && !$avatar->hasMoved()) {
@@ -297,6 +313,33 @@ class UserController extends BaseController
     private function passwordChangedEmail(string $firstname, string $lastname): string
     {
         return view('Emails/passwordChanged', [
+            'firstname' => $firstname,
+            'lastname'  => $lastname,
+            'date'      => ucfirst(Time::now('Europe/Paris', 'fr_FR')->toLocalizedString('d MMMM yyyy à HH:mm')),
+            'support'   => env('mailer.from'),
+        ]);
+    }
+
+    /**
+     * Construit le corps HTML de l'email envoyé à l'ancienne adresse lors d'un changement d'email
+     */
+    private function emailChangedOldEmail(string $firstname, string $lastname, string $newEmail): string
+    {
+        return view('Emails/emailChangedOld', [
+            'firstname' => $firstname,
+            'lastname'  => $lastname,
+            'newEmail'  => $newEmail,
+            'date'      => ucfirst(Time::now('Europe/Paris', 'fr_FR')->toLocalizedString('d MMMM yyyy à HH:mm')),
+            'support'   => env('mailer.from'),
+        ]);
+    }
+
+    /**
+     * Construit le corps HTML de l'email envoyé à la nouvelle adresse lors d'un changement d'email
+     */
+    private function emailChangedNewEmail(string $firstname, string $lastname): string
+    {
+        return view('Emails/emailChangedNew', [
             'firstname' => $firstname,
             'lastname'  => $lastname,
             'date'      => ucfirst(Time::now('Europe/Paris', 'fr_FR')->toLocalizedString('d MMMM yyyy à HH:mm')),
