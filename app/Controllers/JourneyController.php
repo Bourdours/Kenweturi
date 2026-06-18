@@ -508,4 +508,26 @@ class JourneyController extends BaseController{
 
     }
 
+    /**
+     * Annule plusieurs trajets en une seule fois (annulation en masse, soft delete).
+     *
+     * @return RedirectResponse
+     */
+    public function cancelBulk()
+    {
+        $ids = $this->request->getPost('journey_ids') ?? [];
+        $journeyModel = new JourneyModel();
+
+        foreach ($ids as $id) {
+            $journey = $journeyModel->where('user_id', session()->get('user_id'))->find($id);
+            if ($journey && !$journey['canceled_at']) {
+                $journeyModel->update($id, ['canceled_at' => date('Y-m-d H:i:s')]);
+            }
+        }
+
+        $referer = $this->request->getServer('HTTP_REFERER') ?? site_url('dashboard/journeys');
+
+        return redirect()->to($referer)->with('success', 'Trajets annulés avec succès.');
+    }
+
 }
