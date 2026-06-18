@@ -20,7 +20,7 @@
         <div class="flex bg-surface border border-action/15 rounded-full p-1 gap-1" role="group" aria-label="Filtre des trajets">
             <a href="<?= site_url('dashboard/journeys') ?>?filter=upcoming"
                class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= ($filter === 'upcoming' || $filter === null) ? 'bg-action text-ink' : 'text-ink/60 hover:text-ink' ?>">
-                À venir
+                À&nbsp;venir
             </a>
             <a href="<?= site_url('dashboard/journeys') ?>?filter=past"
                class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= $filter === 'past' ? 'bg-action text-ink' : 'text-ink/60 hover:text-ink' ?>">
