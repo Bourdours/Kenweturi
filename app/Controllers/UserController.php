@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Models\UserModel;
 use App\Models\RememberTokenModel;
 use App\Models\CityModel;
+use App\Models\NotificationPrefModel;
 use App\Libraries\MailerExample;
 use CodeIgniter\I18n\Time;
 use App\Models\CarModel;
@@ -18,13 +19,15 @@ class UserController extends BaseController
     private UserModel $userModel;
     private CityModel $cityModel;
     private CarModel $carModel;
+    private NotificationPrefModel $notifPrefModel;
     protected GeocodingService $geocodingService;
 
     public function __construct()
     {
-        $this->userModel = new UserModel();
-        $this->cityModel = new CityModel();
-        $this->carModel  = new CarModel();
+        $this->userModel      = new UserModel();
+        $this->cityModel      = new CityModel();
+        $this->carModel       = new CarModel();
+        $this->notifPrefModel = new NotificationPrefModel();
         $this->geocodingService = new GeocodingService();
         helper('cookie');
     }
@@ -361,6 +364,72 @@ class UserController extends BaseController
             'lastname'  => $lastname,
             'date'      => ucfirst(Time::now('Europe/Paris', 'fr_FR')->toLocalizedString('d MMMM yyyy à HH:mm')),
             'support'   => env('mailer.from'),
+        ]);
+    }
+
+    public function showNotifications(): string
+    {
+        $userId  = (int) session('user_id');
+        $isAdmin = (bool) session('isAdmin');
+
+        $prefLabels = $this->visiblePrefs($isAdmin);
+
+        return view('Profile/notifications', [
+            'title'      => 'Préférences de notifications',
+            'prefs'      => $this->notifPrefModel->getAllForUser($userId),
+            'prefLabels' => $prefLabels,
+        ]);
+    }
+
+    public function updateNotifications(): RedirectResponse
+    {
+        $userId    = (int) session('user_id');
+        $isAdmin   = (bool) session('isAdmin');
+        $submitted = array_intersect(
+            $this->request->getPost('prefs') ?? [],
+            array_keys($this->visiblePrefs($isAdmin))
+        );
+
+        $this->notifPrefModel->saveForUser($userId, $submitted, $this->visiblePrefs($isAdmin));
+
+        return redirect()->to(site_url('profile/notifications'))
+            ->with('success', 'Préférences mises à jour.');
+    }
+
+    private function visiblePrefs(bool $isAdmin): array
+    {
+        if ($isAdmin) {
+            return NotificationPrefModel::PREFS;
+        }
+        return array_filter(
+            NotificationPrefModel::PREFS,
+            fn($k) => !str_starts_with($k, 'admin_'),
+            ARRAY_FILTER_USE_KEY
+        );
+    }
+
+    public function unsubscribe(): string
+    {
+        $uid   = (int) $this->request->getGet('uid');
+        $pref  = (string) $this->request->getGet('pref');
+        $token = (string) $this->request->getGet('token');
+
+        if (!session()->get('isLoggedIn')) {
+            session()->set('redirect_url', site_url('profile/notifications'));
+        }
+
+        if (!$uid || !isset(NotificationPrefModel::PREFS[$pref]) || !$this->userModel->validateUnsubscribeToken($uid, $pref, $token)) {
+            return view('unsubscribe', ['success' => false, 'label' => '']);
+        }
+
+        $this->notifPrefModel->saveForUser($uid, array_filter(
+            array_keys(NotificationPrefModel::PREFS),
+            fn($k) => $k !== $pref && $this->notifPrefModel->wantsNotif($uid, $k)
+        ));
+
+        return view('unsubscribe', [
+            'success' => true,
+            'label'   => NotificationPrefModel::PREFS[$pref],
         ]);
     }
 }

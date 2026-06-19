@@ -219,4 +219,14 @@ class UserModel extends BaseModel
             ->where('email_token_expiry >', date('Y-m-d H:i:s'))
             ->first();
     }
+
+    public static function unsubscribeToken(int $userId, string $pref): string
+    {
+        return hash_hmac('sha256', $userId . ':' . $pref, env('encryption.key', 'kenweturi'));
+    }
+
+    public function validateUnsubscribeToken(int $userId, string $pref, string $token): bool
+    {
+        return hash_equals(self::unsubscribeToken($userId, $pref), $token);
+    }
 }
