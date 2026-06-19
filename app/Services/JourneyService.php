@@ -12,6 +12,8 @@ use App\Models\StageModel;
 use App\Models\CityModel;
 use App\Models\CarModel;
 use App\Models\BookingModel;
+use App\Models\NotificationPrefModel;
+use App\Models\UserModel;
 
 use App\Exceptions\ExternalApiException;
 use App\Exceptions\ModelValidationException;
@@ -48,6 +50,7 @@ class JourneyService
 
     protected RoutingService $routingService;
     protected GeocodingService $geocodingService;
+    protected NotificationPrefModel $notifPrefModel;
 
     protected MailerExample $mailer;
 
@@ -64,6 +67,7 @@ class JourneyService
         $this->cityModel            = new CityModel();
         $this->carModel             = new CarModel();
         $this->bookingModel         = new BookingModel();
+        $this->notifPrefModel       = new NotificationPrefModel();
 
         $this->routingService       = new RoutingService();
         $this->geocodingService     = new GeocodingService();
@@ -175,6 +179,9 @@ class JourneyService
             }
 
             // --- Envoi du mail
+            $requesterId = (int) $request['user_id'];
+            if (!$this->notifPrefModel->wantsNotif($requesterId, 'journey_request')) continue;
+
             $date = date('d/m/Y', strtotime($journey['start_datetime']))
                   . ' à ' . date('H:i', strtotime($journey['start_datetime']));
 
@@ -182,11 +189,14 @@ class JourneyService
                 $request['requester_email'],
                 'Un trajet correspond à votre demande !',
                 view('Emails/journeyRequestMatch', [
-                    'firstname'  => $request['requester_firstname'],
-                    'cityStart'  => $request['city_start_name'],
-                    'cityEnd'    => $request['city_end_name'],
-                    'date'       => $date,
-                    'journeyUrl' => site_url('journeys/' . $journeyId),
+                    'firstname'      => $request['requester_firstname'],
+                    'cityStart'      => $request['city_start_name'],
+                    'cityEnd'        => $request['city_end_name'],
+                    'date'           => $date,
+                    'journeyUrl'     => site_url('journeys/' . $journeyId),
+                    'prefLabel'      => NotificationPrefModel::PREFS['journey_request'],
+                    'unsubscribeUrl' => site_url('unsubscribe?uid=' . $requesterId . '&pref=journey_request&token=' . UserModel::unsubscribeToken($requesterId, 'journey_request')),
+                    'preferencesUrl' => site_url('profile/notifications'),
                 ])
             );
         }
@@ -233,6 +243,9 @@ class JourneyService
                 if ($diff > 1800) continue;
             }
 
+            $requesterId = (int) $request['user_id'];
+            if (!$this->notifPrefModel->wantsNotif($requesterId, 'journey_request')) continue;
+
             $date = date('d/m/Y', strtotime($journey['start_datetime']))
                   . ' à ' . date('H:i', strtotime($journey['start_datetime']));
 
@@ -240,11 +253,14 @@ class JourneyService
                 $request['requester_email'],
                 'Un trajet correspond à votre demande !',
                 view('Emails/journeyRequestMatch', [
-                    'firstname'  => $request['requester_firstname'],
-                    'cityStart'  => $request['city_start_name'],
-                    'cityEnd'    => $request['city_end_name'],
-                    'date'       => $date,
-                    'journeyUrl' => site_url('journeys/' . $journey['id']),
+                    'firstname'      => $request['requester_firstname'],
+                    'cityStart'      => $request['city_start_name'],
+                    'cityEnd'        => $request['city_end_name'],
+                    'date'           => $date,
+                    'journeyUrl'     => site_url('journeys/' . $journey['id']),
+                    'prefLabel'      => NotificationPrefModel::PREFS['journey_request'],
+                    'unsubscribeUrl' => site_url('unsubscribe?uid=' . $requesterId . '&pref=journey_request&token=' . UserModel::unsubscribeToken($requesterId, 'journey_request')),
+                    'preferencesUrl' => site_url('profile/notifications'),
                 ])
             );
         }
@@ -297,24 +313,30 @@ class JourneyService
     public function notifyCancelledJourney(array $journey): void
     {
         $bookings = $this->bookingModel
-            ->select('user.email, user.firstname')
+            ->select('booking.user_id as passenger_id, user.email, user.firstname')
             ->join('user', 'user.id = booking.user_id')
             ->where('booking.journey_id', $journey['id'])
             ->where('booking.status', 'accepted')
             ->findAll();
-        
+
+        $date = date('d/m/Y', strtotime($journey['start_datetime']))
+            . ' à ' . date('H:i', strtotime($journey['start_datetime']));
+
         foreach ($bookings as $booking) {
-            $date = date('d/m/Y', strtotime($journey['start_datetime']))
-                . ' à ' . date('H:i', strtotime($journey['start_datetime']));
+            $passengerId = (int) $booking['passenger_id'];
+            if (!$this->notifPrefModel->wantsNotif($passengerId, 'journey_cancelled')) continue;
 
             $this->mailer->sendHtml(
                 $booking['email'],
                 'Votre trajet a été annulé',
                 view('Emails/journeyCancelled', [
-                    'firstname' => $booking['firstname'],
-                    'cityStart' => $journey['city_start_name'],
-                    'cityEnd'   => $journey['city_end_name'],
-                    'date'      => $date,
+                    'firstname'      => $booking['firstname'],
+                    'cityStart'      => $journey['city_start_name'],
+                    'cityEnd'        => $journey['city_end_name'],
+                    'date'           => $date,
+                    'prefLabel'      => NotificationPrefModel::PREFS['journey_cancelled'],
+                    'unsubscribeUrl' => site_url('unsubscribe?uid=' . $passengerId . '&pref=journey_cancelled&token=' . UserModel::unsubscribeToken($passengerId, 'journey_cancelled')),
+                    'preferencesUrl' => site_url('profile/notifications'),
                 ])
             );
         }

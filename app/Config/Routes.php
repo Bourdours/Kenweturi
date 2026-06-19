@@ -10,7 +10,8 @@ use CodeIgniter\Router\RouteCollection;
  *  DEV ONLY — prévisualisation des emails
  * ========================================================= */
 if (ENVIRONMENT === 'development') {
-    $routes->get('dev/email/(:segment)', 'DevController::emailPreview/$1');
+    $routes->get('dev/email/(:segment)',      'DevController::emailPreview/$1');
+    $routes->get('dev/email/(:segment)/send', 'DevController::emailSend/$1');
 }
 
 /* =========================================================
@@ -35,6 +36,9 @@ $routes->post('contact',          'PageController::sendContact');
 
 // Confirmation d'adresse email (accessible à tous : l'utilisateur n'est pas encore connecté)
 $routes->get('verifyEmail', 'AuthController::verifyEmail');
+
+// Désabonnement one-click depuis un email (token signé, sans connexion requise)
+$routes->get('unsubscribe', 'UserController::unsubscribe');
 
 /* =========================================================
  *  ROUTES INVITÉS (interdites aux utilisateurs connectés)
@@ -106,11 +110,13 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->post('journey-requests/(:num)/cancel', 'JourneyRequestController::delete/$1');
 
     // Profile
-    $routes->get('profile',         'UserController::show');
-    $routes->get('profile/edit',    'UserController::showEditForm');
-    $routes->get('profile/update',  'UserController::showEditForm');
-    $routes->post('profile/update', 'UserController::update');
-    $routes->post('profile/delete', 'UserController::delete');
+    $routes->get('profile',                    'UserController::show');
+    $routes->get('profile/edit',               'UserController::showEditForm');
+    $routes->get('profile/update',             'UserController::showEditForm');
+    $routes->post('profile/update',            'UserController::update');
+    $routes->post('profile/delete',            'UserController::delete');
+    $routes->get('profile/notifications',      'UserController::showNotifications');
+    $routes->post('profile/notifications',     'UserController::updateNotifications');
 
     // Users
     $routes->get('users/(:num)', 'UserController::show/$1');

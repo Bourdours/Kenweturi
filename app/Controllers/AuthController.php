@@ -8,6 +8,7 @@ use App\Libraries\MailerExample;
 use \App\Models\UserModel;
 use \App\Models\CityModel;
 use App\Models\RememberTokenModel;
+use App\Models\NotificationPrefModel;
 use DateTime;
 use App\Services\GeocodingService;
 
@@ -350,15 +351,21 @@ class AuthController extends BaseController
             'email_token_expiry' => null,
         ]);
 
-        // Notification aux admins
-        $admins    = $this->userModel->getActiveAdmins();
-        $emailBody = view('Emails/newRegistration', [
-            'firstname' => $user['firstname'],
-            'lastname'  => $user['lastname'],
-            'email'     => $user['email'],
-        ]);
-        $mailer = new MailerExample();
+        // Notification aux admins (selon leur préférence)
+        $admins         = $this->userModel->getActiveAdmins();
+        $notifPrefModel = new NotificationPrefModel();
+        $mailer         = new MailerExample();
         foreach ($admins as $admin) {
+            if (!$notifPrefModel->wantsNotif((int) $admin['id'], 'admin_registration')) continue;
+            $adminId   = (int) $admin['id'];
+            $emailBody = view('Emails/newRegistration', [
+                'firstname'      => $user['firstname'],
+                'lastname'       => $user['lastname'],
+                'email'          => $user['email'],
+                'prefLabel'      => NotificationPrefModel::PREFS['admin_registration'],
+                'unsubscribeUrl' => site_url('unsubscribe?uid=' . $adminId . '&pref=admin_registration&token=' . UserModel::unsubscribeToken($adminId, 'admin_registration')),
+                'preferencesUrl' => site_url('profile/notifications'),
+            ]);
             $mailer->sendHtml($admin['email'], 'Nouvelle demande d\'inscription', $emailBody);
         }
 
