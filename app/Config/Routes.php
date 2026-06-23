@@ -144,6 +144,8 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
     $routes->post('users/(:num)/validate',  'AdminController::updateRegistration/$1');
     $routes->post('users/(:num)/delete',    'AdminController::deleteUser/$1');
     $routes->post('users/(:num)/student',   'AdminController::updateStudent/$1');
+    $routes->post('settings',               'AdminController::updateSettings');
+    $routes->post('settings/clear',         'AdminController::clearSettings');
 });
 
 /* =========================================================
