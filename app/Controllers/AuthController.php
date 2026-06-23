@@ -107,7 +107,7 @@ class AuthController extends BaseController
         ];
 
         if (!$this->validate($rules, $messages)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+            return redirect()->to('/register')->withInput()->with('errors', $this->validator->getErrors());
         }
 
         $birthDateStr = $this->request->getPost('birthDate');
@@ -119,14 +119,14 @@ class AuthController extends BaseController
 
         // Vérification de la majorité
         if ($age < 18) {
-            return redirect()->back()->withInput()->with('errors', [
+            return redirect()->to('/register')->withInput()->with('errors', [
                 'birthDate' => 'Vous devez avoir au moins 18 ans pour vous inscrire.'
             ]);
         }
 
         // l'année de naissance ne peut pas être antérieure à 1920
         if ((int)$birthDateObj->format('Y') < 1920) {
-            return redirect()->back()->withInput()->with('errors', [
+            return redirect()->to('/register')->withInput()->with('errors', [
                 'birthDate' => 'Veuillez saisir une date de naissance réaliste.'
             ]);
         }
@@ -140,13 +140,13 @@ class AuthController extends BaseController
         $cityNameChecked = $this->geocodingService->getCheckedCityName($cityName, $zipCode);
 
         if ($cityNameChecked === null) {
-            return redirect()->back()->withInput()->with('errors', [
+            return redirect()->to('/register')->withInput()->with('errors', [
                 'cityName' => 'Impossible de vérifier la ville. Veuillez réessayer.'
             ]);
         }
 
         if ($cityNameChecked === false) {
-            return redirect()->back()->withInput()->with('errors', [
+            return redirect()->to('/register')->withInput()->with('errors', [
                 'cityName' => 'La ville et le code postal ne correspondent pas à une commune valide.'
             ]);
         }
@@ -171,7 +171,7 @@ class AuthController extends BaseController
 
         // Tentative de sauvegarde de l'utilisateur via le Model
         if (!$this->userModel->save($data)) {
-            return redirect()->back()->withInput()->with('errors', $this->userModel->errors());
+            return redirect()->to('/register')->withInput()->with('errors', $this->userModel->errors());
         }
 
         $userId = $this->userModel->getInsertID();
