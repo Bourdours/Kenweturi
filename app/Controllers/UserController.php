@@ -201,10 +201,29 @@ class UserController extends BaseController
             $rules['confirmPasswordProfile'] = 'required|matches[newPasswordProfile]';
         }
 
-        // Messages d'erreur personnalisés pour le changement de mot de passe
         $messages = [
+            'firstNameProfile' => [
+                'required'   => 'Le prénom est obligatoire.',
+                'min_length' => 'Le prénom doit faire au moins 2 caractères.',
+                'max_length' => 'Le prénom ne peut pas dépasser 100 caractères.',
+            ],
+            'lastNameProfile' => [
+                'required'   => 'Le nom est obligatoire.',
+                'min_length' => 'Le nom doit faire au moins 2 caractères.',
+                'max_length' => 'Le nom ne peut pas dépasser 100 caractères.',
+            ],
             'emailProfile' => [
-                'is_unique' => 'Cette adresse e-mail ne peut pas être utilisée.',
+                'required'    => 'L\'adresse e-mail est obligatoire.',
+                'valid_email' => 'L\'adresse e-mail n\'est pas valide.',
+                'is_unique'   => 'Cette adresse e-mail ne peut pas être utilisée.',
+            ],
+            'genderProfile' => [
+                'required' => 'Le genre est obligatoire.',
+                'in_list'  => 'Le genre sélectionné n\'est pas valide.',
+            ],
+            'birthDateProfile' => [
+                'required'   => 'La date de naissance est obligatoire.',
+                'valid_date' => 'La date de naissance n\'est pas valide.',
             ],
             'newPasswordProfile' => [
                 'required'    => 'Le mot de passe est obligatoire.',

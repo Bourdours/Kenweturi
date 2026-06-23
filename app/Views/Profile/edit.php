@@ -33,7 +33,7 @@
   <?php endif; ?>
 
   <!-- Formulaire -->
-  <form action="<?= site_url('profile/update') ?>" method="post" enctype="multipart/form-data" class="flex flex-col gap-6">
+  <form id="profileForm" action="<?= site_url('profile/update') ?>" method="post" enctype="multipart/form-data" class="flex flex-col gap-6">
     <?= csrf_field() ?>
 
     <!-- Photo de profil -->
@@ -149,7 +149,7 @@
   </form>
 
     <!-- Véhicules -->
-    <div id="vehicles"  class="bg-surface rounded-2xl p-6 border border-action/10 scroll-mt-28">
+    <div id="vehicles" class="bg-surface rounded-2xl p-6 border border-action/10 scroll-mt-28">
       <h2 class="text-ink text-base font-semibold font-display mb-5 flex items-center gap-2">
         <i class="fa-solid fa-car text-action text-sm"></i>Mes véhicules
       </h2>
@@ -234,9 +234,6 @@
 
     </div>
 
-    <form action="<?= site_url('profile/update') ?>" method="post" enctype="multipart/form-data" class="flex flex-col gap-6">
-      <?= csrf_field() ?>
-
     <!-- Mot de passe -->
     <div class="bg-surface rounded-2xl p-6 border border-action/10">
       <h2 class="text-ink text-base font-semibold font-display mb-1 flex items-center gap-2">
@@ -248,7 +245,7 @@
         <div>
           <label for="currentPasswordProfile" class="text-ink/50 text-xs font-medium mb-1.5 block">Mot de passe actuel</label>
           <div class="relative">
-            <input type="password" id="currentPasswordProfile" name="currentPasswordProfile"
+            <input type="password" id="currentPasswordProfile" name="currentPasswordProfile" form="profileForm"
               placeholder="Requis pour changer le mot de passe"
               class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 pr-9 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors">
             <button type="button" onclick="togglePassword('currentPasswordProfile', this)"
@@ -262,7 +259,7 @@
           <div>
             <label for="newPasswordProfile" class="text-ink/50 text-xs font-medium mb-1.5 block">Nouveau mot de passe</label>
             <div class="relative">
-              <input type="password" id="newPasswordProfile" name="newPasswordProfile"
+              <input type="password" id="newPasswordProfile" name="newPasswordProfile" form="profileForm"
                 placeholder="••••••••"
                 class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 pr-9 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors">
               <button type="button" onclick="togglePassword('newPasswordProfile', this)"
@@ -274,9 +271,9 @@
           <div>
             <label for="confirmPasswordProfile" class="text-ink/50 text-xs font-medium mb-1.5 block">Confirmer le mot de passe</label>
             <div class="relative">
-              <input type="password" id="confirmPasswordProfile" name="confirmPasswordProfile"
+              <input type="password" id="confirmPasswordProfile" name="confirmPasswordProfile" form="profileForm"
                 placeholder="••••••••"
-                class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 pr-9 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors">
+                class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 pr-9 outline-none focus:border-action/50 transition-colors">
               <button type="button" onclick="togglePassword('confirmPasswordProfile', this)"
                 class="absolute right-3 top-1/2 -translate-y-1/2 text-ink/30 hover:text-action/60 transition-colors">
                 <i class="fa-regular fa-eye text-sm"></i>
@@ -294,13 +291,12 @@
         class="flex items-center gap-2 border border-action/20 hover:border-action/50 text-ink/60 hover:text-ink font-medium rounded-lg px-5 py-2.5 text-sm transition-colors">
         Annuler
       </a>
-      <button type="submit"
+      <button type="submit" form="profileForm"
         class="flex items-center gap-2 bg-action hover:bg-action-dark text-ink font-semibold font-display rounded-lg px-5 py-2.5 text-sm transition-colors cursor-pointer">
         <i class="fa-solid fa-check text-xs"></i>Enregistrer
       </button>
     </div>
 
-  </form>
 </div>
 
 <?= view('partials/avatar_modal', ['avatarSrc' => site_url(esc($user['avatar'] ?? '')), 'firstname' => $user['firstname'], 'initials' => $initials]) ?>
