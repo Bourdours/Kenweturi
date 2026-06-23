@@ -12,6 +12,7 @@
   ],
 ]) ?>
 <?= view('partials/header') ?>
+<?php $favoriteFullAddress = $favorite ? $favorite['address'] . ', ' . $favorite['city_zipcode'] . ' ' . $favorite['city_name'] : null; ?>
 
 <div class="max-w-4xl mx-auto py-10 px-4 flex flex-col gap-6">
 
@@ -49,7 +50,14 @@
             <div class="w-px flex-1 bg-ink/10 mt-1 min-h-10"></div>
           </div>
           <div class="flex-1 pb-4">
-            <label for="startAddress" class="text-ink/50 text-xs font-medium mb-1.5 block">Départ</label>
+            <div class="flex items-center justify-between mb-1.5">
+              <label for="startAddress" class="text-ink/50 text-xs font-medium mb-1 block">Départ</label>
+              <?php if ($favorite): ?>
+                <button type="button" class="use-favorite-btn text-action/60 hover:text-action text-xs font-medium transition-colors cursor-pointer mb-1" data-target="startAddress" data-address="<?= esc($favoriteFullAddress, 'attr') ?>">
+                  <i class="fa-solid fa-location-dot text-xs"></i> Adresse Greta
+                </button>
+              <?php endif; ?>
+            </div>
             <input id="startAddress" class="address w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors" name="startAddress" type="text" placeholder="Adresse de départ..." value="<?= esc(old('startAddress')) ?>">
           </div>
         </div>
@@ -120,7 +128,14 @@
             <div class="w-3 h-3 bg-action rounded-full shrink-0"></div>
           </div>
           <div class="flex-1">
-            <label for="endAddress" class="text-ink/50 text-xs font-medium mb-1.5 block">Arrivée</label>
+            <div class="flex items-center justify-between mb-1.5">
+              <label for="endAddress" class="text-ink/50 text-xs font-medium mb-1 block">Arrivée</label>
+              <?php if ($favorite): ?>
+                <button type="button" class="use-favorite-btn text-action/60 hover:text-action text-xs font-medium transition-colors cursor-pointer mb-1" data-target="endAddress" data-address="<?= esc($favoriteFullAddress, 'attr') ?>">
+                  <i class="fa-solid fa-location-dot text-xs"></i> Adresse Greta
+                </button>
+              <?php endif; ?>
+            </div>
             <input id="endAddress" class="address w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors" name="endAddress" type="text" placeholder="Adresse d'arrivée..." value="<?= esc(old('endAddress')) ?>">
           </div>
         </div>
