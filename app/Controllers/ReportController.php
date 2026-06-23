@@ -6,6 +6,8 @@ use App\Models\ReportModel;
 use App\Models\JourneyModel;
 use App\Models\UserModel;
 use App\Models\BookingModel;
+use App\Models\NotificationPrefModel;
+use App\Libraries\MailerExample;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use Config\Services;
 
@@ -162,16 +164,25 @@ class ReportController extends BaseController
 
     private function notifyAdmin(array $journey, string $description, int $reporterId): void
     {
-        $email = Services::email();
+        $notifPrefModel = new NotificationPrefModel();
+        $admins         = $this->userModel->getActiveAdmins();
+        $mailer         = new MailerExample();
 
-        $email->setTo(getenv('ADMIN_EMAIL') ?: 'admin@exemple.com');
-        $email->setSubject('[Signalement] Nouveau signalement à traiter');
-        $email->setMessage(view('Emails/adminNewReport', [
-            'reporterId'  => $reporterId,
-            'journeyId'   => $journey['id'],
-            'description' => $description,
-        ]));
-
-        $email->send();
+        foreach ($admins as $admin) {
+            if (!$notifPrefModel->wantsNotif((int) $admin['id'], 'admin_report')) continue;
+            $adminId = (int) $admin['id'];
+            $mailer->sendHtml(
+                $admin['email'],
+                '[Signalement] Nouveau signalement à traiter',
+                view('Emails/adminNewReport', [
+                    'reporterId'     => $reporterId,
+                    'journeyId'      => $journey['id'],
+                    'description'    => $description,
+                    'prefLabel'      => NotificationPrefModel::PREFS['admin_report'],
+                    'unsubscribeUrl' => site_url('unsubscribe?uid=' . $adminId . '&pref=admin_report&token=' . UserModel::unsubscribeToken($adminId, 'admin_report')),
+                    'preferencesUrl' => site_url('profile/notifications'),
+                ])
+            );
+        }
     }
 }

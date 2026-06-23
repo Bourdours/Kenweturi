@@ -3,6 +3,9 @@
 /** @var string $cityStart */
 /** @var string $cityEnd */
 /** @var string $date */
+/** @var string $prefLabel */
+/** @var string $unsubscribeUrl */
+/** @var string $preferencesUrl */
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -64,6 +67,8 @@
 
                         </td>
                     </tr>
+
+                    <?= view('Emails/_notifFooter', compact('prefLabel', 'unsubscribeUrl', 'preferencesUrl')) ?>
 
                     <!-- Footer -->
                     <tr>

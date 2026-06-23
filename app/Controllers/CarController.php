@@ -44,60 +44,15 @@ class CarController extends BaseController
         ];
 
         if (!$carModel->save($data)) {
-            if ($this->request->isAJAX()) {
-                return $this->response->setJSON(['success' => false, 'errors' => $carModel->errors()]);
-            }
             return redirect()->back()->withInput()->with('errors', $carModel->errors());
         }
 
-        $id = $carModel->getInsertID();
-
-        if ($this->request->isAJAX()) {
-            return $this->response->setJSON([
-                'success' => true,
-                'car_id'  => $id,
-                'label'   => $data['brand'] . ' ' . $data['model'] . ' ' . $data['color'],
-                'csrfToken' => csrf_hash(),
-            ]);
-        }
-
-        $back = $this->request->getPost('back') ?? site_url('profile/edit');
+        $back = $this->request->getPost('back');
+        if (empty($back)) {
+            $back = site_url('profile/edit');
+        } 
         return redirect()->to($back)->with('success', 'Voiture ajoutée avec succès !');
     }
-
-    /** 
-     * 
-     * Affiche une voitures d'un utilisateur.
-     * 
-     * @return string
-     */
-    public function show(int $id): string|RedirectResponse
-    {
-        $carModel = new CarModel();
-        $car = $carModel->where('user_id', session()->get('user_id'))->find($id);
-        if (!$car) {
-            return redirect()->to('/dashboard')->with('error', 'Voiture introuvable.');
-        }
-        return view('car/show', ['car' => $car]);
-    }
-
-    /** 
-     * 
-     * Affiche la liste des voitures d'un utilisateur.
-     * 
-     * @return string
-     */
-    public function showAll()
-    {
-        $carModel = new CarModel();
-
-        $data = [
-            'cars' => $carModel->where('user_id', session()->get('user_id'))->findAll()
-        ];
-
-        return view('/cars/get', $data);
-    }
-
 
     /** 
      * 
@@ -119,7 +74,7 @@ class CarController extends BaseController
             'car' => $car
         ];
 
-        return view('profile/carUpdate', $data);
+        return view('Profile/carUpdate', $data);
     }
 
 

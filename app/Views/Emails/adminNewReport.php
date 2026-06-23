@@ -2,6 +2,9 @@
 /** @var int    $reporterId */
 /** @var int    $journeyId */
 /** @var string $description */
+/** @var string $prefLabel */
+/** @var string $unsubscribeUrl */
+/** @var string $preferencesUrl */
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -61,6 +64,8 @@
 
                         </td>
                     </tr>
+
+                    <?= view('Emails/_notifFooter', compact('prefLabel', 'unsubscribeUrl', 'preferencesUrl')) ?>
 
                     <!-- Footer -->
                     <tr>

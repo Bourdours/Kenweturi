@@ -43,6 +43,8 @@ class UserModel extends BaseModel
         'reset_token',
         'reset_token_expiry',
         'role',
+        'email_token',
+        'email_token_expiry',
     ];
 
     // Règles de validation appliquées automatiquement avant chaque insertion
@@ -233,5 +235,30 @@ class UserModel extends BaseModel
             'reset_token'        => null,
             'reset_token_expiry' => null,
         ]);
+    }
+  
+    public function setEmailToken(int $userId, string $rawToken, int $hours = 24): bool
+    {
+        return $this->update($userId, [
+            'email_token'        => hash('sha256', $rawToken),
+            'email_token_expiry' => date('Y-m-d H:i:s', strtotime("+{$hours} hour")),
+        ]);
+    }
+
+    public function findByValidEmailToken(string $rawToken)
+    {
+        return $this->where('email_token', hash('sha256', $rawToken))
+            ->where('email_token_expiry >', date('Y-m-d H:i:s'))
+            ->first();
+    }
+
+    public static function unsubscribeToken(int $userId, string $pref): string
+    {
+        return hash_hmac('sha256', $userId . ':' . $pref, env('encryption.key', 'kenweturi'));
+    }
+
+    public function validateUnsubscribeToken(int $userId, string $pref, string $token): bool
+    {
+        return hash_equals(self::unsubscribeToken($userId, $pref), $token);
     }
 }

@@ -10,7 +10,8 @@ use CodeIgniter\Router\RouteCollection;
  *  DEV ONLY — prévisualisation des emails
  * ========================================================= */
 if (ENVIRONMENT === 'development') {
-    $routes->get('dev/email/(:segment)', 'DevController::emailPreview/$1');
+    $routes->get('dev/email/(:segment)',      'DevController::emailPreview/$1');
+    $routes->get('dev/email/(:segment)/send', 'DevController::emailSend/$1');
 }
 
 /* =========================================================
@@ -32,6 +33,12 @@ $routes->get('blog',              'PageController::blog');
 $routes->get('contact',           'PageController::contact');
 $routes->post('contact',          'PageController::sendContact');
 
+
+// Confirmation d'adresse email (accessible à tous : l'utilisateur n'est pas encore connecté)
+$routes->get('verifyEmail', 'AuthController::verifyEmail');
+
+// Désabonnement one-click depuis un email (token signé, sans connexion requise)
+$routes->get('unsubscribe', 'UserController::unsubscribe');
 
 /* =========================================================
  *  ROUTES INVITÉS (interdites aux utilisateurs connectés)
@@ -65,14 +72,15 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('logout', 'AuthController::logout');
 
     // Dashboard
-    $routes->get('dashboard',                 'DashboardController::show');
-    $routes->get('dashboard/journeys',        'DashboardController::showJourneys');
-    $routes->get('dashboard/bookings',        'DashboardController::showBookings');
+    $routes->get('dashboard',                            'DashboardController::show');
+    $routes->get('dashboard/journeys',                   'DashboardController::showJourneys');
+    $routes->get('dashboard/bookings',                   'DashboardController::showBookings');
     $routes->get('dashboard/reports',                    'DashboardController::showReports');
     $routes->get('dashboard/reports/(:num)',             'DashboardController::showReport/$1');
     $routes->get('dashboard/journey-requests',           'DashboardController::showJourneyRequests');
     $routes->get('dashboard/journey-requests/(:num)',    'DashboardController::showJourneyRequest/$1');
     $routes->get('dashboard/car/new',                    'CarController::showCreateForm');
+    $routes->post('dashboard/journeys/cancel-bulk',      'JourneyController::cancelBulk');
 
     // Bookings
     $routes->get('dashboard/bookings/(:num)',           'BookingController::show/$1');
@@ -102,11 +110,13 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->post('journey-requests/(:num)/cancel', 'JourneyRequestController::delete/$1');
 
     // Profile
-    $routes->get('profile',         'UserController::show');
-    $routes->get('profile/edit',    'UserController::showEditForm');
-    $routes->get('profile/update',  'UserController::showEditForm');
-    $routes->post('profile/update', 'UserController::update');
-    $routes->post('profile/delete', 'UserController::delete');
+    $routes->get('profile',                    'UserController::show');
+    $routes->get('profile/edit',               'UserController::showEditForm');
+    $routes->get('profile/update',             'UserController::showEditForm');
+    $routes->post('profile/update',            'UserController::update');
+    $routes->post('profile/delete',            'UserController::delete');
+    $routes->get('profile/notifications',      'UserController::showNotifications');
+    $routes->post('profile/notifications',     'UserController::updateNotifications');
 
     // Users
     $routes->get('users/(:num)', 'UserController::show/$1');

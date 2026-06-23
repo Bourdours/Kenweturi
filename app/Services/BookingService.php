@@ -8,6 +8,8 @@ use App\Services\JourneyService;
 
 use App\Models\JourneyModel;
 use App\Models\BookingModel;
+use App\Models\NotificationPrefModel;
+use App\Models\UserModel;
 
 use App\Exceptions\BookingAlreadyAcceptedException;
 use App\Exceptions\BookingNotAssignedToDriverException;
@@ -23,13 +25,14 @@ class BookingService
 
     protected JourneyModel $journeyModel;
     protected BookingModel $bookingModel;
+    protected NotificationPrefModel $notifPrefModel;
 
     public function __construct()
     {
-        $this->journeyService       = new JourneyService();
-
-        $this->journeyModel         = new JourneyModel();
-        $this->bookingModel         = new BookingModel();
+        $this->journeyService  = new JourneyService();
+        $this->journeyModel    = new JourneyModel();
+        $this->bookingModel    = new BookingModel();
+        $this->notifPrefModel  = new NotificationPrefModel();
     }
 
     public function accept(int $bookingId,int $driverId):void{
@@ -61,9 +64,14 @@ class BookingService
 
     }
 
-    public function confirmToPassenger(int $bookingId, int $driverId){
+    public function confirmToPassenger(int $bookingId, int $driverId): void
+    {
+        $booking     = $this->bookingModel->findWithDetails($bookingId, $driverId);
+        $passengerId = (int) $booking['user_id'];
 
-        $booking = $this->bookingModel->findWithDetails($bookingId, $driverId);
+        if (!$this->notifPrefModel->wantsNotif($passengerId, 'booking_accepted')) {
+            return;
+        }
 
         $date = date('d/m/Y', strtotime($booking['start_datetime'])) . ' à ' . date('H:i', strtotime($booking['start_datetime']));
 
@@ -78,9 +86,11 @@ class BookingService
                 'cityStart'       => $booking['city_start_name'],
                 'cityEnd'         => $booking['city_end_name'],
                 'date'            => $date,
+                'prefLabel'       => NotificationPrefModel::PREFS['booking_accepted'],
+                'unsubscribeUrl'  => site_url('unsubscribe?uid=' . $passengerId . '&pref=booking_accepted&token=' . UserModel::unsubscribeToken($passengerId, 'booking_accepted')),
+                'preferencesUrl'  => site_url('profile/notifications'),
             ])
         );
-
     }
 
     public function getDetails(int $id, int $userId): array
