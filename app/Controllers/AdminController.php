@@ -7,15 +7,29 @@ use App\Models\JourneyModel;
 use App\Models\ReportModel;
 use App\Models\UserModel;
 
+use App\Services\UserService;
+
+use App\Exceptions\UserNotFoundException;
+use App\Exceptions\CannotDeleteSelfException;
+use App\Exceptions\CannotDeleteSuperadminException;
+use App\Exceptions\AdminDeletionForbiddenException;
+use App\Exceptions\LastAdminException;
+
+use CodeIgniter\HTTP\RedirectResponse;
+
 class AdminController extends BaseController
 {
     private ReportModel $reportModel;
     private UserModel   $userModel;
 
+    private UserService  $userService;
+
     public function __construct()
     {
         $this->reportModel = new ReportModel();
         $this->userModel   = new UserModel();
+
+        $this->userService = new UserService();
     }
 
     /**
@@ -206,72 +220,61 @@ class AdminController extends BaseController
      * @param  int  $id  Identifiant de l'utilisateur à supprimer
      * @return \CodeIgniter\HTTP\RedirectResponse
      */
-    public function deleteUser(int $id)
+    public function deleteUser(int $id): RedirectResponse
     {
-        $target      = $this->userModel->find($id);
-        $currentRole = session()->get('role');
+        $currentUserId = (int) session()->get('user_id');
+        $currentRole   = (string) session()->get('role');
 
-        if (! $target) {
+        try {
+
+            $contact = $this->userService->delete($id, $currentUserId, $currentRole);
+
+        } catch (UserNotFoundException) {
+
             return redirect()->to(site_url('admin?tab=admins'))
                 ->with('error', 'Utilisateur introuvable.');
-        }
 
-        // 1. Pas d'auto-suppression
-        if ($id === (int) session()->get('user_id')) {
+        } catch (CannotDeleteSelfException) {
+
             return redirect()->to(site_url('admin?tab=admins'))
                 ->with('error', 'Vous ne pouvez pas supprimer votre propre compte.');
-        }
 
-        // 2. Personne ne peut supprimer un super-administrateur
-        if ($target['role'] === 'superadmin') {
+        } catch (CannotDeleteSuperadminException) {
+
             return redirect()->to(site_url('admin?tab=admins'))
                 ->with('error', 'Impossible de supprimer un super-administrateur.');
-        }
 
-        // 3. Un admin simple ne peut pas supprimer un autre admin
-        //    (seul un superadmin peut supprimer un admin)
-        if ($target['role'] === 'admin' && $currentRole !== 'superadmin') {
+        } catch (AdminDeletionForbiddenException) {
+
             return redirect()->to(site_url('admin?tab=admins'))
                 ->with('error', 'Seul un super-administrateur peut supprimer un administrateur.');
+
+        } catch (LastAdminException) {
+
+            return redirect()->to(site_url('admin?tab=admins'))
+                ->with('error', 'Impossible de supprimer le dernier administrateur.');
+
+        } catch (\Throwable $e) {
+
+            log_message('error', 'Deletion failed for user n°{id}', ['id' => $id]);
+            return redirect()->to(site_url('admin?tab=admins'))
+                ->with('error', 'Un problème est survenu.');
+
         }
 
-        // 4. Garde-fou : on n'autorise pas la suppression du dernier administrateur
-        //    (au moins un admin doit rester en plus du superadmin)
-        if ($target['role'] === 'admin') {
-            $adminCount = $this->userModel
-                ->where('status', 'active')
-                ->where('role', 'admin')
-                ->countAllResults();
+        // Email à part : un échec d'envoi ne doit pas annuler la suppression (comme accept)
+        try {
 
-            if ($adminCount <= 1) {
-                return redirect()->to(site_url('admin?tab=admins'))
-                    ->with('error', 'Impossible de supprimer le dernier administrateur.');
-            }
+            $this->userService->notifyDeletion($contact);
+
+        } catch (\Throwable) {
+
+            log_message('error', 'User deletion mail failed for user {id}', ['id' => $id]);
+
         }
-
-        // Soft delete (remplit deleted_at)
-        $this->userModel->delete($id);
-
-        // Annulation de tous ses trajets actifs
-        $journeyModel = new JourneyModel();
-        $journeyModel->where('user_id', $id)
-            ->where('canceled_at', null)
-            ->set(['canceled_at' => date('Y-m-d H:i:s')])
-            ->update();
-
-        // Notification email
-        $mailer = new MailerExample();
-        $mailer->sendHtml(
-            $target['email'],
-            'Votre compte a été supprimé',
-            view('Emails/adminDeletedAccount', [
-                'firstname' => $target['firstname'],
-                'lastname'  => $target['lastname'],
-            ])
-        );
 
         return redirect()->to(site_url('admin?tab=admins'))
-            ->with('success', "{$target['firstname']} a été supprimé et ses trajets annulés.");
+            ->with('success', "{$contact['firstname']} a été supprimé et ses trajets annulés.");
     }
 
     /**
