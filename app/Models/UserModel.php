@@ -202,4 +202,36 @@ class UserModel extends BaseModel
     {
         return $this->update($userId, ['is_banned' => 1]);
     }
+
+    /**
+     * Compte les utilisateurs actifs ayant un rôle donné.
+     */
+    public function countActiveByRole(string $role): int
+    {
+        return $this->where('status', 'active')
+                    ->where('role', $role)
+                    ->countAllResults();
+    }
+
+    /**
+     * Anonymise les données personnelles d'un utilisateur avant le soft delete.
+     * Écrase la PII par des valeurs neutres (le schéma reste NOT NULL).
+     * skipValidation(true) car on ne repasse pas par les règles de validation métier.
+     */
+    public function anonymize(int $userId): bool
+    {
+        return $this->skipValidation(true)->update($userId, [
+            'firstname'          => 'Compte',
+            'lastname'           => 'supprimé',
+            'email'              => 'deleted_' . $userId . '@deleted.invalid',
+            'gender'             => 'Autre',
+            'birth_date'         => null,
+            'biography'          => null,
+            'avatar'             => null,
+            // chaîne aléatoire -> hachée par le hook beforeUpdate -> connexion impossible
+            'password_hash'      => bin2hex(random_bytes(32)),
+            'reset_token'        => null,
+            'reset_token_expiry' => null,
+        ]);
+    }
 }
