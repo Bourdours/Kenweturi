@@ -12,7 +12,8 @@
     <div class="bg-paper rounded-xl border border-action/10 px-4 py-3 flex items-center justify-between gap-3">
       <div class="flex items-center gap-3">
         <i class="fa-solid fa-location-dot text-action text-sm shrink-0"></i>
-        <span class="text-ink text-sm"><?= esc($favorite['address']) ?></span>
+        <?php $favoriteFullAddress = $favorite ? $favorite['address'] . ', ' . $favorite['city_zipcode'] . ' ' . $favorite['city_name'] : null; ?>
+        <span class="text-ink text-sm"><?= esc($favoriteFullAddress) ?></span>
       </div>
       <form action="<?= site_url('admin/settings/clear') ?>" method="post">
         <?= csrf_field() ?>
