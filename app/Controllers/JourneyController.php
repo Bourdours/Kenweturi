@@ -1,32 +1,29 @@
 <?php
 namespace App\Controllers;
-
 use App\Controllers\BaseController;
 use CodeIgniter\HTTP\RedirectResponse;
-
 use App\Models\CarModel;
 use App\Models\JourneyModel;
-
+use App\Models\LocationModel;
 use App\Services\JourneyService;
 use App\Services\CreateJourneyService;
 use App\Services\JourneySearchService;
-
 use App\Exceptions\ExternalApiException;
 use App\Exceptions\ModelValidationException;
 use App\Exceptions\AddressValidationException;
 
 class JourneyController extends BaseController{
-
     protected CarModel $carModel;
     protected JourneyModel $journeyModel;
+    protected LocationModel $locationModel;
     protected JourneyService $journeyService;
     protected CreateJourneyService $createJourneyService;
     protected JourneySearchService $journeySearchService;
 
     public function __construct(){
-
         $this->carModel = new CarModel();
         $this->journeyModel = new JourneyModel();
+        $this->locationModel = new LocationModel();
         $this->journeyService = new JourneyService();
         $this->createJourneyService = new CreateJourneyService();
         $this->journeySearchService = new JourneySearchService();
@@ -42,14 +39,14 @@ class JourneyController extends BaseController{
      */
     public function showCreateForm()
     {
-
-        $userId = session('user_id');
-
+        $userId   = session('user_id');
         $userCars = $this->carModel->findByUser($userId);
+        $favorite = $this->locationModel->getFavorite();
 
         return view('Journeys/newJourney', [
-            'title' => "Publier un trajet",
-            'cars' => $userCars,
+            'title'    => "Publier un trajet",
+            'cars'     => $userCars,
+            'favorite' => $favorite,
         ]);
     }
 
