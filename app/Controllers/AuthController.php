@@ -206,7 +206,7 @@ class AuthController extends BaseController
 
         $throttler = service('throttler');
         if ($throttler->check(md5($this->request->getIPAddress() . 'login'), 10, MINUTE) === false) {
-            return redirect()->back()->withInput()->with('error', 'Trop de tentatives de connexion. Veuillez patienter 1 minute avant de réessayer.');
+            return redirect()->to('/login')->withInput()->with('error', 'Trop de tentatives de connexion. Veuillez patienter 1 minute avant de réessayer.');
         }
 
         $email = $this->request->getPost('email');
@@ -218,21 +218,21 @@ class AuthController extends BaseController
         if ($user) {
             //  Vérification du bannissement
             if ((bool)$user['is_banned'] === true) {
-                return redirect()->back()->withInput()->with('error', 'Votre compte a été suspendu par l\'équipe de modération.');
+                return redirect()->to('/login')->withInput()->with('error', 'Votre compte a été suspendu par l\'équipe de modération.');
             }
             //  Vérification de la confirmation email
             if ($user['status'] === 'unverified') {
-                return redirect()->back()->withInput()->with('error', 'Veuillez confirmer votre adresse email avant de vous connecter. Consultez votre boîte mail.');
+                return redirect()->to('/login')->withInput()->with('error', 'Veuillez confirmer votre adresse email avant de vous connecter. Consultez votre boîte mail.');
             }
             //  Vérification du status
             if ($user['status'] === 'pending') {
-                return redirect()->back()->withInput()->with('error', 'Votre inscription est en cours de validation par un administrateur. Vous recevrez un e-mail dès qu\'elle sera acceptée.');
+                return redirect()->to('/login')->withInput()->with('error', 'Votre inscription est en cours de validation par un administrateur. Vous recevrez un e-mail dès qu\'elle sera acceptée.');
             }
             //  Vérification si l'utilisateur a été rejeté
             if ($user['status'] === 'rejected') {
-                return redirect()->back()->withInput()->with('error', 'Désolé, votre demande d\'inscription sur la plateforme n\'a pas été validée.');
+                return redirect()->to('/login')->withInput()->with('error', 'Désolé, votre demande d\'inscription sur la plateforme n\'a pas été validée.');
             }
-            // Vérification du mot de passe 
+            // Vérification du mot de passe
             if (password_verify($password, $user['password_hash'])) {
 
                 $sessionData = [
@@ -285,11 +285,11 @@ class AuthController extends BaseController
                 return redirect()->to($redirectUrl)->with('success', 'Ravi de vous revoir, ' . $user['firstname'] . ' !');
             } else {
                 // Mauvais mot de passe
-                return redirect()->back()->withInput()->with('error', 'Identifiants invalides.');
+                return redirect()->to('/login')->withInput()->with('error', 'Identifiants invalides.');
             }
         } else {
             // Email non trouvé
-            return redirect()->back()->withInput()->with('error', 'Identifiants invalides.');
+            return redirect()->to('/login')->withInput()->with('error', 'Identifiants invalides.');
         }
     }
 
