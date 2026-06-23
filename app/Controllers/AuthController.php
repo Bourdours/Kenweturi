@@ -107,7 +107,7 @@ class AuthController extends BaseController
         ];
 
         if (!$this->validate($rules, $messages)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+            return redirect()->to('/register')->withInput()->with('errors', $this->validator->getErrors());
         }
 
         $birthDateStr = $this->request->getPost('birthDate');
@@ -119,14 +119,14 @@ class AuthController extends BaseController
 
         // Vérification de la majorité
         if ($age < 18) {
-            return redirect()->back()->withInput()->with('errors', [
+            return redirect()->to('/register')->withInput()->with('errors', [
                 'birthDate' => 'Vous devez avoir au moins 18 ans pour vous inscrire.'
             ]);
         }
 
         // l'année de naissance ne peut pas être antérieure à 1920
         if ((int)$birthDateObj->format('Y') < 1920) {
-            return redirect()->back()->withInput()->with('errors', [
+            return redirect()->to('/register')->withInput()->with('errors', [
                 'birthDate' => 'Veuillez saisir une date de naissance réaliste.'
             ]);
         }
@@ -140,13 +140,13 @@ class AuthController extends BaseController
         $cityNameChecked = $this->geocodingService->getCheckedCityName($cityName, $zipCode);
 
         if ($cityNameChecked === null) {
-            return redirect()->back()->withInput()->with('errors', [
+            return redirect()->to('/register')->withInput()->with('errors', [
                 'cityName' => 'Impossible de vérifier la ville. Veuillez réessayer.'
             ]);
         }
 
         if ($cityNameChecked === false) {
-            return redirect()->back()->withInput()->with('errors', [
+            return redirect()->to('/register')->withInput()->with('errors', [
                 'cityName' => 'La ville et le code postal ne correspondent pas à une commune valide.'
             ]);
         }
@@ -171,7 +171,7 @@ class AuthController extends BaseController
 
         // Tentative de sauvegarde de l'utilisateur via le Model
         if (!$this->userModel->save($data)) {
-            return redirect()->back()->withInput()->with('errors', $this->userModel->errors());
+            return redirect()->to('/register')->withInput()->with('errors', $this->userModel->errors());
         }
 
         $userId = $this->userModel->getInsertID();
@@ -206,7 +206,7 @@ class AuthController extends BaseController
 
         $throttler = service('throttler');
         if ($throttler->check(md5($this->request->getIPAddress() . 'login'), 10, MINUTE) === false) {
-            return redirect()->back()->withInput()->with('error', 'Trop de tentatives de connexion. Veuillez patienter 1 minute avant de réessayer.');
+            return redirect()->to('/login')->withInput()->with('error', 'Trop de tentatives de connexion. Veuillez patienter 1 minute avant de réessayer.');
         }
 
         $email = $this->request->getPost('email');
@@ -218,21 +218,21 @@ class AuthController extends BaseController
         if ($user) {
             //  Vérification du bannissement
             if ((bool)$user['is_banned'] === true) {
-                return redirect()->back()->withInput()->with('error', 'Votre compte a été suspendu par l\'équipe de modération.');
+                return redirect()->to('/login')->withInput()->with('error', 'Votre compte a été suspendu par l\'équipe de modération.');
             }
             //  Vérification de la confirmation email
             if ($user['status'] === 'unverified') {
-                return redirect()->back()->withInput()->with('error', 'Veuillez confirmer votre adresse email avant de vous connecter. Consultez votre boîte mail.');
+                return redirect()->to('/login')->withInput()->with('error', 'Veuillez confirmer votre adresse email avant de vous connecter. Consultez votre boîte mail.');
             }
             //  Vérification du status
             if ($user['status'] === 'pending') {
-                return redirect()->back()->withInput()->with('error', 'Votre inscription est en cours de validation par un administrateur. Vous recevrez un e-mail dès qu\'elle sera acceptée.');
+                return redirect()->to('/login')->withInput()->with('error', 'Votre inscription est en cours de validation par un administrateur. Vous recevrez un e-mail dès qu\'elle sera acceptée.');
             }
             //  Vérification si l'utilisateur a été rejeté
             if ($user['status'] === 'rejected') {
-                return redirect()->back()->withInput()->with('error', 'Désolé, votre demande d\'inscription sur la plateforme n\'a pas été validée.');
+                return redirect()->to('/login')->withInput()->with('error', 'Désolé, votre demande d\'inscription sur la plateforme n\'a pas été validée.');
             }
-            // Vérification du mot de passe 
+            // Vérification du mot de passe
             if (password_verify($password, $user['password_hash'])) {
 
                 $sessionData = [
@@ -285,11 +285,11 @@ class AuthController extends BaseController
                 return redirect()->to($redirectUrl)->with('success', 'Ravi de vous revoir, ' . $user['firstname'] . ' !');
             } else {
                 // Mauvais mot de passe
-                return redirect()->back()->withInput()->with('error', 'Identifiants invalides.');
+                return redirect()->to('/login')->withInput()->with('error', 'Identifiants invalides.');
             }
         } else {
             // Email non trouvé
-            return redirect()->back()->withInput()->with('error', 'Identifiants invalides.');
+            return redirect()->to('/login')->withInput()->with('error', 'Identifiants invalides.');
         }
     }
 
