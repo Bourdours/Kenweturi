@@ -8,6 +8,7 @@ use App\Libraries\MailerExample;
 use \App\Models\UserModel;
 use \App\Models\CityModel;
 use App\Models\RememberTokenModel;
+use App\Models\NotificationPrefModel;
 use DateTime;
 use App\Services\GeocodingService;
 
@@ -173,20 +174,23 @@ class AuthController extends BaseController
             return redirect()->back()->withInput()->with('errors', $this->userModel->errors());
         }
 
-        // Notification aux admins
-        $admins = $this->userModel->getActiveAdmins();
-        $emailBody = view('Emails/newRegistration', [
-            'firstname' => $data['firstname'],
-            'lastname'  => $data['lastname'],
-            'email'     => $data['email'],
+        $userId = $this->userModel->getInsertID();
+
+        // Génération et stockage du token de vérification d'email
+        $token = bin2hex(random_bytes(32));
+        $this->userModel->setEmailToken($userId, $token);
+
+        // Envoi de l'email de confirmation à l'utilisateur
+        $verifyLink = base_url('verifyEmail?token=' . $token);
+        $emailBody  = view('Emails/emailVerification', [
+            'firstname'  => $data['firstname'],
+            'verifyLink' => $verifyLink,
         ]);
         $mailer = new MailerExample();
-        foreach ($admins as $admin) {
-            $mailer->sendHtml($admin['email'], 'Nouvelle demande d\'inscription', $emailBody);
-        }
+        $mailer->sendHtml($data['email'], 'Confirmez votre adresse email — Kenweturi', $emailBody);
 
         // Redirection vers la page de connexion avec un message flash
-        return redirect()->to('/login')->with('success', 'Inscription reçue ! Notre équipe va examiner votre demande et vous recevrez une réponse par email.');
+        return redirect()->to('/login')->with('success', 'Inscription reçue ! Consultez votre boîte mail pour confirmer votre adresse email.');
     }
 
     /**
@@ -215,6 +219,10 @@ class AuthController extends BaseController
             //  Vérification du bannissement
             if ((bool)$user['is_banned'] === true) {
                 return redirect()->back()->withInput()->with('error', 'Votre compte a été suspendu par l\'équipe de modération.');
+            }
+            //  Vérification de la confirmation email
+            if ($user['status'] === 'unverified') {
+                return redirect()->back()->withInput()->with('error', 'Veuillez confirmer votre adresse email avant de vous connecter. Consultez votre boîte mail.');
             }
             //  Vérification du status
             if ($user['status'] === 'pending') {
@@ -314,8 +322,59 @@ class AuthController extends BaseController
     }
 
     /**
+     * Valide le token de confirmation d'email et fait passer le compte en 'pending'
+     *
+     * @return RedirectResponse
+     */
+    public function verifyEmail(): RedirectResponse
+    {
+        $token = $this->request->getGet('token');
+
+        if (!$token) {
+            return redirect()->to('/login')->with('error', 'Lien de vérification invalide.');
+        }
+
+        $user = $this->userModel->findByValidEmailToken($token);
+
+        if (!$user) {
+            return redirect()->to('/login')->with('error', 'Ce lien de confirmation est invalide ou a expiré. Veuillez vous réinscrire.');
+        }
+
+        if ($user['status'] !== 'unverified') {
+            return redirect()->to('/login')->with('success', 'Votre adresse email est déjà confirmée.');
+        }
+
+        // Passage en 'pending' et suppression du token
+        $this->userModel->update($user['id'], [
+            'status'             => 'pending',
+            'email_token'        => null,
+            'email_token_expiry' => null,
+        ]);
+
+        // Notification aux admins (selon leur préférence)
+        $admins         = $this->userModel->getActiveAdmins();
+        $notifPrefModel = new NotificationPrefModel();
+        $mailer         = new MailerExample();
+        foreach ($admins as $admin) {
+            if (!$notifPrefModel->wantsNotif((int) $admin['id'], 'admin_registration')) continue;
+            $adminId   = (int) $admin['id'];
+            $emailBody = view('Emails/newRegistration', [
+                'firstname'      => $user['firstname'],
+                'lastname'       => $user['lastname'],
+                'email'          => $user['email'],
+                'prefLabel'      => NotificationPrefModel::PREFS['admin_registration'],
+                'unsubscribeUrl' => site_url('unsubscribe?uid=' . $adminId . '&pref=admin_registration&token=' . UserModel::unsubscribeToken($adminId, 'admin_registration')),
+                'preferencesUrl' => site_url('profile/notifications'),
+            ]);
+            $mailer->sendHtml($admin['email'], 'Nouvelle demande d\'inscription', $emailBody);
+        }
+
+        return redirect()->to('/login')->with('success', 'Adresse email confirmée ! Notre équipe va examiner votre demande et vous recevrez une réponse par email.');
+    }
+
+    /**
      * Affiche la page de mot de passe oublié
-     * 
+     *
      * @return string
      */
     public function showForgotPasswordForm()

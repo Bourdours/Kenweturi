@@ -8,6 +8,8 @@ module.exports = {
   ],
   safelist: [
     'animate-bounce',
+    'ring-2',
+    'ring-action/40',
   ],
   theme: {
     extend: {
