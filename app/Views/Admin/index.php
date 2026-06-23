@@ -8,7 +8,11 @@
 /** @var int    $nPendingUsers  Nombre d'inscriptions en attente */
 /** @var array  $allUsers       Liste de tous les utilisateurs (admin et superadmin) */
 ?>
-<?= view('partials/head') ?>
+<?= view('partials/head', [
+  'extraJs' => ($tab === 'settings') ? [
+    base_url('js/autocomplete.js'),
+    base_url('js/adminSettings.js'),] : [],
+]) ?>
 <?= view('partials/header') ?>
 <div class="max-w-5xl mx-auto py-10 px-4 flex flex-col gap-6">
   <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
@@ -74,16 +78,26 @@
       </a>
     <?php endif; ?>
 
+    <!-- Réglages -->
+  <a href="<?= site_url('admin?tab=settings') ?>"
+    class="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold font-display rounded-t-lg transition-colors
+          <?= ($tab === 'settings') ? 'bg-surface border border-b-surface border-action/10 text-ink sm:-mb-px' : 'text-ink/40 hover:text-ink' ?>">
+    <i class="fa-solid fa-gear text-xs"></i>
+    Réglages
+  </a>
+
   </div>
 
   <!-- Contenu de l'onglet actif  -->
-  <div class="bg-surface rounded-2xl border border-action/10 overflow-hidden">
+  <div class="bg-surface rounded-2xl border border-action/10 <?= $tab === 'settings' ? '' : 'overflow-hidden' ?>">
     <?php if ($tab === 'registrations'): ?>
       <?= view('Admin/registrations_tab', ['pendingUsers' => $pendingUsers]) ?>
     <?php elseif ($tab === 'reports'): ?>
       <?= view('Admin/reports_tab', ['reports' => $reports]) ?>
     <?php elseif ($tab === 'admins' && session()->get('isAdmin')): ?>
       <?= view('Admin/admins_tab', ['allUsers' => $allUsers, 'superadminCount' => $superadminCount, 'adminCount' => $adminCount]) ?>
+    <?php elseif ($tab === 'settings'): ?>
+      <?= view('Admin/settings_tab', ['favorite' => $favorite]) ?>
     <?php endif; ?>
   </div>
 </div>
