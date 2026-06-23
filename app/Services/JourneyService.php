@@ -350,4 +350,84 @@ class JourneyService
         return $nbOfSeats - $nbOfAcceptedBook;
 
     }
+
+    /**
+     * Trajets actifs (non annulés) d'un conducteur, enrichis des villes de
+     * départ/arrivée (nécessaires pour notifier les passagers à l'annulation).
+     *
+     * @return array<int,array>
+     */
+    public function getActiveJourneysWithCities(int $userId): array
+    {
+        return $this->journeyModel->findActiveByUserWithCities($userId);
+    }
+
+    /**
+     * Prévient (best-effort) les passagers acceptés que des trajets sont annulés.
+     * Un échec d'envoi est journalisé mais n'interrompt pas le traitement.
+     *
+     * @param array<int,array> $journeys
+     */
+    public function notifyJourneysCancelled(array $journeys): void
+    {
+        foreach ($journeys as $journey) {
+            try {
+                $this->notifyCancelledJourney($journey);
+            } catch (\Throwable $e) {
+                log_message('error', 'Journey cancellation mail failed (journey {id}): {type}', [
+                    'id'      => $journey['id'] ?? null,
+                    'type' => get_class($e),
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Annule tous les trajets actifs d'un conducteur (soft cancel via canceled_at).
+     */
+    public function cancelAllByDriver(int $userId): void
+    {
+        $this->journeyModel->cancelAllByUser($userId);
+    }
+
+    /**
+     * Données de notification (passagers acceptés + infos trajet) pour une liste
+     * de trajets — à CAPTURER avant tout rejet/annulation.
+     *
+     * @param int[] $journeyIds
+     * @return array<int,array>
+     */
+    public function getCancellationNotifications(array $journeyIds): array
+    {
+        return $this->bookingModel->findAcceptedNotificationsForJourneys($journeyIds);
+    }
+
+    /**
+     * Prévient (best-effort) les passagers de l'annulation, à partir de payloads
+     * pré-capturés. Ne refait aucune requête : sûr à appeler APRÈS commit.
+     *
+     * @param array<int,array> $notifications
+     */
+    public function notifyPassengersJourneyCancelled(array $notifications): void
+    {
+        foreach ($notifications as $n) {
+            try {
+                $date = date('d/m/Y', strtotime($n['start_datetime']))
+                    . ' à ' . date('H:i', strtotime($n['start_datetime']));
+
+                $this->mailer->sendHtml(
+                    $n['email'],
+                    'Votre trajet a été annulé',
+                    view('Emails/journeyCancelled', [
+                        'firstname' => $n['firstname'],
+                        'cityStart' => $n['city_start_name'],
+                        'cityEnd'   => $n['city_end_name'],
+                        'date'      => $date,
+                    ])
+                );
+            } catch (\Throwable $e) {
+                log_message('error', 'Journey cancellation mail failed: {type}', ['type' => get_class($e)]);
+            }
+        }
+    }
 }
