@@ -34,9 +34,12 @@ class LocationModel extends BaseModel
 
     public function getFavorite(): ?array
     {
-        return $this->where('is_favorite', 1)->first();
+        return $this->select('location.*, city.name as city_name, city.zipcode as city_zipcode')
+            ->join('city', 'city.id = location.city_id')
+            ->where('location.is_favorite', 1)
+            ->first();
     }
-
+    
     public function clearFavorite(): bool
     {
         return $this->where('is_favorite', 1)->set('is_favorite', 0)->update();
