@@ -15,16 +15,17 @@ class JourneyRequestModel extends BaseModel
     protected $allowedFields = [
         'start_datetime',
         'seats',
+        'radius_km',
         'message',
         'user_id',
         'location_start_id',
-        'location_end_id'
-
+        'location_end_id',
     ];
 
     protected $validationRules = [
         'start_datetime'    => 'required|valid_date[Y-m-d H:i:s]|after_now',
         'seats'             => 'permit_empty|integer|greater_than_equal_to[1]|less_than_equal_to[8]',
+        'radius_km'         => 'permit_empty|numeric|greater_than_equal_to[0.1]|less_than_equal_to[200]',
         'message'           => 'permit_empty|max_length[2000]',
         'user_id'           => 'required|integer|is_not_unique[user.id]',
         'location_start_id' => 'required|integer|is_not_unique[location.id]',
@@ -88,6 +89,33 @@ class JourneyRequestModel extends BaseModel
             ->where('journey_request.user_id !=', $excludedUserId)
             ->where('journey_request.start_datetime >=', date('Y-m-d H:i:s'))
             ->findAll();
+    }
+
+    /**
+     * Récupère une demande avec ses coordonnées GPS et les infos du demandeur,
+     * sans restriction d'ownership — utilisé pour le matching côté service.
+     *
+     * @param  int        $id Identifiant de la demande
+     * @return array|null     Demande enrichie, ou null si introuvable
+     */
+    public function findWithCoordinatesById(int $id): ?array
+    {
+        return $this->select('journey_request.*,
+                u.email             as requester_email,
+                u.firstname         as requester_firstname,
+                loc_start.latitude  as start_lat,
+                loc_start.longitude as start_lng,
+                loc_end.latitude    as end_lat,
+                loc_end.longitude   as end_lng,
+                city_start.name     as city_start_name,
+                city_end.name       as city_end_name')
+            ->join('user u',             'u.id = journey_request.user_id')
+            ->join('location loc_start', 'loc_start.id = journey_request.location_start_id')
+            ->join('location loc_end',   'loc_end.id = journey_request.location_end_id')
+            ->join('city city_start',    'city_start.id = loc_start.city_id')
+            ->join('city city_end',      'city_end.id = loc_end.city_id')
+            ->where('journey_request.id', $id)
+            ->first();
     }
 
     /**

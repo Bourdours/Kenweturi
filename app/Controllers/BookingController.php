@@ -9,6 +9,8 @@ use App\Services\JourneyService;
 
 use App\Models\BookingModel;
 use App\Models\JourneyModel;
+use App\Models\NotificationPrefModel;
+use App\Models\UserModel;
 
 use \CodeIgniter\HTTP\RedirectResponse;
 
@@ -25,14 +27,16 @@ class BookingController extends BaseController
 
     protected BookingModel $bookingModel;
     protected JourneyModel $journeyModel;
+    protected NotificationPrefModel $notifPrefModel;
 
     protected BookingService $bookingService;
     protected JourneyService $journeyService;
 
     public function __construct()
     {
-        $this->bookingModel = new BookingModel();
-        $this->journeyModel = new JourneyModel();
+        $this->bookingModel   = new BookingModel();
+        $this->journeyModel   = new JourneyModel();
+        $this->notifPrefModel = new NotificationPrefModel();
 
         $this->bookingService = new BookingService();
         $this->journeyService = new JourneyService();
@@ -101,8 +105,9 @@ class BookingController extends BaseController
 
         if ($bookingId) {
             $booking = $this->bookingModel->findWithDetails((int) $bookingId, $userId);
-            if ($booking) {
-                $date = date('d/m/Y', strtotime($booking['start_datetime'])) . ' à ' . date('H:i', strtotime($booking['start_datetime']));
+            if ($booking && $this->notifPrefModel->wantsNotif((int) $booking['driver_id'], 'booking_request')) {
+                $date  = date('d/m/Y', strtotime($booking['start_datetime'])) . ' à ' . date('H:i', strtotime($booking['start_datetime']));
+                $driverId = (int) $booking['driver_id'];
                 $mailer = new MailerExample();
                 $mailer->sendHtml(
                     $booking['driver_email'],
@@ -114,6 +119,9 @@ class BookingController extends BaseController
                         'cityStart'          => $booking['city_start_name'],
                         'cityEnd'            => $booking['city_end_name'],
                         'date'               => $date,
+                        'prefLabel'          => NotificationPrefModel::PREFS['booking_request'],
+                        'unsubscribeUrl'     => site_url('unsubscribe?uid=' . $driverId . '&pref=booking_request&token=' . UserModel::unsubscribeToken($driverId, 'booking_request')),
+                        'preferencesUrl'     => site_url('profile/notifications'),
                     ])
                 );
             }
@@ -140,21 +148,26 @@ class BookingController extends BaseController
 
         $this->bookingModel->delete($id);
 
-        $date = date('d/m/Y', strtotime($booking['start_datetime'])) . ' à ' . date('H:i', strtotime($booking['start_datetime']));
-
-        $mailer = new MailerExample();
-        $mailer->sendHtml(
-            $booking['driver_email'],
-            'Annulation d\'une réservation',
-            view('Emails/bookingCancelled', [
-                'firstname'          => $booking['driver_firstname'],
-                'passengerFirstname' => $booking['passenger_firstname'],
-                'passengerLastname'  => $booking['passenger_lastname'],
-                'cityStart'          => $booking['city_start_name'],
-                'cityEnd'            => $booking['city_end_name'],
-                'date'               => $date,
-            ])
-        );
+        $driverId = (int) $booking['driver_id'];
+        if ($this->notifPrefModel->wantsNotif($driverId, 'booking_cancelled')) {
+            $date = date('d/m/Y', strtotime($booking['start_datetime'])) . ' à ' . date('H:i', strtotime($booking['start_datetime']));
+            $mailer = new MailerExample();
+            $mailer->sendHtml(
+                $booking['driver_email'],
+                'Annulation d\'une réservation',
+                view('Emails/bookingCancelled', [
+                    'firstname'          => $booking['driver_firstname'],
+                    'passengerFirstname' => $booking['passenger_firstname'],
+                    'passengerLastname'  => $booking['passenger_lastname'],
+                    'cityStart'          => $booking['city_start_name'],
+                    'cityEnd'            => $booking['city_end_name'],
+                    'date'               => $date,
+                    'prefLabel'          => NotificationPrefModel::PREFS['booking_cancelled'],
+                    'unsubscribeUrl'     => site_url('unsubscribe?uid=' . $driverId . '&pref=booking_cancelled&token=' . UserModel::unsubscribeToken($driverId, 'booking_cancelled')),
+                    'preferencesUrl'     => site_url('profile/notifications'),
+                ])
+            );
+        }
 
         return redirect()->to('/dashboard')->with('success', 'Réservation annulée avec succès !');
     }
@@ -235,19 +248,24 @@ class BookingController extends BaseController
 
         $this->bookingModel->update($id, ['status' => 'rejected']);
 
-        $date = date('d/m/Y', strtotime($booking['start_datetime'])) . ' à ' . date('H:i', strtotime($booking['start_datetime']));
-
-        $mailer = new MailerExample();
-        $mailer->sendHtml(
-            $booking['passenger_email'],
-            'Votre réservation n\'a pas été retenue',
-            view('Emails/bookingRejected', [
-                'firstname' => $booking['passenger_firstname'],
-                'cityStart' => $booking['city_start_name'],
-                'cityEnd'   => $booking['city_end_name'],
-                'date'      => $date,
-            ])
-        );
+        $passengerId = (int) $booking['user_id'];
+        if ($this->notifPrefModel->wantsNotif($passengerId, 'booking_rejected')) {
+            $date = date('d/m/Y', strtotime($booking['start_datetime'])) . ' à ' . date('H:i', strtotime($booking['start_datetime']));
+            $mailer = new MailerExample();
+            $mailer->sendHtml(
+                $booking['passenger_email'],
+                'Votre réservation n\'a pas été retenue',
+                view('Emails/bookingRejected', [
+                    'firstname'      => $booking['passenger_firstname'],
+                    'cityStart'      => $booking['city_start_name'],
+                    'cityEnd'        => $booking['city_end_name'],
+                    'date'           => $date,
+                    'prefLabel'      => NotificationPrefModel::PREFS['booking_rejected'],
+                    'unsubscribeUrl' => site_url('unsubscribe?uid=' . $passengerId . '&pref=booking_rejected&token=' . UserModel::unsubscribeToken($passengerId, 'booking_rejected')),
+                    'preferencesUrl' => site_url('profile/notifications'),
+                ])
+            );
+        }
 
         return redirect()->to('/dashboard/bookings')->with('success', 'Réservation refusée.');
     }

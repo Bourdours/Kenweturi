@@ -1,13 +1,6 @@
 <?php
 /** @var string $firstname */
-/** @var string $passengerFirstname */
-/** @var string $passengerLastname */
-/** @var string $cityStart */
-/** @var string $cityEnd */
-/** @var string $date */
-/** @var string $prefLabel */
-/** @var string $unsubscribeUrl */
-/** @var string $preferencesUrl */
+/** @var string $verifyLink */
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -15,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Annulation d'une réservation</title>
+    <title>Confirmez votre adresse email</title>
 </head>
 
 <body style="margin:0;padding:0;background-color:#111a26;font-family:'Helvetica Neue',Arial,sans-serif;">
@@ -36,47 +29,42 @@
                         <td style="background-color:#16222e;padding:40px;">
 
                             <p style="margin:0 0 24px;font-size:20px;font-weight:700;color:#ffffff;letter-spacing:-0.2px;">
-                                Annulation d'une réservation
+                                Bienvenue, <?= esc($firstname) ?> !
                             </p>
 
-                            <p style="margin:0 0 28px;font-size:15px;color:#93b8d8;line-height:1.6;">
-                                Bonjour <?= esc($firstname) ?>,
+                            <p style="margin:0 0 20px;font-size:15px;color:#93b8d8;line-height:1.6;">
+                                Merci pour votre inscription sur <strong style="color:#ffffff;">Kenweturi</strong>. Pour finaliser votre demande, veuillez d'abord confirmer votre adresse email en cliquant sur le bouton ci-dessous.
                             </p>
 
-                            <p style="margin:0 0 28px;font-size:15px;color:#93b8d8;line-height:1.6;">
-                                <strong style="color:#ffffff;"><?= esc($passengerFirstname) ?> <?= esc($passengerLastname) ?></strong> a annulé sa réservation sur votre trajet.
-                            </p>
-
-                            <p style="margin:0 0 8px;font-size:14px;font-weight:700;color:#ffffff;">
-                                Trajet concerné :
-                            </p>
-                            <p style="margin:0 0 32px;font-size:15px;color:#93b8d8;line-height:1.6;background-color:#1a3a5c;padding:16px;border-radius:8px;">
-                                <?= esc($cityStart) ?> → <?= esc($cityEnd) ?><br>
-                                <?= esc($date) ?>
+                            <p style="margin:0 0 32px;font-size:15px;color:#93b8d8;line-height:1.6;">
+                                Ce lien est valable <strong style="color:#ffffff;">24 heures</strong>. Passé ce délai, vous devrez vous réinscrire.
                             </p>
 
                             <!-- CTA -->
                             <table cellpadding="0" cellspacing="0" width="100%">
                                 <tr>
-                                    <td align="center" style="padding-bottom:8px;">
-                                        <a href="<?= site_url('dashboard') ?>"
+                                    <td align="center" style="padding-bottom:24px;">
+                                        <a href="<?= $verifyLink ?>"
                                             style="display:inline-block;background-color:#D85A30;color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:14px 36px;border-radius:8px;letter-spacing:0.1px;">
-                                            Voir mon tableau de bord
+                                            Confirmer mon adresse email
                                         </a>
                                     </td>
                                 </tr>
                             </table>
 
+                            <p style="margin:0;font-size:13px;color:#556678;line-height:1.6;">
+                                Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :<br>
+                                <span style="color:#93b8d8;word-break:break-all;"><?= $verifyLink ?></span>
+                            </p>
+
                         </td>
                     </tr>
-
-                    <?= view('Emails/_notifFooter', compact('prefLabel', 'unsubscribeUrl', 'preferencesUrl')) ?>
 
                     <!-- Footer -->
                     <tr>
                         <td style="background-color:#111a26;border-radius:0 0 12px 12px;padding:24px 40px;border-top:1px solid #1a3a5c;">
                             <p style="margin:0;font-size:12px;color:#555;line-height:1.6;text-align:center;">
-                                Cordialement,<br>
+                                Si vous n'êtes pas à l'origine de cette inscription, ignorez cet email.<br>
                                 <span style="color:#93b8d8;">L'équipe Kenweturi</span>
                             </p>
                         </td>
