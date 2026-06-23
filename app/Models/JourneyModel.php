@@ -239,4 +239,38 @@ class JourneyModel extends BaseModel
         return $row === null ? 0 : $row['seats'];
 
     }
+
+    /**
+     * Annule tous les trajets actifs d'un utilisateur (soft cancel via canceled_at).
+     */
+    public function cancelAllByUser(int $userId): void
+    {
+        $this->where('user_id', $userId)
+            ->where('canceled_at', null)
+            ->set(['canceled_at' => date('Y-m-d H:i:s')])
+            ->update();
+    }
+
+    /**
+     * Trajets actifs (non annulés) d'un conducteur, joints aux villes de
+     * départ/arrivée. Sert à la fois à notifier les passagers et à récupérer
+     * les IDs (via array_column) pour le rejet des réservations.
+     *
+     * @return array<int,array>
+     */
+    public function findActiveByUserWithCities(int $userId): array
+    {
+        return $this->db->table($this->table)
+            ->select('journey.id, journey.start_datetime,
+                    city_start.name as city_start_name,
+                    city_end.name   as city_end_name')
+            ->join('location loc_start', 'loc_start.id = journey.location_start_id')
+            ->join('location loc_end',   'loc_end.id = journey.location_end_id')
+            ->join('city city_start',    'city_start.id = loc_start.city_id')
+            ->join('city city_end',      'city_end.id = loc_end.city_id')
+            ->where('journey.user_id', $userId)
+            ->where('journey.canceled_at', null)
+            ->get()
+            ->getResultArray();
+    }
 }
