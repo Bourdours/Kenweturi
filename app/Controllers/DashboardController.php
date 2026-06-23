@@ -215,6 +215,7 @@ class DashboardController extends BaseController
 
         if ($filter === 'upcoming') {
             $builder->where('journey.start_datetime >=', date('Y-m-d H:i:s'))
+                    ->orderBy('journey.canceled_at IS NULL', 'DESC', false)
                     ->orderBy('journey.start_datetime', 'ASC');
         } elseif ($filter === 'past') {
             $builder->where('journey.start_datetime <', date('Y-m-d H:i:s'))

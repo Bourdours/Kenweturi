@@ -69,9 +69,9 @@
                                 <span class="text-xs text-danger font-semibold bg-danger/10 px-2 py-0.5 rounded-full">Annulé</span>
                             </div>
                         <?php elseif ($filter !== 'past'): ?>
-                            <div class="journey-checkbox absolute top-1.5 right-3 z-10 hidden w-5 h-5 flex items-center justify-center">
+                            <div class="journey-checkbox absolute top-3 right-3 z-10 hidden">
                                 <input type="checkbox" name="journey_ids[]" value="<?= esc($journey['id']) ?>"
-                                    class="w-5 h-5 rounded border-action/30 text-action focus:ring-action/40 cursor-pointer">
+                                    class="appearance-none w-5 h-5 rounded-full border-2 border-action/40 bg-paper checked:bg-action checked:border-action cursor-pointer transition-colors focus:ring-0">
                             </div>
                         <?php endif ?>
 
@@ -125,13 +125,13 @@
         <!-- Barre d'action flottante (mode sélection) -->
         <div class="grid items-center -mt-4">
             <div id="selectionBar" class="hidden sticky bottom-4 z-50 flex justify-end pointer-events-none col-start-1 row-start-1">
-                <div class="bg-ink text-paper rounded-full px-5 py-3 shadow-xl flex items-center gap-4 pointer-events-auto">
-                    <span id="selectionCount" class="text-sm font-medium">0 sélectionné</span>
+                <div class="bg-surface border border-action/20 rounded-full px-5 py-3 shadow-xl flex items-center gap-4 pointer-events-auto">
+                    <span id="selectionCount" class="text-sm font-medium text-ink">0 sélectionné</span>
                     <button type="button" id="cancelSelectedBtn"
                         class="bg-danger text-paper text-sm font-semibold rounded-full px-4 py-1.5 hover:opacity-90 transition-opacity">
                         Annuler
                     </button>
-                    <button type="button" id="exitSelectionBtn" class="text-paper/60 hover:text-paper text-sm transition-colors">
+                    <button type="button" id="exitSelectionBtn" class="text-ink/40 hover:text-ink text-sm transition-colors">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                 </div>
