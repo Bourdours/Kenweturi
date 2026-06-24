@@ -89,8 +89,6 @@
                 <tr class="border-b border-action/10 text-ink/50 font-semibold">
                     <th class="px-4 py-3 font-display">Utilisateur</th>
                     <th class="px-4 py-3 font-display">Email</th>
-                    <th class="px-4 py-3 font-display">Ville</th>
-                    <th class="px-4 py-3 font-display">Date</th>
                     <th class="px-3 py-3 font-display">Actions</th>
                 </tr>
             </thead>
@@ -109,24 +107,7 @@
                         <td class="px-4 py-3 text-ink/70 whitespace-nowrap">
                             <span <?= mb_strlen($user['email']) > 28 ? 'title="' . esc($user['email']) . '"' : '' ?>><?= esc(mb_strlen($user['email']) > 28 ? mb_substr($user['email'], 0, 28) . '…' : $user['email']) ?></span>
                         </td>
-                        <!-- Ville ou code postal -->
-                        <td class="px-4 py-3 text-ink/70 whitespace-nowrap">
-                            <span class="inline-flex items-center gap-1">
-                                <i class="fa-solid fa-location-dot text-ink/30 text-xs"></i>
-                                <?php $city = $user['city_name'] ?? 'Non renseignée'; ?>
-                                <span <?= mb_strlen($city) > 9 ? 'title="' . esc($city) . '"' : '' ?>><?= esc(mb_strlen($city) > 9 ? mb_substr($city, 0, 9) . '…' : $city) ?></span>
-                            </span>
-                        </td>
-
-                        <!-- Date et heure d'inscription -->
-                        <td class="px-4 py-3 text-ink/40 whitespace-nowrap">
-                            <?php
-                            $date = new DateTime($user['registered_at'], new DateTimeZone('UTC'));
-                            $date->setTimezone(new DateTimeZone('Europe/Paris'));
-                            echo $date->format('d/m/y H:i');
-                            ?>
-                        </td>
-
+                    
                         <td class="px-3 py-3 whitespace-nowrap">
                             <!-- Empêche l'admin de s'auto-valider / s'auto-refuser -->
                             <?php if ((int)$user['id'] !== (int)session()->get('user_id')): ?>

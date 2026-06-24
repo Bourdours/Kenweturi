@@ -3,23 +3,7 @@
 namespace App\Models;
 
 /**
- * Modèle pour la gestion des trajets de covoiturage.
- *
- * Gère les opérations CRUD sur la table `journey` ainsi que la validation
- * des données associées (créneau, places, lieux de départ et d'arrivée,
- * tracé du parcours, etc.).
- *
- * Un journey est lié à :
- * - un utilisateur conducteur (user_id)
- * - un tracé GeoJSON (track_id)
- * - une localisation de départ (location_start_id)
- * - une localisation d'arrivée (location_end_id)
- *
- * Règles métier appliquées via la validation :
- * - La date de départ doit être dans le futur
- * - Le nombre de places est compris entre 1 et 8
- * - Les lieux de départ et d'arrivée doivent être différents
- * - Toutes les clés étrangères doivent référencer des entrées existantes
+ * Modèle pour la gestion des trajets de covoiturage (Adapté à la vue de publication).
  *
  * @package App\Models
  */
@@ -29,83 +13,78 @@ class JourneyModel extends BaseModel
     protected $primaryKey = 'id';
     protected $useAutoIncrement = true;
 
+    // Ajout des nouveaux champs liés à la récurrence et mise en correspondance des noms
     protected $allowedFields = [
-        'start_datetime',
+        'start_datetime', // Sera combiné dans le contrôleur via startDate et startTime
         'seats',
         'note',
         'smoking',
         'canceled_at',
         'track_id',
         'user_id',
-        'car_id',
+        'car_id',         // Reçu via le champ 'car' de la vue
         'location_start_id',
-        'location_end_id'
-
+        'location_end_id',
+        'is_recurring',    // Nouveau champ en BDD basé sur 'isRecurring'
+        'recurring_days',  // Stocké en JSON ou chaîne (ex: 'lundi,mardi')
+        'recurring_weeks'  // Stocké en JSON ou chaîne (ex: '1,2')
     ];
 
+    // Règles de validation calquées sur les attributs "name" des inputs de la vue
     protected $validationRules = [
-        'start_datetime'    => 'required|valid_date[Y-m-d H:i:s]|after_now',
-        'seats'             => 'required|integer|greater_than_equal_to[1]|less_than_equal_to[8]',
-        'note'              => 'permit_empty|string|max_length[1000]',
-        'smoking'           => 'required|in_list[0,1]',
-        'canceled_at'       => 'permit_empty|valid_date',
-        'track_id'          => 'required|integer|is_not_unique[track.id]',
-        'user_id'           => 'required|integer|is_not_unique[user.id]',
-        'location_start_id' => 'required|integer|is_not_unique[location.id]',
-        'location_end_id'   => 'required|integer|is_not_unique[location.id]|differs[location_start_id]',
+        'startDate'         => 'permit_empty',
+        'startTime'         => 'permit_empty',
+        'seats'             => 'permit_empty',
+        'smoking'           => 'permit_empty',
+        'car'               => 'permit_empty',
+        'startAddress'      => 'permit_empty',
+        'endAddress'        => 'permit_empty',
+        'isRecurring'       => 'permit_empty',
+        'recurringDays'     => 'permit_empty',
+        'recurringWeeks'    => 'permit_empty',
     ];
 
     protected $validationMessages = [
-        'start_datetime' => [
+        'startDate' => [
             'required'   => 'Veuillez renseigner une date de départ.',
-            'valid_date' => 'Veuillez renseigner une date valide.',
-            'after_now'  => 'La date de départ doit être dans le futur.',
+            'valid_date' => 'Le format de la date de départ n\'est pas valide.',
+        ],
+        'startTime' => [
+            'required'   => 'Veuillez renseigner une heure de départ.',
+            'valid_date' => 'Le format de l\'heure de départ n\'est pas valide.',
         ],
         'seats' => [
-            'required'              => 'Veuillez renseigner le nombre de places.',
-            'greater_than_equal_to[1]' => 'Le trajet doit avoir au moins 1 places.',
-            'less_than_equal_to'    => 'Le trajet ne peut pas dépasser 8 places.',
+            'required'                 => 'Veuillez renseigner le nombre de places.',
+            'greater_than_equal_to[1]' => 'Le trajet doit avoir au moins 1 place.',
+            'less_than_equal_to[9]'    => 'Le trajet ne peut pas dépasser 9 places.',
+        ],
+        'smoking' => [
+            'required' => 'Veuillez indiquer si le covoiturage est fumeur ou non.',
+            'in_list'  => 'La valeur sélectionnée pour l\'option fumeur n\'est pas valide.',
+        ],
+        'car' => [
+            'required'      => 'Veuillez sélectionner un véhicule.',
+            'is_not_unique' => 'Le véhicule sélectionné n\'existe pas.',
+        ],
+        'startAddress' => [
+            'required'   => 'L\'adresse de départ est obligatoire.',
+            'min_length' => 'L\'adresse de départ semble trop courte.',
+        ],
+        'endAddress' => [
+            'required'   => 'L\'adresse d\'arrivée est obligatoire.',
+            'min_length' => 'L\'adresse d\'arrivée semble trop courte.',
         ],
         'note' => [
            'max_length' => 'Le message doit contenir au maximum 1000 caractères.',
         ],
-        'smoking' => [
-            'required' => 'Veuillez indiquer si le covoiturage est fumeur ou non.',
-            'in_list'  => 'La valeur sélectionnée n\'est pas valide.',
-        ],
-        'canceled_at' => [
-            'valid_date' => 'La date d\'annulation doit être une date valide.',
-        ],
-        'track_id' => [
-            'required'      => 'L\'identifiant du tracé est obligatoire.',
-            'integer'       => 'L\'identifiant du tracé doit être un nombre entier.',
-            'is_not_unique' => 'Le tracé spécifié n\'existe pas.',
-        ],
-        'user_id' => [
-            'required'      => 'L\'identifiant de l\'utilisateur est obligatoire.',
-            'integer'       => 'L\'identifiant de l\'utilisateur doit être un nombre entier.',
-            'is_not_unique' => 'L\'utilisateur spécifié n\'existe pas.',
-        ],
-        'location_start_id' => [
-            'required'      => 'Le lieu de départ est obligatoire.',
-            'integer'       => 'Le lieu de départ doit être un identifiant valide.',
-            'is_not_unique' => 'Le lieu de départ sélectionné n\'existe pas.',
-        ],
-        'location_end_id' => [
-            'required'      => 'Le lieu d\'arrivée est obligatoire.',
-            'integer'       => 'Le lieu d\'arrivée doit être un identifiant valide.',
-            'is_not_unique' => 'Le lieu d\'arrivée sélectionné n\'existe pas.',
+        'isRecurring' => [
+            'required' => 'Veuillez spécifier si le trajet est récurrent.',
+            'in_list'  => 'Option de récurrence invalide.',
         ]
     ];
 
-/**
-     * Récupère un trajet avec toutes ses informations liées :
-     * adresses et villes de départ/arrivée, conducteur, véhicule.
-     *
-     * Les trajets dont le conducteur a été supprimé (soft delete) sont exclus.
-     *
-     * @param int $journeyId Identifiant du trajet
-     * @return array|null    Trajet enrichi, ou null si introuvable
+    /**
+     * Récupère un trajet avec toutes ses informations liées.
      */
     public function findWithDetails(int $journeyId): ?array
     {
@@ -142,21 +121,9 @@ class JourneyModel extends BaseModel
             ->get()
             ->getRowArray();
     }
+
     /**
-     * Récupère tous les trajets correspondant aux filtres non géographiques fournis.
-     *
-     * Filtres pris en compte :
-     *  - filterDate + filterTime : créneau ±30 min autour du datetime
-     *  - filterDate seul         : trajets de la journée (≥ maintenant si c'est aujourd'hui)
-     *  - aucun filtre date       : trajets à partir de maintenant
-     *  - availableSeats          : places restantes minimum
-     *  - smoking                 : '0' ou '1'
-     *
-     * Les trajets annulés et ceux dont le conducteur est supprimé (soft delete)
-     * sont automatiquement exclus.
-     *
-     * @param  array $filters Filtres : filterDate, filterTime, availableSeats, smoking
-     * @return array          Trajets enrichis (villes, conducteur, places restantes)
+     * Récupère tous les trajets correspondant aux filtres non géographiques.
      */
     public function findAllWithFilters(array $filters): array
     {
@@ -207,15 +174,6 @@ class JourneyModel extends BaseModel
         return $builder->get()->getResultArray();
     }
 
-    /**
-     * Récupère le premier trajet d'un utilisateur dont le départ tombe dans
-     * un intervalle de temps donné (bornes : `>=` début, `<` fin).
-     *
-     * @param  int    $userId   Identifiant du conducteur
-     * @param  string $fromDateTime Borne basse incluse, format 'Y-m-d H:i:s'
-     * @param  string $toDateTime   Borne haute exclue,   format 'Y-m-d H:i:s'
-     * @return array|null       Trajet trouvé, ou null si aucun
-     */
     public function findByUserInTimeRange(int $userId, string $fromDateTime, string $toDateTime): ?array
     {
         return $this->where('user_id', $userId)
@@ -231,13 +189,10 @@ class JourneyModel extends BaseModel
                     ->first();
     }
 
-    public function getNumberOfSeats(int $id) :int {
-
-        $row = $this->select('seats')
-                    ->find($id);
-        
+    public function getNumberOfSeats(int $id): int 
+    {
+        $row = $this->select('seats')->find($id);
         return $row === null ? 0 : $row['seats'];
-
     }
 
     /**
