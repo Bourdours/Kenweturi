@@ -6,6 +6,9 @@ use App\Libraries\MailerExample;
 use App\Models\JourneyModel;
 use App\Models\ReportModel;
 use App\Models\UserModel;
+use App\Models\LocationModel;
+use App\Models\CityModel;
+use App\Services\GeocodingService;
 
 use App\Services\UserService;
 
@@ -19,17 +22,21 @@ use CodeIgniter\HTTP\RedirectResponse;
 
 class AdminController extends BaseController
 {
-    private ReportModel $reportModel;
-    private UserModel   $userModel;
-
-    private UserService  $userService;
+    private ReportModel       $reportModel;
+    private UserModel         $userModel;
+    private LocationModel     $locationModel;
+    private CityModel         $cityModel;
+    private GeocodingService  $geocodingService;
+    private UserService       $userService;
 
     public function __construct()
     {
-        $this->reportModel = new ReportModel();
-        $this->userModel   = new UserModel();
-
-        $this->userService = new UserService();
+        $this->reportModel      = new ReportModel();
+        $this->userModel        = new UserModel();
+        $this->locationModel    = new LocationModel();
+        $this->cityModel        = new CityModel();
+        $this->geocodingService = new GeocodingService();
+        $this->userService      = new UserService();
     }
 
     /**
@@ -46,6 +53,7 @@ class AdminController extends BaseController
         $allUsers        = [];
         $superadminCount = 0;
         $adminCount      = 0;
+        $favorite        = null;
 
         if ($tab === 'registrations') {
             // Charge les utilisateurs dont l'inscription est en attente de validation
@@ -58,6 +66,8 @@ class AdminController extends BaseController
             $allUsers        = $this->userModel->where('status', 'active')->findAll();
             $superadminCount = $this->userModel->where('status', 'active')->where('role', 'superadmin')->countAllResults();
             $adminCount      = $this->userModel->where('status', 'active')->where('role', 'admin')->countAllResults();
+        } elseif ($tab === 'settings') {
+            $favorite = $this->locationModel->getFavorite();
         }
 
         // Compteurs globaux pour les badges/onglets
@@ -75,6 +85,7 @@ class AdminController extends BaseController
             'allUsers'        => $allUsers,
             'superadminCount' => $superadminCount,
             'adminCount'      => $adminCount,
+            'favorite'        => $favorite,
         ]);
     }
 
@@ -367,5 +378,60 @@ class AdminController extends BaseController
             'lastname'  => $lastname,
             'comment'   => $comment,
         ]);
+    }
+
+    /**
+     * POST /admin/settings
+     * Traitement : géocode l'adresse saisie, crée la location et la définit comme favorite
+     */
+    public function updateSettings()
+    {
+        $address = trim($this->request->getPost('favoriteAddress') ?? '');
+
+        if (empty($address)) {
+            return redirect()->back()->withInput()
+                ->with('errors', ['favoriteAddress' => 'L\'adresse est obligatoire.']);
+        }
+
+        $data = $this->geocodingService->getLocationData($address);
+
+        if ($data === null) {
+            return redirect()->back()->withInput()
+                ->with('errors', ['favoriteAddress' => "Adresse introuvable : $address"]);
+        }
+
+        if (empty($data['street']) && empty($data['locality'])) {
+            return redirect()->back()->withInput()
+                ->with('errors', ['favoriteAddress' => "L'adresse \"$address\" doit contenir un nom de rue."]);
+        }
+
+        $cityId = $this->cityModel->findOrCreateCity($data['city'], $data['postcode']);
+
+        $locationId = $this->locationModel->insert([
+            'latitude'  => $data['latitude'],
+            'longitude' => $data['longitude'],
+            'address'   => $data['name'],
+            'city_id'   => $cityId,
+        ]);
+
+        if ($locationId === false) {
+            return redirect()->back()->withInput()
+                ->with('errors', $this->locationModel->errors());
+        }
+
+        $this->locationModel->setFavorite($locationId);
+
+        return redirect()->to(site_url('admin?tab=settings'))->with('success', 'Adresse favorite mise à jour.');
+    }
+
+    /**
+     * POST /admin/settings/clear
+     * Traitement : retire l'adresse favorite actuelle (désactive le flag, ne supprime pas la location)
+     */
+    public function clearSettings()
+    {
+        $this->locationModel->clearFavorite();
+
+        return redirect()->to(site_url('admin?tab=settings'))->with('success', 'Adresse favorite retirée.');
     }
 }

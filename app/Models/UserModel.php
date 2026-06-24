@@ -17,7 +17,7 @@ class UserModel extends BaseModel
     // Active l'incrémentation automatique de l'ID à chaque nouvel enregistrement
     protected $useAutoIncrement = true;
 
-    protected $useSoftDeletes = true;
+    protected $useSoftDeletes = false;
     protected $dateFormat     = 'datetime';
     protected $deletedField   = 'deleted_at';
 
@@ -39,7 +39,7 @@ class UserModel extends BaseModel
         'is_admin',
         'is_banned',
         'status',
-        'city_id',
+        // 'city_id',
         'reset_token',
         'reset_token_expiry',
         'role',

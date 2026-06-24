@@ -4,7 +4,6 @@ namespace App\Controllers;
 
 use App\Models\UserModel;
 use App\Models\RememberTokenModel;
-use App\Models\CityModel;
 use App\Models\NotificationPrefModel;
 use App\Libraries\MailerExample;
 use CodeIgniter\I18n\Time;
@@ -21,7 +20,6 @@ use App\Exceptions\InvalidPasswordException;
 class UserController extends BaseController
 {
     private UserModel $userModel;
-    private CityModel $cityModel;
     private CarModel $carModel;
     private NotificationPrefModel $notifPrefModel;
     protected GeocodingService $geocodingService;
@@ -61,19 +59,13 @@ class UserController extends BaseController
             return redirect()->back()->with('error', 'Utilisateur introuvable.');
         }
 
-
-        $city        = $this->cityModel->find($user['city_id']);
-        $memberSince = ucfirst(Time::parse($user['registered_at'], 'Europe/Paris', 'fr_FR')->toLocalizedString('MMMM yyyy'));
-
         $referer = $this->request->getServer('HTTP_REFERER');
         $back    = ($referer && str_starts_with($referer, base_url())) ? $referer : null;
 
         return view('Profile/show', [
             'user'         => $user,
-            'city'         => $city['name'] ?? null,
             'cars'         => $this->carModel->where('user_id', $userId)->findAll(),
             'isOwnProfile' => $isOwnProfile,
-            'memberSince'  => $memberSince,
             'back'         => $back,
         ]);
     }
@@ -96,13 +88,9 @@ class UserController extends BaseController
                 ->with('error', 'Ce compte n\'existe plus.');
         }
 
-        $city   = $this->cityModel->find($user['city_id']);
-
         return view('Profile/edit', [
             'title'        => 'Modifier mon profil',
             'user'         => $user,
-            'city'         => $city['name'] ?? null,
-            'zipcode'      => $city['zipcode'] ?? null,
             'isOwnProfile' => true,
             'cars'         => $this->carModel->where('user_id', $userId)->findAll(),
         ]);
@@ -258,12 +246,6 @@ class UserController extends BaseController
         if (!$this->validate($rules, $messages)) {
             return redirect()->to(site_url('profile/edit'))->withInput()->with('errors', $this->validator->getErrors());
         }
-
-        $cityName = trim($this->request->getPost('cityProfile')    ?? '');
-        $zipcode  = trim($this->request->getPost('zipcodeProfile') ?? '');
-
-        $cityNameChecked = $this->geocodingService->getCheckedCityName($cityName, $zipcode);
-        $data['city_id'] = $this->cityModel->findOrCreateCity($cityNameChecked, $zipcode);
 
         // Hachage du nouveau mot de passe si renseigné
         if (!empty($newPassword)) {

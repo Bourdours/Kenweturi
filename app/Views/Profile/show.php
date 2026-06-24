@@ -2,7 +2,6 @@
 
 /** @var array $user */
 /** @var string $city */
-/** @var string $memberSince */
 /** @var bool $isOwnProfile */
 ?>
 <?= view('partials/head', ['extraJs' => [base_url('js/auth.js'), base_url('js/user.js')]]) ?>
@@ -63,14 +62,7 @@
         <?php endif; ?>
       </div>
 
-      <p class="text-ink/50 text-sm flex flex-wrap items-center justify-center sm:justify-start gap-x-2 gap-y-1">
-        <?php if (!empty($city)): ?>
-          <span><i class="fa-solid fa-location-dot mr-1"></i><?= esc($city) ?></span>
-          <span class="text-ink/20">·</span>
-        <?php endif; ?>
-        <span><i class="fa-regular fa-calendar mr-1"></i>Membre depuis <?= esc($memberSince) ?></span>
-      </p>
-
+  
       <?php if ($isOwnProfile): ?>
         <div class="mt-4 flex flex-wrap justify-center sm:justify-start gap-3">
           <a href="<?= site_url('profile/update') ?>"
@@ -108,18 +100,15 @@
     </h2>
     <dl class="flex flex-col divide-y divide-action/10">
 
-      <?php if ($isOwnProfile): ?>
         <div class="flex items-center gap-4 py-3 first:pt-0 last:pb-0">
           <div class="w-8 h-8 rounded-lg bg-action/10 flex items-center justify-center shrink-0">
             <i class="fa-solid fa-envelope text-action text-xs"></i>
           </div>
-          
           <div>
             <dt class="text-ink/40 text-xs mb-0.5">Email</dt>
             <dd class="text-ink text-sm font-medium"><?= esc($user['email']) ?></dd>
           </div>
         </div>
-      <?php endif ?>
 
       <div class="flex items-center gap-4 py-3 first:pt-0 last:pb-0">
         <div class="w-8 h-8 rounded-lg bg-action/10 flex items-center justify-center shrink-0">
