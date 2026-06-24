@@ -25,9 +25,7 @@ $initials = session()->get('isLoggedIn')
 
       <!-- Logo -->
       <a href="<?= site_url('/') ?>" class="flex items-center gap-2">
-        <div class="w-7 h-7 rounded-xl bg-action flex items-center justify-center shrink-0">
-          <i class="fa-solid fa-car-side text-ink text-xs"></i>
-        </div>
+        <img src="<?= base_url('data/images/logo.png') ?>" alt="Kenweturi" class="h-9 w-auto shrink-0">
         <!-- <span class="text-2xl font-bold text-ink font-display">Kenweturi</span> -->
         <svg width="240" height="36" viewBox="0 0 240 36" xmlns="http://www.w3.org/2000/svg" class="text-ink">
           <defs>
