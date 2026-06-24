@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controllers;
 use App\Controllers\BaseController;
 use CodeIgniter\HTTP\RedirectResponse;
@@ -139,52 +140,61 @@ class JourneyController extends BaseController{
     /**
      * Confirme la publication du trajet : persiste les données en session en base.
      *
-     * Après persistance, vide la session de prévisualisation, déclenche les
-     * notifications de matching, puis redirige vers la page du trajet créé.
+     * Si le trajet est récurrent, persiste N trajets indépendants et redirige
+     * vers le dashboard avec un message récapitulatif. Si le trajet est unique,
+     * redirige vers le dashboard avec un message de confirmation simple.
      *
-     * @return RedirectResponse Redirection vers le trajet ou vers le formulaire
+     * @return RedirectResponse Redirection vers le dashboard ou vers le formulaire
      *                          en cas d'erreur de persistance
      */
     public function confirm(): RedirectResponse
     {
-        $preview = session()->get('journey_preview');
-        if (!$preview) {
-            return redirect()->to('/journeys/new');
-        }
+    $preview = session()->get('journey_preview');
+    if (!$preview) {
+        return redirect()->to('/journeys/new');
+    }
 
-        $userId = (int) session('user_id');
+    $userId = (int) session('user_id');
 
-        try {
-            $journeyId = $this->createJourneyService->persistJourney(
-                $userId,
-                $preview['createFormData'],
-                $preview['locationsData'],
-                $preview['geoJsonTrack']
-            );
-        } catch (ExternalApiException $e) {
-            session()->remove('journey_preview');
-            return redirect()->to('/journeys/new')
-                ->with('errors', ['api' => 'Service de cartographie indisponible, réessayez plus tard.']);
-        } catch (ModelValidationException $e) {
-            session()->remove('journey_preview');
-            return redirect()->to('/journeys/new')
-                ->with('errors', $e->getErrors());
-        } catch (\Throwable $e) {
-            session()->remove('journey_preview');
-            return redirect()->to('/journeys/new')
-                ->with('errors', ['db' => 'Une erreur est survenue lors de l\'enregistrement.']);
-        }
-
+    try {
+        $result = $this->createJourneyService->persistJourney(
+            $userId,
+            $preview['createFormData'],
+            $preview['locationsData'],
+            $preview['geoJsonTrack']
+        );
+    } catch (ExternalApiException $e) {
         session()->remove('journey_preview');
+        return redirect()->to('/journeys/new')
+            ->with('errors', ['api' => 'Service de cartographie indisponible, réessayez plus tard.']);
+    } catch (ModelValidationException $e) {
+        session()->remove('journey_preview');
+        return redirect()->to('/journeys/new')
+            ->with('errors', $e->getErrors());
+    } catch (\Throwable $e) {
+        session()->remove('journey_preview');
+        return redirect()->to('/journeys/new')
+            ->with('errors', ['db' => 'Une erreur est survenue lors de l\'enregistrement.']);
+    }
 
-        // ====== Matching avec les demandes de trajet existantes
+    session()->remove('journey_preview');
+
+    // ====== Matching avec les demandes de trajet existantes
+    foreach ($result['journeyIds'] as $journeyId) {
         try {
             $this->journeyService->notifyMatchingRequests($journeyId, $preview['geoJsonTrack']);
         } catch (\Throwable $e) {
             log_message('error', 'notifyMatchingRequests: ' . $e->getMessage());
         }
+    }
 
-        return redirect()->to('/journeys/' . $journeyId);
+    // ====== Message et redirection
+    $successMessage = $result['count'] > 1
+        ? $result['count'] . ' trajets récurrents ont été publiés.'
+        : 'Votre trajet a été publié.';
+
+    return redirect()->to('/dashboard/journeys?filter=upcoming')
+        ->with('success', $successMessage);
     }
 
     /**
@@ -318,22 +328,28 @@ class JourneyController extends BaseController{
      * ne peut pas être résolue, on retombe sur une borne par défaut : la règle
      * sur 'car' invalidera le formulaire de toute façon.
      *
+     * Les champs 'recurringDays' et 'recurringWeeks' sont validés par des règles
+     * personnalisées (valid_recurring_days / valid_recurring_weeks, définies dans
+     * App\Validation\CustomRules) qui n'exigent une sélection que si isRecurring = 1.
+     *
      * @param  int $maxSeats Nombre maximum de places réservables (défaut : 9)
      * @return array<string, string> Règles de validation CodeIgniter indexées par champ
      */
     private function getCreateValidationRules(int $maxSeats = 9): array {
-
-        return [
-            'startDate'     => 'required|valid_date',
-            'startTime'     => 'required|regex_match[/^([01]\d|2[0-3]):[0-5]\d$/]',
-            'seats'         => 'required|integer|greater_than[0]|less_than_equal_to[' . $maxSeats . ']',
-            'note'          => 'permit_empty|max_length[500]',
-            'smoking'       => 'in_list[0,1]',
-            'startAddress'  => 'required|string|max_length[255]',
-            'endAddress'    => 'required|string|max_length[255]',
-            'car'           => 'required|integer|greater_than[0]',
-        ];
-    }
+    return [
+        'startDate'      => 'required|valid_date[Y-m-d]',
+        'startTime'      => 'required|regex_match[/^([01]\d|2[0-3]):[0-5]\d$/]',
+        'seats'          => 'required|integer|greater_than[0]|less_than_equal_to[' . $maxSeats . ']',
+        'note'           => 'permit_empty|max_length[500]',
+        'smoking'        => 'in_list[0,1]',
+        'startAddress'   => 'required|string|max_length[255]',
+        'endAddress'     => 'required|string|max_length[255]',
+        'car'            => 'required|integer|greater_than[0]',
+        'isRecurring'    => 'permit_empty|in_list[0,1]',
+        'recurringDays'  => 'permit_empty',
+        'recurringWeeks' => 'permit_empty',
+    ];
+}
 
     /**
      * Retourne les messages d'erreur personnalisés associés aux règles de validation.
@@ -378,6 +394,15 @@ class JourneyController extends BaseController{
             'smoking'      => [
                 'in_list'       => 'Veuillez indiquer si le covoiturage est fumeur ou non.',
             ],
+            'isRecurring'  => [
+                'in_list'       => 'La valeur du trajet récurrent n\'est pas valide.',
+            ],
+            'recurringDays' => [
+                'valid_recurring_days' => 'Veuillez sélectionner au moins un jour valide pour un trajet récurrent.',
+            ],
+            'recurringWeeks' => [
+                'valid_recurring_weeks' => 'Veuillez sélectionner au moins une semaine valide pour un trajet récurrent.',
+            ],
         ];
 
     }
@@ -411,21 +436,43 @@ class JourneyController extends BaseController{
     /**
      * Récupère les champs du trajet (hors adresses) postés dans le formulaire.
      *
+     * Si le trajet est marqué comme récurrent (isRecurring = '1'), les jours et
+     * semaines sélectionnés sont filtrés via une liste blanche (sanitizeRecurringValues)
+     * en plus de la validation déjà effectuée par les règles personnalisées. Si le
+     * trajet n'est pas récurrent, ces deux champs sont vidés pour éviter de persister
+     * des valeurs incohérentes avec isRecurring = false.
+     *
      * @return array{startDate:string, startTime:string, seats:mixed, note:mixed,
-     *               smoking:mixed, car:mixed} Données brutes du POST
+     *               smoking:mixed, car:mixed, isRecurring:bool,
+     *               recurringDays:array<string>, recurringWeeks:array<string>} Données brutes du POST
      */
     private function getJourneyCreateFormData(): array {
 
-        return [
-            'startDate'     => $this->request->getPost('startDate'),
-            'startTime'     => $this->request->getPost('startTime'),
-            'seats'         => $this->request->getPost('seats'),
-            'note'          => $this->request->getPost('note'),
-            'smoking'       => $this->request->getPost('smoking'),
-            'car'           => $this->request->getPost('car'),
-        ];
+    // On utilise filter_var pour récupérer proprement le booléen, faux par défaut
+    $isRecurring = filter_var($this->request->getPost('isRecurring'), FILTER_VALIDATE_BOOLEAN);
 
-    }
+    return [
+        'startDate'      => $this->request->getPost('startDate'),
+        'startTime'      => $this->request->getPost('startTime'),
+        'seats'          => $this->request->getPost('seats'),
+        'note'           => $this->request->getPost('note'),
+        'smoking'        => $this->request->getPost('smoking'),
+        'car'            => $this->request->getPost('car'),
+        'isRecurring'    => $isRecurring,
+        'recurringDays'  => $isRecurring
+            ? $this->sanitizeRecurringValues(
+                $this->request->getPost('recurringDays'),
+                ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi']
+            )
+            : [],
+        'recurringWeeks' => $isRecurring
+            ? $this->sanitizeRecurringValues(
+                $this->request->getPost('recurringWeeks'),
+                ['1', '2', '3', '4']
+            )
+            : [],
+    ];
+}
 
     /**
      * Agrège l'ensemble des données du formulaire de création de trajet.
@@ -506,6 +553,24 @@ class JourneyController extends BaseController{
     }
 
     /**
+     * Filtre un tableau de valeurs postées (jours ou semaines de récurrence)
+     * pour ne garder que celles présentes dans la liste blanche fournie.
+     *
+     * Sert de filet de sécurité en plus de la validation CodeIgniter (règles
+     * valid_recurring_days / valid_recurring_weeks), au cas où des valeurs
+     * auraient été manipulées côté client malgré la validation.
+     *
+     * @param  mixed $value Valeur brute issue du POST (tableau attendu)
+     * @param  array<string> $allowedValues Liste des valeurs autorisées
+     * @return array<string> Valeurs filtrées, réindexées
+     */
+    private function sanitizeRecurringValues($value, array $allowedValues): array {
+
+        if (!is_array($value)) {
+            return [];
+        }
+        return array_values(array_intersect($value, $allowedValues));
+    }
      * Annule plusieurs trajets en une seule fois (annulation en masse, soft delete).
      *
      * @return RedirectResponse
