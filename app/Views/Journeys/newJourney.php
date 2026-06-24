@@ -160,69 +160,68 @@
             class="w-full bg-paper border border-action/15 rounded-lg text-ink/60 text-sm px-3 py-2.5 outline-none focus:border-action/50 cursor-pointer transition-colors">
         </div>
       </div>
-      <div class="bg-surface rounded-2xl p-6 border border-action/10">
+      
   
 
-  <!-- Trajet récurrent -->
-  <div class="mt-5 pt-5 border-t border-action/10">
-    <div class="flex items-center justify-between">
-      <label class="text-ink/50 text-xs font-medium block">Trajet récurrent</label>
-      <div class="flex items-center gap-2" role="group" aria-label="Trajet récurrent">
-        <input type="hidden" name="isRecurring" id="isRecurring" value="<?= esc(old('isRecurring', '0')) ?>">
-        <button type="button" id="recurringYes"
-          class="recurring-toggle-btn px-4 py-1.5 rounded-lg text-sm font-medium border border-action/15 text-ink/60 transition-colors">
-          Oui
-        </button>
-        <button type="button" id="recurringNo"
-          class="recurring-toggle-btn px-4 py-1.5 rounded-lg text-sm font-medium border border-action/15 transition-colors">
-          Non
-        </button>
+      <!-- Trajet récurrent -->
+      <div class="mt-4 bg-surface rounded-2xl p-6 border border-action/10">
+        <div class="flex items-center justify-between">
+          <label class="text-ink/50 text-xs font-medium block">Trajet récurrent</label>
+          <div class="flex items-center gap-2" role="group" aria-label="Trajet récurrent">
+            <input type="hidden" name="isRecurring" id="isRecurring" value="<?= esc(old('isRecurring', '0')) ?>">
+            <button type="button" id="recurringYes"
+              class="recurring-toggle-btn px-4 py-1.5 rounded-lg text-sm font-medium border border-action/15 text-ink/60 transition-colors">
+              Oui
+            </button>
+            <button type="button" id="recurringNo"
+              class="recurring-toggle-btn px-4 py-1.5 rounded-lg text-sm font-medium border border-action/15 transition-colors">
+              Non
+            </button>
+          </div>
+        </div>
+
+        <div id="recurringDays" class="mt-4 hidden">
+          <label class="text-ink/50 text-xs font-medium mb-2 block">Jours de récurrence</label>
+          <div class="flex flex-wrap gap-2">
+            <?php
+              $jours = [
+                'lundi'    => 'Lundi',
+                'mardi'    => 'Mardi',
+                'mercredi' => 'Mercredi',
+                'jeudi'    => 'Jeudi',
+                'vendredi' => 'Vendredi',
+              ];
+              $selectedDays = old('recurringDays', []);
+            ?>
+            <?php foreach ($jours as $value => $label): ?>
+              <button type="button"
+                class="day-toggle-btn px-3 py-1.5 rounded-lg text-sm font-medium border border-action/15 text-ink/60 transition-colors"
+                data-day="<?= esc($value) ?>">
+                <?= esc($label) ?>
+              </button>
+              <input type="checkbox" name="recurringDays[]" value="<?= esc($value) ?>" id="day_<?= esc($value) ?>"
+                class="hidden-day-checkbox" <?= in_array($value, $selectedDays) ? 'checked' : '' ?>>
+            <?php endforeach; ?>
+          </div>
+        </div>
+
+        <div id="recurringWeeks" class="mt-4 hidden">
+          <label class="text-ink/50 text-xs font-medium mb-2 block">Semaines concernées</label>
+          <?php $selectedWeeks = old('recurringWeeks', []); ?>
+          <div class="flex flex-wrap gap-2" role="group" aria-label="Semaines concernées">
+            <?php for ($w = 1; $w <= 4; $w++): ?>
+              <button type="button"
+                class="week-toggle-btn px-3 py-1.5 rounded-lg text-sm font-medium border border-action/15 text-ink/60 transition-colors"
+                data-week="<?= $w ?>">
+                Semaine <?= $w ?>
+              </button>
+              <input type="checkbox" name="recurringWeeks[]" value="<?= $w ?>" id="week_<?= $w ?>"
+                class="hidden-week-checkbox" <?= in_array((string) $w, $selectedWeeks) ? 'checked' : '' ?>>
+            <?php endfor; ?>
+          </div>
+        </div>
       </div>
     </div>
-
-    <div id="recurringDays" class="mt-4 hidden">
-      <label class="text-ink/50 text-xs font-medium mb-2 block">Jours de récurrence</label>
-      <div class="flex flex-wrap gap-2">
-        <?php
-          $jours = [
-            'lundi'    => 'Lundi',
-            'mardi'    => 'Mardi',
-            'mercredi' => 'Mercredi',
-            'jeudi'    => 'Jeudi',
-            'vendredi' => 'Vendredi',
-          ];
-          $selectedDays = old('recurringDays', []);
-        ?>
-        <?php foreach ($jours as $value => $label): ?>
-          <button type="button"
-            class="day-toggle-btn px-3 py-1.5 rounded-lg text-sm font-medium border border-action/15 text-ink/60 transition-colors"
-            data-day="<?= esc($value) ?>">
-            <?= esc($label) ?>
-          </button>
-          <input type="checkbox" name="recurringDays[]" value="<?= esc($value) ?>" id="day_<?= esc($value) ?>"
-            class="hidden-day-checkbox" <?= in_array($value, $selectedDays) ? 'checked' : '' ?>>
-        <?php endforeach; ?>
-      </div>
-    </div>
-
-    <div id="recurringWeeks" class="mt-4 hidden">
-  <label class="text-ink/50 text-xs font-medium mb-2 block">Semaines concernées</label>
-  <?php $selectedWeeks = old('recurringWeeks', []); ?>
-  <div class="flex flex-wrap gap-2" role="group" aria-label="Semaines concernées">
-    <?php for ($w = 1; $w <= 4; $w++): ?>
-      <button type="button"
-        class="week-toggle-btn px-3 py-1.5 rounded-lg text-sm font-medium border border-action/15 text-ink/60 transition-colors"
-        data-week="<?= $w ?>">
-        Semaine <?= $w ?>
-      </button>
-      <input type="checkbox" name="recurringWeeks[]" value="<?= $w ?>" id="week_<?= $w ?>"
-        class="hidden-week-checkbox" <?= in_array((string) $w, $selectedWeeks) ? 'checked' : '' ?>>
-    <?php endfor; ?>
-  </div>
-</div>
-
-  </div>
-</div>
 
     <!-- Préférences -->
     <div class="bg-surface rounded-2xl p-6 border border-action/10">
