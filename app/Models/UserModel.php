@@ -17,7 +17,7 @@ class UserModel extends BaseModel
     // Active l'incrémentation automatique de l'ID à chaque nouvel enregistrement
     protected $useAutoIncrement = true;
 
-    protected $useSoftDeletes = true;
+    protected $useSoftDeletes = false;
     protected $dateFormat     = 'datetime';
     protected $deletedField   = 'deleted_at';
 
