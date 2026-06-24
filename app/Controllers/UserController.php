@@ -4,7 +4,6 @@ namespace App\Controllers;
 
 use App\Models\UserModel;
 use App\Models\RememberTokenModel;
-use App\Models\CityModel;
 use App\Models\NotificationPrefModel;
 use App\Libraries\MailerExample;
 use CodeIgniter\I18n\Time;
@@ -13,22 +12,26 @@ use App\Models\CarModel;
 use CodeIgniter\HTTP\RedirectResponse;
 
 use App\Services\GeocodingService;
+use App\Services\UserService;
+
+use App\Exceptions\UserNotFoundException;
+use App\Exceptions\InvalidPasswordException;
 
 class UserController extends BaseController
 {
     private UserModel $userModel;
-    private CityModel $cityModel;
     private CarModel $carModel;
     private NotificationPrefModel $notifPrefModel;
     protected GeocodingService $geocodingService;
+    private UserService $userService;
 
     public function __construct()
     {
-        $this->userModel      = new UserModel();
-        $this->cityModel      = new CityModel();
-        $this->carModel       = new CarModel();
-        $this->notifPrefModel = new NotificationPrefModel();
+        $this->userModel        = new UserModel();
+        $this->carModel         = new CarModel();
+        $this->notifPrefModel   = new NotificationPrefModel();
         $this->geocodingService = new GeocodingService();
+        $this->userService      = new UserService();
         helper('cookie');
     }
 
@@ -55,19 +58,13 @@ class UserController extends BaseController
             return redirect()->back()->with('error', 'Utilisateur introuvable.');
         }
 
-
-        $city        = $this->cityModel->find($user['city_id']);
-        $memberSince = ucfirst(Time::parse($user['registered_at'], 'Europe/Paris', 'fr_FR')->toLocalizedString('MMMM yyyy'));
-
         $referer = $this->request->getServer('HTTP_REFERER');
         $back    = ($referer && str_starts_with($referer, base_url())) ? $referer : null;
 
         return view('Profile/show', [
             'user'         => $user,
-            'city'         => $city['name'] ?? null,
             'cars'         => $this->carModel->where('user_id', $userId)->findAll(),
             'isOwnProfile' => $isOwnProfile,
-            'memberSince'  => $memberSince,
             'back'         => $back,
         ]);
     }
@@ -90,13 +87,9 @@ class UserController extends BaseController
                 ->with('error', 'Ce compte n\'existe plus.');
         }
 
-        $city   = $this->cityModel->find($user['city_id']);
-
         return view('Profile/edit', [
             'title'        => 'Modifier mon profil',
             'user'         => $user,
-            'city'         => $city['name'] ?? null,
-            'zipcode'      => $city['zipcode'] ?? null,
             'isOwnProfile' => true,
             'cars'         => $this->carModel->where('user_id', $userId)->findAll(),
         ]);
@@ -109,39 +102,43 @@ class UserController extends BaseController
      */
     public function delete()
     {
-        $userId = session()->get('user_id');
-        $user   = $this->userModel->find($userId);
+        $userId        = (int) session()->get('user_id');
+        $inputPassword = (string) $this->request->getPost('deleteAccountPassword');
 
-        if (!$user) {
-            session()->destroy();
-            return redirect()->to(site_url('login'))
-                ->with('error', 'Ce compte n\'existe plus.');
-        }
-
-        $inputPassword = $this->request->getPost('deleteAccountPassword');
-
-
-        if (empty($inputPassword)) {
+        // Le mot de passe est obligatoire pour confirmer la suppression
+        if ($inputPassword === '') {
             return redirect()->to(site_url('profile'))
                 ->with('error', 'Veuillez saisir votre mot de passe pour confirmer la suppression.');
         }
 
-        if (!password_verify($inputPassword, $user['password_hash'])) {
+        try {
+            // Même logique métier que la suppression admin :
+            // annulation des trajets/réservations, anonymisation, soft delete.
+            $contact = $this->userService->deleteOwnAccount($userId, $inputPassword);
+        } catch (UserNotFoundException) {
+            session()->destroy();
+            return redirect()->to(site_url('login'))
+                ->with('error', 'Ce compte n\'existe plus.');
+        } catch (InvalidPasswordException) {
             return redirect()->to(site_url('profile'))
                 ->with('error', 'Le mot de passe saisi est incorrect.');
+        } catch (\Throwable $e) {
+            log_message('error', 'Self-deletion failed for user {id}', ['id' => $userId]);
+            return redirect()->to(site_url('profile'))
+                ->with('error', 'Un problème est survenu.');
         }
 
-        // Envoi de l'email de confirmation de suppression
-        $mailer = new MailerExample();
-        $mailer->sendHtml(
-            $user['email'],
-            'Votre compte a été supprimé',
-            $this->accountDeletedEmail($user['firstname'], $user['lastname'])
-        );
+        // Email de confirmation au compte supprimé (après commit, best-effort)
+        try {
+            $this->userService->notifySelfDeletion($contact);
+        } catch (\Throwable $e) {
+            log_message('error', 'Self-deletion mail failed for user {id}', ['id' => $userId]);
+        }
 
-        $this->userModel->delete($userId);
+        // Suppression du cookie « se souvenir de moi » (auto-suppression uniquement)
+        delete_cookie('remember_token');
+        
         session()->destroy();
-
         return redirect()->to(site_url('login'))
             ->with('success', 'Votre compte a été supprimé.');
     }
@@ -248,12 +245,6 @@ class UserController extends BaseController
         if (!$this->validate($rules, $messages)) {
             return redirect()->to(site_url('profile/edit'))->withInput()->with('errors', $this->validator->getErrors());
         }
-
-        $cityName = trim($this->request->getPost('cityProfile')    ?? '');
-        $zipcode  = trim($this->request->getPost('zipcodeProfile') ?? '');
-
-        $cityNameChecked = $this->geocodingService->getCheckedCityName($cityName, $zipcode);
-        $data['city_id'] = $this->cityModel->findOrCreateCity($cityNameChecked, $zipcode);
 
         // Hachage du nouveau mot de passe si renseigné
         if (!empty($newPassword)) {

@@ -1,32 +1,33 @@
 <?php
+
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use CodeIgniter\HTTP\RedirectResponse;
-
 use App\Models\CarModel;
 use App\Models\JourneyModel;
-
+use App\Models\LocationModel;
 use App\Services\JourneyService;
 use App\Services\CreateJourneyService;
 use App\Services\JourneySearchService;
-
 use App\Exceptions\ExternalApiException;
 use App\Exceptions\ModelValidationException;
 use App\Exceptions\AddressValidationException;
 
-class JourneyController extends BaseController{
-
+class JourneyController extends BaseController
+{
     protected CarModel $carModel;
     protected JourneyModel $journeyModel;
+    protected LocationModel $locationModel;
     protected JourneyService $journeyService;
     protected CreateJourneyService $createJourneyService;
     protected JourneySearchService $journeySearchService;
 
-    public function __construct(){
-
+    public function __construct()
+    {
         $this->carModel = new CarModel();
         $this->journeyModel = new JourneyModel();
+        $this->locationModel = new LocationModel();
         $this->journeyService = new JourneyService();
         $this->createJourneyService = new CreateJourneyService();
         $this->journeySearchService = new JourneySearchService();
@@ -42,14 +43,14 @@ class JourneyController extends BaseController{
      */
     public function showCreateForm()
     {
-
-        $userId = session('user_id');
-
+        $userId   = session('user_id');
         $userCars = $this->carModel->findByUser($userId);
+        $favorite = $this->locationModel->getFavorite();
 
         return view('Journeys/newJourney', [
-            'title' => "Publier un trajet",
-            'cars' => $userCars,
+            'title'    => "Publier un trajet",
+            'cars'     => $userCars,
+            'favorite' => $favorite,
         ]);
     }
 
@@ -142,10 +143,11 @@ class JourneyController extends BaseController{
     /**
      * Confirme la publication du trajet : persiste les données en session en base.
      *
-     * Après persistance, vide la session de prévisualisation, déclenche les
-     * notifications de matching, puis redirige vers la page du trajet créé.
+     * Si le trajet est récurrent, persiste N trajets indépendants et redirige
+     * vers le dashboard avec un message récapitulatif. Si le trajet est unique,
+     * redirige vers le dashboard avec un message de confirmation simple.
      *
-     * @return RedirectResponse Redirection vers le trajet ou vers le formulaire
+     * @return RedirectResponse Redirection vers le dashboard ou vers le formulaire
      *                          en cas d'erreur de persistance
      */
     public function confirm(): RedirectResponse
@@ -158,7 +160,7 @@ class JourneyController extends BaseController{
         $userId = (int) session('user_id');
 
         try {
-            $journeyId = $this->createJourneyService->persistJourney(
+            $result = $this->createJourneyService->persistJourney(
                 $userId,
                 $preview['createFormData'],
                 $preview['locationsData'],
@@ -181,13 +183,21 @@ class JourneyController extends BaseController{
         session()->remove('journey_preview');
 
         // ====== Matching avec les demandes de trajet existantes
-        try {
-            $this->journeyService->notifyMatchingRequests($journeyId, $preview['geoJsonTrack']);
-        } catch (\Throwable $e) {
-            log_message('error', 'notifyMatchingRequests: ' . $e->getMessage());
+        foreach ($result['journeyIds'] as $journeyId) {
+            try {
+                $this->journeyService->notifyMatchingRequests($journeyId, $preview['geoJsonTrack']);
+            } catch (\Throwable $e) {
+                log_message('error', 'notifyMatchingRequests: ' . $e->getMessage());
+            }
         }
 
-        return redirect()->to('/journeys/' . $journeyId);
+        // ====== Message et redirection
+        $successMessage = $result['count'] > 1
+            ? $result['count'] . ' trajets récurrents ont été publiés.'
+            : 'Votre trajet a été publié.';
+
+        return redirect()->to('/dashboard/journeys?filter=upcoming')
+            ->with('success', $successMessage);
     }
 
     /**
@@ -230,7 +240,7 @@ class JourneyController extends BaseController{
         $userId    = (int) session('user_id');
 
         $details = $this->journeyService->getJourneyDetails($journeyId, $userId);
-        
+
         if ($details === null) {
             return redirect()->to('/journeys');
         }
@@ -293,7 +303,7 @@ class JourneyController extends BaseController{
      * @param  int $id Identifiant du trajet
      * @return RedirectResponse Redirection vers le dashboard
      */
-    public function cancel(int $id): RedirectResponse 
+    public function cancel(int $id): RedirectResponse
     {
         $journey = $this->journeyModel->findWithDetails($id);
         if (!$journey || $journey['user_id'] !== session()->get('user_id')) {
@@ -321,20 +331,27 @@ class JourneyController extends BaseController{
      * ne peut pas être résolue, on retombe sur une borne par défaut : la règle
      * sur 'car' invalidera le formulaire de toute façon.
      *
+     * Les champs 'recurringDays' et 'recurringWeeks' sont validés par des règles
+     * personnalisées (valid_recurring_days / valid_recurring_weeks, définies dans
+     * App\Validation\CustomRules) qui n'exigent une sélection que si isRecurring = 1.
+     *
      * @param  int $maxSeats Nombre maximum de places réservables (défaut : 9)
      * @return array<string, string> Règles de validation CodeIgniter indexées par champ
      */
-    private function getCreateValidationRules(int $maxSeats = 9): array {
-
+    private function getCreateValidationRules(int $maxSeats = 9): array
+    {
         return [
-            'startDate'     => 'required|valid_date',
-            'startTime'     => 'required|regex_match[/^([01]\d|2[0-3]):[0-5]\d$/]',
-            'seats'         => 'required|integer|greater_than[0]|less_than_equal_to[' . $maxSeats . ']',
-            'note'          => 'permit_empty|max_length[500]',
-            'smoking'       => 'in_list[0,1]',
-            'startAddress'  => 'required|string|max_length[255]',
-            'endAddress'    => 'required|string|max_length[255]',
-            'car'           => 'required|integer|greater_than[0]',
+            'startDate'      => 'required|valid_date[Y-m-d]',
+            'startTime'      => 'required|regex_match[/^([01]\d|2[0-3]):[0-5]\d$/]',
+            'seats'          => 'required|integer|greater_than[0]|less_than_equal_to[' . $maxSeats . ']',
+            'note'           => 'permit_empty|max_length[500]',
+            'smoking'        => 'in_list[0,1]',
+            'startAddress'   => 'required|string|max_length[255]',
+            'endAddress'     => 'required|string|max_length[255]',
+            'car'            => 'required|integer|greater_than[0]',
+            'isRecurring'    => 'permit_empty|in_list[0,1]',
+            'recurringDays'  => 'permit_empty',
+            'recurringWeeks' => 'permit_empty',
         ];
     }
 
@@ -345,7 +362,8 @@ class JourneyController extends BaseController{
      *                       injecté dans le message d'erreur du champ 'seats'
      * @return array<string, string>> Messages indexés par champ puis par règle
      */
-    private function getCreateValidationMessages(int $maxSeats = 9): array {
+    private function getCreateValidationMessages(int $maxSeats = 9): array
+    {
 
         return [
             'startDate'    => [
@@ -381,8 +399,16 @@ class JourneyController extends BaseController{
             'smoking'      => [
                 'in_list'       => 'Veuillez indiquer si le covoiturage est fumeur ou non.',
             ],
+            'isRecurring'  => [
+                'in_list'       => 'La valeur du trajet récurrent n\'est pas valide.',
+            ],
+            'recurringDays' => [
+                'valid_recurring_days' => 'Veuillez sélectionner au moins un jour valide pour un trajet récurrent.',
+            ],
+            'recurringWeeks' => [
+                'valid_recurring_weeks' => 'Veuillez sélectionner au moins une semaine valide pour un trajet récurrent.',
+            ],
         ];
-
     }
 
     /**
@@ -393,7 +419,8 @@ class JourneyController extends BaseController{
      *
      * @return array<string, string> Adresses nettoyées indexées par clé
      */
-    private function getLocationsCreateFormData(): array {
+    private function getLocationsCreateFormData(): array
+    {
 
         $locations['start'] = $this->sanitizeAddress($this->request->getPost('startAddress'));
 
@@ -408,26 +435,48 @@ class JourneyController extends BaseController{
         $locations['end'] = $this->sanitizeAddress($this->request->getPost('endAddress'));
 
         return $locations;
-
     }
 
     /**
      * Récupère les champs du trajet (hors adresses) postés dans le formulaire.
      *
+     * Si le trajet est marqué comme récurrent (isRecurring = '1'), les jours et
+     * semaines sélectionnés sont filtrés via une liste blanche (sanitizeRecurringValues)
+     * en plus de la validation déjà effectuée par les règles personnalisées. Si le
+     * trajet n'est pas récurrent, ces deux champs sont vidés pour éviter de persister
+     * des valeurs incohérentes avec isRecurring = false.
+     *
      * @return array{startDate:string, startTime:string, seats:mixed, note:mixed,
-     *               smoking:mixed, car:mixed} Données brutes du POST
+     *               smoking:mixed, car:mixed, isRecurring:bool,
+     *               recurringDays:array<string>, recurringWeeks:array<string>} Données brutes du POST
      */
-    private function getJourneyCreateFormData(): array {
+    private function getJourneyCreateFormData(): array
+    {
+
+        // On utilise filter_var pour récupérer proprement le booléen, faux par défaut
+        $isRecurring = filter_var($this->request->getPost('isRecurring'), FILTER_VALIDATE_BOOLEAN);
 
         return [
-            'startDate'     => $this->request->getPost('startDate'),
-            'startTime'     => $this->request->getPost('startTime'),
-            'seats'         => $this->request->getPost('seats'),
-            'note'          => $this->request->getPost('note'),
-            'smoking'       => $this->request->getPost('smoking'),
-            'car'           => $this->request->getPost('car'),
+            'startDate'      => $this->request->getPost('startDate'),
+            'startTime'      => $this->request->getPost('startTime'),
+            'seats'          => $this->request->getPost('seats'),
+            'note'           => $this->request->getPost('note'),
+            'smoking'        => $this->request->getPost('smoking'),
+            'car'            => $this->request->getPost('car'),
+            'isRecurring'    => $isRecurring,
+            'recurringDays'  => $isRecurring
+                ? $this->sanitizeRecurringValues(
+                    $this->request->getPost('recurringDays'),
+                    ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi']
+                )
+                : [],
+            'recurringWeeks' => $isRecurring
+                ? $this->sanitizeRecurringValues(
+                    $this->request->getPost('recurringWeeks'),
+                    ['1', '2', '3', '4']
+                )
+                : [],
         ];
-
     }
 
     /**
@@ -436,13 +485,13 @@ class JourneyController extends BaseController{
      * @return array{location: array<string,string>, journey: array} Données du formulaire
      *               structurées en deux sous-tableaux : 'location' et 'journey'
      */
-    private function getCreateFormData(): array {
+    private function getCreateFormData(): array
+    {
 
         return [
-            "location"=>$this->getLocationsCreateFormData(),
-            "journey"=>$this->getJourneyCreateFormData(),
+            "location" => $this->getLocationsCreateFormData(),
+            "journey" => $this->getJourneyCreateFormData(),
         ];
-
     }
 
     /**
@@ -499,17 +548,37 @@ class JourneyController extends BaseController{
      * @param  mixed $value Valeur brute issue du POST
      * @return string       Adresse nettoyée (chaîne vide si entrée invalide)
      */
-    private function sanitizeAddress($value): string {
+    private function sanitizeAddress($value): string
+    {
 
         if (!is_string($value)) {
             return '';
         }
         return trim(strip_tags($value));
-
     }
 
     /**
-     * Annule plusieurs trajets en une seule fois (annulation en masse, soft delete).
+     * Filtre un tableau de valeurs postées (jours ou semaines de récurrence)
+     * pour ne garder que celles présentes dans la liste blanche fournie.
+     *
+     * Sert de filet de sécurité en plus de la validation CodeIgniter (règles
+     * valid_recurring_days / valid_recurring_weeks), au cas où des valeurs
+     * auraient été manipulées côté client malgré la validation.
+     *
+     * @param  mixed $value Valeur brute issue du POST (tableau attendu)
+     * @param  array<string> $allowedValues Liste des valeurs autorisées
+     * @return array<string> Valeurs filtrées, réindexées
+     */
+    private function sanitizeRecurringValues($value, array $allowedValues): array
+    {
+
+        if (!is_array($value)) {
+            return [];
+        }
+        return array_values(array_intersect($value, $allowedValues));
+    }
+
+    /* Annule plusieurs trajets en une seule fois (annulation en masse, soft delete).
      *
      * @return RedirectResponse
      */
@@ -529,5 +598,4 @@ class JourneyController extends BaseController{
 
         return redirect()->to($referer)->with('success', 'Trajets annulés avec succès.');
     }
-
 }

@@ -68,7 +68,7 @@ class CreateUserTable extends Migration
             ],
             'city_id' => [
                 'type' => 'INT',
-                'null' => false,
+                'null' => true,
             ],
         ]);
         $this->forge->addPrimaryKey('id');
