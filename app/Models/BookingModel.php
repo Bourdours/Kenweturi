@@ -177,5 +177,93 @@ class BookingModel extends BaseModel
                 ->countAllResults();
 
     }
+
+    /**
+     * Refuse toutes les réservations d'un passager (filtrées par booking.user_id).
+     */
+    public function rejectAllByPassenger(int $userId): void
+    {
+        $this->where('user_id', $userId)
+            ->whereIn('status', ['pending', 'accepted'])
+            ->set(['status' => 'rejected'])
+            ->update();
+    }
+
+    /**
+     * Refuse toutes les réservations (en attente ou acceptées) d'une liste de trajets.
+     *
+     * @param int[] $journeyIds
+     */
+    public function rejectAllForJourneys(array $journeyIds): void
+    {
+        if ($journeyIds === []) {
+            return;
+        }
+
+        $this->whereIn('journey_id', $journeyIds)
+            ->whereIn('status', ['pending', 'accepted'])
+            ->set(['status' => 'rejected'])
+            ->update();
+    }
+
+    /**
+     * Réservations actives (en attente ou acceptées) d'un passager, enrichies
+     * des infos nécessaires pour prévenir les conducteurs de l'annulation.
+     *
+     * @return array<int,array>
+     */
+    public function findActiveByPassengerWithDetails(int $userId): array
+    {
+        return $this->db->table('booking')
+            ->select('booking.id, booking.journey_id, booking.status,
+                    journey.start_datetime,
+                    city_start.name as city_start_name,
+                    city_end.name   as city_end_name,
+                    passenger.firstname as passenger_firstname,
+                    passenger.lastname  as passenger_lastname,
+                    driver.email     as driver_email,
+                    driver.firstname as driver_firstname')
+            ->join('journey',            'journey.id = booking.journey_id')
+            ->join('location loc_start', 'loc_start.id = journey.location_start_id')
+            ->join('location loc_end',   'loc_end.id = journey.location_end_id')
+            ->join('city city_start',    'city_start.id = loc_start.city_id')
+            ->join('city city_end',      'city_end.id = loc_end.city_id')
+            ->join('user passenger',     'passenger.id = booking.user_id')
+            ->join('user driver',        'driver.id = journey.user_id')
+            ->where('booking.user_id', $userId)
+            ->whereIn('booking.status', ['pending', 'accepted'])
+            ->get()
+            ->getResultArray();
+    }
+
+    /**
+     * Passagers acceptés sur une liste de trajets, enrichis des infos nécessaires
+     * au mail d'annulation. Lecture pré-capture (avant rejet).
+     *
+     * @param int[] $journeyIds
+     * @return array<int,array>
+     */
+    public function findAcceptedNotificationsForJourneys(array $journeyIds): array
+    {
+        if ($journeyIds === []) {
+            return [];
+        }
+
+        return $this->db->table('booking')
+            ->select('passenger.email    as email,
+                    passenger.firstname as firstname,
+                    journey.start_datetime,
+                    city_start.name as city_start_name,
+                    city_end.name   as city_end_name')
+            ->join('journey',            'journey.id = booking.journey_id')
+            ->join('location loc_start', 'loc_start.id = journey.location_start_id')
+            ->join('location loc_end',   'loc_end.id = journey.location_end_id')
+            ->join('city city_start',    'city_start.id = loc_start.city_id')
+            ->join('city city_end',      'city_end.id = loc_end.city_id')
+            ->join('user passenger',     'passenger.id = booking.user_id')
+            ->whereIn('booking.journey_id', $journeyIds)
+            ->where('booking.status', 'accepted')
+            ->get()->getResultArray();
+    }
     
 }

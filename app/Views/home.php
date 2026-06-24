@@ -157,61 +157,58 @@
 
   <?php if (!empty($nextDriverJourney) || !empty($nextPassengerJourney)): ?>
     <div class="max-w-4xl mx-auto px-4 pt-8 relative z-10">
-      <div class="grid grid-cols-1 <?= (!empty($nextDriverJourney) && !empty($nextPassengerJourney)) ? 'sm:grid-cols-2' : '' ?> gap-3 mb-1">
+        <div class="grid grid-cols-1 <?= (!empty($nextDriverJourney) && !empty($nextPassengerJourney)) ? 'sm:grid-cols-2' : '' ?> gap-3">
+
         <?php if (!empty($nextDriverJourney)): ?>
-          <a href="<?= site_url('dashboard/journeys') ?>?filter=upcoming" class="text-action text-xs font-medium hover:underline flex items-center gap-1 pl-3">
-            Mes trajets conducteur <i class="fa-solid fa-arrow-right text-[10px]"></i>
-          </a>
+          <div class="flex flex-col gap-1">
+            <a href="<?= site_url('dashboard/journeys') ?>?filter=upcoming" class="text-action text-xs font-medium hover:underline flex items-center gap-1 pl-3">
+              Mes trajets conducteur <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </a>
+            <a href="<?= site_url('journeys/' . $nextDriverJourney['id']) ?>?back=<?= urlencode(current_url(true)) ?>"
+              class="flex items-center gap-4 bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors">
+              <div class="w-10 h-10 rounded-xl bg-action/10 flex items-center justify-center shrink-0">
+                <i class="fa-solid fa-car-side text-action text-sm"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-ink/40 text-xs mb-0.5">Prochain trajet conducteur</p>
+                <p class="text-ink font-semibold text-sm truncate">
+                  <?= esc($nextDriverJourney['city_start_name']) ?>
+                  <span class="text-ink/30 mx-1">→</span>
+                  <?= esc($nextDriverJourney['city_end_name']) ?>
+                </p>
+              </div>
+              <div class="flex flex-col items-end gap-0.5 shrink-0">
+                <p class="text-ink font-bold text-sm font-display"><?= date('H:i', strtotime($nextDriverJourney['start_datetime'])) ?></p>
+                <p class="text-ink/40 text-xs"><?= date('d/m/Y', strtotime($nextDriverJourney['start_datetime'])) ?></p>
+              </div>
+            </a>
+          </div>
         <?php endif; ?>
+
         <?php if (!empty($nextPassengerJourney)): ?>
-          <a href="<?= site_url('dashboard/bookings') ?>?filter=upcoming" class="text-action text-xs font-medium hover:underline flex items-center gap-1 pl-3">
+          <div class="flex flex-col gap-1">
+            <a href="<?= site_url('dashboard/bookings') ?>?filter=upcoming" class="text-action text-xs font-medium hover:underline flex items-center gap-1 pl-3">
               Mes trajets passager <i class="fa-solid fa-arrow-right text-[10px]"></i>
-          </a>
-        <?php endif; ?>
-      </div>
-
-      <div class="grid grid-cols-1 <?= (!empty($nextDriverJourney) && !empty($nextPassengerJourney)) ? 'sm:grid-cols-2' : '' ?> gap-3">
-
-        <?php if (!empty($nextDriverJourney)): ?>
-          <a href="<?= site_url('journeys/' . $nextDriverJourney['id']) ?>?back=<?= urlencode(current_url(true)) ?>"
-            class="flex items-center gap-4 bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors">
-            <div class="w-10 h-10 rounded-xl bg-action/10 flex items-center justify-center shrink-0">
-              <i class="fa-solid fa-car-side text-action text-sm"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-              <p class="text-ink/40 text-xs mb-0.5">Prochain trajet conducteur</p>
-              <p class="text-ink font-semibold text-sm truncate">
-                <?= esc($nextDriverJourney['city_start_name']) ?>
-                <span class="text-ink/30 mx-1">→</span>
-                <?= esc($nextDriverJourney['city_end_name']) ?>
-              </p>
-            </div>
-            <div class="flex flex-col items-end gap-0.5 shrink-0">
-              <p class="text-ink font-bold text-sm font-display"><?= date('H:i', strtotime($nextDriverJourney['start_datetime'])) ?></p>
-              <p class="text-ink/40 text-xs"><?= date('d/m/Y', strtotime($nextDriverJourney['start_datetime'])) ?></p>
-            </div>
-          </a>
-        <?php endif; ?>
-
-        <?php if (!empty($nextPassengerJourney)): ?>
-          <a href="<?= site_url('journeys/' . $nextPassengerJourney['id']) ?>?back=<?= urlencode(current_url(true)) ?>"
-            class="flex items-center gap-4 bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors">
-            <div class="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center shrink-0">
-              <i class="fa-solid fa-person-walking text-brand text-sm"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-              <p class="text-ink/40 text-xs mb-0.5">Prochain trajet passager</p>
-              <p class="text-ink font-semibold text-sm truncate">
-                <?= esc($nextPassengerJourney['city_start_name']) ?>
-                <span class="text-ink/30 mx-1">→</span>
-                <?= esc($nextPassengerJourney['city_end_name']) ?>
-              </p>
-            </div>
-            <div class="flex flex-col items-end gap-0.5 shrink-0">
-              <p class="text-ink font-bold text-sm font-display"><?= date('H:i', strtotime($nextPassengerJourney['start_datetime'])) ?></p>
-              <p class="text-ink/40 text-xs"><?= date('d/m/Y', strtotime($nextPassengerJourney['start_datetime'])) ?></p>
-            </div>
-          </a>
+            </a>
+            <a href="<?= site_url('journeys/' . $nextPassengerJourney['id']) ?>?back=<?= urlencode(current_url(true)) ?>"
+              class="flex items-center gap-4 bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors">
+              <div class="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center shrink-0">
+                <i class="fa-solid fa-person-walking text-brand text-sm"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-ink/40 text-xs mb-0.5">Prochain trajet passager</p>
+                <p class="text-ink font-semibold text-sm truncate">
+                  <?= esc($nextPassengerJourney['city_start_name']) ?>
+                  <span class="text-ink/30 mx-1">→</span>
+                  <?= esc($nextPassengerJourney['city_end_name']) ?>
+                </p>
+              </div>
+              <div class="flex flex-col items-end gap-0.5 shrink-0">
+                <p class="text-ink font-bold text-sm font-display"><?= date('H:i', strtotime($nextPassengerJourney['start_datetime'])) ?></p>
+                <p class="text-ink/40 text-xs"><?= date('d/m/Y', strtotime($nextPassengerJourney['start_datetime'])) ?></p>
+              </div>
+            </a>
+          </div>
         <?php endif; ?>
 
       </div>

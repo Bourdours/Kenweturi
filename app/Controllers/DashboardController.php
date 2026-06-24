@@ -215,6 +215,7 @@ class DashboardController extends BaseController
 
         if ($filter === 'upcoming') {
             $builder->where('journey.start_datetime >=', date('Y-m-d H:i:s'))
+                    ->orderBy('journey.canceled_at IS NULL', 'DESC', false)
                     ->orderBy('journey.start_datetime', 'ASC');
         } elseif ($filter === 'past') {
             $builder->where('journey.start_datetime <', date('Y-m-d H:i:s'))
@@ -292,12 +293,28 @@ class DashboardController extends BaseController
             $builder->join('user u',       'u.id = journey.user_id')
                     ->where('booking.user_id', $userId)
                     ->where('booking.status', 'pending')
+                    ->where('journey.start_datetime >=', date('Y-m-d H:i:s'))
                     ->orderBy('journey.start_datetime', 'ASC');
             $title = 'Mes demandes de réservation';
+        } elseif ($filter === 'mine-past') {
+            $builder->join('user u',       'u.id = journey.user_id')
+                    ->where('booking.user_id', $userId)
+                    ->where('booking.status', 'pending')
+                    ->where('journey.start_datetime <', date('Y-m-d H:i:s'))
+                    ->orderBy('journey.start_datetime', 'DESC');
+            $title = 'Mes demandes passées';
+        } elseif ($filter === 'received-past') {
+            $builder->join('user u',       'u.id = booking.user_id')
+                    ->where('journey.user_id', $userId)
+                    ->where('booking.status', 'pending')
+                    ->where('journey.start_datetime <', date('Y-m-d H:i:s'))
+                    ->orderBy('journey.start_datetime', 'DESC');
+            $title = 'Réservations reçues passées';
         } else {
             $builder->join('user u',       'u.id = booking.user_id')
                     ->where('journey.user_id', $userId)
                     ->where('booking.status', 'pending')
+                    ->where('journey.start_datetime >=', date('Y-m-d H:i:s'))
                     ->orderBy('booking.sent_at', 'ASC');
             $title = 'Réservations reçues';
         }

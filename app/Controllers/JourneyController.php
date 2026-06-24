@@ -1,33 +1,30 @@
 <?php
 
 namespace App\Controllers;
-
 use App\Controllers\BaseController;
 use CodeIgniter\HTTP\RedirectResponse;
-
 use App\Models\CarModel;
 use App\Models\JourneyModel;
-
+use App\Models\LocationModel;
 use App\Services\JourneyService;
 use App\Services\CreateJourneyService;
 use App\Services\JourneySearchService;
-
 use App\Exceptions\ExternalApiException;
 use App\Exceptions\ModelValidationException;
 use App\Exceptions\AddressValidationException;
 
 class JourneyController extends BaseController{
-
     protected CarModel $carModel;
     protected JourneyModel $journeyModel;
+    protected LocationModel $locationModel;
     protected JourneyService $journeyService;
     protected CreateJourneyService $createJourneyService;
     protected JourneySearchService $journeySearchService;
 
     public function __construct(){
-
         $this->carModel = new CarModel();
         $this->journeyModel = new JourneyModel();
+        $this->locationModel = new LocationModel();
         $this->journeyService = new JourneyService();
         $this->createJourneyService = new CreateJourneyService();
         $this->journeySearchService = new JourneySearchService();
@@ -43,14 +40,14 @@ class JourneyController extends BaseController{
      */
     public function showCreateForm()
     {
-
-        $userId = session('user_id');
-
+        $userId   = session('user_id');
         $userCars = $this->carModel->findByUser($userId);
+        $favorite = $this->locationModel->getFavorite();
 
         return view('Journeys/newJourney', [
-            'title' => "Publier un trajet",
-            'cars' => $userCars,
+            'title'    => "Publier un trajet",
+            'cars'     => $userCars,
+            'favorite' => $favorite,
         ]);
     }
 
@@ -573,7 +570,26 @@ class JourneyController extends BaseController{
             return [];
         }
         return array_values(array_intersect($value, $allowedValues));
+    }
+     * Annule plusieurs trajets en une seule fois (annulation en masse, soft delete).
+     *
+     * @return RedirectResponse
+     */
+    public function cancelBulk()
+    {
+        $ids = $this->request->getPost('journey_ids') ?? [];
+        $journeyModel = new JourneyModel();
 
+        foreach ($ids as $id) {
+            $journey = $journeyModel->where('user_id', session()->get('user_id'))->find($id);
+            if ($journey && !$journey['canceled_at']) {
+                $journeyModel->update($id, ['canceled_at' => date('Y-m-d H:i:s')]);
+            }
+        }
+
+        $referer = $this->request->getServer('HTTP_REFERER') ?? site_url('dashboard/journeys');
+
+        return redirect()->to($referer)->with('success', 'Trajets annulés avec succès.');
     }
 
 }

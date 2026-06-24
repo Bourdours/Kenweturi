@@ -77,6 +77,10 @@
             class="flex items-center gap-2 bg-action hover:bg-action-dark text-ink font-semibold font-display rounded-lg px-4 py-2 text-sm transition-colors">
             <i class="fa-solid fa-pen text-xs"></i>Modifier le profil
           </a>
+          <a href="<?= site_url('profile/notifications') ?>"
+            class="flex items-center gap-2 border border-action/30 hover:border-action/60 text-ink/70 hover:text-ink font-semibold font-display rounded-lg px-4 py-2 text-sm transition-colors">
+            <i class="fa-solid fa-bell text-xs"></i>Notifications
+          </a>
         </div>
       <?php endif; ?>
     </div>
