@@ -3,8 +3,9 @@
 
 <div class="max-w-4xl mx-auto py-10 px-4 flex flex-col gap-6">
 
-  <!-- En-tête -->
-  <div>
+  <!-- En-tête / Hero -->
+  <div class="flex flex-col items-center text-center py-6">
+    <img src="<?= base_url('data/images/logo_full_2.png') ?>" alt="Kenweturi" style="max-width:500px; max-height:500px; width:100%; height:auto;">
     <p class="text-action text-xs font-semibold uppercase tracking-widest mb-2">Entreprise</p>
     <h1 class="text-ink text-3xl font-bold font-display mb-2">À propos de Kenweturi</h1>
     <p class="text-ink/40 text-sm">Le covoiturage régional, simple et solidaire.</p>

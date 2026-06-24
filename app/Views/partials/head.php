@@ -9,6 +9,7 @@
     <script src="<?= base_url('js/app.js') ?>" defer></script>
     <script src="<?= base_url('js/car-cursor.js') ?>" defer></script>
     <script src="<?= base_url('js/header.js') ?>" defer></script>
+    <link rel="icon" type="image/png" href="<?= base_url('data/images/logo.png') ?>">
     <title><?= isset($title) ? $title . ', Kenweturi' : 'Kenweturi' ?></title>
     <link rel="stylesheet" href="<?= base_url('css/tailwind.css') ?>">
     <?php foreach ($extraCss ?? [] as $href) : ?>
