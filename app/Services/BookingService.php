@@ -180,6 +180,11 @@ class BookingService
      */
     private function notifyDriverCancellation(array $booking): void
     {
+        $driverId = (int) $booking['driver_id'];
+        if (!$this->notifPrefModel->wantsNotif($driverId, 'booking_cancelled')) {
+            return;
+        }
+
         $date = date('d/m/Y', strtotime($booking['start_datetime']))
             . ' à ' . date('H:i', strtotime($booking['start_datetime']));
 
@@ -194,6 +199,9 @@ class BookingService
                 'cityStart'          => $booking['city_start_name'],
                 'cityEnd'            => $booking['city_end_name'],
                 'date'               => $date,
+                'prefLabel'          => NotificationPrefModel::PREFS['booking_cancelled'],
+                'unsubscribeUrl'     => site_url('unsubscribe?uid=' . $driverId . '&pref=booking_cancelled&token=' . UserModel::unsubscribeToken($driverId, 'booking_cancelled')),
+                'preferencesUrl'     => site_url('profile/notifications'),
             ])
         );
     }
