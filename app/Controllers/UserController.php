@@ -28,7 +28,6 @@ class UserController extends BaseController
     public function __construct()
     {
         $this->userModel        = new UserModel();
-        $this->cityModel        = new CityModel();
         $this->carModel         = new CarModel();
         $this->notifPrefModel   = new NotificationPrefModel();
         $this->geocodingService = new GeocodingService();
