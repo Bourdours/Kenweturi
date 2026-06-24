@@ -345,7 +345,7 @@ class JourneyService
     public function countRemainingSeats(int $journeyId){
 
         $nbOfSeats = (int) $this->journeyModel->getNumberOfSeats($journeyId);
-        $nbOfAcceptedBook = (int) $this->bookingModel->countByStatus("Accepted",$journeyId);
+        $nbOfAcceptedBook = (int) $this->bookingModel->countByStatus("accepted",$journeyId);
 
         return $nbOfSeats - $nbOfAcceptedBook;
 
@@ -412,6 +412,11 @@ class JourneyService
     {
         foreach ($notifications as $n) {
             try {
+                $passengerId = (int) $n['user_id'];
+                if (!$this->notifPrefModel->wantsNotif($passengerId, 'journey_cancelled')) {
+                    continue;
+                }
+
                 $date = date('d/m/Y', strtotime($n['start_datetime']))
                     . ' à ' . date('H:i', strtotime($n['start_datetime']));
 
@@ -419,14 +424,19 @@ class JourneyService
                     $n['email'],
                     'Votre trajet a été annulé',
                     view('Emails/journeyCancelled', [
-                        'firstname' => $n['firstname'],
-                        'cityStart' => $n['city_start_name'],
-                        'cityEnd'   => $n['city_end_name'],
-                        'date'      => $date,
+                        'firstname'      => $n['firstname'],
+                        'cityStart'      => $n['city_start_name'],
+                        'cityEnd'        => $n['city_end_name'],
+                        'date'           => $date,
+                        'prefLabel'      => NotificationPrefModel::PREFS['journey_cancelled'],
+                        'unsubscribeUrl' => site_url('unsubscribe?uid=' . $passengerId . '&pref=journey_cancelled&token=' . UserModel::unsubscribeToken($passengerId, 'journey_cancelled')),
+                        'preferencesUrl' => site_url('profile/notifications'),
                     ])
                 );
             } catch (\Throwable $e) {
-                log_message('error', 'Journey cancellation mail failed: {type}', ['type' => get_class($e)]);
+                log_message('error', 'Journey cancellation mail failed: {type}', [
+                    'type'    => get_class($e),
+                ]);
             }
         }
     }

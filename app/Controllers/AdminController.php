@@ -227,7 +227,7 @@ class AdminController extends BaseController
 
         try {
 
-            $contact = $this->userService->delete($id, $currentUserId, $currentRole);
+            $contact = $this->userService->deleteByAdmin($id, $currentUserId, $currentRole);
 
         } catch (UserNotFoundException) {
 
@@ -265,7 +265,7 @@ class AdminController extends BaseController
         // Email à part : un échec d'envoi ne doit pas annuler la suppression (comme accept)
         try {
 
-            $this->userService->notifyDeletion($contact);
+            $this->userService->notifyAdminDeletion($contact);
 
         } catch (\Throwable) {
 
