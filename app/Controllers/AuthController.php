@@ -6,11 +6,9 @@ use \CodeIgniter\HTTP\RedirectResponse;
 
 use App\Libraries\MailerExample;
 use \App\Models\UserModel;
-use \App\Models\CityModel;
 use App\Models\RememberTokenModel;
 use App\Models\NotificationPrefModel;
 use DateTime;
-use App\Services\GeocodingService;
 
 /**
  * Contrôleur gérant l'authentification (Inscription, Connexion)
@@ -18,15 +16,10 @@ use App\Services\GeocodingService;
 class AuthController extends BaseController
 {
     private UserModel $userModel;
-    private CityModel $cityModel;
-
-    protected GeocodingService $geocodingService;
 
     public function __construct()
     {
         $this->userModel = new UserModel();
-        $this->cityModel = new CityModel();
-        $this->geocodingService = new GeocodingService();
     }
 
     /**
@@ -72,8 +65,6 @@ class AuthController extends BaseController
             'password'    => 'required|min_length[8]|regex_match[/^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*?_~\-()]).*$/]',
             'passConfirm' => 'required|matches[password]',
             'birthDate'   => 'required|valid_date[Y-m-d]',
-            'cityName'    => 'required|min_length[2]',
-            'postalCode'  => 'required|exact_length[5]|numeric',
         ];
 
         $messages = [
@@ -93,16 +84,6 @@ class AuthController extends BaseController
             'birthDate' => [
                 'required'   => 'La date de naissance est obligatoire.',
                 'valid_date' => 'Veuillez saisir une date de naissance valide.',
-            ],
-            // Messages pour la ville
-            'cityName' => [
-                'required'   => 'La ville est obligatoire.',
-                'min_length' => 'Le nom de la ville est trop court.',
-            ],
-            'postalCode' => [
-                'required'     => 'Le code postal est obligatoire.',
-                'exact_length' => 'Le code postal doit comporter exactement 5 chiffres.',
-                'numeric'      => 'Le code postal doit être numérique.',
             ],
         ];
 
@@ -131,32 +112,6 @@ class AuthController extends BaseController
             ]);
         }
 
-        // Récupération des données liées à la ville depuis le formulaire
-        $cityName = $this->request->getPost('cityName');
-        $zipCode  = $this->request->getPost('postalCode');
-
-        // Gestion de la table 'cities' (Ville)
-
-        $cityNameChecked = $this->geocodingService->getCheckedCityName($cityName, $zipCode);
-
-        if ($cityNameChecked === null) {
-            return redirect()->to('/register')->withInput()->with('errors', [
-                'cityName' => 'Impossible de vérifier la ville. Veuillez réessayer.'
-            ]);
-        }
-
-        if ($cityNameChecked === false) {
-            return redirect()->to('/register')->withInput()->with('errors', [
-                'cityName' => 'La ville et le code postal ne correspondent pas à une commune valide.'
-            ]);
-        }
-
-        // On remplace la saisie par la forme officielle avant insertion en BDD
-        $cityName = $cityNameChecked;
-
-        // Vérification si la ville existe ou pas dans la base pour éviter les doublons
-        $cityId = $this->cityModel->findOrCreateCity($cityName, $zipCode);
-
         // Préparation des données de l'utilisateur
         $data = [
             'firstname'     => $this->request->getPost('firstName'),
@@ -166,7 +121,6 @@ class AuthController extends BaseController
             'birth_date'    => $this->request->getPost('birthDate'),
             'is_student'    => 1,
             'password_hash' => $this->request->getPost('password'),
-            'city_id'       => $cityId,
         ];
 
         // Tentative de sauvegarde de l'utilisateur via le Model

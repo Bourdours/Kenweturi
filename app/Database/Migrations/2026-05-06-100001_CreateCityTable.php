@@ -1,35 +1,31 @@
 <?php
-
 namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
-class CreateCityTable extends Migration
+class MakeCityIdNullableOnUser extends Migration
 {
     public function up()
     {
-        $this->forge->addField([
-            'id' => [
-                'type'           => 'INT',
-                'auto_increment' => true,
-            ],
-            'city' => [
-                'type'       => 'VARCHAR',
-                'constraint' => 50,
-                'null'       => false,
-            ],
-            'zipcode' => [
-                'type'       => 'VARCHAR',
-                'constraint' => 10,
-                'null'       => false,
+        // Supprime la FK 
+        $this->db->query('ALTER TABLE user DROP FOREIGN KEY user_city_id_foreign');
+
+        $this->forge->modifyColumn('user', [
+            'city_id' => [
+                'type'    => 'INT',
+                'null'    => true,
+                'default' => null,
             ],
         ]);
-        $this->forge->addPrimaryKey('id');
-        $this->forge->createTable('city');
     }
 
     public function down()
     {
-        $this->forge->dropTable('city');
+        $this->forge->modifyColumn('user', [
+            'city_id' => [
+                'type' => 'INT',
+                'null' => false,
+            ],
+        ]);
     }
 }

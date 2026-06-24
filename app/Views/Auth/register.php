@@ -95,40 +95,7 @@
           <div class="border-t-2 border-dashed border-action/35"></div>
         </div>
 
-        <!-- Bloc Localisation -->
-        <div class="bg-surface rounded-2xl p-5 border border-action/10 lg:col-start-1 lg:row-start-3">
-          <p class="text-sm font-medium text-ink/50 mb-3 flex items-center gap-1.5">
-            <i class="fa-solid fa-location-dot"></i>Localisation
-          </p>
-          <div class="grid gap-3 mb-4 [grid-template-columns:1fr_120px]">
-            <div>
-              <label for="cityName" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
-                <i class="fa-solid fa-city text-sm"></i>Ville
-              </label>
-              <input type="text" name="cityName" id="cityName" data-city
-                value="<?= old('cityName') ?>" required placeholder="Paris"
-                class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30" />
-            </div>
-            <div>
-              <label for="postalCode" class="text-ink/50 text-sm mb-1.5 flex items-center gap-1">
-                <i class="fa-solid fa-hashtag text-sm"></i>Code postal
-              </label>
-              <input type="text" name="postalCode" id="postalCode" data-zip
-                value="<?= old('postalCode') ?>" required placeholder="75001"
-                class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30" />
-            </div>
-          </div>
-          <!-- Message d'erreur -->
-          <p class="errorMessage text-red-600 mb-4 hidden"></p>
 
-          <div class="flex items-start gap-2.5 bg-action/5 border border-action/15 rounded-lg px-3 py-2.5">
-            <i class="fa-solid fa-circle-info text-action/60 text-sm mt-0.5 shrink-0"></i>
-
-            <p class="text-xs text-ink/50 leading-relaxed">
-              Votre ville nous permet de vous suggérer des trajets près de chez vous et de connecter les conducteurs et passagers d'une même région.
-            </p>
-          </div>
-        </div>
 
         <!-- Séparateur vertical (desktop, col centrale sur 3 lignes) -->
         <div class="hidden lg:flex justify-center items-stretch w-10 lg:col-start-2 lg:row-start-1 lg:row-end-4">
@@ -200,13 +167,8 @@
           </div>
         </div>
 
-        <!-- Séparateur droit (horizontal) -->
-        <div class="hidden lg:block py-3 lg:col-start-3 lg:row-start-2">
-          <div class="border-t-2 border-dashed border-action/35"></div>
-        </div>
-
         <!-- Bloc Conditions -->
-        <div class="bg-surface rounded-2xl p-5 border border-action/10 lg:col-start-3 lg:row-start-3">
+        <div class="bg-surface rounded-2xl p-5 border border-action/10 lg:col-start-1 lg:row-start-3">
           <p class="text-sm font-medium text-ink/50 mb-3 flex items-center gap-1.5">
             <i class="fa-regular fa-file-lines"></i>Conditions
           </p>
