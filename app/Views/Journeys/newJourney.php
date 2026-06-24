@@ -145,7 +145,69 @@
             class="w-full bg-paper border border-action/15 rounded-lg text-ink/60 text-sm px-3 py-2.5 outline-none focus:border-action/50 cursor-pointer transition-colors">
         </div>
       </div>
+      <div class="bg-surface rounded-2xl p-6 border border-action/10">
+  
+
+  <!-- Trajet récurrent -->
+  <div class="mt-5 pt-5 border-t border-action/10">
+    <div class="flex items-center justify-between">
+      <label class="text-ink/50 text-xs font-medium block">Trajet récurrent</label>
+      <div class="flex items-center gap-2" role="group" aria-label="Trajet récurrent">
+        <input type="hidden" name="isRecurring" id="isRecurring" value="<?= esc(old('isRecurring', '0')) ?>">
+        <button type="button" id="recurringYes"
+          class="recurring-toggle-btn px-4 py-1.5 rounded-lg text-sm font-medium border border-action/15 text-ink/60 transition-colors">
+          Oui
+        </button>
+        <button type="button" id="recurringNo"
+          class="recurring-toggle-btn px-4 py-1.5 rounded-lg text-sm font-medium border border-action/15 transition-colors">
+          Non
+        </button>
+      </div>
     </div>
+
+    <div id="recurringDays" class="mt-4 hidden">
+      <label class="text-ink/50 text-xs font-medium mb-2 block">Jours de récurrence</label>
+      <div class="flex flex-wrap gap-2">
+        <?php
+          $jours = [
+            'lundi'    => 'Lundi',
+            'mardi'    => 'Mardi',
+            'mercredi' => 'Mercredi',
+            'jeudi'    => 'Jeudi',
+            'vendredi' => 'Vendredi',
+          ];
+          $selectedDays = old('recurringDays', []);
+        ?>
+        <?php foreach ($jours as $value => $label): ?>
+          <button type="button"
+            class="day-toggle-btn px-3 py-1.5 rounded-lg text-sm font-medium border border-action/15 text-ink/60 transition-colors"
+            data-day="<?= esc($value) ?>">
+            <?= esc($label) ?>
+          </button>
+          <input type="checkbox" name="recurringDays[]" value="<?= esc($value) ?>" id="day_<?= esc($value) ?>"
+            class="hidden-day-checkbox" <?= in_array($value, $selectedDays) ? 'checked' : '' ?>>
+        <?php endforeach; ?>
+      </div>
+    </div>
+
+    <div id="recurringWeeks" class="mt-4 hidden">
+  <label class="text-ink/50 text-xs font-medium mb-2 block">Semaines concernées</label>
+  <?php $selectedWeeks = old('recurringWeeks', []); ?>
+  <div class="flex flex-wrap gap-2" role="group" aria-label="Semaines concernées">
+    <?php for ($w = 1; $w <= 4; $w++): ?>
+      <button type="button"
+        class="week-toggle-btn px-3 py-1.5 rounded-lg text-sm font-medium border border-action/15 text-ink/60 transition-colors"
+        data-week="<?= $w ?>">
+        Semaine <?= $w ?>
+      </button>
+      <input type="checkbox" name="recurringWeeks[]" value="<?= $w ?>" id="week_<?= $w ?>"
+        class="hidden-week-checkbox" <?= in_array((string) $w, $selectedWeeks) ? 'checked' : '' ?>>
+    <?php endfor; ?>
+  </div>
+</div>
+
+  </div>
+</div>
 
     <!-- Préférences -->
     <div class="bg-surface rounded-2xl p-6 border border-action/10">
@@ -233,3 +295,94 @@
 </div>
 
 <?= view('partials/footer') ?>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const isRecurringInput = document.getElementById('isRecurring');
+  const yesBtn = document.getElementById('recurringYes');
+  const noBtn = document.getElementById('recurringNo');
+  const daysWrapper = document.getElementById('recurringDays');
+  const weeksWrapper = document.getElementById('recurringWeeks');
+
+  if (!isRecurringInput || !yesBtn || !noBtn || !daysWrapper || !weeksWrapper) return;
+
+  const ACTIVE_CLASSES = ['bg-action', 'text-white', 'border-action'];
+
+  function setActiveButton(activeBtn, inactiveBtn) {
+    ACTIVE_CLASSES.forEach(c => activeBtn.classList.add(c));
+    activeBtn.classList.remove('text-ink/60');
+
+    ACTIVE_CLASSES.forEach(c => inactiveBtn.classList.remove(c));
+    inactiveBtn.classList.add('text-ink/60');
+  }
+
+  function resetCheckboxGroup(checkboxSelector, btnSelector) {
+    document.querySelectorAll(checkboxSelector).forEach(cb => {
+      cb.checked = false;
+    });
+    document.querySelectorAll(btnSelector).forEach(btn => {
+      ACTIVE_CLASSES.forEach(c => btn.classList.remove(c));
+      btn.classList.add('text-ink/60');
+    });
+  }
+
+  function showRecurring(isYes) {
+  // On force la valeur textuelle '1' ou '0'
+  isRecurringInput.value = isYes ? '1' : '0'; 
+  
+  // Utile pour forcer le validateur à voir le changement
+  isRecurringInput.dispatchEvent(new Event('change')); 
+
+  if (isYes) {
+    setActiveButton(yesBtn, noBtn);
+    daysWrapper.classList.remove('hidden');
+    weeksWrapper.classList.remove('hidden');
+  } else {
+    setActiveButton(noBtn, yesBtn);
+    daysWrapper.classList.add('hidden');
+    weeksWrapper.classList.add('hidden');
+
+    resetCheckboxGroup('.hidden-day-checkbox', '.day-toggle-btn');
+    resetCheckboxGroup('.hidden-week-checkbox', '.week-toggle-btn');
+  }
+}
+
+  yesBtn.addEventListener('click', () => showRecurring(true));
+  noBtn.addEventListener('click', () => showRecurring(false));
+
+  // Initialisation selon valeur existante (ex: retour de formulaire avec erreurs)
+  showRecurring(isRecurringInput.value === '1');
+
+  // Fonction générique pour synchroniser un bouton-toggle avec sa checkbox cachée
+  function bindToggleButton(btn, checkbox) {
+    function syncButtonState() {
+      if (checkbox.checked) {
+        ACTIVE_CLASSES.forEach(c => btn.classList.add(c));
+        btn.classList.remove('text-ink/60');
+      } else {
+        ACTIVE_CLASSES.forEach(c => btn.classList.remove(c));
+        btn.classList.add('text-ink/60');
+      }
+    }
+
+    btn.addEventListener('click', () => {
+      checkbox.checked = !checkbox.checked;
+      syncButtonState();
+    });
+
+    syncButtonState(); // état initial (utile si old() a déjà coché certaines valeurs)
+  }
+
+  // Boutons de sélection des jours
+  document.querySelectorAll('.day-toggle-btn').forEach(btn => {
+    const checkbox = document.getElementById('day_' + btn.dataset.day);
+    if (checkbox) bindToggleButton(btn, checkbox);
+  });
+
+  // Boutons de sélection des semaines
+  document.querySelectorAll('.week-toggle-btn').forEach(btn => {
+    const checkbox = document.getElementById('week_' + btn.dataset.week);
+    if (checkbox) bindToggleButton(btn, checkbox);
+  });
+});
+</script>
