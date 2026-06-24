@@ -6,6 +6,7 @@ use App\Controllers\BaseController;
 use App\Models\JourneyRequestModel;
 use App\Models\CityModel;
 use App\Models\LocationModel;
+use App\Services\JourneyService;
 use CodeIgniter\HTTP\RedirectResponse;
 
 class JourneyRequestController extends BaseController
@@ -153,6 +154,7 @@ class JourneyRequestController extends BaseController
         $data = [
             'start_datetime'    => $startDatetime->format('Y-m-d H:i:s'),
             'seats'             => $this->request->getPost('seats') ?: null,
+            'radius_km'         => (float) ($this->request->getPost('radius_km') ?: 1),
             'message'           => $this->request->getPost('message') ?: null,
             'user_id'           => $userId,
             'location_start_id' => $startLocationId,
@@ -191,7 +193,8 @@ class JourneyRequestController extends BaseController
      */
     public function update(int $id): RedirectResponse
     {
-        $journeyRequest = $this->journeyRequestModel->where('user_id', session()->get('user_id'))->find($id);
+        $userId         = (int) session()->get('user_id');
+        $journeyRequest = $this->journeyRequestModel->where('user_id', $userId)->find($id);
 
         if (!$journeyRequest) {
             return redirect()->to('/journey-requests')->with('error', self::NOT_FOUND);
@@ -231,12 +234,15 @@ class JourneyRequestController extends BaseController
             'location_end_id'   => $endLocationId,
             'start_datetime'    => $startDatetime->format('Y-m-d H:i:s'),
             'seats'             => $this->request->getPost('seats') ?: null,
+            'radius_km'         => (float) ($this->request->getPost('radius_km') ?: 1),
             'message'           => $this->request->getPost('message'),
         ];
 
         if (!$this->journeyRequestModel->update($id, $data)) {
             return redirect()->back()->withInput()->with('errors', $this->journeyRequestModel->errors());
         }
+
+        (new JourneyService())->notifyMatchingJourneys($id, $userId);
 
         $back = $this->validateBackUrl($this->request->getPost('back'));
 

@@ -17,7 +17,7 @@ use CodeIgniter\HotReloader\HotReloader;
  *
  * You create code that can execute by subscribing to events with
  * the 'on()' method. This accepts any form of callable, including
- * Closures, that will be executed when the event is triggered.
+ * Closures, that will be extended when the event is triggered.
  *
  * Example:
  *      Events::on('create', [$myInstance, 'myMethod']);
@@ -42,14 +42,14 @@ Events::on('pre_system', static function (): void {
      * --------------------------------------------------------------------
      * If you delete, they will no longer be collected.
      */
-    if (CI_DEBUG && ! is_cli()) {
-        Events::on('DBQuery', 'CodeIgniter\Debug\Toolbar\Collectors\Database::collect');
-        service('toolbar')->respond();
-        // Hot Reload route - for framework use on the hot reloader.
-        if (ENVIRONMENT === 'development') {
-            service('routes')->get('__hot-reload', static function (): void {
-                (new HotReloader())->run();
-            });
-        }
-    }
+    // if (CI_DEBUG && ! is_cli()) {
+    //     Events::on('DBQuery', 'CodeIgniter\Debug\Toolbar\Collectors\Database::collect');
+    //     service('toolbar')->respond();
+    //     // Hot Reload route - for framework use on the hot reloader.
+    //     if (ENVIRONMENT === 'development') {
+    //         service('routes')->get('__hot-reload', static function (): void {
+    //             (new HotReloader())->run();
+    //         });
+    //     }
+    // }
 });

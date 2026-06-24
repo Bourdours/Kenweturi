@@ -23,6 +23,20 @@
 
 <div class="max-w-4xl mx-auto py-10 px-4 space-y-6">
 
+    <?php if (session()->has('success')): ?>
+      <div class="bg-green-500/10 border border-green-500/30 rounded-xl p-4 flex gap-3 items-start">
+        <i class="fa-solid fa-circle-check text-green-500 text-base shrink-0 mt-0.5"></i>
+        <p class="text-ink text-sm"><?= esc(session('success')) ?></p>
+      </div>
+    <?php endif ?>
+
+    <?php if (session()->has('error')): ?>
+      <div class="bg-action/10 border border-action/30 rounded-xl p-4 flex gap-3 items-start">
+        <i class="fa-solid fa-triangle-exclamation text-action text-base shrink-0 mt-0.5"></i>
+        <p class="text-ink text-sm"><?= esc(session('error')) ?></p>
+      </div>
+    <?php endif ?>
+
     <div class="flex items-center justify-between">
         <h1 class="text-ink text-2xl font-bold font-display">Demander un trajet</h1>
         <div class="flex items-center gap-2">

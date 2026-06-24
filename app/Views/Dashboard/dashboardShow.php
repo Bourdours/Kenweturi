@@ -28,9 +28,7 @@
                 <i class="fa-solid fa-car text-brand text-sm"></i>
                 Mes prochains trajets
             </h2>
-            <?php if (!empty($nextJourneys)) : ?>
-                <a href="<?= site_url('dashboard/journeys') ?>?filter=upcoming" class="text-brand text-sm font-medium hover:text-action transition-colors">Voir tous</a>
-            <?php endif ?>
+            <a href="<?= site_url('dashboard/journeys') ?>?filter=upcoming" class="text-brand text-sm font-medium hover:text-action transition-colors">Voir tous</a>
         </div>
         <?php if (empty($nextJourneys)) : ?>
             <p class="text-center text-muted py-8">Aucun trajet trouvé.</p>
@@ -88,9 +86,7 @@
                 <i class="fa-solid fa-inbox text-brand text-sm"></i>
                 Mes demandes de réservation reçues
             </h2>
-            <?php if (!empty($nextBookings)) : ?>
-                <a href="<?= site_url('dashboard/bookings') ?>" class="text-brand text-sm font-medium hover:text-action transition-colors">Voir tous</a>
-            <?php endif ?>
+            <a href="<?= site_url('dashboard/bookings') ?>" class="text-brand text-sm font-medium hover:text-action transition-colors">Voir tous</a>
         </div>
         <?php if (empty($nextBookings)) : ?>
             <p class="text-center text-muted py-8">Aucune réservation trouvée.</p>
@@ -157,9 +153,7 @@
                 <i class="fa-solid fa-clock-rotate-left text-brand text-sm"></i>
                 Trajets passés
             </h2>
-            <?php if (!empty($lastJourneys)) : ?>
-                <a href="<?= site_url('dashboard/journeys') ?>?filter=past" class="text-brand text-sm font-medium hover:text-action transition-colors">Voir tous</a>
-            <?php endif ?>
+            <a href="<?= site_url('dashboard/journeys') ?>?filter=past" class="text-brand text-sm font-medium hover:text-action transition-colors">Voir tous</a>
         </div>
         <?php if (empty($lastJourneys)) : ?>
             <p class="text-center text-muted py-8">Aucun trajet trouvé.</p>
@@ -209,9 +203,7 @@
                 <i class="fa-solid fa-route text-brand text-sm"></i>
                 Mes prochains trajets
             </h2>
-            <?php if (!empty($myNextJourneys)) : ?>
-                <a href="<?= site_url('dashboard/bookings') ?>?filter=upcoming" class="text-brand text-sm font-medium hover:text-action transition-colors">Voir tous</a>
-            <?php endif ?>
+            <a href="<?= site_url('dashboard/bookings') ?>?filter=upcoming" class="text-brand text-sm font-medium hover:text-action transition-colors">Voir tous</a>
         </div>
         <?php if (empty($myNextJourneys)) : ?>
             <p class="text-center text-muted py-8">Aucun trajet trouvé.</p>
@@ -261,9 +253,7 @@
                 <i class="fa-solid fa-paper-plane text-brand text-sm"></i>
                 Mes demandes de réservation
             </h2>
-            <?php if (!empty($myBookings)) : ?>
-                <a href="<?= site_url('dashboard/bookings') ?>?filter=mine" class="text-brand text-sm font-medium hover:text-action transition-colors">Voir tous</a>
-            <?php endif ?>
+            <a href="<?= site_url('dashboard/bookings') ?>?filter=mine" class="text-brand text-sm font-medium hover:text-action transition-colors">Voir tous</a>
         </div>
         <?php if (empty($myBookings)) : ?>
             <p class="text-center text-muted py-8">Aucune réservation trouvée.</p>
@@ -313,9 +303,7 @@
                 <i class="fa-solid fa-magnifying-glass text-brand text-sm"></i>
                 Mes demandes de trajet
             </h2>
-            <?php if (!empty($myJourneyRequests)) : ?>
-                <a href="<?= site_url('dashboard/journey-requests') ?>" class="text-brand text-sm font-medium hover:text-action transition-colors">Voir tous</a>
-            <?php endif ?>
+            <a href="<?= site_url('dashboard/journey-requests') ?>" class="text-brand text-sm font-medium hover:text-action transition-colors">Voir tous</a>
         </div>
         <?php if (empty($myJourneyRequests)) : ?>
             <p class="text-center text-muted py-8">Aucune demande de trajet à venir.</p>
@@ -351,9 +339,7 @@
                 <i class="fa-solid fa-clock-rotate-left text-brand text-sm"></i>
                 Trajets passés
             </h2>
-            <?php if (!empty($lastPassengerJourneys)) : ?>
-                <a href="<?= site_url('dashboard/bookings') ?>?filter=past" class="text-brand text-sm font-medium hover:text-action transition-colors">Voir tous</a>
-            <?php endif ?>
+            <a href="<?= site_url('dashboard/bookings') ?>?filter=past" class="text-brand text-sm font-medium hover:text-action transition-colors">Voir tous</a>
         </div>
         <?php if (empty($lastPassengerJourneys)) : ?>
             <p class="text-center text-muted py-8">Aucun trajet trouvé.</p>

@@ -13,11 +13,11 @@
 <div class="max-w-4xl mx-auto px-4 py-6 space-y-6">
 
     <!-- En-tête -->
-    <div class="flex items-center justify-between gap-4">
-        <h1 class="font-display font-bold text-ink text-2xl"><?= esc($title) ?></h1>
+    <div class="flex items-start justify-between gap-4">
+        <h1 class="font-display font-bold text-ink text-2xl flex-1 min-w-0"><?= esc($title) ?></h1>
 
         <!-- Filtre pill toggle -->
-        <div class="flex bg-surface border border-action/15 rounded-full p-1 gap-1" role="group" aria-label="Filtre des signalements">
+        <div class="flex shrink-0 bg-surface border border-action/15 rounded-full p-1 gap-1" role="group" aria-label="Filtre des signalements">
             <a href="<?= site_url('dashboard/reports') ?>?filter=driver"
                class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= $filter === 'driver' ? 'bg-action text-ink' : 'text-ink/60 hover:text-ink' ?>">
                 Conducteur

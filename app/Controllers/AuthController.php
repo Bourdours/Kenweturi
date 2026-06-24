@@ -8,6 +8,7 @@ use App\Libraries\MailerExample;
 use \App\Models\UserModel;
 use \App\Models\CityModel;
 use App\Models\RememberTokenModel;
+use App\Models\NotificationPrefModel;
 use DateTime;
 use App\Services\GeocodingService;
 
@@ -106,7 +107,7 @@ class AuthController extends BaseController
         ];
 
         if (!$this->validate($rules, $messages)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+            return redirect()->to('/register')->withInput()->with('errors', $this->validator->getErrors());
         }
 
         $birthDateStr = $this->request->getPost('birthDate');
@@ -118,14 +119,14 @@ class AuthController extends BaseController
 
         // Vérification de la majorité
         if ($age < 18) {
-            return redirect()->back()->withInput()->with('errors', [
+            return redirect()->to('/register')->withInput()->with('errors', [
                 'birthDate' => 'Vous devez avoir au moins 18 ans pour vous inscrire.'
             ]);
         }
 
         // l'année de naissance ne peut pas être antérieure à 1920
         if ((int)$birthDateObj->format('Y') < 1920) {
-            return redirect()->back()->withInput()->with('errors', [
+            return redirect()->to('/register')->withInput()->with('errors', [
                 'birthDate' => 'Veuillez saisir une date de naissance réaliste.'
             ]);
         }
@@ -139,13 +140,13 @@ class AuthController extends BaseController
         $cityNameChecked = $this->geocodingService->getCheckedCityName($cityName, $zipCode);
 
         if ($cityNameChecked === null) {
-            return redirect()->back()->withInput()->with('errors', [
+            return redirect()->to('/register')->withInput()->with('errors', [
                 'cityName' => 'Impossible de vérifier la ville. Veuillez réessayer.'
             ]);
         }
 
         if ($cityNameChecked === false) {
-            return redirect()->back()->withInput()->with('errors', [
+            return redirect()->to('/register')->withInput()->with('errors', [
                 'cityName' => 'La ville et le code postal ne correspondent pas à une commune valide.'
             ]);
         }
@@ -170,23 +171,26 @@ class AuthController extends BaseController
 
         // Tentative de sauvegarde de l'utilisateur via le Model
         if (!$this->userModel->save($data)) {
-            return redirect()->back()->withInput()->with('errors', $this->userModel->errors());
+            return redirect()->to('/register')->withInput()->with('errors', $this->userModel->errors());
         }
 
-        // Notification aux admins
-        $admins = $this->userModel->getActiveAdmins();
-        $emailBody = view('Emails/newRegistration', [
-            'firstname' => $data['firstname'],
-            'lastname'  => $data['lastname'],
-            'email'     => $data['email'],
+        $userId = $this->userModel->getInsertID();
+
+        // Génération et stockage du token de vérification d'email
+        $token = bin2hex(random_bytes(32));
+        $this->userModel->setEmailToken($userId, $token);
+
+        // Envoi de l'email de confirmation à l'utilisateur
+        $verifyLink = base_url('verifyEmail?token=' . $token);
+        $emailBody  = view('Emails/emailVerification', [
+            'firstname'  => $data['firstname'],
+            'verifyLink' => $verifyLink,
         ]);
         $mailer = new MailerExample();
-        foreach ($admins as $admin) {
-            $mailer->sendHtml($admin['email'], 'Nouvelle demande d\'inscription', $emailBody);
-        }
+        $mailer->sendHtml($data['email'], 'Confirmez votre adresse email — Kenweturi', $emailBody);
 
         // Redirection vers la page de connexion avec un message flash
-        return redirect()->to('/login')->with('success', 'Inscription reçue ! Notre équipe va examiner votre demande et vous recevrez une réponse par email.');
+        return redirect()->to('/login')->with('success', 'Inscription reçue ! Consultez votre boîte mail pour confirmer votre adresse email.');
     }
 
     /**
@@ -202,7 +206,7 @@ class AuthController extends BaseController
 
         $throttler = service('throttler');
         if ($throttler->check(md5($this->request->getIPAddress() . 'login'), 10, MINUTE) === false) {
-            return redirect()->back()->withInput()->with('error', 'Trop de tentatives de connexion. Veuillez patienter 1 minute avant de réessayer.');
+            return redirect()->to('/login')->withInput()->with('error', 'Trop de tentatives de connexion. Veuillez patienter 1 minute avant de réessayer.');
         }
 
         $email = $this->request->getPost('email');
@@ -214,17 +218,21 @@ class AuthController extends BaseController
         if ($user) {
             //  Vérification du bannissement
             if ((bool)$user['is_banned'] === true) {
-                return redirect()->back()->withInput()->with('error', 'Votre compte a été suspendu par l\'équipe de modération.');
+                return redirect()->to('/login')->withInput()->with('error', 'Votre compte a été suspendu par l\'équipe de modération.');
+            }
+            //  Vérification de la confirmation email
+            if ($user['status'] === 'unverified') {
+                return redirect()->to('/login')->withInput()->with('error', 'Veuillez confirmer votre adresse email avant de vous connecter. Consultez votre boîte mail.');
             }
             //  Vérification du status
             if ($user['status'] === 'pending') {
-                return redirect()->back()->withInput()->with('error', 'Votre inscription est en cours de validation par un administrateur. Vous recevrez un e-mail dès qu\'elle sera acceptée.');
+                return redirect()->to('/login')->withInput()->with('error', 'Votre inscription est en cours de validation par un administrateur. Vous recevrez un e-mail dès qu\'elle sera acceptée.');
             }
             //  Vérification si l'utilisateur a été rejeté
             if ($user['status'] === 'rejected') {
-                return redirect()->back()->withInput()->with('error', 'Désolé, votre demande d\'inscription sur la plateforme n\'a pas été validée.');
+                return redirect()->to('/login')->withInput()->with('error', 'Désolé, votre demande d\'inscription sur la plateforme n\'a pas été validée.');
             }
-            // Vérification du mot de passe 
+            // Vérification du mot de passe
             if (password_verify($password, $user['password_hash'])) {
 
                 $sessionData = [
@@ -277,11 +285,11 @@ class AuthController extends BaseController
                 return redirect()->to($redirectUrl)->with('success', 'Ravi de vous revoir, ' . $user['firstname'] . ' !');
             } else {
                 // Mauvais mot de passe
-                return redirect()->back()->withInput()->with('error', 'Identifiants invalides.');
+                return redirect()->to('/login')->withInput()->with('error', 'Identifiants invalides.');
             }
         } else {
             // Email non trouvé
-            return redirect()->back()->withInput()->with('error', 'Identifiants invalides.');
+            return redirect()->to('/login')->withInput()->with('error', 'Identifiants invalides.');
         }
     }
 
@@ -314,8 +322,59 @@ class AuthController extends BaseController
     }
 
     /**
+     * Valide le token de confirmation d'email et fait passer le compte en 'pending'
+     *
+     * @return RedirectResponse
+     */
+    public function verifyEmail(): RedirectResponse
+    {
+        $token = $this->request->getGet('token');
+
+        if (!$token) {
+            return redirect()->to('/login')->with('error', 'Lien de vérification invalide.');
+        }
+
+        $user = $this->userModel->findByValidEmailToken($token);
+
+        if (!$user) {
+            return redirect()->to('/login')->with('error', 'Ce lien de confirmation est invalide ou a expiré. Veuillez vous réinscrire.');
+        }
+
+        if ($user['status'] !== 'unverified') {
+            return redirect()->to('/login')->with('success', 'Votre adresse email est déjà confirmée.');
+        }
+
+        // Passage en 'pending' et suppression du token
+        $this->userModel->update($user['id'], [
+            'status'             => 'pending',
+            'email_token'        => null,
+            'email_token_expiry' => null,
+        ]);
+
+        // Notification aux admins (selon leur préférence)
+        $admins         = $this->userModel->getActiveAdmins();
+        $notifPrefModel = new NotificationPrefModel();
+        $mailer         = new MailerExample();
+        foreach ($admins as $admin) {
+            if (!$notifPrefModel->wantsNotif((int) $admin['id'], 'admin_registration')) continue;
+            $adminId   = (int) $admin['id'];
+            $emailBody = view('Emails/newRegistration', [
+                'firstname'      => $user['firstname'],
+                'lastname'       => $user['lastname'],
+                'email'          => $user['email'],
+                'prefLabel'      => NotificationPrefModel::PREFS['admin_registration'],
+                'unsubscribeUrl' => site_url('unsubscribe?uid=' . $adminId . '&pref=admin_registration&token=' . UserModel::unsubscribeToken($adminId, 'admin_registration')),
+                'preferencesUrl' => site_url('profile/notifications'),
+            ]);
+            $mailer->sendHtml($admin['email'], 'Nouvelle demande d\'inscription', $emailBody);
+        }
+
+        return redirect()->to('/login')->with('success', 'Adresse email confirmée ! Notre équipe va examiner votre demande et vous recevrez une réponse par email.');
+    }
+
+    /**
      * Affiche la page de mot de passe oublié
-     * 
+     *
      * @return string
      */
     public function showForgotPasswordForm()

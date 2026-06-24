@@ -12,6 +12,8 @@ use App\Models\StageModel;
 use App\Models\CityModel;
 use App\Models\CarModel;
 use App\Models\BookingModel;
+use App\Models\NotificationPrefModel;
+use App\Models\UserModel;
 
 use App\Exceptions\ExternalApiException;
 use App\Exceptions\ModelValidationException;
@@ -48,6 +50,7 @@ class JourneyService
 
     protected RoutingService $routingService;
     protected GeocodingService $geocodingService;
+    protected NotificationPrefModel $notifPrefModel;
 
     protected MailerExample $mailer;
 
@@ -64,6 +67,7 @@ class JourneyService
         $this->cityModel            = new CityModel();
         $this->carModel             = new CarModel();
         $this->bookingModel         = new BookingModel();
+        $this->notifPrefModel       = new NotificationPrefModel();
 
         $this->routingService       = new RoutingService();
         $this->geocodingService     = new GeocodingService();
@@ -164,7 +168,7 @@ class JourneyService
             $start = ['lat' => (float) $request['start_lat'], 'lon' => (float) $request['start_lng']];
             $end   = ['lat' => (float) $request['end_lat'],   'lon' => (float) $request['end_lng']];
 
-            if (!$this->geoService->matchesTrackPoints($points, $start, $end)) {
+            if (!$this->geoService->matchesTrackPoints($points, $start, $end, (float) ($request['radius_km'] ?? 10))) {
                 continue;
             }
 
@@ -175,6 +179,9 @@ class JourneyService
             }
 
             // --- Envoi du mail
+            $requesterId = (int) $request['user_id'];
+            if (!$this->notifPrefModel->wantsNotif($requesterId, 'journey_request')) continue;
+
             $date = date('d/m/Y', strtotime($journey['start_datetime']))
                   . ' à ' . date('H:i', strtotime($journey['start_datetime']));
 
@@ -182,11 +189,78 @@ class JourneyService
                 $request['requester_email'],
                 'Un trajet correspond à votre demande !',
                 view('Emails/journeyRequestMatch', [
-                    'firstname'  => $request['requester_firstname'],
-                    'cityStart'  => $request['city_start_name'],
-                    'cityEnd'    => $request['city_end_name'],
-                    'date'       => $date,
-                    'journeyUrl' => site_url('journeys/' . $journeyId),
+                    'firstname'      => $request['requester_firstname'],
+                    'cityStart'      => $request['city_start_name'],
+                    'cityEnd'        => $request['city_end_name'],
+                    'date'           => $date,
+                    'journeyUrl'     => site_url('journeys/' . $journeyId),
+                    'prefLabel'      => NotificationPrefModel::PREFS['journey_request'],
+                    'unsubscribeUrl' => site_url('unsubscribe?uid=' . $requesterId . '&pref=journey_request&token=' . UserModel::unsubscribeToken($requesterId, 'journey_request')),
+                    'preferencesUrl' => site_url('profile/notifications'),
+                ])
+            );
+        }
+    }
+
+    /**
+     * Recherche les trajets existants compatibles avec une demande de trajet
+     * (typiquement après modification) et envoie un email au demandeur pour chaque match.
+     *
+     * Symétrique de notifyMatchingRequests : ici on fixe la demande et on itère
+     * sur les trajets actifs pour trouver ceux dont le tracé passe à moins de 10 km
+     * du départ et de l'arrivée de la demande, dans la bonne direction, et dans
+     * un créneau de ±30 minutes.
+     *
+     * @param  int $requestId     Identifiant de la demande mise à jour
+     * @param  int $requestUserId Identifiant du demandeur (exclu des trajets à matcher)
+     * @return void
+     */
+    public function notifyMatchingJourneys(int $requestId, int $requestUserId): void
+    {
+        $request = $this->journeyRequestModel->findWithCoordinatesById($requestId);
+        if (!$request) return;
+
+        $journeys = array_filter(
+            $this->journeyModel->findAllWithFilters([]),
+            fn($j) => (int) $j['user_id'] !== $requestUserId
+        );
+
+        if (empty($journeys)) return;
+
+        $start = ['lat' => (float) $request['start_lat'], 'lon' => (float) $request['start_lng']];
+        $end   = ['lat' => (float) $request['end_lat'],   'lon' => (float) $request['end_lng']];
+
+        foreach ($journeys as $journey) {
+            if (empty($journey['track_geojson'])) continue;
+
+            $points = $this->geoService->parseTrackPointsFromGeoJson($journey['track_geojson']);
+            if (empty($points)) continue;
+
+            if (!$this->geoService->matchesTrackPoints($points, $start, $end, (float) ($request['radius_km'] ?? 10))) continue;
+
+            if (!empty($request['start_datetime'])) {
+                $diff = abs(strtotime($journey['start_datetime']) - strtotime($request['start_datetime']));
+                if ($diff > 1800) continue;
+            }
+
+            $requesterId = (int) $request['user_id'];
+            if (!$this->notifPrefModel->wantsNotif($requesterId, 'journey_request')) continue;
+
+            $date = date('d/m/Y', strtotime($journey['start_datetime']))
+                  . ' à ' . date('H:i', strtotime($journey['start_datetime']));
+
+            $this->mailer->sendHtml(
+                $request['requester_email'],
+                'Un trajet correspond à votre demande !',
+                view('Emails/journeyRequestMatch', [
+                    'firstname'      => $request['requester_firstname'],
+                    'cityStart'      => $request['city_start_name'],
+                    'cityEnd'        => $request['city_end_name'],
+                    'date'           => $date,
+                    'journeyUrl'     => site_url('journeys/' . $journey['id']),
+                    'prefLabel'      => NotificationPrefModel::PREFS['journey_request'],
+                    'unsubscribeUrl' => site_url('unsubscribe?uid=' . $requesterId . '&pref=journey_request&token=' . UserModel::unsubscribeToken($requesterId, 'journey_request')),
+                    'preferencesUrl' => site_url('profile/notifications'),
                 ])
             );
         }
@@ -239,24 +313,30 @@ class JourneyService
     public function notifyCancelledJourney(array $journey): void
     {
         $bookings = $this->bookingModel
-            ->select('user.email, user.firstname')
+            ->select('booking.user_id as passenger_id, user.email, user.firstname')
             ->join('user', 'user.id = booking.user_id')
             ->where('booking.journey_id', $journey['id'])
             ->where('booking.status', 'accepted')
             ->findAll();
-        
+
+        $date = date('d/m/Y', strtotime($journey['start_datetime']))
+            . ' à ' . date('H:i', strtotime($journey['start_datetime']));
+
         foreach ($bookings as $booking) {
-            $date = date('d/m/Y', strtotime($journey['start_datetime']))
-                . ' à ' . date('H:i', strtotime($journey['start_datetime']));
+            $passengerId = (int) $booking['passenger_id'];
+            if (!$this->notifPrefModel->wantsNotif($passengerId, 'journey_cancelled')) continue;
 
             $this->mailer->sendHtml(
                 $booking['email'],
                 'Votre trajet a été annulé',
                 view('Emails/journeyCancelled', [
-                    'firstname' => $booking['firstname'],
-                    'cityStart' => $journey['city_start_name'],
-                    'cityEnd'   => $journey['city_end_name'],
-                    'date'      => $date,
+                    'firstname'      => $booking['firstname'],
+                    'cityStart'      => $journey['city_start_name'],
+                    'cityEnd'        => $journey['city_end_name'],
+                    'date'           => $date,
+                    'prefLabel'      => NotificationPrefModel::PREFS['journey_cancelled'],
+                    'unsubscribeUrl' => site_url('unsubscribe?uid=' . $passengerId . '&pref=journey_cancelled&token=' . UserModel::unsubscribeToken($passengerId, 'journey_cancelled')),
+                    'preferencesUrl' => site_url('profile/notifications'),
                 ])
             );
         }
@@ -269,5 +349,85 @@ class JourneyService
 
         return $nbOfSeats - $nbOfAcceptedBook;
 
+    }
+
+    /**
+     * Trajets actifs (non annulés) d'un conducteur, enrichis des villes de
+     * départ/arrivée (nécessaires pour notifier les passagers à l'annulation).
+     *
+     * @return array<int,array>
+     */
+    public function getActiveJourneysWithCities(int $userId): array
+    {
+        return $this->journeyModel->findActiveByUserWithCities($userId);
+    }
+
+    /**
+     * Prévient (best-effort) les passagers acceptés que des trajets sont annulés.
+     * Un échec d'envoi est journalisé mais n'interrompt pas le traitement.
+     *
+     * @param array<int,array> $journeys
+     */
+    public function notifyJourneysCancelled(array $journeys): void
+    {
+        foreach ($journeys as $journey) {
+            try {
+                $this->notifyCancelledJourney($journey);
+            } catch (\Throwable $e) {
+                log_message('error', 'Journey cancellation mail failed (journey {id}): {type}', [
+                    'id'      => $journey['id'] ?? null,
+                    'type' => get_class($e),
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Annule tous les trajets actifs d'un conducteur (soft cancel via canceled_at).
+     */
+    public function cancelAllByDriver(int $userId): void
+    {
+        $this->journeyModel->cancelAllByUser($userId);
+    }
+
+    /**
+     * Données de notification (passagers acceptés + infos trajet) pour une liste
+     * de trajets — à CAPTURER avant tout rejet/annulation.
+     *
+     * @param int[] $journeyIds
+     * @return array<int,array>
+     */
+    public function getCancellationNotifications(array $journeyIds): array
+    {
+        return $this->bookingModel->findAcceptedNotificationsForJourneys($journeyIds);
+    }
+
+    /**
+     * Prévient (best-effort) les passagers de l'annulation, à partir de payloads
+     * pré-capturés. Ne refait aucune requête : sûr à appeler APRÈS commit.
+     *
+     * @param array<int,array> $notifications
+     */
+    public function notifyPassengersJourneyCancelled(array $notifications): void
+    {
+        foreach ($notifications as $n) {
+            try {
+                $date = date('d/m/Y', strtotime($n['start_datetime']))
+                    . ' à ' . date('H:i', strtotime($n['start_datetime']));
+
+                $this->mailer->sendHtml(
+                    $n['email'],
+                    'Votre trajet a été annulé',
+                    view('Emails/journeyCancelled', [
+                        'firstname' => $n['firstname'],
+                        'cityStart' => $n['city_start_name'],
+                        'cityEnd'   => $n['city_end_name'],
+                        'date'      => $date,
+                    ])
+                );
+            } catch (\Throwable $e) {
+                log_message('error', 'Journey cancellation mail failed: {type}', ['type' => get_class($e)]);
+            }
+        }
     }
 }
