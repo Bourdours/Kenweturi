@@ -13,6 +13,10 @@ use App\Models\CarModel;
 use CodeIgniter\HTTP\RedirectResponse;
 
 use App\Services\GeocodingService;
+use App\Services\UserService;
+
+use App\Exceptions\UserNotFoundException;
+use App\Exceptions\InvalidPasswordException;
 
 class UserController extends BaseController
 {
@@ -21,14 +25,16 @@ class UserController extends BaseController
     private CarModel $carModel;
     private NotificationPrefModel $notifPrefModel;
     protected GeocodingService $geocodingService;
+    private UserService $userService;
 
     public function __construct()
     {
-        $this->userModel      = new UserModel();
-        $this->cityModel      = new CityModel();
-        $this->carModel       = new CarModel();
-        $this->notifPrefModel = new NotificationPrefModel();
+        $this->userModel        = new UserModel();
+        $this->cityModel        = new CityModel();
+        $this->carModel         = new CarModel();
+        $this->notifPrefModel   = new NotificationPrefModel();
         $this->geocodingService = new GeocodingService();
+        $this->userService      = new UserService();
         helper('cookie');
     }
 
@@ -109,39 +115,43 @@ class UserController extends BaseController
      */
     public function delete()
     {
-        $userId = session()->get('user_id');
-        $user   = $this->userModel->find($userId);
+        $userId        = (int) session()->get('user_id');
+        $inputPassword = (string) $this->request->getPost('deleteAccountPassword');
 
-        if (!$user) {
-            session()->destroy();
-            return redirect()->to(site_url('login'))
-                ->with('error', 'Ce compte n\'existe plus.');
-        }
-
-        $inputPassword = $this->request->getPost('deleteAccountPassword');
-
-
-        if (empty($inputPassword)) {
+        // Le mot de passe est obligatoire pour confirmer la suppression
+        if ($inputPassword === '') {
             return redirect()->to(site_url('profile'))
                 ->with('error', 'Veuillez saisir votre mot de passe pour confirmer la suppression.');
         }
 
-        if (!password_verify($inputPassword, $user['password_hash'])) {
+        try {
+            // Même logique métier que la suppression admin :
+            // annulation des trajets/réservations, anonymisation, soft delete.
+            $contact = $this->userService->deleteOwnAccount($userId, $inputPassword);
+        } catch (UserNotFoundException) {
+            session()->destroy();
+            return redirect()->to(site_url('login'))
+                ->with('error', 'Ce compte n\'existe plus.');
+        } catch (InvalidPasswordException) {
             return redirect()->to(site_url('profile'))
                 ->with('error', 'Le mot de passe saisi est incorrect.');
+        } catch (\Throwable $e) {
+            log_message('error', 'Self-deletion failed for user {id}', ['id' => $userId]);
+            return redirect()->to(site_url('profile'))
+                ->with('error', 'Un problème est survenu.');
         }
 
-        // Envoi de l'email de confirmation de suppression
-        $mailer = new MailerExample();
-        $mailer->sendHtml(
-            $user['email'],
-            'Votre compte a été supprimé',
-            $this->accountDeletedEmail($user['firstname'], $user['lastname'])
-        );
+        // Email de confirmation au compte supprimé (après commit, best-effort)
+        try {
+            $this->userService->notifySelfDeletion($contact);
+        } catch (\Throwable $e) {
+            log_message('error', 'Self-deletion mail failed for user {id}', ['id' => $userId]);
+        }
 
-        $this->userModel->delete($userId);
+        // Suppression du cookie « se souvenir de moi » (auto-suppression uniquement)
+        delete_cookie('remember_token');
+        
         session()->destroy();
-
         return redirect()->to(site_url('login'))
             ->with('success', 'Votre compte a été supprimé.');
     }

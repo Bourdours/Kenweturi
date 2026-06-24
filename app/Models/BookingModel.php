@@ -217,12 +217,13 @@ class BookingModel extends BaseModel
         return $this->db->table('booking')
             ->select('booking.id, booking.journey_id, booking.status,
                     journey.start_datetime,
-                    city_start.name as city_start_name,
-                    city_end.name   as city_end_name,
+                    city_start.name     as city_start_name,
+                    city_end.name       as city_end_name,
                     passenger.firstname as passenger_firstname,
                     passenger.lastname  as passenger_lastname,
-                    driver.email     as driver_email,
-                    driver.firstname as driver_firstname')
+                    driver.id           as driver_id,
+                    driver.email        as driver_email,
+                    driver.firstname    as driver_firstname')
             ->join('journey',            'journey.id = booking.journey_id')
             ->join('location loc_start', 'loc_start.id = journey.location_start_id')
             ->join('location loc_end',   'loc_end.id = journey.location_end_id')
@@ -250,11 +251,12 @@ class BookingModel extends BaseModel
         }
 
         return $this->db->table('booking')
-            ->select('passenger.email    as email,
+            ->select('passenger.id      as user_id,
+                    passenger.email     as email,
                     passenger.firstname as firstname,
-                    journey.start_datetime,
-                    city_start.name as city_start_name,
-                    city_end.name   as city_end_name')
+                                        journey.start_datetime,
+                    city_start.name     as city_start_name,
+                    city_end.name       as city_end_name')
             ->join('journey',            'journey.id = booking.journey_id')
             ->join('location loc_start', 'loc_start.id = journey.location_start_id')
             ->join('location loc_end',   'loc_end.id = journey.location_end_id')

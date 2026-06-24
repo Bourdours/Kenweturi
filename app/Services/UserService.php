@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Libraries\MailerExample;
 
 use App\Models\UserModel;
+use App\Models\RememberTokenModel;
 
 use App\Services\BookingService;
 use App\Services\JourneyService;
@@ -14,26 +15,29 @@ use App\Exceptions\CannotDeleteSelfException;
 use App\Exceptions\CannotDeleteSuperadminException;
 use App\Exceptions\AdminDeletionForbiddenException;
 use App\Exceptions\LastAdminException;
+use App\Exceptions\InvalidPasswordException;
+
+use CodeIgniter\I18n\Time;
 
 use Config\Database;
 
 class UserService
 {
     protected UserModel      $userModel;
+    protected RememberTokenModel $rememberTokenModel;
     protected BookingService $bookingService;
     protected JourneyService $journeyService;
 
     public function __construct()
     {
-        $this->userModel      = new UserModel();
-        $this->bookingService = new BookingService();
-        $this->journeyService = new JourneyService();
+        $this->userModel            = new UserModel();
+        $this->rememberTokenModel   = new RememberTokenModel();
+        $this->bookingService       = new BookingService();
+        $this->journeyService       = new JourneyService();
     }
 
     /**
-     * Supprime un utilisateur. Les écritures sont regroupées dans une
-     * transaction (tout ou rien) ; les emails ne sont envoyés qu'APRÈS un
-     * commit réussi, à partir de données capturées AVANT les écritures.
+     * Suppression d'un utilisateur par un administrateur.
      *
      * @return array{email:string, firstname:string, lastname:string}
      *
@@ -43,45 +47,81 @@ class UserService
      * @throws AdminDeletionForbiddenException
      * @throws LastAdminException
      */
-    public function delete(int $targetId, int $currentUserId, string $currentRole): array
+    public function deleteByAdmin(int $targetId, int $currentUserId, string $currentRole): array
     {
-
-        // Vérification du user
         $target = $this->userModel->find($targetId);
         if ($target === null) {
             throw new UserNotFoundException();
         }
 
-        // Vérification que la suppression correspond au règle
-        $this->ensureDeletionAllowed($target, $targetId, $currentUserId, $currentRole);
+        $this->ensureAdminDeletionAllowed($target, $targetId, $currentUserId, $currentRole);
 
-        // Coordonnées de l'utilisateur supprimé (pour son propre email)
+        return $this->performDeletion($targetId, $target);
+    }
+
+    /**
+     * Suppression par l'utilisateur de son propre compte.
+     * La seule règle d'autorisation est la vérification du mot de passe.
+     *
+     * @return array{email:string, firstname:string, lastname:string}
+     *
+     * @throws UserNotFoundException
+     * @throws InvalidPasswordException
+     */
+    public function deleteOwnAccount(int $userId, string $password): array
+    {
+        $target = $this->userModel->find($userId);
+        if ($target === null) {
+            throw new UserNotFoundException();
+        }
+
+        $this->ensureSelfDeletionAllowed($target, $password);
+
+        return $this->performDeletion($userId, $target);
+    }
+
+    /**
+     * Logique commune de suppression.
+     *
+     * Les données de notification sont capturées AVANT toute écriture. Les
+     * écritures sont regroupées dans une transaction (tout ou rien). Les emails
+     * ne sont envoyés qu'APRÈS un commit réussi.
+     *
+     * @return array{email:string, firstname:string, lastname:string}
+     *         Coordonnées capturées avant anonymisation.
+     */
+    private function performDeletion(int $targetId, array $target): array
+    {
+        // Coordonnées du compte supprimé (capturées avant anonymisation)
         $targetContact = [
             'email'     => $target['email'],
             'firstname' => $target['firstname'],
             'lastname'  => $target['lastname'],
         ];
 
-        // Capture des informations liées user avant suppression des données dans la base
-        $journeys                = $this->journeyService->getActiveJourneysWithCities($targetId);
-        $journeyIds              = array_column($journeys, 'id');
-        // Données pour notifier les drivers de chaque journey auquel le user a un booking d'accepté
-        $driverNotificationsData     = $this->bookingService->getActivePassengerBookings($targetId);
-        // Données pour notifier les passengers acceptés de chaque journey auquel le user est driver
-        $passengerNotificationsData  = $this->journeyService->getCancellationNotifications($journeyIds);
+        // Capture des informations de notification avant suppression
+        $journeys                   = $this->journeyService->getActiveJourneysWithCities($targetId);
+        $journeyIds                 = array_column($journeys, 'id');
+        // Drivers à prévenir (le user était passager accepté)
+        $driverNotificationsData    = $this->bookingService->getActivePassengerBookings($targetId);
+        // Passagers acceptés à prévenir (le user était conducteur)
+        $passengerNotificationsData = $this->journeyService->getCancellationNotifications($journeyIds);
 
-        // ============ Écritures dans la base, avec rollback si une erreur survient ============
+        // ============ Écritures en base, rollback si erreur ============
 
         $db = Database::connect();
         $db->transBegin();
 
         try {
-            // Annulation des reservations du user
+            // Réservations du user (passager)
             $this->bookingService->rejectAllByPassenger($targetId);
 
-            // Annulation des Trajets de l'utilisateur (conducteur) + réservations de ses passagers
+            // Trajets du user (conducteur) + réservations de ses passagers
             $this->bookingService->rejectAllForJourneys($journeyIds);
             $this->journeyService->cancelAllByDriver($targetId);
+
+            // Invalidation des tokens « se souvenir de moi » (reconnexion auto impossible)
+            $this->rememberTokenModel->deleteAll($targetId);
 
             // Soft delete du user
             $this->userModel->anonymize($targetId);
@@ -89,12 +129,11 @@ class UserService
 
             $db->transCommit();
         } catch (\Throwable $e) {
-            // Si une erreur apparait, annulation des écritures en base et pas d'envoi d'email.
             $db->transRollback();
             throw $e;
         }
 
-        // ============ Envoi emails après modification dans la base ============
+        // ============ Envoi des emails après commit (best-effort) ============
 
         $this->bookingService->notifyDriverCancellations($driverNotificationsData);
         $this->journeyService->notifyPassengersJourneyCancelled($passengerNotificationsData);
@@ -102,7 +141,10 @@ class UserService
         return $targetContact;
     }
 
-    private function ensureDeletionAllowed(array $target, int $targetId, int $currentUserId, string $currentRole): void
+    /**
+     * Règles d'autorisation pour une suppression effectuée par un administrateur.
+     */
+    private function ensureAdminDeletionAllowed(array $target, int $targetId, int $currentUserId, string $currentRole): void
     {
         // Pas d'auto-suppression
         if ($targetId === $currentUserId) {
@@ -126,12 +168,23 @@ class UserService
     }
 
     /**
-     * Notifie l'utilisateur de la suppression de son compte (appelée par le
-     * contrôleur, après le retour de delete(), donc après commit).
+     * Règle d'autorisation pour l'auto-suppression : le mot de passe fourni
+     * doit correspondre à celui du compte.
+     */
+    private function ensureSelfDeletionAllowed(array $target, string $password): void
+    {
+        if (!password_verify($password, $target['password_hash'])) {
+            throw new InvalidPasswordException();
+        }
+    }
+
+    /**
+     * Notifie l'utilisateur que son compte a été supprimé PAR UN ADMINISTRATEUR.
+     * Appelée par AdminController après le retour de deleteByAdmin() (donc après commit).
      *
      * @param array{email:string, firstname:string, lastname:string} $contact
      */
-    public function notifyDeletion(array $contact): void
+    public function notifyAdminDeletion(array $contact): void
     {
         $mailer = new MailerExample();
         $mailer->sendHtml(
@@ -140,6 +193,27 @@ class UserService
             view('Emails/adminDeletedAccount', [
                 'firstname' => $contact['firstname'],
                 'lastname'  => $contact['lastname'],
+            ])
+        );
+    }
+
+    /**
+     * Notifie l'utilisateur que son compte a été supprimé PAR LUI-MÊME.
+     * Appelée par UserController après le retour de deleteOwnAccount() (donc après commit).
+     *
+     * @param array{email:string, firstname:string, lastname:string} $contact
+     */
+    public function notifySelfDeletion(array $contact): void
+    {
+        $mailer = new MailerExample();
+        $mailer->sendHtml(
+            $contact['email'],
+            'Votre compte a été supprimé',
+            view('Emails/accountDeleted', [
+                'firstname' => $contact['firstname'],
+                'lastname'  => $contact['lastname'],
+                'date'      => ucfirst(Time::now('Europe/Paris', 'fr_FR')->toLocalizedString('d MMMM yyyy à HH:mm')),
+                'support'   => env('mailer.from'),
             ])
         );
     }
