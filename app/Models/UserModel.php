@@ -39,7 +39,7 @@ class UserModel extends BaseModel
         'is_admin',
         'is_banned',
         'status',
-        'city_id',
+        // 'city_id',
         'reset_token',
         'reset_token_expiry',
         'role',

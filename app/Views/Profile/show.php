@@ -2,7 +2,6 @@
 
 /** @var array $user */
 /** @var string $city */
-/** @var string $memberSince */
 /** @var bool $isOwnProfile */
 ?>
 <?= view('partials/head', ['extraJs' => [base_url('js/auth.js'), base_url('js/user.js')]]) ?>
@@ -63,14 +62,7 @@
         <?php endif; ?>
       </div>
 
-      <p class="text-ink/50 text-sm flex flex-wrap items-center justify-center sm:justify-start gap-x-2 gap-y-1">
-        <?php if (!empty($city)): ?>
-          <span><i class="fa-solid fa-location-dot mr-1"></i><?= esc($city) ?></span>
-          <span class="text-ink/20">·</span>
-        <?php endif; ?>
-        <span><i class="fa-regular fa-calendar mr-1"></i>Membre depuis <?= esc($memberSince) ?></span>
-      </p>
-
+  
       <?php if ($isOwnProfile): ?>
         <div class="mt-4 flex flex-wrap justify-center sm:justify-start gap-3">
           <a href="<?= site_url('profile/update') ?>"
