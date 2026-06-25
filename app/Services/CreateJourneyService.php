@@ -169,33 +169,6 @@ class CreateJourneyService
         $journeyForm = $createFormData['journey'];
         $isRecurring = !empty($journeyForm['isRecurring']);
 
-        if ($isRecurring) {
-            $dates = $this->computeRecurringDates(
-                $journeyForm['startDate'],
-                $journeyForm['recurringDays'],
-                $journeyForm['recurringWeeks']
-            );
-
-            $formatter = new \IntlDateFormatter(
-                'fr_FR',
-                \IntlDateFormatter::LONG,
-                \IntlDateFormatter::NONE
-            );
-
-            return [
-                'isRecurring'    => true,
-                'recurringDates' => array_map(
-                    fn($d) => $formatter->format(new \DateTime($d)),
-                    $dates
-                ),
-                'recurringCount' => count($dates),
-                'startTime'      => $journeyForm['startTime'],
-                'journey'        => null,
-                'stages'         => [],
-                'remainingSeats' => 0,
-            ];
-        }
-
         $user = $this->userModel->find($userId);
         $car  = $this->carModel->find($createFormData['journey']['car']);
 
@@ -253,12 +226,50 @@ class CreateJourneyService
             $stageIndex++;
         }
 
-        return [
-            'isRecurring'    => false,
-            'journey'        => $journey,
-            'stages'         => $stages,
-            'remainingSeats' => (int) $journeyForm['seats'],
+        $result = [
+            'isRecurring'        => $isRecurring,
+            'journey'            => $journey,
+            'stages'             => $stages,
+            'remainingSeats'     => (int) $journeyForm['seats'],
+            'recurringDates'     => [],
+            'recurringDatesByDay' => [],
+            'recurringCount'     => 0,
+            'startTime'          => $journeyForm['startTime'],
         ];
+
+        if ($isRecurring) {
+            $dates = $this->computeRecurringDates(
+                $journeyForm['startDate'],
+                $journeyForm['recurringDays'],
+                $journeyForm['recurringWeeks']
+            );
+
+            $formatter = new \IntlDateFormatter(
+                'fr_FR',
+                \IntlDateFormatter::LONG,
+                \IntlDateFormatter::NONE
+            );
+
+            $dayNames = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi'];
+            $datesByDay = [];
+            foreach ($dates as $d) {
+                $dt = new \DateTime($d);
+                $dayName = $dayNames[(int) $dt->format('N') - 1];
+                $datesByDay[$dayName][] = $formatter->format($dt);
+            }
+            $recurringDatesByDay = [];
+            foreach ($dayNames as $name) {
+                if (!empty($datesByDay[$name])) {
+                    $recurringDatesByDay[$name] = $datesByDay[$name];
+                }
+            }
+
+            $result['recurringDates']     = array_map(fn($d) => $formatter->format(new \DateTime($d)), $dates);
+            $result['recurringDatesByDay'] = $recurringDatesByDay;
+            $result['recurringCount']     = count($dates);
+        }
+
+        return $result;
     }
 
     private function computeRecurringDates(string $startDate, array $days, array $weeks): array
