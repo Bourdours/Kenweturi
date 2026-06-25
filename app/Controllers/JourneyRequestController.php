@@ -239,7 +239,7 @@ class JourneyRequestController extends BaseController
         ];
 
         if (!$this->journeyRequestModel->update($id, $data)) {
-            return redirect()->back()->withInput()->with('errors', $this->journeyRequestModel->errors());
+            return redirect()->to(site_url("journey-requests/$id/edit"))->withInput()->with('errors', $this->journeyRequestModel->errors());
         }
 
         (new JourneyService())->notifyMatchingJourneys($id, $userId);

@@ -119,7 +119,7 @@ class AdminController extends BaseController
         }
 
         if ($user['role'] !== 'user') {
-            return redirect()->back()->with('error', 'Vous ne pouvez supprimer que les utilisateurs ayant le rôle "Utilisateur"');
+            return redirect()->to(site_url('admin?tab=registrations'))->with('error', 'Vous ne pouvez supprimer que les utilisateurs ayant le rôle "Utilisateur"');
         }
 
         // Détermine le nouveau statut selon l'action choisie
@@ -389,19 +389,19 @@ class AdminController extends BaseController
         $address = trim($this->request->getPost('favoriteAddress') ?? '');
 
         if (empty($address)) {
-            return redirect()->back()->withInput()
+            return redirect()->to(site_url('admin?tab=settings'))->withInput()
                 ->with('errors', ['favoriteAddress' => 'L\'adresse est obligatoire.']);
         }
 
         $data = $this->geocodingService->getLocationData($address);
 
         if ($data === null) {
-            return redirect()->back()->withInput()
+            return redirect()->to(site_url('admin?tab=settings'))->withInput()
                 ->with('errors', ['favoriteAddress' => "Adresse introuvable : $address"]);
         }
 
         if (empty($data['street']) && empty($data['locality'])) {
-            return redirect()->back()->withInput()
+            return redirect()->to(site_url('admin?tab=settings'))->withInput()
                 ->with('errors', ['favoriteAddress' => "L'adresse \"$address\" doit contenir un nom de rue."]);
         }
 
@@ -415,7 +415,7 @@ class AdminController extends BaseController
         ]);
 
         if ($locationId === false) {
-            return redirect()->back()->withInput()
+            return redirect()->to(site_url('admin?tab=settings'))->withInput()
                 ->with('errors', $this->locationModel->errors());
         }
 
