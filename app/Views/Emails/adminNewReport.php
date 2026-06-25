@@ -1,6 +1,6 @@
 <?php
 
-/** @var int    $reporterId */
+/** @var string $reporterFirstName */
 /** @var int    $journeyId */
 /** @var string $description */
 /** @var string $prefLabel */
@@ -44,13 +44,13 @@
                             <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 28px;">
                                 <tr>
                                     <td style="padding:10px 16px;background-color:#1a3a5c;border-radius:8px 8px 0 0;border-bottom:1px solid #16222e;">
-                                        <span style="font-size:13px;font-weight:700;color:#ffffff;">Signalé par (user_id)</span><br>
-                                        <span style="font-size:15px;color:#93b8d8;"><?= esc($reporterId) ?></span>
+                                        <span style="font-size:13px;font-weight:700;color:#ffffff;">Signalé par</span><br>
+                                        <span style="font-size:15px;color:#93b8d8;"><?= esc($reporterFirstName) ?></span>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td style="padding:10px 16px;background-color:#1a3a5c;border-radius:0 0 8px 8px;">
-                                        <span style="font-size:13px;font-weight:700;color:#ffffff;">Trajet signalé (journey_id)</span><br>
+                                        <span style="font-size:13px;font-weight:700;color:#ffffff;">Trajet signalé</span><br>
                                         <span style="font-size:15px;color:#93b8d8;"><?= esc($journeyId) ?></span>
                                     </td>
                                 </tr>
