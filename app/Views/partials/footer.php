@@ -6,10 +6,19 @@
     <!-- Logo + description -->
     <div class="md:max-w-sm">
       <a href="<?= site_url('/') ?>" class="flex items-center gap-2 mb-3">
-        <div class="w-6 h-6 rounded-xl bg-action flex items-center justify-center shrink-0">
-          <i class="fa-solid fa-car-side text-ink text-xs"></i>
-        </div>
-        <span class="font-display text-ink font-bold text-xl">Kenweturi</span>
+        <img src="<?= base_url('data/images/logo.png') ?>" alt="Kenweturi" class="h-9 w-auto shrink-0">
+        <svg width="240" height="36" viewBox="0 0 240 36" xmlns="http://www.w3.org/2000/svg" class="text-ink">
+          <defs>
+            <clipPath id="cw-f">
+              <polygon points="0,0 76,0 56,36 0,36" />
+            </clipPath>
+            <clipPath id="co-f">
+              <polygon points="76,0 240,0 240,36 56,36" />
+            </clipPath>
+          </defs>
+          <text clip-path="url(#cw-f)" x="0" y="28" class="font-display text-2xl font-bold" fill="currentColor" letter-spacing="3">KENWETURI</text>
+          <text clip-path="url(#co-f)" x="0" y="28" class="font-display text-2xl font-bold" fill="#D9663F" letter-spacing="3">KENWETURI</text>
+        </svg>
       </a>
       <p class="text-ink/40 text-base leading-relaxed">
         Le covoiturage régional pensé pour les trajets domicile-travail et domicile-formation.
