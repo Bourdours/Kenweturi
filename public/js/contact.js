@@ -1,7 +1,7 @@
 const trigger = document.getElementById('subject-trigger');
-const list    = document.getElementById('subject-list');
-const input   = document.getElementById('subject-input');
-const label   = document.getElementById('subject-label');
+const list = document.getElementById('subject-list');
+const input = document.getElementById('subject-input');
+const label = document.getElementById('subject-label');
 const chevron = document.getElementById('subject-chevron');
 
 if (trigger && list && input && label && chevron) {

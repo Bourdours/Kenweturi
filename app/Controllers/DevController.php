@@ -16,11 +16,24 @@ class DevController extends BaseController
     public function emailPreview(string $template): string
     {
         $allowed = [
-            'accountBanned', 'accountDeleted', 'adminApproved', 'adminDeletedAccount',
-            'adminNewReport', 'adminRejected', 'adminWarn', 'bookingAccepted',
-            'bookingCancelled', 'bookingRejected', 'bookingRequest', 'contact',
-            'emailVerification', 'journeyCancelled', 'journeyRequestMatch',
-            'newRegistration', 'passwordChanged', 'resetPassword',
+            'accountBanned',
+            'accountDeleted',
+            'adminApproved',
+            'adminDeletedAccount',
+            'adminNewReport',
+            'adminRejected',
+            'adminWarn',
+            'bookingAccepted',
+            'bookingCancelled',
+            'bookingRejected',
+            'bookingRequest',
+            'contact',
+            'emailVerification',
+            'journeyCancelled',
+            'journeyRequestMatch',
+            'newRegistration',
+            'passwordChanged',
+            'resetPassword',
         ];
 
         if (!in_array($template, $allowed, true)) {

@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace App\Models;
 
@@ -100,8 +100,8 @@ class BookingModel extends BaseModel
             ->join('user driver',          'driver.id = journey.user_id')
             ->where('booking.id', $id)
             ->groupStart()
-                ->where('booking.user_id', $userId)
-                ->orWhere('journey.user_id', $userId)
+            ->where('booking.user_id', $userId)
+            ->orWhere('journey.user_id', $userId)
             ->groupEnd()
             ->get()->getRowArray() ?: null;
     }
@@ -130,8 +130,8 @@ class BookingModel extends BaseModel
     public function countPendingBookings(int $journeyId): int
     {
         return $this->where('journey_id', $journeyId)
-                    ->where('status', 'pending')
-                    ->countAllResults();
+            ->where('status', 'pending')
+            ->countAllResults();
     }
 
     /**
@@ -144,8 +144,8 @@ class BookingModel extends BaseModel
     public function findUserBooking(int $journeyId, int $userId): ?array
     {
         return $this->where('journey_id', $journeyId)
-                    ->where('user_id', $userId)
-                    ->first();
+            ->where('user_id', $userId)
+            ->first();
     }
 
     /**
@@ -162,20 +162,20 @@ class BookingModel extends BaseModel
         }
 
         $rows = $this->select('journey_id, COUNT(*) as pending_bookings')
-                    ->where('status', 'pending')
-                    ->whereIn('journey_id', $journeyIds)
-                    ->groupBy('journey_id')
-                    ->findAll();
+            ->where('status', 'pending')
+            ->whereIn('journey_id', $journeyIds)
+            ->groupBy('journey_id')
+            ->findAll();
 
         return array_column($rows, 'pending_bookings', 'journey_id');
     }
 
-    public function countByStatus(string $label,int $journeyId):int{
+    public function countByStatus(string $label, int $journeyId): int
+    {
 
-        return $this->where('journey_id',$journeyId)
-                ->where('status',$label)
-                ->countAllResults();
-
+        return $this->where('journey_id', $journeyId)
+            ->where('status', $label)
+            ->countAllResults();
     }
 
     /**
@@ -267,5 +267,4 @@ class BookingModel extends BaseModel
             ->where('booking.status', 'accepted')
             ->get()->getResultArray();
     }
-    
 }
