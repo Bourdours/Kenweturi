@@ -137,7 +137,7 @@ class UserController extends BaseController
 
         // Suppression du cookie « se souvenir de moi » (auto-suppression uniquement)
         delete_cookie('remember_token');
-        
+
         session()->destroy();
         return redirect()->to(site_url('login') . '?deleted=1');
     }

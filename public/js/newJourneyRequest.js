@@ -14,9 +14,9 @@ document.addEventListener('DOMContentLoaded', () => {
         hideSuggestionsList(list);
 
         const prefix = input.id === 'startAddress' ? 'start' : 'end';
-        document.getElementById(`${prefix}Lat`).value     = suggestion.lat;
-        document.getElementById(`${prefix}Lng`).value     = suggestion.lng;
-        document.getElementById(`${prefix}City`).value    = suggestion.city;
+        document.getElementById(`${prefix}Lat`).value = suggestion.lat;
+        document.getElementById(`${prefix}Lng`).value = suggestion.lng;
+        document.getElementById(`${prefix}City`).value = suggestion.city;
         document.getElementById(`${prefix}Zipcode`).value = suggestion.zipcode;
     }
 

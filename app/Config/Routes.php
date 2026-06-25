@@ -130,7 +130,6 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('car/(:num)/edit',    'CarController::showEditForm/$1');
     $routes->post('car/(:num)/update', 'CarController::update/$1');
     $routes->post('car/(:num)/delete', 'CarController::delete/$1');
-
 });
 
 

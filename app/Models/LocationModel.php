@@ -1,5 +1,7 @@
-<?php 
+<?php
+
 namespace App\Models;
+
 /**
  * Modèle gérant la table 'location'
  */
@@ -16,7 +18,7 @@ class LocationModel extends BaseModel
         'note',
         'city_id',
         'is_favorite'
-        ];
+    ];
 
     protected $validationRules = [
         'latitude'  => 'required|decimal',
@@ -24,7 +26,7 @@ class LocationModel extends BaseModel
         'address'   => 'required|max_length[255]',
         'note'      => 'permit_empty|max_length[1000]',
         'city_id'   => 'required|integer',
-        ];
+    ];
 
     public function setFavorite(int $locationId): bool
     {
@@ -39,7 +41,7 @@ class LocationModel extends BaseModel
             ->where('location.is_favorite', 1)
             ->first();
     }
-    
+
     public function clearFavorite(): bool
     {
         return $this->where('is_favorite', 1)->set('is_favorite', 0)->update();

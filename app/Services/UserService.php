@@ -135,7 +135,6 @@ class UserService
             if ($db->transCommit() === false) {  // ← commit exécuté ICI, par ce test
                 throw new \RuntimeException("Échec du commit lors de la suppression du compte #{$targetId}");
             }
-            
         } catch (\Throwable $e) {
             $db->transRollback();
             throw $e;
