@@ -46,7 +46,8 @@ class AuthController extends BaseController
     public function showLoginForm()
     {
         return view('Auth/login', [
-            'title' => 'Connexion'
+            'title' => 'Connexion',
+            'accountDeleted' => $this->request->getGet('deleted') === '1',
         ]);
     }
 

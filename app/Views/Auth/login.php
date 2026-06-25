@@ -63,6 +63,13 @@
       </div>
     <?php endif ?>
 
+    <?php if (!empty($accountDeleted)): ?>
+      <div class="bg-success/10 border border-success/30 rounded-xl p-3 mb-4 flex gap-2.5 items-center">
+        <i class="fa-solid fa-circle-check text-success text-sm shrink-0"></i>
+        <span class="text-success text-xs">Votre compte a été supprimé.</span>
+      </div>
+    <?php endif ?>
+
     <form action="<?= base_url('index.php/login') ?>" method="post">
       <?= csrf_field() ?>
 
