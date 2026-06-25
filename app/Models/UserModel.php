@@ -17,12 +17,12 @@ class UserModel extends BaseModel
     // Active l'incrémentation automatique de l'ID à chaque nouvel enregistrement
     protected $useAutoIncrement = true;
 
-    protected $useSoftDeletes = false;
+    protected $useSoftDeletes = true;
     protected $dateFormat     = 'datetime';
     protected $deletedField   = 'deleted_at';
 
-    protected $beforeInsert   = ['hashPassword', 'setRegistrationDate'];
-    protected $beforeUpdate   = ['hashPassword'];
+    protected $beforeInsert     = ['hashPassword', 'setRegistrationDate'];
+    protected $beforeUpdate     = ['hashPassword'];
 
     // Liste des colonnes que l'on autorise à modifier ou insérer (sécurité)
     protected $allowedFields = [
@@ -212,6 +212,7 @@ class UserModel extends BaseModel
     {
         return $this->where('status', 'active')
                     ->where('role', $role)
+                    ->where('deleted_at', null)
                     ->countAllResults();
     }
 
@@ -223,19 +224,25 @@ class UserModel extends BaseModel
     public function anonymize(int $userId): bool
     {
         return $this->skipValidation(true)->update($userId, [
-            'firstname'          => 'Compte',
-            'lastname'           => 'supprimé',
-            'email'              => 'deleted_' . $userId . '@deleted.invalid',
-            'gender'             => 'Autre',
-            'birth_date'         => null,
-            'biography'          => null,
-            'avatar'             => null,
+            'firstname'             => 'Compte',
+            'lastname'              => 'supprimé',
+            'email'                 => 'deleted_' . $userId . '@deleted.invalid',
+            'gender'                => 'Autre',
+            'birth_date'            => null,
+            'biography'             => null,
+            'avatar'                => null,
             // chaîne aléatoire -> hachée par le hook beforeUpdate -> connexion impossible
-            'password_hash'      => bin2hex(random_bytes(32)),
-            'reset_token'        => null,
-            'reset_token_expiry' => null,
+            'password_hash'         => bin2hex(random_bytes(32)),
+            'reset_token'           => null,
+            'reset_token_expiry'    => null,
         ]);
     }
+
+    public function markAsDeleted(int $userId): bool
+    {
+        return $this->skipValidation(true)->update($userId, ['status' => 'deleted']);
+    }
+
   
     public function setEmailToken(int $userId, string $rawToken, int $hours = 24): bool
     {
