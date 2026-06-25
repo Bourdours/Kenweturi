@@ -67,10 +67,19 @@
       <label for="avatarProfile" class="text-ink/50 text-xs font-medium mb-1.5 block">Nouvelle photo</label>
       <input type="file" id="avatarProfile" name="avatarProfile" accept="image/*"
         class="w-full text-ink/70 text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-action/10 file:text-action hover:file:bg-action/20 file:cursor-pointer file:transition-colors">
+
+      <?php if (!empty($user['avatar'])): ?>
+        <button type="button" id="btnDeleteAvatar"
+          class="flex items-center gap-1.5 mt-3 text-xs text-action/60 hover:text-action transition-colors cursor-pointer">
+          <i class="fa-solid fa-trash"></i>Supprimer la photo actuelle
+        </button>
+      <?php endif; ?>
+
+
     </div>
 
     <!-- Informations personnelles -->
-    <div class="bg-surface rounded-2xl p-6 border border-action/10">
+    <div class="bg-surface rounded-2xl p-6 border border-action/10 overflow-hidden">
       <h2 class="text-ink text-base font-semibold font-display mb-5 flex items-center gap-2">
         <i class="fa-solid fa-user text-action text-sm"></i>Informations personnelles
       </h2>
@@ -108,7 +117,7 @@
           <div>
             <label for="birthDateProfile" class="text-ink/50 text-xs font-medium mb-1.5 block">Date de naissance</label>
             <input type="date" id="birthDateProfile" name="birthDateProfile" value="<?= esc($user['birth_date']) ?>" required
-              class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 transition-colors">
+              class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 transition-colors appearance-none">
           </div>
         </div>
 
@@ -284,6 +293,31 @@
 
 <?= view('partials/avatar_modal', ['avatarSrc' => site_url(esc($user['avatar'] ?? '')), 'firstname' => $user['firstname'], 'initials' => $initials]) ?>
 
+<!-- Modale suppression avatar -->
+<div id="deleteAvatarModal" class="hidden fixed inset-0 bg-black/60 z-[9999] items-center justify-center">
+  <div class="bg-surface rounded-2xl p-6 w-full max-w-sm mx-4 shadow-xl">
+    <div class="flex items-center gap-3 mb-3">
+      <div class="w-9 h-9 rounded-full bg-action/10 flex items-center justify-center shrink-0">
+        <i class="fa-solid fa-trash text-action text-sm"></i>
+      </div>
+      <h3 class="text-ink font-semibold font-display text-base">Supprimer la photo</h3>
+    </div>
+    <p class="text-ink/50 text-sm mb-5">
+      Voulez-vous vraiment supprimer votre photo de profil ? Cette action est irréversible.
+    </p>
+    <div class="flex gap-3 justify-end">
+      <button type="button" id="cancelDeleteAvatar"
+        class="border border-action/20 hover:border-action/50 text-ink/60 hover:text-ink font-medium rounded-lg px-4 py-2 text-sm transition-colors cursor-pointer">
+        Annuler
+      </button>
+      <button type="button" id="confirmDeleteAvatar"
+        class="bg-action hover:bg-action-dark text-ink font-semibold font-display rounded-lg px-4 py-2 text-sm transition-colors cursor-pointer flex items-center gap-2">
+        <i class="fa-solid fa-trash text-xs"></i>Supprimer
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- Modale suppression voiture -->
 <div id="deleteCarModal" class="hidden fixed inset-0 bg-black/60 z-[9999] items-center justify-center">
   <div class="bg-surface rounded-2xl p-6 w-full max-w-sm mx-4 shadow-xl">
@@ -311,5 +345,9 @@
     </form>
   </div>
 </div>
+
+<form id="formDeleteAvatar" class="hidden" action="<?= site_url('profile/deleteAvatar') ?>" method="post">
+  <?= csrf_field() ?>
+</form>
 
 <?= view('partials/footer') ?>

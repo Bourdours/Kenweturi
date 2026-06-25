@@ -66,7 +66,8 @@ class BookingController extends BaseController
         ], $data));
     }
 
-    public function create(int $id): RedirectResponse{
+    public function create(int $id): RedirectResponse
+    {
 
         $userId = session('user_id');
 
@@ -82,7 +83,7 @@ class BookingController extends BaseController
                 ->with('errors', ['booking' => 'Vous ne pouvez pas réserver votre propre trajet.']);
 
         // --- Vérification pas déjà réservé
-        $existing = $this->bookingModel->findUserBooking($id,$userId);
+        $existing = $this->bookingModel->findUserBooking($id, $userId);
 
         if ($existing)
             return redirect()->to('/journeys/' . $id)
@@ -182,50 +183,40 @@ class BookingController extends BaseController
     {
         $driverId = (int) session()->get('user_id');
 
-        try{
+        try {
 
-            $this->bookingService->accept($bookingId,$driverId);
-
-        }catch(BookingNotFoundException) {
+            $this->bookingService->accept($bookingId, $driverId);
+        } catch (BookingNotFoundException) {
 
             return redirect()->to('/dashboard/bookings/' . $bookingId)
                 ->with('error', 'Cette réservation est introuvable');
-
-        }catch(BookingNotAssignedToDriverException) {
+        } catch (BookingNotAssignedToDriverException) {
 
             return redirect()->to('/dashboard/bookings')
                 ->with('error', 'Vous n\'êtes pas le conducteur du trajet de cette réservation');
-
-        }catch(JourneyFullException) {
+        } catch (JourneyFullException) {
 
             return redirect()->to('/dashboard/bookings/' . $bookingId)
                 ->with('error', 'Le trajet est complet, plus de places disponibles.');
-
-        }catch(BookingAlreadyAcceptedException) {
+        } catch (BookingAlreadyAcceptedException) {
 
             return redirect()->to('/dashboard/bookings/' . $bookingId)
                 ->with('error', 'Cette réservation a déjà été acceptée');
+        } catch (\Throwable $e) {
 
-        }
-        catch(\Throwable $e){
-            
             log_message('error', 'Booking accept failed: {message}', ['message' => $e->getMessage()]);
-            return redirect()->to('/dashboard')->with('error','Un problème est survenu');
-
+            return redirect()->to('/dashboard')->with('error', 'Un problème est survenu');
         }
 
         try {
 
             $this->bookingService->confirmToPassenger($bookingId, $driverId);
-
-        }catch (\Throwable $e) {
+        } catch (\Throwable $e) {
 
             log_message('error', 'Booking confirmation mail failed: {message}', ['message' => $e->getMessage()]);
-
         }
 
         return redirect()->to('/dashboard/bookings/' . $bookingId)->with('success', 'Réservation acceptée.');
-
     }
 
     /**
@@ -269,5 +260,4 @@ class BookingController extends BaseController
 
         return redirect()->to('/dashboard/bookings')->with('success', 'Réservation refusée.');
     }
-
 }

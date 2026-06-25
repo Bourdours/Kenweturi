@@ -35,33 +35,32 @@ class BookingService
         $this->notifPrefModel  = new NotificationPrefModel();
     }
 
-    public function accept(int $bookingId,int $driverId):void{
+    public function accept(int $bookingId, int $driverId): void
+    {
 
         $booking = $this->bookingModel->find($bookingId);
-        if($booking === null)                   throw new BookingNotFoundException();
+        if ($booking === null)                   throw new BookingNotFoundException();
 
         $journey = $this->journeyModel->find($booking['journey_id']);
-        if($journey['user_id'] != $driverId)    throw new BookingNotAssignedToDriverException();
+        if ($journey['user_id'] != $driverId)    throw new BookingNotAssignedToDriverException();
 
-        if($booking['status'] === 'accepted')   throw new BookingAlreadyAcceptedException();
+        if ($booking['status'] === 'accepted')   throw new BookingAlreadyAcceptedException();
 
         $nbOfRemainingSeats = $this->journeyService->countRemainingSeats($journey['id']);
 
-        if($nbOfRemainingSeats === 0)           throw new JourneyFullException();
-        else $this->bookingModel->update($bookingId,['status'=>'accepted']);
-
+        if ($nbOfRemainingSeats === 0)           throw new JourneyFullException();
+        else $this->bookingModel->update($bookingId, ['status' => 'accepted']);
     }
 
-    public function rejectAllPending(int $journeyId){
+    public function rejectAllPending(int $journeyId)
+    {
 
-        $bookings = $this->bookingModel->where('journey_id',$journeyId)->where('status','pending')->findAll();
+        $bookings = $this->bookingModel->where('journey_id', $journeyId)->where('status', 'pending')->findAll();
 
-        foreach($bookings as $booking){
+        foreach ($bookings as $booking) {
 
-            $this->bookingModel->update($booking['id'],['status'=>'rejected']);
-
+            $this->bookingModel->update($booking['id'], ['status' => 'rejected']);
         }
-
     }
 
     public function confirmToPassenger(int $bookingId, int $driverId): void
@@ -205,5 +204,4 @@ class BookingService
             ])
         );
     }
-    
 }

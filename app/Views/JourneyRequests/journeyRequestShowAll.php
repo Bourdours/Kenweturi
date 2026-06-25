@@ -4,6 +4,10 @@
 /** @var string|null $filterCityStart */
 /** @var string|null $filterCityEnd */
 /** @var string|null $filterDate */
+/** @var object      $pager */
+/** @var int         $page */
+/** @var int         $perPage */
+/** @var int         $total */
 ?>
 <?= view('partials/head', [
     'extraCss' => [
@@ -178,6 +182,8 @@
                 </div>
             <?php endforeach ?>
         </div>
+
+        <?= $pager->makeLinks($page, $perPage, $total) ?>
     <?php endif ?>
 
 </div>

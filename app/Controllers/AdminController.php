@@ -217,7 +217,7 @@ class AdminController extends BaseController
         return redirect()->to(site_url('admin?tab=admins'))
             ->with('success', "{$target['firstname']} est maintenant {$label}.");
     }
-    
+
     /**
      * Supprime un utilisateur (soft delete) et annule ses trajets en cours.
      *
@@ -239,49 +239,40 @@ class AdminController extends BaseController
         try {
 
             $contact = $this->userService->deleteByAdmin($id, $currentUserId, $currentRole);
-
         } catch (UserNotFoundException) {
 
             return redirect()->to(site_url('admin?tab=admins'))
                 ->with('error', 'Utilisateur introuvable.');
-
         } catch (CannotDeleteSelfException) {
 
             return redirect()->to(site_url('admin?tab=admins'))
                 ->with('error', 'Vous ne pouvez pas supprimer votre propre compte.');
-
         } catch (CannotDeleteSuperadminException) {
 
             return redirect()->to(site_url('admin?tab=admins'))
                 ->with('error', 'Impossible de supprimer un super-administrateur.');
-
         } catch (AdminDeletionForbiddenException) {
 
             return redirect()->to(site_url('admin?tab=admins'))
                 ->with('error', 'Seul un super-administrateur peut supprimer un administrateur.');
-
         } catch (LastAdminException) {
 
             return redirect()->to(site_url('admin?tab=admins'))
                 ->with('error', 'Impossible de supprimer le dernier administrateur.');
-
         } catch (\Throwable $e) {
 
             log_message('error', 'Deletion failed for user n°{id}', ['id' => $id]);
             return redirect()->to(site_url('admin?tab=admins'))
                 ->with('error', 'Un problème est survenu.');
-
         }
 
         // Email à part : un échec d'envoi ne doit pas annuler la suppression (comme accept)
         try {
 
             $this->userService->notifyAdminDeletion($contact);
-
         } catch (\Throwable) {
 
             log_message('error', 'User deletion mail failed for user {id}', ['id' => $id]);
-
         }
 
         return redirect()->to(site_url('admin?tab=admins'))

@@ -137,7 +137,7 @@ class UserController extends BaseController
 
         // Suppression du cookie « se souvenir de moi » (auto-suppression uniquement)
         delete_cookie('remember_token');
-        
+
         session()->destroy();
         return redirect()->to(site_url('login') . '?deleted=1');
     }
@@ -313,6 +313,21 @@ class UserController extends BaseController
         ]);
 
         return redirect()->to(site_url('profile'))->with('success', 'Profil mis à jour avec succès.');
+    }
+
+    /**
+     * Supprime la photo de profil de l'utilisateur connecté (requête POST).
+     */
+    public function removeAvatar()
+    {
+        $userId = session()->get('user_id');
+
+        try {
+            $this->userService->deleteAvatar($userId);
+            return redirect()->to(site_url('profile'))->with('success', 'Votre photo de profil a été supprimée.');
+        } catch (UserNotFoundException $e) {
+            return redirect()->to(site_url('profile'))->with('error', 'Utilisateur introuvable.');
+        }
     }
 
     /**

@@ -75,7 +75,7 @@ class JourneyModel extends BaseModel
             'min_length' => 'L\'adresse d\'arrivée semble trop courte.',
         ],
         'note' => [
-           'max_length' => 'Le message doit contenir au maximum 1000 caractères.',
+            'max_length' => 'Le message doit contenir au maximum 1000 caractères.',
         ],
         'isRecurring' => [
             'required' => 'Veuillez spécifier si le trajet est récurrent.',
@@ -157,7 +157,7 @@ class JourneyModel extends BaseModel
         if (!empty($filters['filterDate']) && !empty($filters['filterTime'])) {
             $center = strtotime($filters['filterDate'] . ' ' . $filters['filterTime'] . ':00');
             $builder->where('journey.start_datetime >=', date('Y-m-d H:i:s', $center - 1800))
-                    ->where('journey.start_datetime <=', date('Y-m-d H:i:s', $center + 1800));
+                ->where('journey.start_datetime <=', date('Y-m-d H:i:s', $center + 1800));
         } elseif (!empty($filters['filterDate'])) {
             $builder->where('DATE(journey.start_datetime)', $filters['filterDate']);
             if ($filters['filterDate'] === date('Y-m-d')) {
@@ -177,19 +177,19 @@ class JourneyModel extends BaseModel
     public function findByUserInTimeRange(int $userId, string $fromDateTime, string $toDateTime): ?array
     {
         return $this->where('user_id', $userId)
-                    ->where('start_datetime >=', $fromDateTime)
-                    ->where('start_datetime <',  $toDateTime)
-                    ->first();
+            ->where('start_datetime >=', $fromDateTime)
+            ->where('start_datetime <',  $toDateTime)
+            ->first();
     }
 
     public function findActive(int $id)
     {
         return $this->where('id', $id)
-                    ->where('canceled_at', null)
-                    ->first();
+            ->where('canceled_at', null)
+            ->first();
     }
 
-    public function getNumberOfSeats(int $id): int 
+    public function getNumberOfSeats(int $id): int
     {
         $row = $this->select('seats')->find($id);
         return $row === null ? 0 : $row['seats'];

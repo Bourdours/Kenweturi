@@ -219,33 +219,6 @@
       </div>
     </div>
 
-    <!-- Préférences -->
-    <div class="bg-surface rounded-2xl p-6 border border-action/10">
-      <h2 class="text-ink text-base font-semibold font-display mb-5 flex items-center gap-2">
-        <i class="fa-solid fa-sliders text-action text-sm"></i>Préférences
-      </h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label for="seats" class="text-ink/50 text-xs font-medium mb-1.5 block">Nombre de places</label>
-          <input id="seats" name="seats" type="number" min="1" max="9" placeholder="Ex: 3" value="<?= esc(old('seats')) ?>"
-            class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors">
-        </div>
-        <div>
-          <label class="text-ink/50 text-xs font-medium mb-1.5 block">Fumeur</label>
-          <div class="flex gap-2">
-            <label class="flex-1 flex items-center justify-center gap-2 bg-paper border border-action/15 rounded-lg px-3 py-2.5 text-ink text-sm font-medium cursor-pointer has-[:checked]:bg-action/10 has-[:checked]:border-action/50 transition-colors">
-              <input type="radio" name="smoking" value="1" class="hidden" <?= old('smoking') === '1' ? 'checked' : '' ?>>
-              <i class="fa-solid fa-smoking text-xs"></i>Oui
-            </label>
-            <label class="flex-1 flex items-center justify-center gap-2 bg-paper border border-action/15 rounded-lg px-3 py-2.5 text-ink text-sm font-medium cursor-pointer has-[:checked]:bg-action/10 has-[:checked]:border-action/50 transition-colors">
-              <input type="radio" name="smoking" value="0" class="hidden" <?= old('smoking') === '0' ? 'checked' : '' ?>>
-              <i class="fa-solid fa-ban-smoking text-xs"></i>Non
-            </label>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- Voitures -->
     <div class="bg-surface rounded-2xl p-6 border border-action/10">
       <div class="flex items-center justify-between mb-5">
@@ -275,6 +248,33 @@
             <?php endforeach; ?>
           <?php endif; ?>
         </ul>
+      </div>
+    </div>
+
+    <!-- Préférences -->
+    <div class="bg-surface rounded-2xl p-6 border border-action/10">
+      <h2 class="text-ink text-base font-semibold font-display mb-5 flex items-center gap-2">
+        <i class="fa-solid fa-sliders text-action text-sm"></i>Préférences
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label for="seats" class="text-ink/50 text-xs font-medium mb-1.5 block">Nombre de places</label>
+          <input id="seats" name="seats" type="number" min="1" max="9" placeholder="Ex: 3" value="<?= esc(old('seats')) ?>"
+            class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors">
+        </div>
+        <div>
+          <label class="text-ink/50 text-xs font-medium mb-1.5 block">Fumeur</label>
+          <div class="flex gap-2">
+            <label class="flex-1 flex items-center justify-center gap-2 bg-paper border border-action/15 rounded-lg px-3 py-2.5 text-ink text-sm font-medium cursor-pointer has-[:checked]:bg-action/10 has-[:checked]:border-action/50 transition-colors">
+              <input type="radio" name="smoking" value="1" class="hidden" <?= old('smoking') === '1' ? 'checked' : '' ?>>
+              <i class="fa-solid fa-smoking text-xs"></i>Oui
+            </label>
+            <label class="flex-1 flex items-center justify-center gap-2 bg-paper border border-action/15 rounded-lg px-3 py-2.5 text-ink text-sm font-medium cursor-pointer has-[:checked]:bg-action/10 has-[:checked]:border-action/50 transition-colors">
+              <input type="radio" name="smoking" value="0" class="hidden" <?= old('smoking') === '0' ? 'checked' : '' ?>>
+              <i class="fa-solid fa-ban-smoking text-xs"></i>Non
+            </label>
+          </div>
+        </div>
       </div>
     </div>
 
