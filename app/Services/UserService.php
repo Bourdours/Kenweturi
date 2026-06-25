@@ -252,4 +252,30 @@ class UserService
             log_message('error', 'Échec suppression avatar : {path}', ['path' => $avatarPath]);
         }
     }
+
+    /**
+     * Supprime l'avatar d'un utilisateur.
+     *
+     * @param int $userId ID de l'utilisateur concerné.
+     * @return bool True si la suppression a réussi.
+     */
+    public function deleteAvatar(int $userId): bool
+    {
+        $target = $this->userModel->find($userId);
+        if ($target === null) {
+            throw new UserNotFoundException();
+        }
+
+        $avatarPath = $target['avatar'] ?? null;
+
+        if ($avatarPath === null || $avatarPath === '') {
+            return false;
+        }
+
+        $this->userModel->update($userId, ['avatar' => null]);
+
+        $this->deleteAvatarFile($avatarPath);
+
+        return true;
+    }
 }
