@@ -99,6 +99,9 @@ class UserService
             'lastname'  => $target['lastname'],
         ];
 
+        // Chemin de l'avatar capturé AVANT anonymisation (anonymize() le passe à null)
+        $avatarPath = $target['avatar'] ?? null;
+
         // Capture des informations de notification avant suppression
         $journeys                   = $this->journeyService->getActiveJourneysWithCities($targetId);
         $journeyIds                 = array_column($journeys, 'id');
@@ -126,6 +129,8 @@ class UserService
             // Anonymisation et soft delete du user
             $this->userModel->anonymize($targetId);
             $this->userModel->markAsDeleted($targetId); // Update du status
+            // Suppression de la photo de profil : la référence en base passe à null via anonymize() ci-dessus.
+            // Le fichier physique est supprimé APRÈS commit (voir deleteAvatarFile plus bas), car unlink() n'est pas transactionnel.
             $this->userModel->delete($targetId); //Renseigne simplement la date du champs deleted_at, car useSoftDelete=true dans UserModel
 
             if ($db->transStatus() === false) {
@@ -141,8 +146,9 @@ class UserService
             throw $e;
         }
 
-        // ============ Envoi des emails après commit (best-effort) ============
+        // ============ Effets de bord après commit (best-effort) ============
 
+        $this->deleteAvatarFile($avatarPath); // Suppression du fichier physique de l'avatar
         $this->bookingService->notifyDriverCancellations($driverNotificationsData);
         $this->journeyService->notifyPassengersJourneyCancelled($passengerNotificationsData);
 
@@ -224,5 +230,27 @@ class UserService
                 'support'   => env('mailer.from'),
             ])
         );
+    }
+
+    /**
+     * Supprime le fichier physique de l'avatar (best-effort).
+     * Appelée APRÈS commit : un échec ici ne doit jamais annuler une suppression
+     * de compte déjà validée en base.
+     */
+    private function deleteAvatarFile(?string $avatarPath): void
+    {
+        if ($avatarPath === null || $avatarPath === '') {
+            return;
+        }
+
+        $fullPath = FCPATH . $avatarPath;
+
+        if (! is_file($fullPath)) {
+            return;
+        }
+
+        if (! @unlink($fullPath)) {
+            log_message('error', 'Échec suppression avatar : {path}', ['path' => $avatarPath]);
+        }
     }
 }
