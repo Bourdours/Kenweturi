@@ -139,8 +139,7 @@ class UserController extends BaseController
         delete_cookie('remember_token');
         
         session()->destroy();
-        return redirect()->to(site_url('login'))
-            ->with('success', 'Votre compte a été supprimé.');
+        return redirect()->to(site_url('login') . '?deleted=1');
     }
 
     /**

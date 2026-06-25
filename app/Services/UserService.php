@@ -123,11 +123,19 @@ class UserService
             // Invalidation des tokens « se souvenir de moi » (reconnexion auto impossible)
             $this->rememberTokenModel->deleteAll($targetId);
 
-            // Soft delete du user
+            // Anonymisation et soft delete du user
             $this->userModel->anonymize($targetId);
-            $this->userModel->delete($targetId);
+            $this->userModel->markAsDeleted($targetId); // Update du status
+            $this->userModel->delete($targetId); //Renseigne simplement la date du champs deleted_at, car useSoftDelete=true dans UserModel
 
-            $db->transCommit();
+            if ($db->transStatus() === false) {
+                throw new \RuntimeException("Échec SQL lors de la suppression du compte #{$targetId}");
+            }
+
+            if ($db->transCommit() === false) {  // ← commit exécuté ICI, par ce test
+                throw new \RuntimeException("Échec du commit lors de la suppression du compte #{$targetId}");
+            }
+            
         } catch (\Throwable $e) {
             $db->transRollback();
             throw $e;
