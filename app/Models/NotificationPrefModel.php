@@ -62,7 +62,7 @@ class NotificationPrefModel extends Model
 
             if ($existing) {
                 $this->where('user_id', $userId)->where('pref', $key)
-                     ->set('enabled', $enabled)->update();
+                    ->set('enabled', $enabled)->update();
             } else {
                 $this->insert(['user_id' => $userId, 'pref' => $key, 'enabled' => $enabled]);
             }

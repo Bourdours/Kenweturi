@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
             modal.classList.add('hidden');
         }
     });
-    
+
     // Ferme le modal en cliquant en appuyant sur Échap
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && !modal.classList.contains('hidden')) {

@@ -31,9 +31,9 @@ const deleteAccountPassword = document.querySelector('#deleteAccountPassword');
 const deletePasswordError = document.querySelector('#deletePasswordError');
 
 if (deleteForm && modalSupprimer) {
-  
+
   // Ouvrir le modal au clic sur "Supprimer mon compte"
-  const openDeleteModal  = () => { modalSupprimer.classList.remove('hidden'); modalSupprimer.classList.add('flex'); deleteAccountPassword.focus(); };
+  const openDeleteModal = () => { modalSupprimer.classList.remove('hidden'); modalSupprimer.classList.add('flex'); deleteAccountPassword.focus(); };
   const closeDeleteModal = () => { modalSupprimer.classList.remove('flex'); modalSupprimer.classList.add('hidden'); deletePasswordError.classList.add('hidden'); };
 
   btnOpenDeleteModal?.addEventListener('click', openDeleteModal);
@@ -170,15 +170,15 @@ if (addCarBtn) {
 }
 
 // Gestion de la modale de confirmation de suppression de véhicule
-const deleteCarModal  = document.querySelector('#deleteCarModal');
-const deleteCarForm   = document.querySelector('#deleteCarForm');
-const deleteCarLabel  = document.querySelector('#deleteCarLabel');
+const deleteCarModal = document.querySelector('#deleteCarModal');
+const deleteCarForm = document.querySelector('#deleteCarForm');
+const deleteCarLabel = document.querySelector('#deleteCarLabel');
 const cancelDeleteCar = document.querySelector('#cancelDeleteCar');
 
 if (deleteCarModal && deleteCarForm && deleteCarLabel) {
   document.querySelectorAll('.deleteCar').forEach(btn => {
     btn.addEventListener('click', () => {
-      const id    = btn.dataset.carId;
+      const id = btn.dataset.carId;
       const label = btn.dataset.carLabel;
       deleteCarLabel.textContent = label;
       deleteCarForm.action = `${window.baseUrl}car/${id}/delete`;

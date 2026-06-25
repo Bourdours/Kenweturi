@@ -27,9 +27,9 @@ class CarModel extends BaseModel
 
     protected $validationMessages = [
         'brand' => [
-           'required'   => 'Veuillez renseigner une marque de voiture.',
-           'min_length' => 'La marque doit contenir au moins 3 caractères.',
-           'max_length' => 'La marque doit contenir maximum 50 caractères.'
+            'required'   => 'Veuillez renseigner une marque de voiture.',
+            'min_length' => 'La marque doit contenir au moins 3 caractères.',
+            'max_length' => 'La marque doit contenir maximum 50 caractères.'
         ],
 
         'model' => [
@@ -74,8 +74,7 @@ class CarModel extends BaseModel
     public function findOwnedByUser(int $carId, int $userId): ?array
     {
         return $this->where('id', $carId)
-                    ->where('user_id', $userId)
-                    ->first();
+            ->where('user_id', $userId)
+            ->first();
     }
-
 }

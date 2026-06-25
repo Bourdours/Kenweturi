@@ -183,7 +183,7 @@ class JourneyService
             if (!$this->notifPrefModel->wantsNotif($requesterId, 'journey_request')) continue;
 
             $date = date('d/m/Y', strtotime($journey['start_datetime']))
-                  . ' à ' . date('H:i', strtotime($journey['start_datetime']));
+                . ' à ' . date('H:i', strtotime($journey['start_datetime']));
 
             $this->mailer->sendHtml(
                 $request['requester_email'],
@@ -247,7 +247,7 @@ class JourneyService
             if (!$this->notifPrefModel->wantsNotif($requesterId, 'journey_request')) continue;
 
             $date = date('d/m/Y', strtotime($journey['start_datetime']))
-                  . ' à ' . date('H:i', strtotime($journey['start_datetime']));
+                . ' à ' . date('H:i', strtotime($journey['start_datetime']));
 
             $this->mailer->sendHtml(
                 $request['requester_email'],
@@ -342,13 +342,13 @@ class JourneyService
         }
     }
 
-    public function countRemainingSeats(int $journeyId){
+    public function countRemainingSeats(int $journeyId)
+    {
 
         $nbOfSeats = (int) $this->journeyModel->getNumberOfSeats($journeyId);
-        $nbOfAcceptedBook = (int) $this->bookingModel->countByStatus("accepted",$journeyId);
+        $nbOfAcceptedBook = (int) $this->bookingModel->countByStatus("accepted", $journeyId);
 
         return $nbOfSeats - $nbOfAcceptedBook;
-
     }
 
     /**

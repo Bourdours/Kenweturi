@@ -4,47 +4,47 @@
 
     if (!buttons.length || !tooltip) return;
 
-    const style      = getComputedStyle(document.documentElement);
-    const toRgb      = (v) => `rgb(${style.getPropertyValue(v).trim().replace(/\s+/g, ',')})`;
-    const brandColor  = toRgb('--color-brand');
+    const style = getComputedStyle(document.documentElement);
+    const toRgb = (v) => `rgb(${style.getPropertyValue(v).trim().replace(/\s+/g, ',')})`;
+    const brandColor = toRgb('--color-brand');
     const actionColor = toRgb('--color-action');
-    const isDark      = document.documentElement.classList.contains('dark');
-    const tileUrl    = 'https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2&STYLE=normal&FORMAT=image%2Fpng&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}';
+    const isDark = document.documentElement.classList.contains('dark');
+    const tileUrl = 'https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2&STYLE=normal&FORMAT=image%2Fpng&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}';
 
     const isTouch = window.matchMedia('(hover: none)').matches;
 
     const map = L.map(tooltip, {
-        zoomControl:        false,
+        zoomControl: false,
         attributionControl: false,
-        dragging:           false,
-        scrollWheelZoom:    false,
-        doubleClickZoom:    false,
-        touchZoom:          false,
-        keyboard:           false,
+        dragging: false,
+        scrollWheelZoom: false,
+        doubleClickZoom: false,
+        touchZoom: false,
+        keyboard: false,
     });
 
     L.tileLayer(tileUrl).addTo(map);
 
     let currentLayer = null;
-    let activeBtn    = null;
+    let activeBtn = null;
     let timer;
 
     function positionTooltip(card, cursorX, cursorY) {
         const tipW = 280, tipH = 180;
 
         if (isTouch) {
-            const rect  = card.getBoundingClientRect();
-            const left  = Math.max(8, Math.min(rect.left, window.innerWidth - tipW - 8));
+            const rect = card.getBoundingClientRect();
+            const left = Math.max(8, Math.min(rect.left, window.innerWidth - tipW - 8));
             const below = window.innerHeight - rect.bottom > tipH + 8;
             tooltip.style.left = `${left}px`;
-            tooltip.style.top  = `${below ? rect.bottom + 8 : rect.top - tipH - 8}px`;
+            tooltip.style.top = `${below ? rect.bottom + 8 : rect.top - tipH - 8}px`;
         } else {
             const offset = 16;
-            const left   = cursorX + offset + tipW < window.innerWidth
+            const left = cursorX + offset + tipW < window.innerWidth
                 ? cursorX + offset
                 : cursorX - tipW - offset;
             tooltip.style.left = `${left}px`;
-            tooltip.style.top  = `${Math.max(8, Math.min(cursorY - tipH / 2, window.innerHeight - tipH - 8))}px`;
+            tooltip.style.top = `${Math.max(8, Math.min(cursorY - tipH / 2, window.innerHeight - tipH - 8))}px`;
         }
     }
 
@@ -52,7 +52,7 @@
         return L.divIcon({
             className: '',
             html: `<div style="width:10px;height:10px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,.35)"></div>`,
-            iconSize:   [10, 10],
+            iconSize: [10, 10],
             iconAnchor: [5, 5],
         });
     }
@@ -61,7 +61,7 @@
         if (currentLayer) { map.removeLayer(currentLayer); currentLayer = null; }
 
         const geojson = JSON.parse(card.dataset.geojson);
-        const group   = L.layerGroup();
+        const group = L.layerGroup();
 
         L.geoJSON(geojson, { style: { color: brandColor, weight: 3, opacity: 0.9 } }).addTo(group);
 

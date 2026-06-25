@@ -1,7 +1,7 @@
 (function () {
-  var html    = document.documentElement;
-  var btn     = document.getElementById('rainbow-road-toggle');
-  var label   = document.getElementById('rainbow-road-label');
+  var html = document.documentElement;
+  var btn = document.getElementById('rainbow-road-toggle');
+  var label = document.getElementById('rainbow-road-label');
   var sparklesEl = null;
 
   var SPARKLE_POSITIONS = [
@@ -26,8 +26,8 @@
       c.setAttribute('cy', pos[1]);
       c.setAttribute('r', 0.5);
       c.setAttribute('fill', 'hsl(' + ((i * 20) % 360) + ',100%,85%)');
-      var dur  = (1.1 + (i % 6) * 0.25).toFixed(2);
-      var del  = (-(i * 0.31) % 2.2).toFixed(2);
+      var dur = (1.1 + (i % 6) * 0.25).toFixed(2);
+      var del = (-(i * 0.31) % 2.2).toFixed(2);
       c.style.animation = 'sparkle ' + dur + 's ease-in-out ' + del + 's infinite';
       g.appendChild(c);
     });
