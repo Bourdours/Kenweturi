@@ -1,4 +1,4 @@
-const DEBOUNCE_DELAY   = 300;
+const DEBOUNCE_DELAY = 300;
 const MIN_QUERY_LENGTH = 3;
 
 function setupAutocomplete(input, onSelect) {
@@ -34,10 +34,10 @@ function loadSuggestions(query, input, list, onSelect) {
         .then(data => {
             const suggestions = (data.results ?? []).map(s => ({
                 fulltext: s.fulltext,
-                lat:      s.y,
-                lng:      s.x,
-                city:     s.city     ?? '',
-                zipcode:  s.zipcode  ?? '',
+                lat: s.y,
+                lng: s.x,
+                city: s.city ?? '',
+                zipcode: s.zipcode ?? '',
             }));
             displaySuggestions(suggestions, input, list, onSelect);
         })
@@ -59,5 +59,5 @@ function displaySuggestions(suggestions, input, list, onSelect) {
 
 function hideSuggestionsList(list) {
     list.style.display = 'none';
-    list.innerHTML     = '';
+    list.innerHTML = '';
 }
