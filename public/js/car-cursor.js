@@ -162,19 +162,19 @@
   function getCarSVG(dark) {
     const model = localStorage.getItem('carModel') || 'default';
     if (model === 'coupe') return dark ? SVG_COUPE_DARK : SVG_COUPE_LIGHT;
-    if (model === 'suv')   return dark ? SVG_SUV_DARK   : SVG_SUV_LIGHT;
+    if (model === 'suv') return dark ? SVG_SUV_DARK : SVG_SUV_LIGHT;
     return dark ? SVG_DARK : SVG_LIGHT;
   }
 
   function applyConfig() {
     const dark = document.documentElement.classList.contains('dark');
-    carOff     = document.documentElement.classList.contains('car-off');
+    carOff = document.documentElement.classList.contains('car-off');
 
-    cursorStyle.disabled  = carOff;
-    car.style.visibility  = carOff ? 'hidden' : 'visible';
-    carInner.innerHTML    = getCarSVG(dark);
-    dot.style.background  = dark ? '#FFF0A0' : '#D9663F';
-    dot.style.boxShadow   = dark
+    cursorStyle.disabled = carOff;
+    car.style.visibility = carOff ? 'hidden' : 'visible';
+    carInner.innerHTML = getCarSVG(dark);
+    dot.style.background = dark ? '#FFF0A0' : '#D9663F';
+    dot.style.boxShadow = dark
       ? '0 0 6px 3px rgba(255,240,160,0.7)'
       : '0 0 6px 3px rgba(217,102,63,0.7)';
   }
@@ -187,7 +187,7 @@
   // Nez à x=68 dans le SVG ; transform-origin par défaut = 50% = x=36
   // Après scaleX(s) : x_nez_local = 36 + 32*s
   // Pour que le nez soit au curseur : elem_left = cx - 36 - 32*s
-  const OX       = W / 2;          // 36
+  const OX = W / 2;          // 36
   const NOSE_OFF = FRONT_X - OX;   // 32
 
   let tx = -200, ty = -200;
@@ -229,7 +229,7 @@
     cx += (tx - cx) * 0.12;
     cy += (ty - cy) * 0.12;
     currentScaleX += (targetScaleX - currentScaleX) * 0.12;
-    currentTilt   += (targetTilt   - currentTilt)   * 0.08;
+    currentTilt += (targetTilt - currentTilt) * 0.08;
 
     const effectiveTilt = currentTilt;
     const elemX = cx - OX - NOSE_OFF * currentScaleX;
@@ -240,7 +240,7 @@
     // Le point suit le vrai curseur sans délai ; s'efface quand la voiture l'a rattrapé
     const dist = Math.hypot(tx - cx, ty - cy);
     dot.style.transform = `translate(${tx - 3.5}px, ${ty - 3.5}px)`;
-    dot.style.opacity   = (tx > -100 && !carOff) ? Math.min(1, dist / 40) : 0;
+    dot.style.opacity = (tx > -100 && !carOff) ? Math.min(1, dist / 40) : 0;
 
     requestAnimationFrame(animate);
   })();

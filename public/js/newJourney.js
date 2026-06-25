@@ -37,10 +37,10 @@ if (seatsInput) {
 
 // ========== DROPDOWN VEHICULE : INITIALISATION
 
-const carBtn    = document.getElementById('carDropdownBtn');
-const carList   = document.getElementById('carDropdownList');
-const carLabel  = document.getElementById('carDropdownLabel');
-const carArrow  = document.getElementById('carDropdownArrow');
+const carBtn = document.getElementById('carDropdownBtn');
+const carList = document.getElementById('carDropdownList');
+const carLabel = document.getElementById('carDropdownLabel');
+const carArrow = document.getElementById('carDropdownArrow');
 const carHidden = document.getElementById('carHidden');
 
 if (carBtn && carList && carLabel && carArrow && carHidden) {
@@ -52,7 +52,7 @@ if (carBtn && carList && carLabel && carArrow && carHidden) {
 // ========== ETAPES INTERMEDIAIRES : INITIALISATION
 
 const stagesContainer = document.getElementById('stagesContainer');
-const addStageBtn     = document.getElementById('addStageBtn');
+const addStageBtn = document.getElementById('addStageBtn');
 
 if (stagesContainer && addStageBtn) {
     initStagesManagement(stagesContainer, addStageBtn);
@@ -74,7 +74,7 @@ function setupAddressAutocompletion(input) {
 
     if (!input || !input.parentElement) return;
 
-    const DEBOUNCE_DELAY   = 300;
+    const DEBOUNCE_DELAY = 300;
     const MIN_QUERY_LENGTH = 3;
     const list = createSuggestionsList(input);
     let debounceTimer;
@@ -380,8 +380,8 @@ function toggleCarDropdown(list, arrow) {
 
     const isOpen = list.style.display === 'block';
 
-    list.style.display    = isOpen ? 'none' : 'block';
-    arrow.style.transform = isOpen ? ''     : 'rotate(180deg)';
+    list.style.display = isOpen ? 'none' : 'block';
+    arrow.style.transform = isOpen ? '' : 'rotate(180deg)';
 }
 
 
@@ -397,7 +397,7 @@ function toggleCarDropdown(list, arrow) {
  */
 function closeCarDropdown(list, arrow) {
 
-    list.style.display    = 'none';
+    list.style.display = 'none';
     arrow.style.transform = '';
 }
 
@@ -420,7 +420,7 @@ function selectCar(item, label, hidden, list, arrow) {
 
     const value = item.dataset.value;
 
-    hidden.value      = value;
+    hidden.value = value;
     label.textContent = item.textContent.trim();
     label.classList.remove('text-ink/30', 'text-ink');
     label.classList.add(value ? 'text-ink' : 'text-ink/30');
@@ -496,7 +496,7 @@ function addStage(container) {
 
     // L'étape 1 est statique : la numérotation des étapes dynamiques démarre à 2.
     const stageNumber = container.querySelectorAll('.dynamic-stage').length + 2;
-    const row         = buildStageRow(stageNumber);
+    const row = buildStageRow(stageNumber);
 
     setupAddressAutocompletion(row.querySelector('.address'));
 

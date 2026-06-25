@@ -17,7 +17,8 @@ class JourneyRequestController extends BaseController
     protected CityModel $cityModel;
     protected LocationModel $locationModel;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->journeyRequestModel = new JourneyRequestModel();
         $this->cityModel           = new CityModel();
         $this->locationModel       = new LocationModel();
