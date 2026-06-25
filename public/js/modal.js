@@ -1,5 +1,5 @@
 (function () {
-    const HTML = `
+  const HTML = `
 <div id="confirm-modal" class="fixed inset-0 hidden items-center justify-center p-4" style="z-index:1000">
   <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="confirm-modal-backdrop"></div>
   <div class="relative bg-surface-card rounded-2xl shadow-2xl p-6 w-full max-w-sm">
@@ -17,33 +17,33 @@
   </div>
 </div>`;
 
-    document.body.insertAdjacentHTML('beforeend', HTML);
+  document.body.insertAdjacentHTML('beforeend', HTML);
 
-    const modal    = document.getElementById('confirm-modal');
-    const msgEl    = document.getElementById('confirm-modal-message');
-    const backdrop = document.getElementById('confirm-modal-backdrop');
-    const cancelBtn = document.getElementById('confirm-modal-cancel');
-    const okBtn    = document.getElementById('confirm-modal-ok');
-    let pendingForm = null;
+  const modal = document.getElementById('confirm-modal');
+  const msgEl = document.getElementById('confirm-modal-message');
+  const backdrop = document.getElementById('confirm-modal-backdrop');
+  const cancelBtn = document.getElementById('confirm-modal-cancel');
+  const okBtn = document.getElementById('confirm-modal-ok');
+  let pendingForm = null;
 
-    function open(message, formId) {
-        msgEl.textContent = message;
-        pendingForm = formId ? document.getElementById(formId) : null;
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-    }
+  function open(message, formId) {
+    msgEl.textContent = message;
+    pendingForm = formId ? document.getElementById(formId) : null;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
 
-    function close() {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-        pendingForm = null;
-    }
+  function close() {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    pendingForm = null;
+  }
 
-    cancelBtn.addEventListener('click', close);
-    backdrop.addEventListener('click', close);
-    okBtn.addEventListener('click', () => { if (pendingForm) pendingForm.submit(); });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+  cancelBtn.addEventListener('click', close);
+  backdrop.addEventListener('click', close);
+  okBtn.addEventListener('click', () => { if (pendingForm) pendingForm.submit(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
 
-    window.openConfirmModal  = open;
-    window.closeConfirmModal = close;
+  window.openConfirmModal = open;
+  window.closeConfirmModal = close;
 })();

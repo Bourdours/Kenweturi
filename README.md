@@ -30,6 +30,7 @@ Ouvre `.env` et configure :
 
 - **App** : `app.baseURL`
 - **Base de données** : host, nom, identifiants
+- **Encryption** : `encryption.key` — génère une clé avec `php -r "echo bin2hex(random_bytes(32));"`
 - **Mailer** : identifiants SMTP (voir section ci-dessous)
 - **Site** : email de contact et URL publique
 

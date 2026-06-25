@@ -110,7 +110,7 @@ class GeoService
         $dLon = $lon2 - $lon1;
 
         $a = sin($dLat / 2) ** 2
-           + cos($lat1) * cos($lat2) * sin($dLon / 2) ** 2;
+            + cos($lat1) * cos($lat2) * sin($dLon / 2) ** 2;
         $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
 
         return $earthRadiusKm * $c;

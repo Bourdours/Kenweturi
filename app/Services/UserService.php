@@ -147,7 +147,6 @@ class UserService
             if ($db->transCommit() === false) {  // ← commit exécuté ICI, par ce test
                 throw new \RuntimeException("Échec du commit lors de la suppression du compte #{$targetId}");
             }
-            
         } catch (\Throwable $e) {
             $db->transRollback();
             throw $e;
@@ -269,5 +268,30 @@ class UserService
         $this->journeyRequestModel
             ->where('user_id', $userId)
             ->delete();
+    }
+
+     * Supprime l'avatar d'un utilisateur.
+     *
+     * @param int $userId ID de l'utilisateur concerné.
+     * @return bool True si la suppression a réussi.
+     */
+    public function deleteAvatar(int $userId): bool
+    {
+        $target = $this->userModel->find($userId);
+        if ($target === null) {
+            throw new UserNotFoundException();
+        }
+
+        $avatarPath = $target['avatar'] ?? null;
+
+        if ($avatarPath === null || $avatarPath === '') {
+            return false;
+        }
+
+        $this->userModel->update($userId, ['avatar' => null]);
+
+        $this->deleteAvatarFile($avatarPath);
+
+        return true;
     }
 }

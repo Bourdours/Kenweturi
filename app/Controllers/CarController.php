@@ -50,7 +50,7 @@ class CarController extends BaseController
         $back = $this->request->getPost('back');
         if (empty($back)) {
             $back = site_url('profile/edit');
-        } 
+        }
         return redirect()->to($back)->with('success', 'Voiture ajoutée avec succès !');
     }
 
