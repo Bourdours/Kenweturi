@@ -1,4 +1,5 @@
 <?php
+
 /** @var string $title */
 /** @var array $bookings */
 /** @var string|null $filter */
@@ -20,33 +21,33 @@
         <?php if (in_array($filter, ['upcoming', 'past'])): ?>
             <div class="flex bg-surface border border-action/15 rounded-full p-1 gap-1" role="group" aria-label="Filtre des trajets">
                 <a href="<?= site_url('dashboard/bookings') ?>?filter=upcoming"
-                   class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= $filter === 'upcoming' ? 'bg-action text-ink' : 'text-ink/60 hover:text-ink' ?>">
+                    class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= $filter === 'upcoming' ? 'bg-action text-ink' : 'text-ink/60 hover:text-ink' ?>">
                     À&nbsp;venir
                 </a>
                 <a href="<?= site_url('dashboard/bookings') ?>?filter=past"
-                   class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= $filter === 'past' ? 'bg-action text-ink' : 'text-ink/60 hover:text-ink' ?>">
+                    class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= $filter === 'past' ? 'bg-action text-ink' : 'text-ink/60 hover:text-ink' ?>">
                     Passés
                 </a>
             </div>
         <?php elseif (in_array($filter, ['mine', 'mine-past'])): ?>
             <div class="flex bg-surface border border-action/15 rounded-full p-1 gap-1" role="group" aria-label="Filtre des demandes envoyées">
                 <a href="<?= site_url('dashboard/bookings') ?>?filter=mine"
-                   class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= $filter === 'mine' ? 'bg-action text-ink' : 'text-ink/60 hover:text-ink' ?>">
+                    class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= $filter === 'mine' ? 'bg-action text-ink' : 'text-ink/60 hover:text-ink' ?>">
                     À&nbsp;venir
                 </a>
                 <a href="<?= site_url('dashboard/bookings') ?>?filter=mine-past"
-                   class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= $filter === 'mine-past' ? 'bg-action text-ink' : 'text-ink/60 hover:text-ink' ?>">
+                    class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= $filter === 'mine-past' ? 'bg-action text-ink' : 'text-ink/60 hover:text-ink' ?>">
                     Passées
                 </a>
             </div>
         <?php else: ?>
             <div class="flex bg-surface border border-action/15 rounded-full p-1 gap-1" role="group" aria-label="Filtre des réservations reçues">
                 <a href="<?= site_url('dashboard/bookings') ?>"
-                   class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= $filter !== 'received-past' ? 'bg-action text-ink' : 'text-ink/60 hover:text-ink' ?>">
+                    class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= $filter !== 'received-past' ? 'bg-action text-ink' : 'text-ink/60 hover:text-ink' ?>">
                     À&nbsp;venir
                 </a>
                 <a href="<?= site_url('dashboard/bookings') ?>?filter=received-past"
-                   class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= $filter === 'received-past' ? 'bg-action text-ink' : 'text-ink/60 hover:text-ink' ?>">
+                    class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= $filter === 'received-past' ? 'bg-action text-ink' : 'text-ink/60 hover:text-ink' ?>">
                     Passées
                 </a>
             </div>

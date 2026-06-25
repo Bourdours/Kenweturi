@@ -1,14 +1,17 @@
 <?php
+
 /** @var string $firstname */
 /** @var string $resetLink */
 ?>
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Réinitialisation de votre mot de passe</title>
 </head>
+
 <body style="margin:0;padding:0;background-color:#111a26;font-family:'Helvetica Neue',Arial,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#111a26;padding:40px 16px;">
     <tr>
@@ -42,7 +45,7 @@
                 <tr>
                   <td align="center" style="padding-bottom:32px;">
                     <a href="<?= esc($resetLink) ?>"
-                       style="display:inline-block;background-color:#D85A30;color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:14px 36px;border-radius:8px;letter-spacing:0.1px;">
+                      style="display:inline-block;background-color:#D85A30;color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:14px 36px;border-radius:8px;letter-spacing:0.1px;">
                       Réinitialiser mon mot de passe
                     </a>
                   </td>
@@ -75,4 +78,5 @@
     </tr>
   </table>
 </body>
+
 </html>

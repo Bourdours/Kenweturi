@@ -107,7 +107,7 @@
                         <td class="px-4 py-3 text-ink/70 whitespace-nowrap">
                             <span <?= mb_strlen($user['email']) > 28 ? 'title="' . esc($user['email']) . '"' : '' ?>><?= esc(mb_strlen($user['email']) > 28 ? mb_substr($user['email'], 0, 28) . '…' : $user['email']) ?></span>
                         </td>
-                    
+
                         <td class="px-3 py-3 whitespace-nowrap">
                             <!-- Empêche l'admin de s'auto-valider / s'auto-refuser -->
                             <?php if ((int)$user['id'] !== (int)session()->get('user_id')): ?>

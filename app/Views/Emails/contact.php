@@ -1,4 +1,5 @@
 <?php
+
 /** @var string $name */
 /** @var string $email */
 /** @var string $subject */
@@ -6,11 +7,13 @@
 ?>
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nouveau message de contact</title>
 </head>
+
 <body style="margin:0;padding:0;background-color:#111a26;font-family:'Helvetica Neue',Arial,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#111a26;padding:40px 16px;">
     <tr>
@@ -78,4 +81,5 @@
     </tr>
   </table>
 </body>
+
 </html>

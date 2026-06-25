@@ -39,8 +39,7 @@
               name="prefs[]"
               value="<?= esc($slug) ?>"
               <?= ($prefs[$slug] ?? true) ? 'checked' : '' ?>
-              class="w-4 h-4 rounded accent-action cursor-pointer"
-            >
+              class="w-4 h-4 rounded accent-action cursor-pointer">
           </div>
           <div class="flex-1 min-w-0">
             <p class="text-ink text-sm font-medium leading-snug"><?= esc($label) ?></p>
