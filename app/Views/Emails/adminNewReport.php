@@ -1,4 +1,5 @@
 <?php
+
 /** @var int    $reporterId */
 /** @var int    $journeyId */
 /** @var string $description */

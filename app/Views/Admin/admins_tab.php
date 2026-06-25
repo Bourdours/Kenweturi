@@ -120,7 +120,7 @@ $displayCount  = count($allUsers);
                             </button>
                         </form>
                     <?php endif; ?>
-                    
+
                     <?php if ($canDelete): ?>
                         <form action="<?= site_url('admin/users/' . $user['id'] . '/delete') ?>" class="delete-form" method="post">
                             <?= csrf_field() ?>

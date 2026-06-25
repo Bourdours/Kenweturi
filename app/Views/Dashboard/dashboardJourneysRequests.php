@@ -1,4 +1,5 @@
 <?php
+
 /** @var string $title */
 /** @var array $journeyRequests */
 /** @var int $total */
@@ -31,7 +32,7 @@
         <div class="space-y-3">
             <?php foreach ($journeyRequests as $request) : ?>
                 <a href="<?= site_url('dashboard/journey-requests/' . $request['id'] . '?back=' . urlencode(current_url(true))) ?>"
-                   class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors">
+                    class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors">
 
                     <div class="flex items-center gap-4">
                         <div class="flex flex-col items-center shrink-0">

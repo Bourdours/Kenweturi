@@ -17,7 +17,11 @@
 ]) ?>
 <?= view('partials/header') ?>
 
-<style>html { scroll-behavior: smooth; }</style>
+<style>
+    html {
+        scroll-behavior: smooth;
+    }
+</style>
 
 <div class="max-w-4xl mx-auto py-10 px-4 space-y-4">
 
@@ -27,11 +31,11 @@
             <h1 class="text-ink text-2xl font-bold font-display">Confirmer le trajet</h1>
             <div class="flex gap-2 shrink-0">
                 <a href="#actions"
-                   class="inline-flex items-center gap-1.5 bg-action hover:bg-action-dark text-ink font-bold font-display text-sm rounded-full px-4 py-1.5 transition-colors">
+                    class="inline-flex items-center gap-1.5 bg-action hover:bg-action-dark text-ink font-bold font-display text-sm rounded-full px-4 py-1.5 transition-colors">
                     <i class="fa-solid fa-check text-xs"></i>Valider
                 </a>
                 <a href="#actions"
-                   class="inline-flex items-center gap-1.5 border border-action/30 hover:border-action/60 text-ink/70 hover:text-ink font-semibold font-display text-sm rounded-full px-4 py-1.5 transition-colors">
+                    class="inline-flex items-center gap-1.5 border border-action/30 hover:border-action/60 text-ink/70 hover:text-ink font-semibold font-display text-sm rounded-full px-4 py-1.5 transition-colors">
                     <i class="fa-solid fa-pen text-xs"></i>Modifier
                 </a>
             </div>
@@ -116,11 +120,11 @@
 
         <!-- Map du trajet -->
         <?php
-            $mapWaypoints = array_merge(
-                [['lat' => $journey['lat_start'], 'lng' => $journey['lng_start'], 'label' => $journey['city_start_name']]],
-                array_map(fn($s) => ['lat' => $s['latitude'], 'lng' => $s['longitude'], 'label' => $s['city_name']], $stages),
-                [['lat' => $journey['lat_end'],   'lng' => $journey['lng_end'],   'label' => $journey['city_end_name']]]
-            );
+        $mapWaypoints = array_merge(
+            [['lat' => $journey['lat_start'], 'lng' => $journey['lng_start'], 'label' => $journey['city_start_name']]],
+            array_map(fn($s) => ['lat' => $s['latitude'], 'lng' => $s['longitude'], 'label' => $s['city_name']], $stages),
+            [['lat' => $journey['lat_end'],   'lng' => $journey['lng_end'],   'label' => $journey['city_end_name']]]
+        );
         ?>
         <?= view('partials/journeyMap', ['waypoints' => $mapWaypoints, 'geojson' => $journey['track_geojson'] ?? null]) ?>
 
@@ -138,7 +142,7 @@
                     <?php if (!empty($journey['driver_avatar'])): ?>
                         <div class="w-14 h-14 rounded-full overflow-hidden shrink-0">
                             <img src="<?= site_url(esc($journey['driver_avatar'])) ?>" alt="Avatar de <?= esc($journey['driver_firstname']) ?>" class="w-full h-full object-cover"
-                            onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
+                                onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
                         </div>
                         <div class="hidden w-14 h-14 rounded-full bg-action-dark text-ink font-bold text-base shrink-0 items-center justify-center">
                             <?= esc($initials) ?>

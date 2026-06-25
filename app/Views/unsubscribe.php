@@ -1,4 +1,5 @@
 <?php
+
 /** @var bool   $success */
 /** @var string $label */
 ?>
@@ -24,11 +25,11 @@
 
       <div class="w-full border-t border-action/10 pt-5 flex flex-col gap-3">
         <a href="<?= site_url('profile/notifications') ?>"
-           class="w-full bg-action hover:bg-action-dark text-ink font-semibold font-display rounded-lg px-5 py-2.5 text-sm transition-colors text-center">
+          class="w-full bg-action hover:bg-action-dark text-ink font-semibold font-display rounded-lg px-5 py-2.5 text-sm transition-colors text-center">
           Gérer toutes mes préférences
         </a>
         <a href="<?= site_url('/') ?>"
-           class="text-ink/40 hover:text-ink/70 text-xs transition-colors">
+          class="text-ink/40 hover:text-ink/70 text-xs transition-colors">
           Retour à l'accueil
         </a>
       </div>
@@ -49,11 +50,11 @@
 
       <div class="w-full border-t border-action/10 pt-5 flex flex-col gap-3">
         <a href="<?= site_url('profile/notifications') ?>"
-           class="w-full bg-action hover:bg-action-dark text-ink font-semibold font-display rounded-lg px-5 py-2.5 text-sm transition-colors text-center">
+          class="w-full bg-action hover:bg-action-dark text-ink font-semibold font-display rounded-lg px-5 py-2.5 text-sm transition-colors text-center">
           Gérer mes préférences
         </a>
         <a href="<?= site_url('/') ?>"
-           class="text-ink/40 hover:text-ink/70 text-xs transition-colors">
+          class="text-ink/40 hover:text-ink/70 text-xs transition-colors">
           Retour à l'accueil
         </a>
       </div>

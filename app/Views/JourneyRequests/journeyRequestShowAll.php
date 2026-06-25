@@ -1,4 +1,5 @@
 <?php
+
 /** @var array       $journeyRequests */
 /** @var string|null $filterCityStart */
 /** @var string|null $filterCityEnd */
@@ -24,30 +25,30 @@
 <div class="max-w-4xl mx-auto py-10 px-4 space-y-6">
 
     <?php if (session()->has('success')): ?>
-      <div class="bg-green-500/10 border border-green-500/30 rounded-xl p-4 flex gap-3 items-start">
-        <i class="fa-solid fa-circle-check text-green-500 text-base shrink-0 mt-0.5"></i>
-        <p class="text-ink text-sm"><?= esc(session('success')) ?></p>
-      </div>
+        <div class="bg-green-500/10 border border-green-500/30 rounded-xl p-4 flex gap-3 items-start">
+            <i class="fa-solid fa-circle-check text-green-500 text-base shrink-0 mt-0.5"></i>
+            <p class="text-ink text-sm"><?= esc(session('success')) ?></p>
+        </div>
     <?php endif ?>
 
     <?php if (session()->has('error')): ?>
-      <div class="bg-action/10 border border-action/30 rounded-xl p-4 flex gap-3 items-start">
-        <i class="fa-solid fa-triangle-exclamation text-action text-base shrink-0 mt-0.5"></i>
-        <p class="text-ink text-sm"><?= esc(session('error')) ?></p>
-      </div>
+        <div class="bg-action/10 border border-action/30 rounded-xl p-4 flex gap-3 items-start">
+            <i class="fa-solid fa-triangle-exclamation text-action text-base shrink-0 mt-0.5"></i>
+            <p class="text-ink text-sm"><?= esc(session('error')) ?></p>
+        </div>
     <?php endif ?>
 
     <div class="flex items-center justify-between">
         <h1 class="text-ink text-2xl font-bold font-display">Demander un trajet</h1>
         <div class="flex items-center gap-2">
             <?php if (!empty($userRequestsCount)): ?>
-            <a href="<?= site_url('dashboard/journey-requests') ?>"
-               class="flex items-center gap-2 border border-action/20 hover:border-action/50 text-ink/60 hover:text-ink font-medium font-display rounded-lg px-4 py-1.5 text-sm transition-colors">
-                <i class="fa-solid fa-list text-xs"></i>Mes demandes
-            </a>
+                <a href="<?= site_url('dashboard/journey-requests') ?>"
+                    class="flex items-center gap-2 border border-action/20 hover:border-action/50 text-ink/60 hover:text-ink font-medium font-display rounded-lg px-4 py-1.5 text-sm transition-colors">
+                    <i class="fa-solid fa-list text-xs"></i>Mes demandes
+                </a>
             <?php endif ?>
             <a href="<?= site_url('journey-requests/new') ?>"
-               class="flex items-center gap-2 bg-action hover:bg-action-dark text-ink font-semibold font-display rounded-lg px-4 py-1.5 text-sm transition-colors">
+                class="flex items-center gap-2 bg-action hover:bg-action-dark text-ink font-semibold font-display rounded-lg px-4 py-1.5 text-sm transition-colors">
                 <i class="fa-solid fa-plus text-xs"></i>Publier une demande
             </a>
         </div>
@@ -66,32 +67,32 @@
                         <i class="fa-solid fa-circle-dot text-sm"></i>Départ
                     </label>
                     <input type="text" id="cityStart" name="cityStart"
-                           value="<?= esc($filterCityStart ?? '') ?>"
-                           placeholder="Ville de départ"
-                           class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30">
+                        value="<?= esc($filterCityStart ?? '') ?>"
+                        placeholder="Ville de départ"
+                        class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30">
                 </div>
                 <div>
                     <label for="cityEnd" class="text-ink/50 text-sm mb-1.5 flex items-baseline gap-1">
                         <i class="fa-solid fa-location-dot text-sm"></i>Arrivée
                     </label>
                     <input type="text" id="cityEnd" name="cityEnd"
-                           value="<?= esc($filterCityEnd ?? '') ?>"
-                           placeholder="Ville d'arrivée"
-                           class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30">
+                        value="<?= esc($filterCityEnd ?? '') ?>"
+                        placeholder="Ville d'arrivée"
+                        class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30">
                 </div>
                 <div>
                     <label for="date" class="text-ink/50 text-sm mb-1.5 flex items-baseline gap-1">
                         <i class="fa-regular fa-calendar text-sm"></i>Date
                     </label>
                     <input type="text" id="date" name="date" readonly
-                           value="<?= esc($filterDate ?? '') ?>"
-                           placeholder="jj/mm/aaaa"
-                           class="w-full bg-paper border border-action/15 rounded-lg text-ink/60 text-sm px-3 py-2.5 outline-none focus:border-action/50 cursor-pointer">
+                        value="<?= esc($filterDate ?? '') ?>"
+                        placeholder="jj/mm/aaaa"
+                        class="w-full bg-paper border border-action/15 rounded-lg text-ink/60 text-sm px-3 py-2.5 outline-none focus:border-action/50 cursor-pointer">
                 </div>
             </div>
 
             <button type="submit"
-                    class="w-full bg-action hover:bg-action-dark text-ink font-semibold font-display rounded-lg py-3 transition-colors cursor-pointer text-base">
+                class="w-full bg-action hover:bg-action-dark text-ink font-semibold font-display rounded-lg py-3 transition-colors cursor-pointer text-base">
                 <i class="fa-solid fa-magnifying-glass mr-2"></i>Rechercher
             </button>
         </div>
@@ -139,8 +140,8 @@
                             <?php if (!empty($request['avatar'])): ?>
                                 <div class="jsAvatarOpen cursor-pointer w-7 h-7 rounded-full overflow-hidden shrink-0">
                                     <img src="<?= site_url(esc($request['avatar'])) ?>" alt="Avatar"
-                                         class="w-full h-full object-cover"
-                                         onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
+                                        class="w-full h-full object-cover"
+                                        onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
                                 </div>
                                 <div class="jsAvatarOpen cursor-pointer hidden w-7 h-7 rounded-full bg-action-dark text-ink font-bold text-xs shrink-0 items-center justify-center">
                                     <?= $initials ?>
