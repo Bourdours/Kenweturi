@@ -11,7 +11,8 @@
 <?= view('partials/head', [
   'extraJs' => ($tab === 'settings') ? [
     base_url('js/autocomplete.js'),
-    base_url('js/adminSettings.js'),] : [],
+    base_url('js/adminSettings.js'),
+  ] : [],
 ]) ?>
 <?= view('partials/header') ?>
 <div class="max-w-5xl mx-auto py-10 px-4 flex flex-col gap-6">
@@ -79,12 +80,12 @@
     <?php endif; ?>
 
     <!-- Réglages -->
-  <a href="<?= site_url('admin?tab=settings') ?>"
-    class="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold font-display rounded-t-lg transition-colors
+    <a href="<?= site_url('admin?tab=settings') ?>"
+      class="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold font-display rounded-t-lg transition-colors
           <?= ($tab === 'settings') ? 'bg-surface border border-b-surface border-action/10 text-ink sm:-mb-px' : 'text-ink/40 hover:text-ink' ?>">
-    <i class="fa-solid fa-gear text-xs"></i>
-    Réglages
-  </a>
+      <i class="fa-solid fa-gear text-xs"></i>
+      Réglages
+    </a>
 
   </div>
 

@@ -1,4 +1,6 @@
-<?php /** @var \Config\Site $site */ ?>
+<?php
+
+/** @var \Config\Site $site */ ?>
 <?= view('partials/head') ?>
 <?= view('partials/header') ?>
 
