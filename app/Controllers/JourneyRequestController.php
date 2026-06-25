@@ -116,7 +116,7 @@ class JourneyRequestController extends BaseController
 
         // ====== Validation des données du formulaire
         if (!$this->validate($this->getValidationRules(), $this->getValidationMessages())) {
-            return redirect()->back()->withInput()
+            return redirect()->to('/journey-requests/new')->withInput()
                 ->with('errors', $this->validator->getErrors());
         }
 
@@ -162,7 +162,7 @@ class JourneyRequestController extends BaseController
         ];
 
         if (!$this->journeyRequestModel->save($data)) {
-            return redirect()->back()->withInput()->with('errors', $this->journeyRequestModel->errors());
+            return redirect()->to('/journey-requests/new')->withInput()->with('errors', $this->journeyRequestModel->errors());
         }
 
         return redirect()->to('/journey-requests')->with('success', 'Demande publiée avec succès.');
