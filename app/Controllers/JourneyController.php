@@ -75,7 +75,7 @@ class JourneyController extends BaseController
         $createValidationMessages = $this->getCreateValidationMessages($maxSeats);
 
         if (!$this->validate($createValidationRules, $createValidationMessages)) {
-            return redirect()->back()->withInput()
+            return redirect()->to('/journeys/new')->withInput()
                 ->with('errors', $this->validator->getErrors());
         }
 
@@ -88,13 +88,13 @@ class JourneyController extends BaseController
             $locationsData = $this->createJourneyService->fetchAllLocationsData($createFormData['location']);
             $geoJsonTrack  = $this->createJourneyService->fetchTrackOrFail($locationsData);
         } catch (ExternalApiException $e) {
-            return redirect()->back()->withInput()
+            return redirect()->to('/journeys/new')->withInput()
                 ->with('errors', ['api' => 'Service de cartographie indisponible, réessayez plus tard.']);
         } catch (AddressValidationException $e) {
-            return redirect()->back()->withInput()
+            return redirect()->to('/journeys/new')->withInput()
                 ->with('errors', $e->getErrors());
         } catch (\Throwable $e) {
-            return redirect()->back()->withInput()
+            return redirect()->to('/journeys/new')->withInput()
                 ->with('errors', ['db' => 'Une erreur est survenue.']);
         }
 
