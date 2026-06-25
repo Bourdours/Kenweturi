@@ -6,6 +6,7 @@ use App\Libraries\MailerExample;
 
 use App\Models\UserModel;
 use App\Models\RememberTokenModel;
+use App\Models\JourneyRequestModel;
 
 use App\Services\BookingService;
 use App\Services\JourneyService;
@@ -27,6 +28,7 @@ class UserService
     protected RememberTokenModel $rememberTokenModel;
     protected BookingService $bookingService;
     protected JourneyService $journeyService;
+    protected JourneyRequestModel $journeyRequestModel;
 
     public function __construct()
     {
@@ -34,6 +36,7 @@ class UserService
         $this->rememberTokenModel   = new RememberTokenModel();
         $this->bookingService       = new BookingService();
         $this->journeyService       = new JourneyService();
+        $this->journeyRequestModel  = new JourneyRequestModel();
     }
 
     /**
@@ -46,6 +49,7 @@ class UserService
      * @throws CannotDeleteSuperadminException
      * @throws AdminDeletionForbiddenException
      * @throws LastAdminException
+     * @throws \RuntimeException Si la transaction de suppression échoue (échec SQL ou commit).
      */
     public function deleteByAdmin(int $targetId, int $currentUserId, string $currentRole): array
     {
@@ -67,6 +71,7 @@ class UserService
      *
      * @throws UserNotFoundException
      * @throws InvalidPasswordException
+     * @throws \RuntimeException Si la transaction de suppression échoue (échec SQL ou commit).
      */
     public function deleteOwnAccount(int $userId, string $password): array
     {
@@ -119,9 +124,10 @@ class UserService
             // Réservations du user (passager)
             $this->bookingService->rejectAllByPassenger($targetId);
 
-            // Trajets du user (conducteur) + réservations de ses passagers
+            // Trajets du user (conducteur) + réservations de ses passagers + demande de trajet
             $this->bookingService->rejectAllForJourneys($journeyIds);
             $this->journeyService->cancelAllByDriver($targetId);
+            $this->deleteJourneyRequestsByUser($targetId);
 
             // Invalidation des tokens « se souvenir de moi » (reconnexion auto impossible)
             $this->rememberTokenModel->deleteAll($targetId);
@@ -129,6 +135,7 @@ class UserService
             // Anonymisation et soft delete du user
             $this->userModel->anonymize($targetId);
             $this->userModel->markAsDeleted($targetId); // Update du status
+
             // Suppression de la photo de profil : la référence en base passe à null via anonymize() ci-dessus.
             // Le fichier physique est supprimé APRÈS commit (voir deleteAvatarFile plus bas), car unlink() n'est pas transactionnel.
             $this->userModel->delete($targetId); //Renseigne simplement la date du champs deleted_at, car useSoftDelete=true dans UserModel
@@ -252,5 +259,15 @@ class UserService
         if (! @unlink($fullPath)) {
             log_message('error', 'Échec suppression avatar : {path}', ['path' => $avatarPath]);
         }
+    }
+
+    /**
+     * Supprime les demandes de trajet créées par l'utilisateur.
+     */
+    private function deleteJourneyRequestsByUser(int $userId): void
+    {
+        $this->journeyRequestModel
+            ->where('user_id', $userId)
+            ->delete();
     }
 }
