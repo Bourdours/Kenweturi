@@ -6,7 +6,7 @@ if (dateInput) {
         locale: {
             ...frLocale,
             months: {
-                longhand:  frLocale.months.longhand.map(cap),
+                longhand: frLocale.months.longhand.map(cap),
                 shorthand: frLocale.months.shorthand.map(cap),
             },
         },

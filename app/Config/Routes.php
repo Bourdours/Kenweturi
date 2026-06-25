@@ -117,6 +117,7 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->post('profile/delete',            'UserController::delete');
     $routes->get('profile/notifications',      'UserController::showNotifications');
     $routes->post('profile/notifications',     'UserController::updateNotifications');
+    $routes->post('profile/deleteAvatar', 'UserController::removeAvatar');
 
     // Users
     $routes->get('users/(:num)', 'UserController::show/$1');
@@ -130,7 +131,6 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('car/(:num)/edit',    'CarController::showEditForm/$1');
     $routes->post('car/(:num)/update', 'CarController::update/$1');
     $routes->post('car/(:num)/delete', 'CarController::delete/$1');
-
 });
 
 

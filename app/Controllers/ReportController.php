@@ -164,9 +164,11 @@ class ReportController extends BaseController
 
     private function notifyAdmin(array $journey, string $description, int $reporterId): void
     {
-        $notifPrefModel = new NotificationPrefModel();
-        $admins         = $this->userModel->getActiveAdmins();
-        $mailer         = new MailerExample();
+        $notifPrefModel   = new NotificationPrefModel();
+        $admins           = $this->userModel->getActiveAdmins();
+        $mailer           = new MailerExample();
+        $reporter         = $this->userModel->find($reporterId);
+        $reporterFirstName = $reporter['first_name'] ?? '#' . $reporterId;
 
         foreach ($admins as $admin) {
             if (!$notifPrefModel->wantsNotif((int) $admin['id'], 'admin_report')) continue;
@@ -175,7 +177,7 @@ class ReportController extends BaseController
                 $admin['email'],
                 '[Signalement] Nouveau signalement à traiter',
                 view('Emails/adminNewReport', [
-                    'reporterId'     => $reporterId,
+                    'reporterFirstName' => $reporterFirstName,
                     'journeyId'      => $journey['id'],
                     'description'    => $description,
                     'prefLabel'      => NotificationPrefModel::PREFS['admin_report'],

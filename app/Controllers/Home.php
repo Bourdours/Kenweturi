@@ -41,7 +41,6 @@ class Home extends BaseController
                 ->orderBy('journey.start_datetime', 'ASC')
                 ->limit(1)
                 ->get()->getRowArray();
-
         }
 
         return view('home', [
