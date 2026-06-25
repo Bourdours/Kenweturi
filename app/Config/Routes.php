@@ -117,6 +117,7 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->post('profile/delete',            'UserController::delete');
     $routes->get('profile/notifications',      'UserController::showNotifications');
     $routes->post('profile/notifications',     'UserController::updateNotifications');
+    $routes->post('profile/deleteAvatar', 'UserController::removeAvatar');
 
     // Users
     $routes->get('users/(:num)', 'UserController::show/$1');
