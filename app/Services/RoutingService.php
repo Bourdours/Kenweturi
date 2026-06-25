@@ -151,10 +151,9 @@ class RoutingService
         curl_close($ch);
 
         if ($response === false || $httpCode !== 200) {
-            log_message('error', 'RoutingService: échec API Géoplateforme (HTTP {code}, cURL: {curl}) : {body}', [
+            log_message('error', 'RoutingService: échec API Géoplateforme (HTTP {code}, cURL: {curl})', [
                 'code' => $httpCode,
                 'curl' => $curlError !== '' ? $curlError : 'aucune',
-                'body' => $this->sanitizeForLog($response),
             ]);
             return null;
         }
@@ -215,9 +214,7 @@ class RoutingService
             || empty($data['geometry']['coordinates'])
             || !is_array($data['geometry']['coordinates'])
         ) {
-            log_message('error', 'RoutingService: réponse Géoplateforme sans géométrie exploitable : {body}', [
-                'body' => $this->sanitizeForLog($rawResponse),
-            ]);
+            log_message('error', 'RoutingService: réponse Géoplateforme sans géométrie exploitable.');
             return null;
         }
 
@@ -276,23 +273,5 @@ class RoutingService
         }
 
         return $json;
-    }
-
-    /**
-     * Prépare un extrait de réponse pour le log : tronqué et débarrassé
-     * des caractères de contrôle (évite l'injection de lignes dans les logs).
-     *
-     * @param  mixed $response Réponse brute (string attendue)
-     * @return string Extrait sûr pour le log
-     */
-    private function sanitizeForLog(mixed $response): string
-    {
-        if (!is_string($response) || $response === '') {
-            return 'aucune réponse';
-        }
-
-        $excerpt = mb_substr($response, 0, 500);
-
-        return preg_replace('/[\x00-\x1F\x7F]/u', ' ', $excerpt) ?? 'illisible';
     }
 }
