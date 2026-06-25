@@ -40,17 +40,17 @@ class JourneySearchService
         $this->geoCodingService           = new GeoCodingService();
     }
 
-        public function searchJourneys(array &$filters): array
+    public function searchJourneys(array &$filters): array
     {
         $candidates = $this->journeyModel->findAllWithFilters($filters);
         $this->attachPendingBookingsCount($candidates);
 
         // --- Convertion des adresses en longitude et latitude
         $startLocation = !empty($filters['startAddress']) ? $this->geoCodingService->getLocationData($filters['startAddress']) : null;
-        $startCoord = !empty($startLocation['latitude']) || !empty($startLocation['longitude']) ? ['lat'=>$startLocation['latitude'], 'lon'=>$startLocation['longitude']] : null;
+        $startCoord = !empty($startLocation['latitude']) || !empty($startLocation['longitude']) ? ['lat' => $startLocation['latitude'], 'lon' => $startLocation['longitude']] : null;
 
         $endLocation = !empty($filters['endAddress']) ? $this->geoCodingService->getLocationData($filters['endAddress']) : null;
-        $endCoord = !empty($endLocation['latitude']) || !empty($endLocation['longitude']) ? ['lat'=>$endLocation['latitude'], 'lon'=>$endLocation['longitude']] : null;
+        $endCoord = !empty($endLocation['latitude']) || !empty($endLocation['longitude']) ? ['lat' => $endLocation['latitude'], 'lon' => $endLocation['longitude']] : null;
 
         $filters['searchingRadius'] = empty($filters['searchingRadius']) ? 10 : $filters['searchingRadius']; // Pour affiche du filtre par défaut au premier affichage de la page.
 
@@ -143,7 +143,7 @@ class JourneySearchService
 
         return $matchingJourneys;
     }
-        
+
 
     /**
      * Récupère et normalise les points du tracé d'un trajet à partir de son ID.
@@ -163,5 +163,4 @@ class JourneySearchService
 
         return $this->geoService->parseTrackPointsFromGeoJson($track['geojson']);
     }
-
 }
