@@ -1,16 +1,17 @@
-<?php 
+<?php
 
 namespace App\Models;
 
 /**
  * Modèle gérant la table 'city'
  */
-class CityModel extends BaseModel{
+class CityModel extends BaseModel
+{
 
     protected $table = 'city';
     protected $primaryKey = 'id';
     protected $useAutoIncrement = true;
-    
+
     protected $allowedFields = [
         'name',
         'zipcode'
@@ -43,8 +44,8 @@ class CityModel extends BaseModel{
     public function findOrCreateCity(string $name, string $zipcode)
     {
         $city = $this->where('name', $name)
-                    ->where('zipcode', $zipcode)
-                    ->first();
+            ->where('zipcode', $zipcode)
+            ->first();
 
         return $city['id'] ?? $this->insert([
             'name'    => $name,
