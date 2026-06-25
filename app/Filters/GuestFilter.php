@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Filters;
 
 use CodeIgniter\Filters\FilterInterface;
@@ -19,6 +20,6 @@ class GuestFilter implements FilterInterface
 
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
     {
-        // rien
+        
     }
 }

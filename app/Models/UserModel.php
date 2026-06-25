@@ -211,9 +211,9 @@ class UserModel extends BaseModel
     public function countActiveByRole(string $role): int
     {
         return $this->where('status', 'active')
-                    ->where('role', $role)
-                    ->where('deleted_at', null)
-                    ->countAllResults();
+            ->where('role', $role)
+            ->where('deleted_at', null)
+            ->countAllResults();
     }
 
     /**
@@ -243,7 +243,7 @@ class UserModel extends BaseModel
         return $this->skipValidation(true)->update($userId, ['status' => 'deleted']);
     }
 
-  
+
     public function setEmailToken(int $userId, string $rawToken, int $hours = 24): bool
     {
         return $this->update($userId, [
