@@ -33,6 +33,7 @@ class JourneyRequestController extends BaseController
         $filterCityStart = $this->request->getGet('cityStart');
         $filterCityEnd   = $this->request->getGet('cityEnd');
         $filterDate      = $this->request->getGet('date');
+        $page            = max(1, (int) ($this->request->getGet('page') ?? 1));
 
         $builder = $this->journeyRequestModel
             ->select('journey_request.*,
@@ -61,7 +62,11 @@ class JourneyRequestController extends BaseController
             $builder->where('DATE(journey_request.start_datetime)', $filterDate);
         }
 
-        $journeyRequests = $builder->findAll();
+        $allRequests     = $builder->findAll();
+        $perPage         = 10;
+        $total           = count($allRequests);
+        $journeyRequests = array_slice($allRequests, ($page - 1) * $perPage, $perPage);
+        $pager           = \Config\Services::pager();
 
         $userId            = (int) session()->get('user_id');
         $userRequestsCount = $userId
@@ -75,6 +80,10 @@ class JourneyRequestController extends BaseController
             'filterCityEnd'     => $filterCityEnd,
             'filterDate'        => $filterDate,
             'userRequestsCount' => $userRequestsCount,
+            'pager'             => $pager,
+            'page'              => $page,
+            'perPage'           => $perPage,
+            'total'             => $total,
         ]);
     }
 

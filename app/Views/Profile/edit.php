@@ -78,7 +78,7 @@
     </div>
 
     <!-- Informations personnelles -->
-    <div class="bg-surface rounded-2xl p-6 border border-action/10">
+    <div class="bg-surface rounded-2xl p-6 border border-action/10 overflow-hidden">
       <h2 class="text-ink text-base font-semibold font-display mb-5 flex items-center gap-2">
         <i class="fa-solid fa-user text-action text-sm"></i>Informations personnelles
       </h2>
@@ -116,7 +116,7 @@
           <div>
             <label for="birthDateProfile" class="text-ink/50 text-xs font-medium mb-1.5 block">Date de naissance</label>
             <input type="date" id="birthDateProfile" name="birthDateProfile" value="<?= esc($user['birth_date']) ?>" required
-              class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 transition-colors">
+              class="w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 transition-colors appearance-none">
           </div>
         </div>
 
