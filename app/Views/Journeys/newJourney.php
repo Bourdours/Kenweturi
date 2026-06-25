@@ -164,7 +164,7 @@
 
 
       <!-- Trajet récurrent -->
-      <div class="mt-4 bg-surface rounded-2xl p-6 border border-action/10">
+      <div class="mt-4 pt-4 border-t border-action/10">
         <div class="flex items-center justify-between">
           <label class="text-ink/50 text-xs font-medium block">Trajet récurrent</label>
           <div class="flex items-center gap-2" role="group" aria-label="Trajet récurrent">
@@ -174,7 +174,7 @@
               Oui
             </button>
             <button type="button" id="recurringNo"
-              class="recurring-toggle-btn px-4 py-1.5 rounded-lg text-sm font-medium border border-action/15 transition-colors">
+              class="recurring-toggle-btn px-4 py-1.5 rounded-lg text-sm font-medium border border-action/15 text-ink/60 transition-colors">
               Non
             </button>
           </div>
@@ -194,13 +194,11 @@
             $selectedDays = old('recurringDays', []);
             ?>
             <?php foreach ($jours as $value => $label): ?>
-              <button type="button"
-                class="day-toggle-btn px-3 py-1.5 rounded-lg text-sm font-medium border border-action/15 text-ink/60 transition-colors"
-                data-day="<?= esc($value) ?>">
+              <label class="day-toggle-btn flex items-center justify-center px-3 py-1.5 rounded-lg text-sm font-medium border border-action/15 text-ink/60 cursor-pointer has-[:checked]:bg-action has-[:checked]:text-ink has-[:checked]:border-action transition-colors">
+                <input type="checkbox" name="recurringDays[]" value="<?= esc($value) ?>" id="day_<?= esc($value) ?>"
+                  class="day-checkbox hidden" <?= in_array($value, $selectedDays) ? 'checked' : '' ?>>
                 <?= esc($label) ?>
-              </button>
-              <input type="checkbox" name="recurringDays[]" value="<?= esc($value) ?>" id="day_<?= esc($value) ?>"
-                class="hidden-day-checkbox" <?= in_array($value, $selectedDays) ? 'checked' : '' ?>>
+              </label>
             <?php endforeach; ?>
           </div>
         </div>
@@ -210,13 +208,11 @@
           <?php $selectedWeeks = old('recurringWeeks', []); ?>
           <div class="flex flex-wrap gap-2" role="group" aria-label="Semaines concernées">
             <?php for ($w = 1; $w <= 4; $w++): ?>
-              <button type="button"
-                class="week-toggle-btn px-3 py-1.5 rounded-lg text-sm font-medium border border-action/15 text-ink/60 transition-colors"
-                data-week="<?= $w ?>">
+              <label class="week-toggle-btn flex items-center justify-center px-3 py-1.5 rounded-lg text-sm font-medium border border-action/15 text-ink/60 cursor-pointer has-[:checked]:bg-action has-[:checked]:text-ink has-[:checked]:border-action transition-colors">
+                <input type="checkbox" name="recurringWeeks[]" value="<?= $w ?>" id="week_<?= $w ?>"
+                  class="week-checkbox hidden" <?= in_array((string) $w, $selectedWeeks) ? 'checked' : '' ?>>
                 Semaine <?= $w ?>
-              </button>
-              <input type="checkbox" name="recurringWeeks[]" value="<?= $w ?>" id="week_<?= $w ?>"
-                class="hidden-week-checkbox" <?= in_array((string) $w, $selectedWeeks) ? 'checked' : '' ?>>
+              </label>
             <?php endfor; ?>
           </div>
         </div>

@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Kenweturi – Flyer</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  @page {
+    size: A5 portrait;
+    margin: 0;
+  }
+
+  body {
+    width: 148mm;
+    height: 210mm;
+    font-family: 'Nunito', Arial, sans-serif;
+    background: #fff;
+    overflow: hidden;
+    color: #0f1f3d;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── PALETTE ── */
+  :root {
+    --navy: #0f1f3d;
+    --orange: #f97316;
+    --orange-light: #fed7aa;
+    --white: #fff;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: var(--navy);
+    color: var(--white);
+    padding: 5mm 6mm 4mm;
+    position: relative;
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    gap: 3mm;
+  }
+  .logo-icon {
+    width: 12mm;
+    height: 12mm;
+    background: var(--white);
+    border-radius: 2mm;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 1mm;
+  }
+  .logo-icon img { width: 10mm; height: 10mm; object-fit: contain; }
+  .logo-text {
+    font-size: 8mm;
+    font-weight: 900;
+    letter-spacing: -0.3mm;
+    line-height: 1;
+  }
+  .logo-text span { color: var(--orange); }
+  .badge-gratuit {
+    margin-left: auto;
+    background: var(--orange);
+    color: var(--white);
+    font-size: 3mm;
+    font-weight: 800;
+    padding: 1mm 2.5mm;
+    border-radius: 10mm;
+    text-transform: uppercase;
+    letter-spacing: 0.3mm;
+    white-space: nowrap;
+  }
+  .header-sub {
+    font-size: 3.3mm;
+    font-weight: 700;
+    color: var(--orange-light);
+    margin-top: 1mm;
+    letter-spacing: 0.2mm;
+    text-transform: uppercase;
+  }
+  .header-title {
+    font-size: 4.8mm;
+    font-weight: 900;
+    line-height: 1.15;
+    margin-top: 2mm;
+    text-transform: uppercase;
+    letter-spacing: 0.1mm;
+  }
+  .header-title span { color: var(--orange); }
+
+  /* ── C'EST QUOI ── */
+  .quoi-band {
+    background: var(--orange);
+    color: var(--white);
+    padding: 2mm 6mm;
+    display: flex;
+    align-items: center;
+    gap: 2mm;
+  }
+  .quoi-label {
+    font-size: 3.8mm;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.2mm;
+    white-space: nowrap;
+  }
+  .quoi-label .arrow { font-size: 4.5mm; }
+  .quoi-text {
+    font-size: 2.9mm;
+    font-weight: 700;
+    line-height: 1.35;
+  }
+
+  /* ── DETAILS BANDE ── */
+  .details {
+    background: var(--orange-light);
+    padding: 1.5mm 6mm;
+    display: flex;
+    gap: 4mm;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .detail-item {
+    font-size: 2.7mm;
+    font-weight: 800;
+    color: var(--navy);
+  }
+  .detail-item::before {
+    content: '›';
+    color: var(--orange);
+    margin-right: 1mm;
+    font-size: 3.5mm;
+    font-weight: 900;
+  }
+
+  /* ── COLUMNS ── */
+  .columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    padding: 3mm 4mm;
+    flex: 1;
+  }
+  .col {
+    padding: 0 2mm;
+    display: flex;
+    flex-direction: column;
+  }
+  .col + .col {
+    border-left: 0.5mm solid #e5e7eb;
+  }
+  .col-header {
+    text-align: center;
+    margin-bottom: 2.5mm;
+  }
+  .col-icon {
+    width: 13mm;
+    height: 9mm;
+    margin: 0 auto 1.5mm;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .col-icon svg { width: 13mm; height: 9mm; }
+  .col-title {
+    font-size: 3.5mm;
+    font-weight: 900;
+    text-transform: uppercase;
+    color: var(--navy);
+    line-height: 1.2;
+  }
+  .col-subtitle {
+    font-size: 2.7mm;
+    font-weight: 700;
+    color: #6b7280;
+    margin-top: 0.5mm;
+  }
+
+  /* Steps */
+  .steps { list-style: none; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+  .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.8mm;
+  }
+  .step-num {
+    width: 5mm;
+    height: 5mm;
+    min-width: 5mm;
+    background: var(--navy);
+    color: var(--white);
+    border-radius: 50%;
+    font-size: 2.8mm;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.2mm;
+  }
+  .col:last-child .step-num {
+    background: var(--orange);
+  }
+  .step-text {
+    font-size: 2.8mm;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--navy);
+  }
+  .step-text em {
+    font-style: normal;
+    color: var(--orange);
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    border: none;
+    border-top: 0.5mm solid #e5e7eb;
+    margin: 0 4mm;
+  }
+
+  /* ── VALUES ── */
+  .values {
+    display: flex;
+    justify-content: space-around;
+    padding: 2mm 4mm;
+  }
+  .value {
+    text-align: center;
+  }
+  .value-icon {
+    font-size: 5mm;
+    display: block;
+    margin-bottom: 0.5mm;
+  }
+  .value-title {
+    font-size: 2.8mm;
+    font-weight: 900;
+    text-transform: uppercase;
+    color: var(--navy);
+  }
+  .value-desc {
+    font-size: 2.3mm;
+    font-weight: 600;
+    color: #6b7280;
+    line-height: 1.2;
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    background: var(--navy);
+    color: var(--white);
+    padding: 3mm 6mm;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .footer-contact {
+    line-height: 1.6;
+  }
+  .footer-site {
+    font-size: 4mm;
+    font-weight: 900;
+    color: var(--orange);
+    letter-spacing: 0.2mm;
+  }
+  .footer-email {
+    font-size: 2.7mm;
+    font-weight: 700;
+    color: #cbd5e1;
+  }
+  .footer-qr {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1mm;
+  }
+  .qr-box {
+    background: var(--white);
+    border-radius: 1.5mm;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2mm;
+  }
+  #qrcode canvas, #qrcode img { width: 22mm !important; height: 22mm !important; display: block; }
+  .footer-qr-label {
+    font-size: 2mm;
+    font-weight: 700;
+    color: #94a3b8;
+    text-align: center;
+  }
+  .footer-badge {
+    display: flex;
+    flex-direction: column;
+    gap: 1mm;
+    text-align: right;
+  }
+  .footer-pill {
+    background: var(--orange);
+    color: var(--white);
+    font-size: 2.5mm;
+    font-weight: 800;
+    padding: 0.8mm 2mm;
+    border-radius: 10mm;
+    text-transform: uppercase;
+    letter-spacing: 0.2mm;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-top">
+    <div class="logo-icon">
+      <img src="public/data/images/logo.png" alt="Kenweturi">
+    </div>
+    <div class="logo-text">ken<span>weturi</span></div>
+    <div class="badge-gratuit">100&nbsp;% gratuit</div>
+  </div>
+  <div class="header-sub">Moins de voitures, plus d'impact.</div>
+  <div class="header-title">
+    La plateforme de covoiturage<br>
+    <span>domicile&nbsp;– travail</span> et <span>formation</span>
+  </div>
+</div>
+
+<!-- C'EST QUOI -->
+<div class="quoi-band">
+  <div class="quoi-label"><span class="arrow">›</span>&nbsp;C'est quoi&nbsp;?</div>
+  <div class="quoi-text">
+    Kenweturi met en relation des conducteurs et des passagers qui partagent le même trajet — au quotidien ou ponctuellement.
+  </div>
+</div>
+
+<!-- DETAILS BANDE -->
+<div class="details">
+  <div class="detail-item">Domicile → Travail</div>
+  <div class="detail-item">Domicile → Formation</div>
+  <div class="detail-item">Régulier / Occasionnel</div>
+</div>
+
+<!-- COLUMNS -->
+<div class="columns">
+
+  <!-- CONDUCTEUR -->
+  <div class="col">
+    <div class="col-header">
+      <div class="col-icon">
+        <!-- Driver car icon -->
+        <svg viewBox="0 0 60 36" xmlns="http://www.w3.org/2000/svg">
+          <rect x="5" y="14" width="50" height="16" rx="3" fill="#0f1f3d"/>
+          <path d="M12 14 L18 4 H42 L50 14" fill="#0f1f3d"/>
+          <rect x="19" y="6" width="9" height="7" rx="1" fill="#fed7aa"/>
+          <rect x="30" y="6" width="9" height="7" rx="1" fill="#fed7aa"/>
+          <circle cx="16" cy="30" r="5" fill="#fff" stroke="#0f1f3d" stroke-width="2"/>
+          <circle cx="44" cy="30" r="5" fill="#fff" stroke="#0f1f3d" stroke-width="2"/>
+          <circle cx="16" cy="30" r="2" fill="#0f1f3d"/>
+          <circle cx="44" cy="30" r="2" fill="#0f1f3d"/>
+          <!-- key symbol -->
+          <circle cx="51" cy="8" r="3" fill="#f97316"/>
+          <line x1="53" y1="10" x2="57" y2="14" stroke="#f97316" stroke-width="1.5"/>
+        </svg>
+      </div>
+      <div class="col-title">J'ai<br>une voiture</div>
+      <div class="col-subtitle">Je deviens conducteur</div>
+    </div>
+    <ul class="steps">
+      <li class="step">
+        <div class="step-num">1</div>
+        <div class="step-text">Je crée mon compte et j'ajoute mon véhicule</div>
+      </li>
+      <li class="step">
+        <div class="step-num">2</div>
+        <div class="step-text">Je <em>publie mon trajet</em> : départ, arrivée, horaire, places dispo</div>
+      </li>
+      <li class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">Je reçois les demandes de réservation</div>
+      </li>
+      <li class="step">
+        <div class="step-num">4</div>
+        <div class="step-text">J'accepte un passager — il est prévenu par e-mail</div>
+      </li>
+      <li class="step">
+        <div class="step-num">5</div>
+        <div class="step-text">On se retrouve au point de départ et <em>on covoiture !</em></div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- PASSAGER -->
+  <div class="col">
+    <div class="col-header">
+      <div class="col-icon">
+        <!-- Passenger icon -->
+        <svg viewBox="0 0 60 36" xmlns="http://www.w3.org/2000/svg">
+          <rect x="5" y="14" width="50" height="16" rx="3" fill="#f97316"/>
+          <path d="M12 14 L18 4 H42 L50 14" fill="#f97316"/>
+          <rect x="19" y="6" width="9" height="7" rx="1" fill="#fed7aa"/>
+          <rect x="30" y="6" width="9" height="7" rx="1" fill="#fed7aa"/>
+          <circle cx="16" cy="30" r="5" fill="#fff" stroke="#f97316" stroke-width="2"/>
+          <circle cx="44" cy="30" r="5" fill="#fff" stroke="#f97316" stroke-width="2"/>
+          <circle cx="16" cy="30" r="2" fill="#f97316"/>
+          <circle cx="44" cy="30" r="2" fill="#f97316"/>
+          <!-- person inside -->
+          <circle cx="30" cy="10" r="3" fill="#fff"/>
+          <path d="M26 18 Q30 14 34 18" fill="#fff"/>
+        </svg>
+      </div>
+      <div class="col-title">Je n'ai pas<br>de voiture</div>
+      <div class="col-subtitle">Je cherche un trajet</div>
+    </div>
+    <ul class="steps">
+      <li class="step">
+        <div class="step-num">1</div>
+        <div class="step-text">Je crée mon compte et complète mon profil</div>
+      </li>
+      <li class="step">
+        <div class="step-num">2</div>
+        <div class="step-text">Je <em>recherche un trajet</em> par lieu, date et heure</div>
+      </li>
+      <li class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">Je demande une réservation au conducteur</div>
+      </li>
+      <li class="step">
+        <div class="step-num">4</div>
+        <div class="step-text">Le conducteur accepte — je suis prévenu par e-mail</div>
+      </li>
+      <li class="step">
+        <div class="step-num">5</div>
+        <div class="step-text">On se retrouve au point de départ et <em>c'est parti !</em></div>
+      </li>
+    </ul>
+  </div>
+
+</div>
+
+<!-- DIVIDER -->
+<hr class="divider">
+
+<!-- VALUES -->
+<div class="values">
+  <div class="value">
+    <span class="value-icon">🌱</span>
+    <div class="value-title">Écologie</div>
+    <div class="value-desc">Moins de voitures<br>sur les routes</div>
+  </div>
+  <div class="value">
+    <span class="value-icon">🤝</span>
+    <div class="value-title">Solidarité</div>
+    <div class="value-desc">Du lien entre collègues<br>et étudiants</div>
+  </div>
+  <div class="value">
+    <span class="value-icon">💰</span>
+    <div class="value-title">Économies</div>
+    <div class="value-desc">Partagez les frais<br>de carburant</div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="footer-contact">
+    <div class="footer-site">kenweturi.fr</div>
+    <div class="footer-email">contact@kenweturi.fr</div>
+  </div>
+  <div class="footer-qr">
+    <div class="qr-box">
+      <div id="qrcode"></div>
+    </div>
+    <div class="footer-qr-label">S'inscrire</div>
+  </div>
+  <div class="footer-badge">
+    <div class="footer-pill">Gratuit</div>
+    <div class="footer-pill">Simple</div>
+    <div class="footer-pill">Local</div>
+  </div>
+</div>
+
+<script>
+  new QRCode(document.getElementById("qrcode"), {
+    text: window.location.origin,
+    width: 200,
+    height: 200,
+    colorDark: "#0f1f3d",
+    colorLight: "#ffffff",
+    correctLevel: QRCode.CorrectLevel.L
+  });
+</script>
+</body>
+</html>
