@@ -6,7 +6,7 @@ if (menuToggle) {
 }
 
 const userMenuToggle = document.getElementById('user-menu-toggle');
-const userDropdown   = document.getElementById('user-dropdown');
+const userDropdown = document.getElementById('user-dropdown');
 
 if (userMenuToggle && userDropdown) {
   userMenuToggle.addEventListener('click', function (e) {
@@ -20,14 +20,14 @@ if (userMenuToggle && userDropdown) {
 }
 
 (function () {
-  var html  = document.documentElement;
-  var icon  = document.getElementById('theme-icon');
+  var html = document.documentElement;
+  var icon = document.getElementById('theme-icon');
   var label = document.getElementById('theme-label');
-  var btn   = document.getElementById('theme-toggle');
+  var btn = document.getElementById('theme-toggle');
 
   function sync() {
     var isDark = html.classList.contains('dark');
-    if (icon)  icon.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+    if (icon) icon.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
     if (label) label.textContent = isDark ? 'Thème clair' : 'Thème sombre';
   }
 
@@ -50,7 +50,7 @@ if (userMenuToggle && userDropdown) {
 (function () {
   var MODELS = ['default', 'coupe', 'suv'];
   var LABELS = { default: 'Berline', coupe: 'Décapotable', suv: 'SUV' };
-  var btn   = document.getElementById('car-model-toggle');
+  var btn = document.getElementById('car-model-toggle');
   var label = document.getElementById('car-model-label');
 
   function sync() {
@@ -70,15 +70,15 @@ if (userMenuToggle && userDropdown) {
 })();
 
 (function () {
-  var html  = document.documentElement;
-  var btn   = document.getElementById('car-toggle');
+  var html = document.documentElement;
+  var btn = document.getElementById('car-toggle');
   var label = document.getElementById('car-toggle-label');
 
   var modelBtn = document.getElementById('car-model-toggle');
 
   function sync() {
     var off = html.classList.contains('car-off');
-    if (label)    label.textContent  = off ? 'Curseur voiture' : 'Curseur normal';
+    if (label) label.textContent = off ? 'Curseur voiture' : 'Curseur normal';
     if (modelBtn) { modelBtn.classList.toggle('hidden', off); modelBtn.classList.toggle('flex', !off); }
   }
 
