@@ -316,6 +316,21 @@ class UserController extends BaseController
     }
 
     /**
+     * Supprime la photo de profil de l'utilisateur connecté (requête POST).
+     */
+    public function removeAvatar()
+    {
+        $userId = session()->get('user_id');
+
+        try {
+            $this->userService->deleteAvatar($userId);
+            return redirect()->to(site_url('profile'))->with('success', 'Votre photo de profil a été supprimée.');
+        } catch (UserNotFoundException $e) {
+            return redirect()->to(site_url('profile'))->with('error', 'Utilisateur introuvable.');
+        }
+    }
+
+    /**
      * Construit le corps HTML de l'email de notification de changement de mot de passe
      *
      * @param  string $firstname Prénom de l'utilisateur 
