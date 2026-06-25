@@ -67,6 +67,14 @@
       <label for="avatarProfile" class="text-ink/50 text-xs font-medium mb-1.5 block">Nouvelle photo</label>
       <input type="file" id="avatarProfile" name="avatarProfile" accept="image/*"
         class="w-full text-ink/70 text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-action/10 file:text-action hover:file:bg-action/20 file:cursor-pointer file:transition-colors">
+
+      <?php if (!empty($user['avatar'])): ?>
+        <button type="submit" form="formDeleteAvatar">
+          Supprimer la photo actuelle
+        </button>
+      <?php endif; ?>
+
+
     </div>
 
     <!-- Informations personnelles -->
@@ -311,5 +319,9 @@
     </form>
   </div>
 </div>
+
+<form id="formDeleteAvatar" class="hidden" action="<?= site_url('profile/deleteAvatar') ?>" method="post">
+  <?= csrf_field() ?>
+</form>
 
 <?= view('partials/footer') ?>
