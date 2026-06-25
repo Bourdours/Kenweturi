@@ -26,10 +26,10 @@
 
   <!-- En-tête -->
   <div class="flex items-center justify-between">
-      <h1 class="text-ink text-2xl font-bold font-display">Profil</h1>
-      <a href="<?= esc($back ?? base_url('journeys')) ?>" class="text-ink/50 hover:text-action text-sm flex items-center gap-1.5 transition-colors">
-          <i class="fa-solid fa-arrow-left text-xs"></i>Retour
-      </a>
+    <h1 class="text-ink text-2xl font-bold font-display">Profil</h1>
+    <a href="<?= esc($back ?? base_url('journeys')) ?>" class="text-ink/50 hover:text-action text-sm flex items-center gap-1.5 transition-colors">
+      <i class="fa-solid fa-arrow-left text-xs"></i>Retour
+    </a>
   </div>
 
   <!-- Carte identité -->
@@ -62,7 +62,7 @@
         <?php endif; ?>
       </div>
 
-  
+
       <?php if ($isOwnProfile): ?>
         <div class="mt-4 flex flex-wrap justify-center sm:justify-start gap-3">
           <a href="<?= site_url('profile/update') ?>"
@@ -100,15 +100,15 @@
     </h2>
     <dl class="flex flex-col divide-y divide-action/10">
 
-        <div class="flex items-center gap-4 py-3 first:pt-0 last:pb-0">
-          <div class="w-8 h-8 rounded-lg bg-action/10 flex items-center justify-center shrink-0">
-            <i class="fa-solid fa-envelope text-action text-xs"></i>
-          </div>
-          <div>
-            <dt class="text-ink/40 text-xs mb-0.5">Email</dt>
-            <dd class="text-ink text-sm font-medium"><?= esc($user['email']) ?></dd>
-          </div>
+      <div class="flex items-center gap-4 py-3 first:pt-0 last:pb-0">
+        <div class="w-8 h-8 rounded-lg bg-action/10 flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-envelope text-action text-xs"></i>
         </div>
+        <div>
+          <dt class="text-ink/40 text-xs mb-0.5">Email</dt>
+          <dd class="text-ink text-sm font-medium"><?= esc($user['email']) ?></dd>
+        </div>
+      </div>
 
       <div class="flex items-center gap-4 py-3 first:pt-0 last:pb-0">
         <div class="w-8 h-8 rounded-lg bg-action/10 flex items-center justify-center shrink-0">

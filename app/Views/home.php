@@ -157,7 +157,7 @@
 
   <?php if (!empty($nextDriverJourney) || !empty($nextPassengerJourney)): ?>
     <div class="max-w-4xl mx-auto px-4 pt-8 relative z-10">
-        <div class="grid grid-cols-1 <?= (!empty($nextDriverJourney) && !empty($nextPassengerJourney)) ? 'sm:grid-cols-2' : '' ?> gap-3">
+      <div class="grid grid-cols-1 <?= (!empty($nextDriverJourney) && !empty($nextPassengerJourney)) ? 'sm:grid-cols-2' : '' ?> gap-3">
 
         <?php if (!empty($nextDriverJourney)): ?>
           <div class="flex flex-col gap-1">

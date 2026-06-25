@@ -1,4 +1,5 @@
 <?php
+
 /** @var array|null $favorite Adresse favorite actuelle (location), ou null si non définie */
 ?>
 <div class="p-6 flex flex-col gap-6">

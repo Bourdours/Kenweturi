@@ -276,9 +276,9 @@
     </div>
     <div class="flex flex-col sm:flex-row gap-3 shrink-0">
       <?php if (!session()->get('isLoggedIn')): ?>
-      <a href="<?= site_url('register') ?>" class="bg-action hover:bg-action/90 transition-colors text-ink font-semibold text-sm rounded-xl px-5 py-2.5 text-center">
-        Créer un compte
-      </a>
+        <a href="<?= site_url('register') ?>" class="bg-action hover:bg-action/90 transition-colors text-ink font-semibold text-sm rounded-xl px-5 py-2.5 text-center">
+          Créer un compte
+        </a>
       <?php endif ?>
 
       <a href="<?= site_url('journeys') ?>" class="bg-paper hover:bg-action/10 border border-action/20 transition-colors text-ink/70 font-semibold text-sm rounded-xl px-5 py-2.5 text-center">

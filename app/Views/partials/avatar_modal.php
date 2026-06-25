@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var string $avatarSrc   URL complète de l'avatar (ou chaîne vide)
  * @var string $firstname   Prénom de l'utilisateur
