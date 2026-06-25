@@ -1,4 +1,5 @@
 <?php
+
 /** @var array $report */
 $date = new DateTime($report['created_at'], new DateTimeZone('UTC'));
 $date->setTimezone(new DateTimeZone('Europe/Paris'));

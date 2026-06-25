@@ -121,14 +121,15 @@
         </div>
 
       </div>
+      
       <!-- Se souvenir de moi -->
-<div class="flex items-center gap-2 mb-5">
-  <input type="checkbox" name="rememberMe" id="rememberMe" value="1"
-    class="w-4 h-4 accent-action cursor-pointer" />
-  <label for="rememberMe" class="text-ink/50 text-sm cursor-pointer">
-    Se souvenir de moi
-  </label>
-</div>
+      <div class="flex items-center gap-2 mb-5">
+        <input type="checkbox" name="rememberMe" id="rememberMe" value="1"
+          class="w-4 h-4 accent-action cursor-pointer" />
+        <label for="rememberMe" class="text-ink/50 text-sm cursor-pointer">
+          Se souvenir de moi
+        </label>
+      </div>
       <button type="submit"
         class="w-full bg-action hover:bg-action-dark text-ink font-semibold font-display rounded-lg py-3 text-base mb-4 transition-colors cursor-pointer">
         <i class="fa-solid fa-arrow-right-to-bracket mr-2"></i>Se connecter

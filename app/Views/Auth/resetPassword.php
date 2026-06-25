@@ -1,4 +1,5 @@
 <?php
+
 /** @var bool   $tokenValid */
 /** @var string $token */
 ?>

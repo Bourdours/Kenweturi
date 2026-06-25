@@ -1,4 +1,5 @@
 <?php
+
 /** @var array<int,array{id:int,city_boarding_name:string,city_end_name:string,address_start:string,address_end:string,start_datetime:string,remaining_seats:int,pending_bookings:int,driver_firstname:string,driver_lastname:string,driver_avatar:string,driver_is_student:bool,track_geojson:string}> $journeys */
 /** @var string|null $startAddress */
 /** @var string|null $endAddress */
@@ -95,7 +96,7 @@
                         <button type="button" id="smokingDropdownBtn"
                             class="w-full bg-paper border border-action/15 rounded-lg text-sm px-3 py-2.5 outline-none focus:border-action/50 transition-colors cursor-pointer text-left flex items-center justify-between">
                             <span id="smokingDropdownLabel" class="text-ink">
-                                <?= [''=>'Indifférent','0'=>'Non-fumeur','1'=>'Fumeur'][$smoking ?? ''] ?? 'Indifférent' ?>
+                                <?= ['' => 'Indifférent', '0' => 'Non-fumeur', '1' => 'Fumeur'][$smoking ?? ''] ?? 'Indifférent' ?>
                             </span>
                             <i id="smokingDropdownArrow" class="fa-solid fa-chevron-down text-xs text-ink/30 transition-transform"></i>
                         </button>
@@ -129,17 +130,17 @@
         <div class="space-y-3">
             <?php foreach ($journeys as $journey) : ?>
                 <a href="<?= site_url('/journeys/') ?><?= esc($journey['id']) ?>?boardingCity=<?= urlencode($journey['city_boarding_name']) ?>&startAddress=<?= urlencode($startAddress ?? '') ?>&startLat=<?= esc($latStart ?? '') ?>&startLng=<?= esc($lngStart ?? '') ?>&endAddress=<?= urlencode($endAddress ?? '') ?>&endLat=<?= esc($latEnd ?? '') ?>&endLng=<?= esc($lngEnd ?? '') ?>&back=<?= urlencode(current_url(true)) ?>"
-                   class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors"
-                   <?php if (!empty($journey['track_geojson'])): ?>data-geojson="<?= esc($journey['track_geojson'], 'attr') ?>" data-stages="<?= esc($journey['stages_json'] ?? '[]', 'attr') ?>"<?php endif ?>>
+                    class="block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors"
+                    <?php if (!empty($journey['track_geojson'])): ?>data-geojson="<?= esc($journey['track_geojson'], 'attr') ?>" data-stages="<?= esc($journey['stages_json'] ?? '[]', 'attr') ?>" <?php endif ?>>
                     <div class="flex items-start gap-4">
                         <div class="grid grid-cols-[10px_1fr] gap-x-4 flex-1 min-w-0 items-center">
                             <div class="w-2.5 h-2.5 rounded-full bg-brand justify-self-center"></div>
                             <div class="flex items-center gap-1.5 min-w-0">
                                 <p class="text-ink font-semibold truncate"><?= esc($journey['city_boarding_name']) ?></p>
                                 <?php if (!empty($journey['track_geojson'])): ?>
-                                <button type="button" class="jsMapToggle shrink-0 text-action/50 hover:text-action transition-colors" aria-label="Aperçu du trajet">
-                                    <i class="fa-solid fa-map text-xs"></i>
-                                </button>
+                                    <button type="button" class="jsMapToggle shrink-0 text-action/50 hover:text-action transition-colors" aria-label="Aperçu du trajet">
+                                        <i class="fa-solid fa-map text-xs"></i>
+                                    </button>
                                 <?php endif ?>
                             </div>
                             <div class="w-px self-stretch bg-ink/10 justify-self-center"></div>
@@ -160,14 +161,14 @@
                             <p class="text-ink/40 text-xs"><?= esc(date('d/m', strtotime($journey['start_datetime']))) ?></p>
                         </div>
                     </div>
-                    
+
                     <div class="mt-3 pt-3 border-t border-action/10 flex items-start justify-between text-sm text-ink/50">
                         <div class="flex items-center gap-4">
                             <?php $initials = strtoupper(substr($journey['driver_firstname'], 0, 1) . substr($journey['driver_lastname'], 0, 1)); ?>
                             <?php if (!empty($journey['driver_avatar'])): ?>
                                 <div class="jsAvatarOpen cursor-pointer w-7 h-7 rounded-full overflow-hidden shrink-0">
                                     <img src="<?= site_url(esc($journey['driver_avatar'])) ?>" alt="Avatar de <?= esc($journey['driver_firstname']) ?>" class="w-full h-full object-cover"
-                                    onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
+                                        onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
                                 </div>
                                 <div class="jsAvatarOpen cursor-pointer hidden w-7 h-7 rounded-full bg-action-dark text-ink font-bold text-xs shrink-0 items-center justify-center">
                                     <?= esc($initials) ?>

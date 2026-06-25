@@ -160,8 +160,8 @@
             class="w-full bg-paper border border-action/15 rounded-lg text-ink/60 text-sm px-3 py-2.5 outline-none focus:border-action/50 cursor-pointer transition-colors">
         </div>
       </div>
-      
-  
+
+
 
       <!-- Trajet récurrent -->
       <div class="mt-4 pt-4 border-t border-action/10">
@@ -184,14 +184,14 @@
           <label class="text-ink/50 text-xs font-medium mb-2 block">Jours de récurrence</label>
           <div class="flex flex-wrap gap-2">
             <?php
-              $jours = [
-                'lundi'    => 'Lundi',
-                'mardi'    => 'Mardi',
-                'mercredi' => 'Mercredi',
-                'jeudi'    => 'Jeudi',
-                'vendredi' => 'Vendredi',
-              ];
-              $selectedDays = old('recurringDays', []);
+            $jours = [
+              'lundi'    => 'Lundi',
+              'mardi'    => 'Mardi',
+              'mercredi' => 'Mercredi',
+              'jeudi'    => 'Jeudi',
+              'vendredi' => 'Vendredi',
+            ];
+            $selectedDays = old('recurringDays', []);
             ?>
             <?php foreach ($jours as $value => $label): ?>
               <label class="day-toggle-btn flex items-center justify-center px-3 py-1.5 rounded-lg text-sm font-medium border border-action/15 text-ink/60 cursor-pointer has-[:checked]:bg-action has-[:checked]:text-ink has-[:checked]:border-action transition-colors">
@@ -248,34 +248,34 @@
 
     <!-- Voitures -->
     <div class="bg-surface rounded-2xl p-6 border border-action/10">
-        <div class="flex items-center justify-between mb-5">
-            <h2 class="text-ink text-base font-semibold font-display flex items-center gap-2">
-                <i class="fa-solid fa-car text-action text-sm"></i>Voiture
-            </h2>
-          <a href="<?= site_url('profile/edit') ?>?back=<?= urlencode(current_url()) ?>#vehicles"
-            class="text-action text-xs hover:underline inline-flex items-center gap-1">
-              <i class="fa-solid fa-plus text-xs"></i> Ajouter une voiture
-          </a>
-        </div>
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="text-ink text-base font-semibold font-display flex items-center gap-2">
+          <i class="fa-solid fa-car text-action text-sm"></i>Voiture
+        </h2>
+        <a href="<?= site_url('profile/edit') ?>?back=<?= urlencode(current_url()) ?>#vehicles"
+          class="text-action text-xs hover:underline inline-flex items-center gap-1">
+          <i class="fa-solid fa-plus text-xs"></i> Ajouter une voiture
+        </a>
+      </div>
 
-        <label class="text-ink/50 text-xs font-medium mb-1.5 block">Quelle voiture allez-vous conduire ?</label>
-        <div class="relative" id="carDropdownWrapper">
-            <button type="button" id="carDropdownBtn"
-                class="w-full bg-paper border border-action/15 rounded-lg text-sm px-3 py-2.5 outline-none focus:border-action/50 transition-colors cursor-pointer text-left flex items-center justify-between">
-                <span id="carDropdownLabel" class="text-ink/30">-- Choisir une voiture --</span>
-                <i id="carDropdownArrow" class="fa-solid fa-chevron-down text-xs text-ink/30 transition-transform"></i>
-            </button>
-            <input type="hidden" name="car" id="carHidden" value="<?= esc(old('car'), 'attr') ?>">
-            <ul class="autocomplete-dropdown" id="carDropdownList">
-                <?php if (!empty($cars)) : ?>
-                    <?php foreach ($cars as $car) : ?>
-                        <li class="autocomplete-item" data-value="<?= esc($car['id']) ?>">
-                            <?= esc($car['brand']) ?> <?= esc($car['model']) ?> <?= esc($car['color']) ?>
-                        </li>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </ul>
-        </div>
+      <label class="text-ink/50 text-xs font-medium mb-1.5 block">Quelle voiture allez-vous conduire ?</label>
+      <div class="relative" id="carDropdownWrapper">
+        <button type="button" id="carDropdownBtn"
+          class="w-full bg-paper border border-action/15 rounded-lg text-sm px-3 py-2.5 outline-none focus:border-action/50 transition-colors cursor-pointer text-left flex items-center justify-between">
+          <span id="carDropdownLabel" class="text-ink/30">-- Choisir une voiture --</span>
+          <i id="carDropdownArrow" class="fa-solid fa-chevron-down text-xs text-ink/30 transition-transform"></i>
+        </button>
+        <input type="hidden" name="car" id="carHidden" value="<?= esc(old('car'), 'attr') ?>">
+        <ul class="autocomplete-dropdown" id="carDropdownList">
+          <?php if (!empty($cars)) : ?>
+            <?php foreach ($cars as $car) : ?>
+              <li class="autocomplete-item" data-value="<?= esc($car['id']) ?>">
+                <?= esc($car['brand']) ?> <?= esc($car['model']) ?> <?= esc($car['color']) ?>
+              </li>
+            <?php endforeach; ?>
+          <?php endif; ?>
+        </ul>
+      </div>
     </div>
 
     <!-- Note -->

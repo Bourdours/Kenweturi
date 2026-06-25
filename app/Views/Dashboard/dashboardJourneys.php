@@ -1,4 +1,5 @@
 <?php
+
 /** @var string $title */
 /** @var array $journeys */
 /** @var string|null $filter */
@@ -19,11 +20,11 @@
         <!-- Filtre pill toggle -->
         <div class="flex bg-surface border border-action/15 rounded-full p-1 gap-1" role="group" aria-label="Filtre des trajets">
             <a href="<?= site_url('dashboard/journeys') ?>?filter=upcoming"
-               class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= ($filter === 'upcoming' || $filter === null) ? 'bg-action text-ink' : 'text-ink/60 hover:text-ink' ?>">
+                class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= ($filter === 'upcoming' || $filter === null) ? 'bg-action text-ink' : 'text-ink/60 hover:text-ink' ?>">
                 À&nbsp;venir
             </a>
             <a href="<?= site_url('dashboard/journeys') ?>?filter=past"
-               class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= $filter === 'past' ? 'bg-action text-ink' : 'text-ink/60 hover:text-ink' ?>">
+                class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= $filter === 'past' ? 'bg-action text-ink' : 'text-ink/60 hover:text-ink' ?>">
                 Passés
             </a>
         </div>
@@ -61,8 +62,8 @@
             <div class="space-y-3" id="journeyList">
                 <?php foreach ($journeys as $journey) : ?>
                     <a href="<?= site_url('journeys/' . esc($journey['id'])) ?>?back=<?= urlencode(current_url(true)) ?>"
-                       data-journey-id="<?= esc($journey['id']) ?>"
-                       class="journey-card relative block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors <?= $journey['canceled_at'] ? 'pointer-events-none' : '' ?>">
+                        data-journey-id="<?= esc($journey['id']) ?>"
+                        class="journey-card relative block bg-surface rounded-2xl p-5 border border-action/10 hover:border-action/30 transition-colors <?= $journey['canceled_at'] ? 'pointer-events-none' : '' ?>">
 
                         <?php if ($journey['canceled_at']): ?>
                             <div class="absolute top-0.5 right-2 z-10">
@@ -143,7 +144,7 @@
         </div>
     <?php endif ?>
 
-    
+
 
 </div>
 
