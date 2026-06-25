@@ -1,4 +1,5 @@
 <?php
+
 /** @var array $booking  */
 /** @var bool  $isDriver */
 
@@ -25,15 +26,15 @@
     </div>
     <?php if (session()->getFlashdata('success')): ?>
         <div class="bg-success/10 border border-success/20 rounded-xl px-5 py-3 text-success text-sm flex items-center gap-2">
-        <i class="fa-solid fa-circle-check shrink-0"></i>
-        <?= esc(session()->getFlashdata('success')) ?>
+            <i class="fa-solid fa-circle-check shrink-0"></i>
+            <?= esc(session()->getFlashdata('success')) ?>
         </div>
     <?php endif; ?>
     <?php if (session()->getFlashdata('error')): ?>
-      <div class="bg-action/10 border border-action/30 rounded-xl p-3 mb-4 flex gap-2.5 items-center">
-        <i class="fa-solid fa-triangle-exclamation text-action text-sm shrink-0"></i>
-        <span class="text-action text-xs"><?= esc(session()->getFlashdata('error')) ?></span>
-      </div>
+        <div class="bg-action/10 border border-action/30 rounded-xl p-3 mb-4 flex gap-2.5 items-center">
+            <i class="fa-solid fa-triangle-exclamation text-action text-sm shrink-0"></i>
+            <span class="text-action text-xs"><?= esc(session()->getFlashdata('error')) ?></span>
+        </div>
     <?php endif ?>
 
     <!-- Itinéraire -->
@@ -80,10 +81,10 @@
 
     <!-- Map du trajet -->
     <?php
-        $mapWaypoints = [
-            ['lat' => $booking['lat_pickup'],  'lng' => $booking['lng_pickup'],  'label' => $booking['pickup_city_name']  ?? $booking['city_start_name']],
-            ['lat' => $booking['lat_dropoff'], 'lng' => $booking['lng_dropoff'], 'label' => $booking['dropoff_city_name'] ?? $booking['city_end_name']],
-        ];
+    $mapWaypoints = [
+        ['lat' => $booking['lat_pickup'],  'lng' => $booking['lng_pickup'],  'label' => $booking['pickup_city_name']  ?? $booking['city_start_name']],
+        ['lat' => $booking['lat_dropoff'], 'lng' => $booking['lng_dropoff'], 'label' => $booking['dropoff_city_name'] ?? $booking['city_end_name']],
+    ];
     ?>
     <?= view('partials/journeyMap', ['waypoints' => $mapWaypoints, 'geojson' => $booking['track_geojson'] ?? null]) ?>
 
@@ -92,14 +93,14 @@
         <h2 class="text-muted text-xs font-semibold uppercase tracking-wider mb-4"><?= $person_label ?></h2>
         <div class="flex items-center gap-4">
             <a href="<?= site_url('users/' . ($is_driver ? $booking['user_id'] : $booking['driver_id'])) ?>?back=<?= urlencode(current_url(true)) ?>"
-        class="flex items-center gap-4">
+                class="flex items-center gap-4">
                 <?php $initials = strtoupper(substr($person_firstname, 0, 1) . substr($person_lastname, 0, 1)); ?>
                 <?php if (!empty($person_avatar)): ?>
                     <div class="w-14 h-14 rounded-full overflow-hidden shrink-0">
                         <img src="<?= site_url(esc($person_avatar)) ?>" alt="Avatar" class="w-full h-full object-cover"
-                        onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
+                            onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
                     </div>
-                    <div class="hidden w-14 h-14 rounded-full bg-action-dark text-ink font-bold text-base shrink-0 items-center justify-center">    
+                    <div class="hidden w-14 h-14 rounded-full bg-action-dark text-ink font-bold text-base shrink-0 items-center justify-center">
                         <?= $initials ?>
                     </div>
                 <?php else: ?>
@@ -113,7 +114,7 @@
                 </div>
             </a>
         </div>
-        
+
     </article>
 
     <!-- Actions -->
@@ -139,7 +140,7 @@
                     <form id="form-confirm" action="<?= site_url('dashboard/bookings/' . $booking['id'] . '/reject') ?>" method="post">
                         <?= csrf_field() ?>
                         <button type="button" onclick="openConfirmModal('Refuser cette réservation ?', 'form-confirm')"
-                                class="w-full border border-danger text-danger font-bold font-display rounded-full py-3 hover:bg-danger hover:text-paper transition-colors">
+                            class="w-full border border-danger text-danger font-bold font-display rounded-full py-3 hover:bg-danger hover:text-paper transition-colors">
                             Refuser la réservation
                         </button>
                     </form>
@@ -154,20 +155,20 @@
                     </div>
                 <?php endif ?>
 
-            <?php elseif($isPending): ?>
+            <?php elseif ($isPending): ?>
                 <form id="form-confirm" action="<?= site_url('dashboard/bookings/' . $booking['id'] . '/delete') ?>" method="post">
                     <?= csrf_field() ?>
                     <button type="button" onclick="openConfirmModal('Annuler ma demande de réservation ?', 'form-confirm')"
-                            class="w-full border border-danger text-danger font-bold font-display rounded-full py-3 hover:bg-danger hover:text-paper transition-colors">
+                        class="w-full border border-danger text-danger font-bold font-display rounded-full py-3 hover:bg-danger hover:text-paper transition-colors">
                         Annuler ma demande de réservation
                     </button>
                 </form>
 
-            <?php elseif($isAccepted) : ?>
+            <?php elseif ($isAccepted) : ?>
                 <form id="form-confirm" action="<?= site_url('dashboard/bookings/' . $booking['id'] . '/delete') ?>" method="post">
                     <?= csrf_field() ?>
                     <button type="button" onclick="openConfirmModal('Annuler cette réservation ?', 'form-confirm')"
-                            class="w-full border border-danger text-danger font-bold font-display rounded-full py-3 hover:bg-danger hover:text-paper transition-colors">
+                        class="w-full border border-danger text-danger font-bold font-display rounded-full py-3 hover:bg-danger hover:text-paper transition-colors">
                         Annuler ma réservation
                     </button>
                 </form>
@@ -182,11 +183,11 @@
     <?php else : ?>
         <article class="bg-surface-card rounded-2xl p-6">
             <?php if ($is_driver): ?>
-                <?php if($isPending): ?>
+                <?php if ($isPending): ?>
                     <div class="text-center mb-3">
                         <p class="text-muted text-sm">Vous n'aviez pas répondu à cette demande de réservation</p>
                     </div>
-                <?php elseif($isAccepted): ?>
+                <?php elseif ($isAccepted): ?>
                     <div class="text-center mb-3">
                         <p class="text-muted text-sm">Vous aviez accepté cette réservation</p>
                     </div>
@@ -196,11 +197,11 @@
                     </div>
                 <?php endif ?>
             <?php else: ?>
-                <?php if($isPending): ?>
+                <?php if ($isPending): ?>
                     <div class="text-center mb-3">
                         <p class="text-muted text-sm">Cette demande de réservation n'avait pas reçu de réponse.</p>
                     </div>
-                <?php elseif($isAccepted): ?>
+                <?php elseif ($isAccepted): ?>
                     <div class="text-center mb-3">
                         <p class="text-muted text-sm">Cette demande de réservation avait été acceptée</p>
                     </div>
@@ -210,7 +211,7 @@
                     </div>
                 <?php endif ?>
             <?php endif ?>
-        </article>        
+        </article>
     <?php endif ?>
 </div>
 

@@ -1,4 +1,5 @@
 <?php
+
 /** @var string $firstname */
 /** @var string $cityStart */
 /** @var string $cityEnd */

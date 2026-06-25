@@ -96,9 +96,9 @@ $initials = session()->get('isLoggedIn')
                   <i class="fa-solid fa-gauge text-xs w-4"></i> Tableau de bord
                 </a>
                 <?php if (session()->get('isAdmin')): ?>
-                <a href="<?= site_url('admin') ?>" class="flex items-center gap-2 px-4 py-2 text-ink/70 hover:text-action text-sm transition-colors duration-200">
-                  <i class="fa-solid fa-shield-halved text-xs w-4"></i> Administration
-                </a>
+                  <a href="<?= site_url('admin') ?>" class="flex items-center gap-2 px-4 py-2 text-ink/70 hover:text-action text-sm transition-colors duration-200">
+                    <i class="fa-solid fa-shield-halved text-xs w-4"></i> Administration
+                  </a>
                 <?php endif; ?>
 
                 <div class="border-t border-action/10 mt-1 pt-1">
@@ -162,10 +162,10 @@ $initials = session()->get('isLoggedIn')
           <div class="flex flex-col gap-2 pt-4 border-t border-action/10 mt-4">
             <a href="<?= site_url('profile') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Mon profil</a>
             <a href="<?= site_url('dashboard') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Tableau de bord</a>
-         <?php if (session()->get('isAdmin')): ?>
-        <a href="<?= site_url('admin') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Administration</a>
-        <?php endif; ?>
-    </div>
+            <?php if (session()->get('isAdmin')): ?>
+              <a href="<?= site_url('admin') ?>" class="text-ink/70 hover:text-action font-medium text-base transition-colors duration-200">Administration</a>
+            <?php endif; ?>
+          </div>
 
       </nav>
 

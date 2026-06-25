@@ -1,4 +1,6 @@
-<?php /** @var \Config\Site $site */ ?>
+<?php
+
+/** @var \Config\Site $site */ ?>
 <?= view('partials/head', ['extraJs' => [base_url('js/contact.js')]]) ?>
 <?= view('partials/header') ?>
 
@@ -34,8 +36,7 @@
           name="name"
           value="<?= esc(old('name')) ?>"
           placeholder="Jean Dupont"
-          class="bg-paper border <?= isset($errors['name']) ? 'border-red-400' : 'border-action/20' ?> rounded-xl px-4 py-2.5 text-ink text-sm placeholder:text-ink/30 focus:outline-none focus:border-action transition-colors"
-        >
+          class="bg-paper border <?= isset($errors['name']) ? 'border-red-400' : 'border-action/20' ?> rounded-xl px-4 py-2.5 text-ink text-sm placeholder:text-ink/30 focus:outline-none focus:border-action transition-colors">
         <?php if (isset($errors['name'])): ?>
           <p class="text-red-400 text-xs"><?= esc($errors['name']) ?></p>
         <?php endif; ?>
@@ -50,8 +51,7 @@
           name="email"
           value="<?= esc(old('email')) ?>"
           placeholder="jean@exemple.fr"
-          class="bg-paper border <?= isset($errors['email']) ? 'border-red-400' : 'border-action/20' ?> rounded-xl px-4 py-2.5 text-ink text-sm placeholder:text-ink/30 focus:outline-none focus:border-action transition-colors"
-        >
+          class="bg-paper border <?= isset($errors['email']) ? 'border-red-400' : 'border-action/20' ?> rounded-xl px-4 py-2.5 text-ink text-sm placeholder:text-ink/30 focus:outline-none focus:border-action transition-colors">
         <?php if (isset($errors['email'])): ?>
           <p class="text-red-400 text-xs"><?= esc($errors['email']) ?></p>
         <?php endif; ?>
@@ -66,8 +66,7 @@
       <div class="relative" id="subject-dropdown-wrapper">
         <input type="hidden" name="subject" id="subject-input" value="<?= esc($selectedSubject) ?>">
         <button type="button" id="subject-trigger"
-          class="w-full text-left bg-paper border <?= isset($errors['subject']) ? 'border-red-400' : 'border-action/20' ?> rounded-xl px-4 py-2.5 text-sm flex items-center justify-between gap-2 focus:outline-none focus:border-action transition-colors"
-        >
+          class="w-full text-left bg-paper border <?= isset($errors['subject']) ? 'border-red-400' : 'border-action/20' ?> rounded-xl px-4 py-2.5 text-sm flex items-center justify-between gap-2 focus:outline-none focus:border-action transition-colors">
           <span id="subject-label" class="<?= $selectedSubject ? 'text-ink' : 'text-ink/30' ?>">
             <?= $selectedSubject ? esc($selectedSubject) : 'Choisissez un sujet' ?>
           </span>
@@ -94,8 +93,7 @@
         name="message"
         rows="5"
         placeholder="Décrivez votre demande..."
-        class="bg-paper border <?= isset($errors['message']) ? 'border-red-400' : 'border-action/20' ?> rounded-xl px-4 py-2.5 text-ink text-sm placeholder:text-ink/30 focus:outline-none focus:border-action transition-colors resize-none"
-      ><?= esc(old('message')) ?></textarea>
+        class="bg-paper border <?= isset($errors['message']) ? 'border-red-400' : 'border-action/20' ?> rounded-xl px-4 py-2.5 text-ink text-sm placeholder:text-ink/30 focus:outline-none focus:border-action transition-colors resize-none"><?= esc(old('message')) ?></textarea>
       <?php if (isset($errors['message'])): ?>
         <p class="text-red-400 text-xs"><?= esc($errors['message']) ?></p>
       <?php endif; ?>

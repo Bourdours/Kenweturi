@@ -1,4 +1,5 @@
 <?php
+
 /** @var string $title */
 ?>
 <?= view('partials/head', [
@@ -55,7 +56,7 @@
           <div class="flex-1 pb-4">
             <label for="startAddress" class="text-ink/50 text-xs font-medium mb-1.5 block">Départ</label>
             <input id="startAddress" class="address w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors"
-              name="startAddress" type="text" placeholder="Adresse de départ..." value="<?= esc(old('startAddress'))?>">
+              name="startAddress" type="text" placeholder="Adresse de départ..." value="<?= esc(old('startAddress')) ?>">
             <input type="hidden" name="startLat" id="startLat" value="<?= esc(old('startLat')) ?>">
             <input type="hidden" name="startLng" id="startLng" value="<?= esc(old('startLng')) ?>">
             <input type="hidden" name="startCity" id="startCity" value="<?= esc(old('startCity')) ?>">
@@ -71,7 +72,7 @@
           <div class="flex-1">
             <label for="endAddress" class="text-ink/50 text-xs font-medium mb-1.5 block">Arrivée</label>
             <input id="endAddress" class="address w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30 transition-colors"
-              name="endAddress" type="text" placeholder="Adresse d'arrivée..." value="<?= esc(old('endAddress'))?>">
+              name="endAddress" type="text" placeholder="Adresse d'arrivée..." value="<?= esc(old('endAddress')) ?>">
             <input type="hidden" name="endLat" id="endLat" value="<?= esc(old('endLat')) ?>">
             <input type="hidden" name="endLng" id="endLng" value="<?= esc(old('endLng')) ?>">
             <input type="hidden" name="endCity" id="endCity" value="<?= esc(old('endCity')) ?>">
@@ -83,9 +84,9 @@
 
       <!-- Rayon -->
       <?php
-        $initRadius = (float) old('radius_km', 1);
-        $presets    = [1, 5, 10];
-        $isCustom   = !in_array($initRadius, $presets);
+      $initRadius = (float) old('radius_km', 1);
+      $presets    = [1, 5, 10];
+      $isCustom   = !in_array($initRadius, $presets);
       ?>
       <div class="mt-5 pt-5 border-t border-action/10">
         <label class="text-ink/50 text-xs font-medium mb-2 block">Rayon de recherche autour de mes adresses</label>
@@ -107,39 +108,50 @@
         <p class="mt-2 text-ink/30 text-xs">Astuce : 0.5 = 500 m, 0.1 = 100 m</p>
       </div>
       <script>
-      (function() {
-        const pills  = document.querySelectorAll('.radius-pill');
-        const cpill  = document.querySelector('.radius-custom-pill');
-        const cinput = document.getElementById('customRadiusInput');
-        const hidden = document.getElementById('radiusKmInput');
-        const on     = ['bg-action', 'text-ink', 'border-action'];
-        const off    = ['border-action/20', 'text-ink/50'];
+        (function() {
+          const pills = document.querySelectorAll('.radius-pill');
+          const cpill = document.querySelector('.radius-custom-pill');
+          const cinput = document.getElementById('customRadiusInput');
+          const hidden = document.getElementById('radiusKmInput');
+          const on = ['bg-action', 'text-ink', 'border-action'];
+          const off = ['border-action/20', 'text-ink/50'];
 
-        function activatePreset(btn) {
-          pills.forEach(p => { p.classList.remove(...on); p.classList.add(...off); });
-          btn.classList.add(...on); btn.classList.remove(...off);
-          cpill.classList.remove(...on); cpill.classList.add('border-action/20');
-          cinput.classList.remove('text-ink'); cinput.classList.add('text-ink/50');
-          cinput.value = '';
-        }
+          function activatePreset(btn) {
+            pills.forEach(p => {
+              p.classList.remove(...on);
+              p.classList.add(...off);
+            });
+            btn.classList.add(...on);
+            btn.classList.remove(...off);
+            cpill.classList.remove(...on);
+            cpill.classList.add('border-action/20');
+            cinput.classList.remove('text-ink');
+            cinput.classList.add('text-ink/50');
+            cinput.value = '';
+          }
 
-        function activateCustom() {
-          pills.forEach(p => { p.classList.remove(...on); p.classList.add(...off); });
-          cpill.classList.add(...on); cpill.classList.remove('border-action/20');
-          cinput.classList.add('text-ink'); cinput.classList.remove('text-ink/50');
-        }
+          function activateCustom() {
+            pills.forEach(p => {
+              p.classList.remove(...on);
+              p.classList.add(...off);
+            });
+            cpill.classList.add(...on);
+            cpill.classList.remove('border-action/20');
+            cinput.classList.add('text-ink');
+            cinput.classList.remove('text-ink/50');
+          }
 
-        pills.forEach(p => p.addEventListener('click', () => {
-          activatePreset(p);
-          hidden.value = p.dataset.radius;
-        }));
+          pills.forEach(p => p.addEventListener('click', () => {
+            activatePreset(p);
+            hidden.value = p.dataset.radius;
+          }));
 
-        cinput.addEventListener('focus', activateCustom);
-        cinput.addEventListener('input', () => {
-          activateCustom();
-          if (cinput.value) hidden.value = cinput.value;
-        });
-      })();
+          cinput.addEventListener('focus', activateCustom);
+          cinput.addEventListener('input', () => {
+            activateCustom();
+            if (cinput.value) hidden.value = cinput.value;
+          });
+        })();
       </script>
 
     </div>
@@ -152,12 +164,12 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label for="date" class="text-ink/50 text-xs font-medium mb-1.5 block">Date souhaitée</label>
-          <input id="date" name="startDate" type="text" readonly placeholder="jj/mm/aaaa" value="<?= esc(old('startDate'))?>"
+          <input id="date" name="startDate" type="text" readonly placeholder="jj/mm/aaaa" value="<?= esc(old('startDate')) ?>"
             class="w-full bg-paper border border-action/15 rounded-lg text-ink/60 text-sm px-3 py-2.5 outline-none focus:border-action/50 cursor-pointer transition-colors">
         </div>
         <div>
           <label for="time" class="text-ink/50 text-xs font-medium mb-1.5 block">Heure souhaitée</label>
-          <input id="time" name="startTime" type="text" readonly placeholder="--:--" value="<?= esc(old('startTime'))?>"
+          <input id="time" name="startTime" type="text" readonly placeholder="--:--" value="<?= esc(old('startTime')) ?>"
             class="w-full bg-paper border border-action/15 rounded-lg text-ink/60 text-sm px-3 py-2.5 outline-none focus:border-action/50 cursor-pointer transition-colors">
         </div>
       </div>

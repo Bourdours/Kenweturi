@@ -1,4 +1,5 @@
 <?php
+
 /** @var string $title */
 /** @var array $reports */
 /** @var string|null $filter */
@@ -19,11 +20,11 @@
         <!-- Filtre pill toggle -->
         <div class="flex shrink-0 bg-surface border border-action/15 rounded-full p-1 gap-1" role="group" aria-label="Filtre des signalements">
             <a href="<?= site_url('dashboard/reports') ?>?filter=driver"
-               class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= $filter === 'driver' ? 'bg-action text-ink' : 'text-ink/60 hover:text-ink' ?>">
+                class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= $filter === 'driver' ? 'bg-action text-ink' : 'text-ink/60 hover:text-ink' ?>">
                 Conducteur
             </a>
             <a href="<?= site_url('dashboard/reports') ?>?filter=passenger"
-               class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= $filter === 'passenger' ? 'bg-action text-ink' : 'text-ink/60 hover:text-ink' ?>">
+                class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?= $filter === 'passenger' ? 'bg-action text-ink' : 'text-ink/60 hover:text-ink' ?>">
                 Passager
             </a>
         </div>

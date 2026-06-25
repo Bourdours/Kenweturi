@@ -1,4 +1,5 @@
 <?php
+
 /** @var string     $title */
 /** @var array      $journeyRequest */
 /** @var string|null $back */
@@ -86,9 +87,9 @@
 
       <!-- Rayon -->
       <?php
-        $initRadius = (float) old('radius_km', $journeyRequest['radius_km'] ?? 1);
-        $presets    = [1, 5, 10];
-        $isCustom   = !in_array($initRadius, $presets);
+      $initRadius = (float) old('radius_km', $journeyRequest['radius_km'] ?? 1);
+      $presets    = [1, 5, 10];
+      $isCustom   = !in_array($initRadius, $presets);
       ?>
       <div class="mt-5 pt-5 border-t border-action/10">
         <label class="text-ink/50 text-xs font-medium mb-2 block">Rayon de recherche autour de mes adresses</label>
@@ -110,39 +111,50 @@
         <p class="mt-2 text-ink/30 text-xs">Astuce : 0.5 = 500 m, 0.1 = 100 m</p>
       </div>
       <script>
-      (function() {
-        const pills  = document.querySelectorAll('.radius-pill');
-        const cpill  = document.querySelector('.radius-custom-pill');
-        const cinput = document.getElementById('customRadiusInput');
-        const hidden = document.getElementById('radiusKmInput');
-        const on     = ['bg-action', 'text-ink', 'border-action'];
-        const off    = ['border-action/20', 'text-ink/50'];
+        (function() {
+          const pills = document.querySelectorAll('.radius-pill');
+          const cpill = document.querySelector('.radius-custom-pill');
+          const cinput = document.getElementById('customRadiusInput');
+          const hidden = document.getElementById('radiusKmInput');
+          const on = ['bg-action', 'text-ink', 'border-action'];
+          const off = ['border-action/20', 'text-ink/50'];
 
-        function activatePreset(btn) {
-          pills.forEach(p => { p.classList.remove(...on); p.classList.add(...off); });
-          btn.classList.add(...on); btn.classList.remove(...off);
-          cpill.classList.remove(...on); cpill.classList.add('border-action/20');
-          cinput.classList.remove('text-ink'); cinput.classList.add('text-ink/50');
-          cinput.value = '';
-        }
+          function activatePreset(btn) {
+            pills.forEach(p => {
+              p.classList.remove(...on);
+              p.classList.add(...off);
+            });
+            btn.classList.add(...on);
+            btn.classList.remove(...off);
+            cpill.classList.remove(...on);
+            cpill.classList.add('border-action/20');
+            cinput.classList.remove('text-ink');
+            cinput.classList.add('text-ink/50');
+            cinput.value = '';
+          }
 
-        function activateCustom() {
-          pills.forEach(p => { p.classList.remove(...on); p.classList.add(...off); });
-          cpill.classList.add(...on); cpill.classList.remove('border-action/20');
-          cinput.classList.add('text-ink'); cinput.classList.remove('text-ink/50');
-        }
+          function activateCustom() {
+            pills.forEach(p => {
+              p.classList.remove(...on);
+              p.classList.add(...off);
+            });
+            cpill.classList.add(...on);
+            cpill.classList.remove('border-action/20');
+            cinput.classList.add('text-ink');
+            cinput.classList.remove('text-ink/50');
+          }
 
-        pills.forEach(p => p.addEventListener('click', () => {
-          activatePreset(p);
-          hidden.value = p.dataset.radius;
-        }));
+          pills.forEach(p => p.addEventListener('click', () => {
+            activatePreset(p);
+            hidden.value = p.dataset.radius;
+          }));
 
-        cinput.addEventListener('focus', activateCustom);
-        cinput.addEventListener('input', () => {
-          activateCustom();
-          if (cinput.value) hidden.value = cinput.value;
-        });
-      })();
+          cinput.addEventListener('focus', activateCustom);
+          cinput.addEventListener('input', () => {
+            activateCustom();
+            if (cinput.value) hidden.value = cinput.value;
+          });
+        })();
       </script>
 
     </div>
