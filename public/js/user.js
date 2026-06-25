@@ -199,3 +199,29 @@ deleteCarModal?.addEventListener('click', (e) => {
     deleteCarModal.classList.remove('flex');
   }
 });
+
+const deleteAvatarModal = document.querySelector('#deleteAvatarModal');
+const btnDeleteAvatar = document.querySelector('#btnDeleteAvatar');
+const cancelDeleteAvatar = document.querySelector('#cancelDeleteAvatar');
+const confirmDeleteAvatar = document.querySelector('#confirmDeleteAvatar');
+
+btnDeleteAvatar?.addEventListener('click', () => {
+  deleteAvatarModal.classList.remove('hidden');
+  deleteAvatarModal.classList.add('flex');
+});
+
+cancelDeleteAvatar?.addEventListener('click', () => {
+  deleteAvatarModal.classList.add('hidden');
+  deleteAvatarModal.classList.remove('flex');
+});
+
+deleteAvatarModal?.addEventListener('click', (e) => {
+  if (e.target === deleteAvatarModal) {
+    deleteAvatarModal.classList.add('hidden');
+    deleteAvatarModal.classList.remove('flex');
+  }
+});
+
+confirmDeleteAvatar?.addEventListener('click', () => {
+  document.querySelector('#formDeleteAvatar').submit();
+});
