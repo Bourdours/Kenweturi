@@ -1,7 +1,7 @@
 <?= view('partials/head', ['extraJs' => [base_url('js/auth.js')]]) ?>
 <?= view('partials/header') ?>
 
-<div class="max-w-4xl mx-auto py-10 px-6">
+<div class="max-w-4xl mx-auto py-12 px-4">
 
   <p class="text-ink/40 text-base mb-1">
     <i class="fa-solid fa-user-plus mr-2"></i>Créer un compte
@@ -90,15 +90,13 @@
           </div>
         </div>
 
-        <!-- Séparateur gauche (horizontal) -->
-        <div class="hidden lg:block py-3 lg:col-start-1 lg:row-start-2">
+        <!-- Séparateur horizontal (4+5+6) : pleine largeur -->
+        <div class="hidden lg:block py-3 lg:col-start-1 lg:col-end-4 lg:row-start-2">
           <div class="border-t-2 border-dashed border-action/35"></div>
         </div>
 
-
-
-        <!-- Séparateur vertical (desktop, col centrale sur 3 lignes) -->
-        <div class="hidden lg:flex justify-center items-stretch w-10 lg:col-start-2 lg:row-start-1 lg:row-end-4">
+        <!-- Séparateur vertical (8) : col centrale, ligne 1 uniquement -->
+        <div class="hidden lg:flex justify-center items-stretch w-10 lg:col-start-2 lg:row-start-1">
           <div class="border-l-2 border-dashed border-action/35 self-stretch my-6"></div>
         </div>
 
@@ -167,31 +165,47 @@
           </div>
         </div>
 
-        <!-- Bloc Conditions -->
-        <div class="bg-surface rounded-2xl p-5 border border-action/10 lg:col-start-1 lg:row-start-3">
-          <p class="text-sm font-medium text-ink/50 mb-3 flex items-center gap-1.5">
-            <i class="fa-regular fa-file-lines"></i>Conditions
-          </p>
-          <label class="flex items-start gap-2 cursor-pointer mb-4">
-            <input type="checkbox" required class="mt-0.5 shrink-0 accent-action" />
-            <span class="text-xs text-ink/40 leading-relaxed">
-              J'accepte les <a href="<?= site_url('cgu') ?>" target="_blank" class="text-action font-medium hover:text-action-dark transition-colors">conditions d'utilisation</a>
-              et la <a href="<?= site_url('confidentialite') ?>" target="_blank" class="text-action font-medium hover:text-action-dark transition-colors">politique de confidentialité</a> de Kenweturi.
-            </span>
-          </label>
-          <button type="submit"
-            class="w-full bg-action hover:bg-action-dark text-ink font-semibold font-display rounded-lg py-3 mb-3 transition-colors cursor-pointer text-base">
-            <i class="fa-solid fa-user-plus mr-2"></i>Créer mon compte
-          </button>
-          <div class="flex items-center gap-3 mb-4">
-            <div class="flex-1 border-t border-action/10"></div>
-            <span class="text-ink/30 text-xs">ou</span>
-            <div class="flex-1 border-t border-action/10"></div>
+        <!-- Row 3 : pavé numérique positions 1, 2, 3 -->
+        <div class="lg:col-start-1 lg:col-end-4 lg:row-start-3 flex flex-col lg:flex-row lg:items-stretch gap-5">
+
+          <!-- Position 1 : décoration pointillés gauche -->
+          <div class="hidden lg:block lg:flex-1 relative">
+            <!-- 9,6,3 : ligne verticale sur le bord droit (longe la card Conditions) -->
+            <div class="absolute top-0 bottom-0 right-0 border-l-2 border-dashed border-action/35"></div>
           </div>
-          <p class="text-center text-sm text-ink/40">
-            <span class="text-ink/30 text-xs">Déjà un compte ?&nbsp;</span>
-            <a href="<?= site_url('login') ?>" class="text-action font-medium hover:text-action-dark transition-colors">Se connecter</a>
-          </p>
+
+          <!-- Position 2 : Bloc Conditions -->
+          <div class="bg-surface rounded-2xl p-5 border border-action/10 lg:w-[calc(50%-20px)] shrink-0">
+            <p class="text-sm font-medium text-ink/50 mb-3 flex items-center gap-1.5">
+              <i class="fa-regular fa-file-lines"></i>Conditions
+            </p>
+            <label class="flex items-start gap-2 cursor-pointer mb-4">
+              <input type="checkbox" required class="mt-0.5 shrink-0 accent-action" />
+              <span class="text-xs text-ink/40 leading-relaxed">
+                J'accepte les <a href="<?= site_url('cgu') ?>" target="_blank" class="text-action font-medium hover:text-action-dark transition-colors">conditions d'utilisation</a>
+                et la <a href="<?= site_url('confidentialite') ?>" target="_blank" class="text-action font-medium hover:text-action-dark transition-colors">politique de confidentialité</a> de Kenweturi.
+              </span>
+            </label>
+            <button type="submit"
+              class="w-full bg-action hover:bg-action-dark text-ink font-semibold font-display rounded-lg py-3 mb-3 transition-colors cursor-pointer text-base">
+              <i class="fa-solid fa-user-plus mr-2"></i>Créer mon compte
+            </button>
+            <div class="flex items-center gap-3 mb-4">
+              <div class="flex-1 border-t border-action/10"></div>
+              <span class="text-ink/30 text-xs">ou</span>
+              <div class="flex-1 border-t border-action/10"></div>
+            </div>
+            <p class="text-center text-sm text-ink/40">
+              <span class="text-ink/30 text-xs">Déjà un compte ?&nbsp;</span>
+              <a href="<?= site_url('login') ?>" class="text-action font-medium hover:text-action-dark transition-colors">Se connecter</a>
+            </p>
+          </div>
+
+          <!-- Position 3 : miroir de la ligne 9,6,3 -->
+          <div class="hidden lg:block lg:flex-1 relative">
+            <div class="absolute top-0 bottom-0 left-0 border-l-2 border-dashed border-action/35"></div>
+          </div>
+
         </div>
 
       </div>
