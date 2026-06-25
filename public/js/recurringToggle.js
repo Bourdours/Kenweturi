@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (!isRecurringInput || !yesBtn || !noBtn || !daysWrapper || !weeksWrapper) return;
 
-    const ACTIVE_CLASSES = ['bg-action', 'text-white', 'border-action'];
+    const ACTIVE_CLASSES = ['bg-action', 'text-ink', 'border-action'];
 
     function setActiveButton(activeBtn, inactiveBtn) {
         ACTIVE_CLASSES.forEach(c => activeBtn.classList.add(c));
@@ -15,16 +15,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         ACTIVE_CLASSES.forEach(c => inactiveBtn.classList.remove(c));
         inactiveBtn.classList.add('text-ink/60');
-    }
-
-    function resetCheckboxGroup(checkboxSelector, btnSelector) {
-        document.querySelectorAll(checkboxSelector).forEach(cb => {
-            cb.checked = false;
-        });
-        document.querySelectorAll(btnSelector).forEach(btn => {
-            ACTIVE_CLASSES.forEach(c => btn.classList.remove(c));
-            btn.classList.add('text-ink/60');
-        });
     }
 
     function showRecurring(isYes) {
@@ -43,8 +33,8 @@ document.addEventListener('DOMContentLoaded', function () {
             daysWrapper.classList.add('hidden');
             weeksWrapper.classList.add('hidden');
 
-            resetCheckboxGroup('.hidden-day-checkbox', '.day-toggle-btn');
-            resetCheckboxGroup('.hidden-week-checkbox', '.week-toggle-btn');
+            document.querySelectorAll('.day-checkbox').forEach(cb => { cb.checked = false; });
+            document.querySelectorAll('.week-checkbox').forEach(cb => { cb.checked = false; });
         }
     }
 
@@ -53,36 +43,4 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Initialisation selon valeur existante (ex: retour de formulaire avec erreurs)
     showRecurring(isRecurringInput.value === '1');
-
-    // Fonction générique pour synchroniser un bouton-toggle avec sa checkbox cachée
-    function bindToggleButton(btn, checkbox) {
-        function syncButtonState() {
-            if (checkbox.checked) {
-                ACTIVE_CLASSES.forEach(c => btn.classList.add(c));
-                btn.classList.remove('text-ink/60');
-            } else {
-                ACTIVE_CLASSES.forEach(c => btn.classList.remove(c));
-                btn.classList.add('text-ink/60');
-            }
-        }
-
-        btn.addEventListener('click', () => {
-            checkbox.checked = !checkbox.checked;
-            syncButtonState();
-        });
-
-        syncButtonState(); // état initial (utile si old() a déjà coché certaines valeurs)
-    }
-
-    // Boutons de sélection des jours
-    document.querySelectorAll('.day-toggle-btn').forEach(btn => {
-        const checkbox = document.getElementById('day_' + btn.dataset.day);
-        if (checkbox) bindToggleButton(btn, checkbox);
-    });
-
-    // Boutons de sélection des semaines
-    document.querySelectorAll('.week-toggle-btn').forEach(btn => {
-        const checkbox = document.getElementById('week_' + btn.dataset.week);
-        if (checkbox) bindToggleButton(btn, checkbox);
-    });
 });

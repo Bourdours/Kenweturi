@@ -55,7 +55,7 @@ class UserController extends BaseController
                 return redirect()->to(site_url('login'))
                     ->with('error', 'Ce compte n\'existe plus.');
             }
-            return redirect()->back()->with('error', 'Utilisateur introuvable.');
+            return redirect()->to('/journeys')->with('error', 'Utilisateur introuvable.');
         }
 
         $referer = $this->request->getServer('HTTP_REFERER');

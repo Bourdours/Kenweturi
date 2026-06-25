@@ -49,7 +49,7 @@ class ReportController extends BaseController
         }
 
         if ($this->reportModel->alreadyReported($reporterId, $journeyId)) {
-            return redirect()->back()
+            return redirect()->to(site_url("journeys/$journeyId/report"))
                 ->with('error', 'Vous avez déjà signalé ce trajet.');
         }
 
@@ -63,13 +63,13 @@ class ReportController extends BaseController
             ->countAllResults() > 0;
 
         if (!$isDriver && !$hasBooked) {
-            return redirect()->back()
+            return redirect()->to(site_url("journeys/$journeyId/report"))
                 ->with('error', 'Vous devez avoir effectué ce trajet pour le signaler.');
         }
 
         $reportedUserId = (int) $this->request->getPost('reportedUserId');
         if ($reportedUserId === $reporterId) {
-            return redirect()->back()
+            return redirect()->to(site_url("journeys/$journeyId/report"))
                 ->withInput()
                 ->with('error', 'Vous ne pouvez pas vous signaler vous-même.');
         }
@@ -88,7 +88,7 @@ class ReportController extends BaseController
         $validIds = array_diff($validIds, [$reporterId]);
 
         if (!in_array($reportedUserId, $validIds, true)) {
-            return redirect()->back()
+            return redirect()->to(site_url("journeys/$journeyId/report"))
                 ->withInput()
                 ->with('error', 'Utilisateur signalé invalide.');
         }
@@ -102,14 +102,14 @@ class ReportController extends BaseController
         ];
 
         if (!$this->reportModel->insert($data)) {
-            return redirect()->back()
+            return redirect()->to(site_url("journeys/$journeyId/report"))
                 ->withInput()
                 ->with('validationErrors', $this->reportModel->errors());
         }
 
         $this->notifyAdmin($journey, $data['description'], $reporterId);
 
-        return redirect()->back()
+        return redirect()->to(site_url("journeys/$journeyId"))
             ->with('success', 'Signalement envoyé. Notre équipe le traitera sous 48h.');
     }
 

@@ -349,7 +349,7 @@ class AuthController extends BaseController
     {
         $throttler = service('throttler');
         if ($throttler->check(md5($this->request->getIPAddress() . 'forgotpwd'), 3, MINUTE) === false) {
-            return redirect()->back()->with('success', 'Si un compte existe avec cet email, vous recevrez un lien de réinitialisation.');
+            return redirect()->to('/forgotPassword')->with('success', 'Si un compte existe avec cet email, vous recevrez un lien de réinitialisation.');
         }
 
         $email = $this->request->getPost('email');
@@ -357,7 +357,7 @@ class AuthController extends BaseController
         $user = $this->userModel->findByEmail($email);
 
         if (!$user || $user['deleted_at'] !== null) {
-            return redirect()->back()->withInput()->with('success', 'Si un compte existe avec cet email, vous recevrez un lien de réinitialisation.');
+            return redirect()->to('/forgotPassword')->withInput()->with('success', 'Si un compte existe avec cet email, vous recevrez un lien de réinitialisation.');
         }
 
         // Génération du token unique
@@ -384,7 +384,7 @@ class AuthController extends BaseController
             log_message('error', 'Mailer error: ' . $e->getMessage());
         }
 
-        return redirect()->back()->with('success', 'Si un compte existe avec cet email, vous recevrez un lien de réinitialisation.');
+        return redirect()->to('/forgotPassword')->with('success', 'Si un compte existe avec cet email, vous recevrez un lien de réinitialisation.');
     }
 
     /**
@@ -439,7 +439,7 @@ class AuthController extends BaseController
         ];
 
         if (!$this->validate($rules, $messages)) {
-            return redirect()->back()->with('error', implode(' ', $this->validator->getErrors()));
+            return redirect()->to(site_url('resetPassword') . '?token=' . urlencode((string) $token))->with('error', implode(' ', $this->validator->getErrors()));
         }
 
         $password = $this->request->getPost('password');

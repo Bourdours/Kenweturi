@@ -5,11 +5,20 @@
 
   <!-- Panneau branding (desktop uniquement) -->
   <div class="hidden md:flex flex-col flex-1">
-    <div class="flex items-center gap-3 mb-5">
-      <div class="w-10 h-10 bg-action rounded-xl flex items-center justify-center shrink-0">
-        <i class="fa-solid fa-car-side text-ink text-lg"></i>
-      </div>
-      <span class="text-ink text-xl font-bold font-display">Kenweturi</span>
+    <div class="flex items-center gap-2 mb-5">
+      <img src="<?= base_url('data/images/logo.png') ?>" alt="Kenweturi" class="h-9 w-auto shrink-0">
+      <svg width="240" height="36" viewBox="0 0 240 36" xmlns="http://www.w3.org/2000/svg" class="text-ink">
+        <defs>
+          <clipPath id="cw-fp">
+            <polygon points="0,0 76,0 56,36 0,36" />
+          </clipPath>
+          <clipPath id="co-fp">
+            <polygon points="76,0 240,0 240,36 56,36" />
+          </clipPath>
+        </defs>
+        <text clip-path="url(#cw-fp)" x="0" y="28" class="font-display text-2xl font-bold" fill="currentColor" letter-spacing="3">KENWETURI</text>
+        <text clip-path="url(#co-fp)" x="0" y="28" class="font-display text-2xl font-bold" fill="#D9663F" letter-spacing="3">KENWETURI</text>
+      </svg>
     </div>
     <h1 class="text-ink text-xl font-semibold font-display mb-2 leading-snug">
       Retrouvez l'accès<br>à votre compte.
