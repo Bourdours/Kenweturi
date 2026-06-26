@@ -100,6 +100,7 @@
     </h2>
     <dl class="flex flex-col divide-y divide-action/10">
 
+      <?php if ($isOwnProfile): ?>
       <div class="flex items-center gap-4 py-3 first:pt-0 last:pb-0">
         <div class="w-8 h-8 rounded-lg bg-action/10 flex items-center justify-center shrink-0">
           <i class="fa-solid fa-envelope text-action text-xs"></i>
@@ -109,6 +110,7 @@
           <dd class="text-ink text-sm font-medium"><?= esc($user['email']) ?></dd>
         </div>
       </div>
+      <?php endif; ?>
 
       <div class="flex items-center gap-4 py-3 first:pt-0 last:pb-0">
         <div class="w-8 h-8 rounded-lg bg-action/10 flex items-center justify-center shrink-0">
