@@ -112,7 +112,8 @@ class JourneyRequestController extends BaseController
     public function showCreateForm(): string
     {
         return view('JourneyRequests/newJourneyRequest', [
-            'title' => 'Publier une demande de trajet'
+            'title'    => 'Publier une demande de trajet',
+            'favorite' => $this->locationModel->getFavorite(),
         ]);
     }
 

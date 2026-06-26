@@ -27,7 +27,7 @@ $initials = session()->get('isLoggedIn')
       <a href="<?= site_url('/') ?>" class="flex items-center gap-2">
         <img src="<?= base_url('data/images/logo.png') ?>" alt="Kenweturi" class="h-9 w-auto shrink-0">
         <!-- <span class="text-2xl font-bold text-ink font-display">Kenweturi</span> -->
-        <svg width="240" height="36" viewBox="0 0 240 36" xmlns="http://www.w3.org/2000/svg" class="text-ink">
+        <svg width="240" height="36" viewBox="0 0 240 36" xmlns="http://www.w3.org/2000/svg" class="hidden sm:block text-ink">
           <defs>
             <clipPath id="cw">
               <polygon points="0,0 76,0 56,36 0,36" />
