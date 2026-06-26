@@ -289,6 +289,7 @@ class JourneyController extends BaseController
             'pager'    => $pager,
             'total'    => $total,
             'perPage'  => $perPage,
+            'favorite' => $this->locationModel->getFavorite(),
             // Spread du tableau : passe startAddress, endAddress, latStart, etc.
             ...$filters,
         ]);

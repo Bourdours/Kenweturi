@@ -36,6 +36,7 @@
     ],
 ]) ?>
 <?= view('partials/header') ?>
+<?php $favoriteFullAddress = ($favorite ?? null) ? $favorite['address'] . ', ' . $favorite['city_zipcode'] . ' ' . $favorite['city_name'] : null; ?>
 
 <div class="max-w-4xl mx-auto py-10 px-4 space-y-6">
 
@@ -49,9 +50,16 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] gap-3 sm:gap-x-2 sm:items-end">
                 <div>
-                    <label for="startAddress" class="text-ink/50 text-sm mb-1.5 flex items-baseline gap-1">
-                        <i class="fa-solid fa-circle-dot text-sm"></i>Départ
-                    </label>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label for="startAddress" class="text-ink/50 text-sm flex items-baseline gap-1">
+                            <i class="fa-solid fa-circle-dot text-sm"></i>Départ
+                        </label>
+                        <?php if ($favoriteFullAddress): ?>
+                            <button type="button" class="use-favorite-btn text-action/60 hover:text-action text-xs font-medium transition-colors cursor-pointer" data-target="startAddress" data-address="<?= esc($favoriteFullAddress, 'attr') ?>">
+                                <i class="fa-solid fa-location-dot text-xs"></i> Adresse Greta
+                            </button>
+                        <?php endif; ?>
+                    </div>
                     <input type="text" id="startAddress" class="address w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30" name="startAddress" value="<?= esc($startAddress ?? '') ?>" placeholder="Ville ou adresse">
                 </div>
                 <div class="flex justify-center sm:mb-1">
@@ -62,9 +70,16 @@
                     </button>
                 </div>
                 <div>
-                    <label for="endAddress" class="text-ink/50 text-sm mb-1.5 flex items-baseline gap-1">
-                        <i class="fa-solid fa-location-dot text-sm"></i>Arrivée
-                    </label>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label for="endAddress" class="text-ink/50 text-sm flex items-baseline gap-1">
+                            <i class="fa-solid fa-location-dot text-sm"></i>Arrivée
+                        </label>
+                        <?php if ($favoriteFullAddress): ?>
+                            <button type="button" class="use-favorite-btn text-action/60 hover:text-action text-xs font-medium transition-colors cursor-pointer" data-target="endAddress" data-address="<?= esc($favoriteFullAddress, 'attr') ?>">
+                                <i class="fa-solid fa-location-dot text-xs"></i> Adresse Greta
+                            </button>
+                        <?php endif; ?>
+                    </div>
                     <input type="text" id="endAddress" class="address w-full bg-paper border border-action/15 rounded-lg text-ink text-sm px-3 py-2.5 outline-none focus:border-action/50 placeholder:text-ink/30" name="endAddress" value="<?= esc($endAddress ?? '') ?>" placeholder="Ville ou adresse">
                 </div>
             </div>
@@ -207,3 +222,12 @@
 <div id="mapTooltip" class="fixed z-[9999] w-[280px] h-[180px] rounded-xl overflow-hidden shadow-lg opacity-0 pointer-events-none transition-opacity duration-150 border border-action/15"></div>
 
 <?= view('partials/footer') ?>
+
+<script>
+document.querySelectorAll('.use-favorite-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+        const input = document.getElementById(btn.dataset.target);
+        if (input) input.value = btn.dataset.address;
+    });
+});
+</script>
