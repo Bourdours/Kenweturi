@@ -9,6 +9,7 @@
     base_url('js/datepicker.js'),
     base_url('js/timepicker.js'),
     base_url('js/newJourney.js'),
+    base_url('js/favoriteAddress.js'),
   ],
 ]) ?>
 <?= view('partials/header') ?>

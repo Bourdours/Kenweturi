@@ -33,6 +33,7 @@
         base_url('js/swapAddresses.js'),
         'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
         base_url('js/journeyList.js'),
+        base_url('js/favoriteAddress.js'),
     ],
 ]) ?>
 <?= view('partials/header') ?>
@@ -222,12 +223,3 @@
 <div id="mapTooltip" class="fixed z-[9999] w-[280px] h-[180px] rounded-xl overflow-hidden shadow-lg opacity-0 pointer-events-none transition-opacity duration-150 border border-action/15"></div>
 
 <?= view('partials/footer') ?>
-
-<script>
-document.querySelectorAll('.use-favorite-btn').forEach((btn) => {
-    btn.addEventListener('click', () => {
-        const input = document.getElementById(btn.dataset.target);
-        if (input) input.value = btn.dataset.address;
-    });
-});
-</script>

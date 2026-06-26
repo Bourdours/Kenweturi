@@ -14,6 +14,7 @@
     base_url('js/timepicker.js'),
     base_url('js/autocomplete.js'),
     base_url('js/newJourneyRequest.js'),
+    base_url('js/favoriteAddress.js'),
   ],
 ]) ?>
 <?= view('partials/header') ?>
@@ -229,12 +230,3 @@
 </div>
 
 <?= view('partials/footer') ?>
-
-<script>
-document.querySelectorAll('.use-favorite-btn').forEach((btn) => {
-    btn.addEventListener('click', () => {
-        const input = document.getElementById(btn.dataset.target);
-        if (input) input.value = btn.dataset.address;
-    });
-});
-</script>
