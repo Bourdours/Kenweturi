@@ -45,9 +45,10 @@ class CarController extends BaseController
      * 
      * Modifie la voiture d'un utilisateur.
      * 
+     * @param  int $id Identifiant de la voiture à modifier
      * @return string|RedirectResponse
      */
-    public function showEditForm($id)
+    public function showEditForm(int $id)
     {
         $carModel = new CarModel();
 
@@ -69,9 +70,10 @@ class CarController extends BaseController
      * 
      * Gère la modification d'une voiture et la redirection avec message de succès.
      * 
+     * @param  int $id Identifiant de la voiture à modifier
      * @return RedirectResponse
      */
-    public function update($id)
+    public function update(int $id)
     {
         $carModel = new CarModel();
 
@@ -101,9 +103,10 @@ class CarController extends BaseController
      * 
      * Gère la supression d'une voiture et la redirection avec message de succès.
      * 
+     * @param  int $id Identifiant de la voiture à supprimer
      * @return RedirectResponse
      */
-    public function delete($id)
+    public function delete(int $id)
     {
         $carModel = new CarModel();
 
