@@ -34,7 +34,7 @@ class CarController extends BaseController
             return redirect()->to(site_url('profile/edit'))->withInput()->with('errors', $carModel->errors());
         }
 
-        $back = $this->request->getPost('back');
+        $back = $this->validateBackUrl($this->request->getPost('back'));
         if (empty($back)) {
             $back = site_url('profile/edit');
         }
