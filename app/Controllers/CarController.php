@@ -12,19 +12,6 @@ use \CodeIgniter\HTTP\RedirectResponse;
 class CarController extends BaseController
 {
 
-    /** 
-     * 
-     * Créer la voiture d'un utilisateur.
-     * 
-     * @return string
-     */
-    public function showCreateForm()
-    {
-        return view('Car/create', [
-            'back' => $this->request->getGet('back')
-        ]);
-    }
-
     /**
      * Traite les données envoyées par le formulaire 
      * 
