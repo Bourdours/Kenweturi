@@ -55,7 +55,7 @@ abstract class BaseController extends Controller
      * @param  string|null $url URL de retour à valider
      * @return string|null      URL validée si conforme, null sinon
      */
-    function validateBackUrl(?string $url): ?string
+    protected function validateBackUrl(?string $url): ?string
     {
         if (empty($url)) {
             return null;
