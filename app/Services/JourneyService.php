@@ -54,8 +54,6 @@ class JourneyService
 
     protected MailerExample $mailer;
 
-    private const ABSOLUTE_MAX_SEATS = 9;
-
     public function __construct()
     {
         $this->journeyModel         = new JourneyModel();
@@ -264,13 +262,6 @@ class JourneyService
                 ])
             );
         }
-    }
-
-    public function getMaxSeatsForCar(int $carId, int $userId): int
-    {
-        if ($carId <= 0) return self::ABSOLUTE_MAX_SEATS;
-        $car = $this->carModel->findOwnedByUser($carId, $userId);
-        return $car ? (int) $car['seats'] - 1 : self::ABSOLUTE_MAX_SEATS;
     }
 
     /**

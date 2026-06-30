@@ -68,9 +68,17 @@ class JourneyController extends BaseController
     {
         $userId = session('user_id');
 
-        // ====== Validation des données du formulaire
-        $carId                    = (int) $this->request->getPost('car');
-        $maxSeats                 = $this->journeyService->getMaxSeatsForCar($carId, $userId);
+        $carId  = (int) $this->request->getPost('car');
+
+        // ====== Vérification de propriété (autorisation)
+        $car = $this->carModel->findOwnedByUser($carId, $userId);
+        if ($car === null) {
+            return redirect()->to('/journeys/new')->withInput()
+                ->with('errors', ['car' => 'Voiture introuvable.']);
+        }
+
+        // ====== Validation (forme des données)
+        $maxSeats = (int) $car['seats'] - 1;
         $createValidationRules    = $this->getCreateValidationRules($maxSeats);
         $createValidationMessages = $this->getCreateValidationMessages($maxSeats);
 
@@ -328,18 +336,18 @@ class JourneyController extends BaseController
      * Retourne les règles de validation du formulaire de création de trajet.
      *
      * La borne max de 'seats' est calculée dynamiquement à partir de la capacité
-     * de la voiture sélectionnée (capacité - 1 pour le conducteur). Si la voiture
-     * ne peut pas être résolue, on retombe sur une borne par défaut : la règle
-     * sur 'car' invalidera le formulaire de toute façon.
+     * de la voiture sélectionnée (capacité - 1 pour le conducteur). La résolution
+     * de la voiture et la vérification de propriété sont effectuées en amont par
+     * l'appelant.
      *
      * Les champs 'recurringDays' et 'recurringWeeks' sont validés par des règles
      * personnalisées (valid_recurring_days / valid_recurring_weeks, définies dans
      * App\Validation\CustomRules) qui n'exigent une sélection que si isRecurring = 1.
      *
-     * @param  int $maxSeats Nombre maximum de places réservables (défaut : 9)
+     * @param  int $maxSeats Nombre maximum de places réservables
      * @return array<string, string> Règles de validation CodeIgniter indexées par champ
      */
-    private function getCreateValidationRules(int $maxSeats = 9): array
+    private function getCreateValidationRules(int $maxSeats): array
     {
         return [
             'startDate'      => 'required|valid_date[Y-m-d]',
@@ -359,11 +367,11 @@ class JourneyController extends BaseController
     /**
      * Retourne les messages d'erreur personnalisés associés aux règles de validation.
      *
-     * @param  int $maxSeats Nombre maximum de places réservables (défaut : 9),
+     * @param  int $maxSeats Nombre maximum de places réservables,
      *                       injecté dans le message d'erreur du champ 'seats'
      * @return array<string, string>> Messages indexés par champ puis par règle
      */
-    private function getCreateValidationMessages(int $maxSeats = 8): array
+    private function getCreateValidationMessages(int $maxSeats): array
     {
 
         return [
