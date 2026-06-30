@@ -13,73 +13,71 @@ class JourneyModel extends BaseModel
     protected $primaryKey = 'id';
     protected $useAutoIncrement = true;
 
-    // Ajout des nouveaux champs liés à la récurrence et mise en correspondance des noms
     protected $allowedFields = [
-        'start_datetime', // Sera combiné dans le contrôleur via startDate et startTime
+        'start_datetime',
         'seats',
         'note',
         'smoking',
         'canceled_at',
         'track_id',
         'user_id',
-        'car_id',         // Reçu via le champ 'car' de la vue
+        'car_id',
         'location_start_id',
         'location_end_id',
-        'is_recurring',    // Nouveau champ en BDD basé sur 'isRecurring'
-        'recurring_days',  // Stocké en JSON ou chaîne (ex: 'lundi,mardi')
-        'recurring_weeks'  // Stocké en JSON ou chaîne (ex: '1,2')
     ];
 
-    // Règles de validation calquées sur les attributs "name" des inputs de la vue
     protected $validationRules = [
-        'startDate'         => 'permit_empty',
-        'startTime'         => 'permit_empty',
-        'seats'             => 'permit_empty',
-        'smoking'           => 'permit_empty',
-        'car'               => 'permit_empty',
-        'startAddress'      => 'permit_empty',
-        'endAddress'        => 'permit_empty',
-        'isRecurring'       => 'permit_empty',
-        'recurringDays'     => 'permit_empty',
-        'recurringWeeks'    => 'permit_empty',
+        'start_datetime'    => 'required|valid_date[Y-m-d H:i:s]',
+        'seats'             => 'required|integer|greater_than_equal_to[1]|less_than_equal_to[8]',
+        'note'              => 'permit_empty|string|max_length[1000]',
+        'smoking'           => 'required|in_list[0,1]',
+        'canceled_at'       => 'permit_empty|valid_date',
+        'track_id'          => 'required|integer|is_not_unique[track.id]',
+        'user_id'           => 'required|integer|is_not_unique[user.id]',
+        'location_start_id' => 'required|integer|is_not_unique[location.id]',
+        'location_end_id'   => 'required|integer|is_not_unique[location.id]|differs[location_start_id]',
+        'car_id'            => 'required|integer|is_not_unique[car.id]',
     ];
 
     protected $validationMessages = [
-        'startDate' => [
+        'start_datetime' => [
             'required'   => 'Veuillez renseigner une date de départ.',
-            'valid_date' => 'Le format de la date de départ n\'est pas valide.',
-        ],
-        'startTime' => [
-            'required'   => 'Veuillez renseigner une heure de départ.',
-            'valid_date' => 'Le format de l\'heure de départ n\'est pas valide.',
+            'valid_date' => 'Veuillez renseigner une date valide.',
         ],
         'seats' => [
-            'required'                 => 'Veuillez renseigner le nombre de places.',
-            'greater_than_equal_to[1]' => 'Le trajet doit avoir au moins 1 place.',
-            'less_than_equal_to[9]'    => 'Le trajet ne peut pas dépasser 9 places.',
+            'required'              => 'Veuillez renseigner le nombre de places.',
+            'greater_than_equal_to' => 'Le trajet doit avoir au moins 1 place.',
+            'less_than_equal_to'    => 'Le trajet ne peut pas dépasser 8 places.',
+        ],
+        'note' => [
+           'max_length' => 'Le message doit contenir au maximum 1000 caractères.',
         ],
         'smoking' => [
             'required' => 'Veuillez indiquer si le covoiturage est fumeur ou non.',
-            'in_list'  => 'La valeur sélectionnée pour l\'option fumeur n\'est pas valide.',
+            'in_list'  => 'La valeur sélectionnée n\'est pas valide.',
         ],
-        'car' => [
-            'required'      => 'Veuillez sélectionner un véhicule.',
-            'is_not_unique' => 'Le véhicule sélectionné n\'existe pas.',
+        'canceled_at' => [
+            'valid_date' => 'La date d\'annulation doit être une date valide.',
         ],
-        'startAddress' => [
-            'required'   => 'L\'adresse de départ est obligatoire.',
-            'min_length' => 'L\'adresse de départ semble trop courte.',
+        'track_id' => [
+            'required'      => 'L\'identifiant du tracé est obligatoire.',
+            'integer'       => 'L\'identifiant du tracé doit être un nombre entier.',
+            'is_not_unique' => 'Le tracé spécifié n\'existe pas.',
         ],
-        'endAddress' => [
-            'required'   => 'L\'adresse d\'arrivée est obligatoire.',
-            'min_length' => 'L\'adresse d\'arrivée semble trop courte.',
+        'user_id' => [
+            'required'      => 'L\'identifiant de l\'utilisateur est obligatoire.',
+            'integer'       => 'L\'identifiant de l\'utilisateur doit être un nombre entier.',
+            'is_not_unique' => 'L\'utilisateur spécifié n\'existe pas.',
         ],
-        'note' => [
-            'max_length' => 'Le message doit contenir au maximum 1000 caractères.',
+        'location_start_id' => [
+            'required'      => 'Le lieu de départ est obligatoire.',
+            'integer'       => 'Le lieu de départ doit être un identifiant valide.',
+            'is_not_unique' => 'Le lieu de départ sélectionné n\'existe pas.',
         ],
-        'isRecurring' => [
-            'required' => 'Veuillez spécifier si le trajet est récurrent.',
-            'in_list'  => 'Option de récurrence invalide.',
+        'location_end_id' => [
+            'required'      => 'Le lieu d\'arrivée est obligatoire.',
+            'integer'       => 'Le lieu d\'arrivée doit être un identifiant valide.',
+            'is_not_unique' => 'Le lieu d\'arrivée sélectionné n\'existe pas.',
         ]
     ];
 

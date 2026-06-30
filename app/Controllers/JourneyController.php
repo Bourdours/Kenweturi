@@ -363,7 +363,7 @@ class JourneyController extends BaseController
      *                       injecté dans le message d'erreur du champ 'seats'
      * @return array<string, string>> Messages indexés par champ puis par règle
      */
-    private function getCreateValidationMessages(int $maxSeats = 9): array
+    private function getCreateValidationMessages(int $maxSeats = 8): array
     {
 
         return [
