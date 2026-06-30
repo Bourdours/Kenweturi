@@ -28,12 +28,24 @@ class LocationModel extends BaseModel
         'city_id'   => 'required|integer',
     ];
 
+    /**
+     * Définit un lieu comme favori unique : réinitialise l'ancien favori
+     * puis marque le lieu fourni comme favori.
+     *
+     * @param int $locationId Identifiant du lieu à marquer comme favori
+     * @return bool           true si la mise à jour a réussi
+     */
     public function setFavorite(int $locationId): bool
     {
         $this->where('is_favorite', 1)->set('is_favorite', 0)->update();
         return $this->update($locationId, ['is_favorite' => 1]);
     }
 
+    /**
+     * Récupère le lieu favori courant, enrichi du nom et du code postal de la ville.
+     *
+     * @return array|null Lieu favori, ou null si aucun favori défini
+     */
     public function getFavorite(): ?array
     {
         return $this->select('location.*, city.name as city_name, city.zipcode as city_zipcode')
@@ -42,6 +54,11 @@ class LocationModel extends BaseModel
             ->first();
     }
 
+    /**
+     * Retire le statut favori de tous les lieux.
+     *
+     * @return bool true si la mise à jour a réussi
+     */
     public function clearFavorite(): bool
     {
         return $this->where('is_favorite', 1)->set('is_favorite', 0)->update();

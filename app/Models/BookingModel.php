@@ -122,10 +122,10 @@ class BookingModel extends BaseModel
     }
 
     /**
-     * Récupère les reservations envoyées (en cours) pour un trajet.
+     * Compte le nombre de réservations en attente ('pending') pour un trajet.
      *
      * @param int $journeyId Identifiant du trajet
-     * @return array         nombres de reservation envoyées 
+     * @return int           Nombre de réservations en attente
      */
     public function countPendingBookings(int $journeyId): int
     {
@@ -170,6 +170,13 @@ class BookingModel extends BaseModel
         return array_column($rows, 'pending_bookings', 'journey_id');
     }
 
+    /**
+     * Compte le nombre de réservations ayant un statut donné sur un trajet.
+     *
+     * @param string $label     Statut recherché ('pending', 'accepted', 'rejected'...)
+     * @param int    $journeyId Identifiant du trajet
+     * @return int              Nombre de réservations correspondantes
+     */
     public function countByStatus(string $label, int $journeyId): int
     {
 
