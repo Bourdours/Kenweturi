@@ -28,7 +28,7 @@ class JourneyModel extends BaseModel
 
     protected $validationRules = [
         'start_datetime'    => 'required|valid_date[Y-m-d H:i:s]',
-        'seats'             => 'required|integer|greater_than_equal_to[1]|less_than_equal_to[8]',
+        'seats'             => 'required|integer|greater_than_equal_to[1]|less_than_equal_to[7]',
         'note'              => 'permit_empty|string|max_length[1000]',
         'smoking'           => 'required|in_list[0,1]',
         'canceled_at'       => 'permit_empty|valid_date',
@@ -47,7 +47,7 @@ class JourneyModel extends BaseModel
         'seats' => [
             'required'              => 'Veuillez renseigner le nombre de places.',
             'greater_than_equal_to' => 'Le trajet doit avoir au moins 1 place.',
-            'less_than_equal_to'    => 'Le trajet ne peut pas dépasser 8 places.',
+            'less_than_equal_to'    => 'Le trajet ne peut pas dépasser 7 places.',
         ],
         'note' => [
            'max_length' => 'Le message doit contenir au maximum 1000 caractères.',
