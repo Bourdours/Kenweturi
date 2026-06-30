@@ -47,12 +47,15 @@ abstract class BaseController extends Controller
 
     /**
      * Valide une URL de retour pour éviter les redirections ouvertes (open redirect).
-     * L'URL doit avoir le même host que l'application et utiliser un schéma http/https.
      *
-     * @param string|null $url URL de retour à valider
-     * @return string URL validée si conforme, URL de repli (page journeys) sinon
+     * L'URL doit avoir le même host, le même port et le même schéma (http/https)
+     * que l'application. Retourne null si l'URL est vide, non conforme,
+     * ou si son parsing échoue.
+     *
+     * @param  string|null $url URL de retour à valider
+     * @return string|null      URL validée si conforme, null sinon
      */
-    function validateBackUrl(?string $url): ?string
+    protected function validateBackUrl(?string $url): ?string
     {
         if (empty($url)) {
             return null;
@@ -66,6 +69,9 @@ abstract class BaseController extends Controller
                 return null;
             }
             if (! in_array($uri->getScheme(), ['http', 'https'], true)) {
+                return null;
+            }
+            if ($uri->getScheme() !== $baseUri->getScheme()) {
                 return null;
             }
             if ($uri->getPort() !== $baseUri->getPort()) {

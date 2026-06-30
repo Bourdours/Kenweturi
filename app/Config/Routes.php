@@ -79,7 +79,6 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('dashboard/reports/(:num)',             'DashboardController::showReport/$1');
     $routes->get('dashboard/journey-requests',           'DashboardController::showJourneyRequests');
     $routes->get('dashboard/journey-requests/(:num)',    'DashboardController::showJourneyRequest/$1');
-    $routes->get('dashboard/car/new',                    'CarController::showCreateForm');
     $routes->post('dashboard/journeys/cancel-bulk',      'JourneyController::cancelBulk');
 
     // Bookings
