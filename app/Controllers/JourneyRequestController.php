@@ -211,10 +211,17 @@ class JourneyRequestController extends BaseController
             return redirect()->to('/journey-requests')->with('error', self::NOT_FOUND);
         }
 
+        // ====== Validation des données du formulaire
+        if (!$this->validate($this->getValidationRules(), $this->getValidationMessages())) {
+            return redirect()->to(site_url("journey-requests/$id/edit"))->withInput()
+                ->with('errors', $this->validator->getErrors());
+        }
+
         $startCityId = $this->cityModel->findOrCreateCity(
             $this->request->getPost('startCity'),
             $this->request->getPost('startZipcode')
         );
+
         $startLocationId = $this->locationModel->insert([
             'latitude'  => (float) $this->request->getPost('startLat'),
             'longitude' => (float) $this->request->getPost('startLng'),
