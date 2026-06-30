@@ -172,6 +172,16 @@ class JourneyModel extends BaseModel
         return $builder->get()->getResultArray();
     }
 
+    /**
+     * Récupère le premier trajet d'un utilisateur dont le départ tombe dans
+     * un intervalle de temps donné. Sert à détecter un chevauchement avant
+     * la création d'un nouveau trajet.
+     *
+     * @param int    $userId       Identifiant du conducteur
+     * @param string $fromDateTime Borne basse incluse, format 'Y-m-d H:i:s'
+     * @param string $toDateTime   Borne haute exclue, format 'Y-m-d H:i:s'
+     * @return array|null          Trajet trouvé, ou null si aucun
+     */
     public function findByUserInTimeRange(int $userId, string $fromDateTime, string $toDateTime): ?array
     {
         return $this->where('user_id', $userId)
@@ -180,6 +190,12 @@ class JourneyModel extends BaseModel
             ->first();
     }
 
+    /**
+     * Récupère un trajet uniquement s'il n'est pas annulé (canceled_at à null).
+     *
+     * @param int $id Identifiant du trajet
+     * @return array|null Trajet actif, ou null s'il est annulé / introuvable
+     */
     public function findActive(int $id)
     {
         return $this->where('id', $id)
@@ -187,6 +203,12 @@ class JourneyModel extends BaseModel
             ->first();
     }
 
+    /**
+     * Retourne le nombre de places proposées sur un trajet.
+     *
+     * @param int $id Identifiant du trajet
+     * @return int    Nombre de places, ou 0 si le trajet est introuvable
+     */
     public function getNumberOfSeats(int $id): int
     {
         $row = $this->select('seats')->find($id);

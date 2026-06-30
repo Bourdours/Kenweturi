@@ -58,6 +58,14 @@ class ReportModel extends BaseModel
             'is_not_unique'      => 'Cet utilisateur n\'existe pas.',
         ],
     ];
+
+    /**
+     * Récupère le détail d'un signalement, enrichi des infos du signaleur,
+     * de l'utilisateur signalé et du trajet concerné.
+     *
+     * @param int $id Identifiant du signalement
+     * @return array|null Signalement enrichi, ou null si introuvable
+     */
     public function getReportDetail(int $id): ?array
     {
         return $this->select('report.*,
@@ -71,6 +79,13 @@ class ReportModel extends BaseModel
             ->first();
     }
 
+    /**
+     * Indique si un utilisateur a déjà signalé un trajet donné.
+     *
+     * @param int $userId    Identifiant du signaleur
+     * @param int $journeyId Identifiant du trajet
+     * @return bool          true si un signalement existe déjà
+     */
     public function alreadyReported(int $userId, int $journeyId): bool
     {
         return $this->where('user_id', $userId)
@@ -96,6 +111,12 @@ class ReportModel extends BaseModel
             ->findAll(); // findAll() retourne directement un tableau de résultats
     }
 
+    /**
+     * Récupère les signalements clôturés, enrichis des alias attendus par la vue,
+     * triés du plus récemment résolu au plus ancien.
+     *
+     * @return array Liste des signalements clôturés
+     */
     public function getClosedReports(): array
     {
         return $this->select('report.*,
@@ -125,7 +146,10 @@ class ReportModel extends BaseModel
     }
 
     /**
-     * Récupère un report spécifique avec l'ID du créateur du trajet
+     * Récupère un signalement par son identifiant.
+     *
+     * @param int $id Identifiant du signalement
+     * @return array|null Signalement, ou null si introuvable
      */
     public function getWithJourneyOwner(int $id): ?array
     {

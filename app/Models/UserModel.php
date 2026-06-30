@@ -200,6 +200,12 @@ class UserModel extends BaseModel
         ]);
     }
 
+    /**
+     * Bannit un utilisateur (is_banned = 1).
+     *
+     * @param int $userId Identifiant de l'utilisateur
+     * @return bool        true si la mise à jour a réussi
+     */
     public function ban(int $userId): bool
     {
         return $this->update($userId, ['is_banned' => 1]);
@@ -238,12 +244,27 @@ class UserModel extends BaseModel
         ]);
     }
 
+    /**
+     * Marque le compte comme supprimé (status = 'deleted') sans repasser par
+     * la validation métier.
+     *
+     * @param int $userId Identifiant de l'utilisateur
+     * @return bool        true si la mise à jour a réussi
+     */
     public function markAsDeleted(int $userId): bool
     {
         return $this->skipValidation(true)->update($userId, ['status' => 'deleted']);
     }
 
-
+    /**
+     * Enregistre le token de vérification d'email, stocké haché (SHA-256)
+     * avec sa date d'expiration. Le token brut n'est jamais persisté.
+     *
+     * @param int    $userId   Identifiant de l'utilisateur
+     * @param string $rawToken Token brut (non haché) envoyé par email
+     * @param int    $hours    Durée de validité en heures (24 par défaut)
+     * @return bool            true si la mise à jour a réussi
+     */
     public function setEmailToken(int $userId, string $rawToken, int $hours = 24): bool
     {
         return $this->update($userId, [
@@ -252,6 +273,13 @@ class UserModel extends BaseModel
         ]);
     }
 
+    /**
+     * Récupère un utilisateur via un token de vérification d'email valide et non expiré.
+     * Le token reçu est haché avant comparaison.
+     *
+     * @param string $rawToken Token brut issu du lien email
+     * @return array|object|null Utilisateur correspondant, ou null si invalide/expiré
+     */
     public function findByValidEmailToken(string $rawToken)
     {
         return $this->where('email_token', hash('sha256', $rawToken))
@@ -259,11 +287,29 @@ class UserModel extends BaseModel
             ->first();
     }
 
+    /**
+     * Génère un token HMAC de désinscription pour un couple utilisateur/préférence.
+     * Permet de se désabonner d'un type de notification depuis un lien email
+     * sans authentification.
+     *
+     * @param int    $userId Identifiant de l'utilisateur
+     * @param string $pref   Slug de la préférence de notification
+     * @return string        Token HMAC-SHA256
+     */
     public static function unsubscribeToken(int $userId, string $pref): string
     {
         return hash_hmac('sha256', $userId . ':' . $pref, env('encryption.key', 'kenweturi'));
     }
 
+    /**
+     * Vérifie qu'un token de désinscription correspond au couple
+     * utilisateur/préférence fourni (comparaison à temps constant).
+     *
+     * @param int    $userId Identifiant de l'utilisateur
+     * @param string $pref   Slug de la préférence de notification
+     * @param string $token  Token reçu à valider
+     * @return bool          true si le token est valide
+     */
     public function validateUnsubscribeToken(int $userId, string $pref, string $token): bool
     {
         return hash_equals(self::unsubscribeToken($userId, $pref), $token);
